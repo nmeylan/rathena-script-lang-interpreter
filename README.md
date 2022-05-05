@@ -1,4 +1,4 @@
-This project is work in project, it will probably never be finished or never work.
+This project is work in progress, it will probably never be finished or never work.
 
 # rAthena script language interpreter
 An interpreter implementation for rAthena script language.
