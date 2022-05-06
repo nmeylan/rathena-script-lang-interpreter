@@ -21,6 +21,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_primaryExpression(&mut self, ctx: &PrimaryExpressionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#functionCallExpression}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#postfixExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -183,24 +189,6 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_specifierQualifierList(&mut self, ctx: &SpecifierQualifierListContext<'input>) { self.visit_children(ctx) }
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#enumeratorList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_enumeratorList(&mut self, ctx: &EnumeratorListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#enumerator}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_enumerator(&mut self, ctx: &EnumeratorContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#enumerationConstant}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_enumerationConstant(&mut self, ctx: &EnumerationConstantContext<'input>) { self.visit_children(ctx) }
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarator}.
 	 * @param ctx the parse tree
 	 */
@@ -243,22 +231,10 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_identifierList(&mut self, ctx: &IdentifierListContext<'input>) { self.visit_children(ctx) }
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#typeName}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_typeName(&mut self, ctx: &TypeNameContext<'input>) { self.visit_children(ctx) }
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#directAbstractDeclarator}.
 	 * @param ctx the parse tree
 	 */
 	fn visit_directAbstractDeclarator(&mut self, ctx: &DirectAbstractDeclaratorContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#typedefName}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_typedefName(&mut self, ctx: &TypedefNameContext<'input>) { self.visit_children(ctx) }
 
 	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initializer}.
@@ -409,12 +385,6 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	 * @param ctx the parse tree
 	 */
 	fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_declarationList(&mut self, ctx: &DeclarationListContext<'input>) { self.visit_children(ctx) }
 
 	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scope_specifier}.

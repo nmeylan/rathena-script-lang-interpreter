@@ -28,6 +28,17 @@ fn enter_primaryExpression(&mut self, _ctx: &PrimaryExpressionContext<'input>) {
 fn exit_primaryExpression(&mut self, _ctx: &PrimaryExpressionContext<'input>) { }
 
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#functionCallExpression}.
+ * @param ctx the parse tree
+ */
+fn enter_functionCallExpression(&mut self, _ctx: &FunctionCallExpressionContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#functionCallExpression}.
+ * @param ctx the parse tree
+ */
+fn exit_functionCallExpression(&mut self, _ctx: &FunctionCallExpressionContext<'input>) { }
+
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#postfixExpression}.
  * @param ctx the parse tree
  */
@@ -325,39 +336,6 @@ fn enter_specifierQualifierList(&mut self, _ctx: &SpecifierQualifierListContext<
 fn exit_specifierQualifierList(&mut self, _ctx: &SpecifierQualifierListContext<'input>) { }
 
 /**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#enumeratorList}.
- * @param ctx the parse tree
- */
-fn enter_enumeratorList(&mut self, _ctx: &EnumeratorListContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#enumeratorList}.
- * @param ctx the parse tree
- */
-fn exit_enumeratorList(&mut self, _ctx: &EnumeratorListContext<'input>) { }
-
-/**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#enumerator}.
- * @param ctx the parse tree
- */
-fn enter_enumerator(&mut self, _ctx: &EnumeratorContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#enumerator}.
- * @param ctx the parse tree
- */
-fn exit_enumerator(&mut self, _ctx: &EnumeratorContext<'input>) { }
-
-/**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#enumerationConstant}.
- * @param ctx the parse tree
- */
-fn enter_enumerationConstant(&mut self, _ctx: &EnumerationConstantContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#enumerationConstant}.
- * @param ctx the parse tree
- */
-fn exit_enumerationConstant(&mut self, _ctx: &EnumerationConstantContext<'input>) { }
-
-/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#declarator}.
  * @param ctx the parse tree
  */
@@ -435,17 +413,6 @@ fn enter_identifierList(&mut self, _ctx: &IdentifierListContext<'input>) { }
 fn exit_identifierList(&mut self, _ctx: &IdentifierListContext<'input>) { }
 
 /**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#typeName}.
- * @param ctx the parse tree
- */
-fn enter_typeName(&mut self, _ctx: &TypeNameContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#typeName}.
- * @param ctx the parse tree
- */
-fn exit_typeName(&mut self, _ctx: &TypeNameContext<'input>) { }
-
-/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#directAbstractDeclarator}.
  * @param ctx the parse tree
  */
@@ -455,17 +422,6 @@ fn enter_directAbstractDeclarator(&mut self, _ctx: &DirectAbstractDeclaratorCont
  * @param ctx the parse tree
  */
 fn exit_directAbstractDeclarator(&mut self, _ctx: &DirectAbstractDeclaratorContext<'input>) { }
-
-/**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#typedefName}.
- * @param ctx the parse tree
- */
-fn enter_typedefName(&mut self, _ctx: &TypedefNameContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#typedefName}.
- * @param ctx the parse tree
- */
-fn exit_typedefName(&mut self, _ctx: &TypedefNameContext<'input>) { }
 
 /**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#initializer}.
@@ -741,17 +697,6 @@ fn enter_scriptInitialization(&mut self, _ctx: &ScriptInitializationContext<'inp
  * @param ctx the parse tree
  */
 fn exit_scriptInitialization(&mut self, _ctx: &ScriptInitializationContext<'input>) { }
-
-/**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#declarationList}.
- * @param ctx the parse tree
- */
-fn enter_declarationList(&mut self, _ctx: &DeclarationListContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#declarationList}.
- * @param ctx the parse tree
- */
-fn exit_declarationList(&mut self, _ctx: &DeclarationListContext<'input>) { }
 
 /**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#scope_specifier}.

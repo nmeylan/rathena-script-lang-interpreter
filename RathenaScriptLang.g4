@@ -2,27 +2,22 @@ grammar RathenaScriptLang;
 
 
 compilationUnit
-    :   translationUnit? EOF
+    :   translationUnit EOF
     ;
 
 primaryExpression
-    :   variable
+    : Identifier
+    | variable
     |   Number
-    |   String+
-    |   '(' expression ')'
+    |   String
     |   '-' // it is a special arguments for command, lets see if it can cause weird parse issue
     ;
 
+functionCallExpression
+    : primaryExpression '(' argumentExpressionList? ')';
+
 postfixExpression
-    :
-    (   primaryExpression
-    |   '__extension__'? '(' typeName ')' '{' initializerList ','? '}'
-    )
-    ('[' expression ']'
-    | '(' argumentExpressionList? ')'
-    | ('.' | '->') Identifier
-    | ('++' | '--')
-    )*
+    : functionCallExpression (expression)* | primaryExpression ('[' expression ']' | ('++' | '--') )*
     ;
 
 argumentExpressionList
@@ -31,12 +26,10 @@ argumentExpressionList
 
 unaryExpression
     :
-    ('++' |  '--' |  'sizeof')*
+    ('++' |  '--')*
     (postfixExpression
     |   unaryOperator castExpression
     |   'getarraysize' '(' variable ')'
-    |   ('sizeof' | '_Alignof') '(' typeName ')'
-    |   '&&' Identifier // GCC extension address of label
     )
     ;
 
@@ -140,18 +133,6 @@ specifierQualifierList
     :   (scope_specifier) specifierQualifierList?
     ;
 
-enumeratorList
-    :   enumerator (',' enumerator)*
-    ;
-
-enumerator
-    :   enumerationConstant ('=' constantExpression)?
-    ;
-
-enumerationConstant
-    :   Identifier
-    ;
-
 declarator
     :   directDeclarator
     ;
@@ -189,17 +170,9 @@ identifierList
     :   Identifier (',' Identifier)*
     ;
 
-typeName
-    :   specifierQualifierList directAbstractDeclarator?
-    ;
-
 directAbstractDeclarator
     :   '[' '*' ']'
     |   directAbstractDeclarator '[' '*' ']'
-    ;
-
-typedefName
-    :   Identifier
     ;
 
 initializer
@@ -232,6 +205,7 @@ statement
     |   selectionStatement
     |   iterationStatement
     |   jumpStatement
+    |   menuStatement
     |   commandStatement
     |   dialogStatement
     ;
@@ -308,12 +282,12 @@ dialogStatement
 
 
 translationUnit
-    :   externalDeclaration+
+    : externalDeclaration+
     ;
 
 externalDeclaration
-    :   functionDefinition
-    |   declaration
+    : functionDefinition
+    | blockItem
     | scriptInitialization
     |   ';' // stray ;
     ;
@@ -324,9 +298,6 @@ functionDefinition
 scriptInitialization
     : '-' (Identifier | '::')* ','? compoundStatement? ;
 
-declarationList
-    :   declaration+
-    ;
 scope_specifier
   :  '@' | '$' | '$@' | '.' | '.@' | '\'' | '#' | '##';
 variable
