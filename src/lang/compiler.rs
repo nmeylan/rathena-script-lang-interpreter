@@ -1,18 +1,22 @@
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::InputStream;
+use antlr_rust::{InputStream, TidExt};
+use antlr_rust::parser::ParserNodeType;
+use antlr_rust::parser_rule_context::BaseParserRuleContext;
+use antlr_rust::rule_context::{CustomRuleContext, RuleContext};
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Visitable, VisitChildren};
 use crate::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
-use crate::{RathenaScriptLangLexer, RathenaScriptLangParser};
-use crate::lang::chunk::{Chunk, OpCode, Value};
+use crate::{Constant, RathenaScriptLangLexer, RathenaScriptLangParser};
+use crate::lang::chunk::{Chunk, OpCode};
+use crate::lang::chunk::OpCode::{*};
+use crate::lang::value::{*};
 use crate::parser::rathenascriptlangparser::{*};
 
-#[derive(Default)]
 pub struct Compiler {
-    chunks: Vec<Chunk>,
-    current_chunk_id: Option<usize>,
+    function: Function,
 }
 
 pub enum State {
@@ -30,21 +34,68 @@ pub enum VariableScope {
     PermanentAccount,
 }
 
-
 impl Compiler {
-    pub fn compile(&mut self, script: InputStream<&str>) -> &mut Vec<Chunk> {
+    fn new(name: String) -> Self {
+        Self {
+            function: Function::new(format!("{}_main", name))
+        }
+    }
+    pub fn compile(name: String, script: InputStream<&str>) -> Function {
+        let mut compiler = Compiler::new(name);
         let lexer = RathenaScriptLangLexer::new(script);
         let token_stream = CommonTokenStream::new(lexer);
         let mut parser = RathenaScriptLangParser::new(token_stream);
         let tree = parser.compilationUnit();
         // println!("{}", tree.unwrap().to_string_tree(&parser));
-        self.visit_compilationUnit(tree.as_ref().unwrap());
 
-        &mut self.chunks
+        compiler.visit_compilationUnit(tree.as_ref().unwrap());
+
+        compiler.function
     }
 
     fn current_chunk(&mut self) -> &mut Chunk {
-        &mut self.chunks[self.current_chunk_id.unwrap()]
+        &mut self.function.chunk
+    }
+
+    fn variable_type(has_dollar: bool) -> VariableType {
+        if has_dollar { VariableType::String } else { VariableType::Number }
+    }
+
+    fn get_variable_scope(ctx: &VariableContext) -> Scope {
+        let scope = if ctx.scope_specifier().is_some() {
+            let scope_specifier = ctx.scope_specifier().unwrap();
+            if scope_specifier.At().is_some() {
+                Scope::Character // TODO: Temporary
+            } else if scope_specifier.Dollar().is_some() {
+                Scope::Server
+            } else if scope_specifier.DollarAt().is_some() {
+                Scope::Server // TODO: Temporary
+            } else if scope_specifier.Dot().is_some() {
+                Scope::Npc
+            } else if scope_specifier.DotAt().is_some() {
+                Scope::Local
+            } else if scope_specifier.Quote().is_some() {
+                Scope::Instance
+            } else if scope_specifier.Sharp().is_some() || scope_specifier.DoubleSharp().is_some() {
+                Scope::Account
+            } else {
+                Scope::Local
+            }
+        } else {
+            Scope::Local
+        };
+        scope
+    }
+
+    fn build_variable_identifier(ctx: &VariableContext) -> Identifier {
+        let scope = Self::get_variable_scope(ctx);
+        let variable_name = ctx.variable_name().unwrap();
+        let name = variable_name.Identifier().unwrap().symbol.text.deref().to_string();
+        Identifier::Variable(Variable {
+            variable_type: Self::variable_type(variable_name.Dollar().is_some()),
+            name,
+            scope: scope.clone(),
+        })
     }
 }
 
@@ -58,17 +109,17 @@ impl RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_primaryExpression(&mut self, ctx: &PrimaryExpressionContext<'input>) {
         if ctx.String().is_some() {
-            self.current_chunk().emit_op_code(OpCode::Constant);
-            self.current_chunk().add_constant(Value::String(ctx.String().unwrap().symbol.text.deref().to_string()));
+            self.current_chunk().emit_op_code(OpCode::LoadConstant);
+            self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()));
         }
         if ctx.Number().is_some() {
-            self.current_chunk().emit_op_code(OpCode::Constant);
+            self.current_chunk().emit_op_code(OpCode::LoadConstant);
             let number_value = &ctx.Number().unwrap().symbol.text;
-            self.current_chunk().add_constant(Value::Number(parse_number(number_value)))
+            self.current_chunk().add_constant(Constant::Number(parse_number(number_value)))
         }
         if ctx.Identifier().is_some() {
-            self.current_chunk().emit_op_code(OpCode::GetIdentifier);
-            self.current_chunk().add_identifiers(ctx.Identifier().unwrap().symbol.text.deref().to_string());
+            self.current_chunk().emit_op_code(OpCode::LoadGlobal);
+            self.current_chunk().add_global(Identifier::String(ctx.Identifier().unwrap().symbol.text.deref().to_string()));
         }
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
@@ -79,7 +130,7 @@ impl RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) {
         self.visit_children(ctx);
         if ctx.argumentExpressionList().is_some() {
-            self.current_chunk().emit_bytes(ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as u64)
+            self.current_chunk().emit_reference(ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as u64)
         }
         self.current_chunk().emit_op_code(OpCode::Call);
     }
@@ -92,7 +143,7 @@ impl RathenaScriptLangVisitor<'input> for Compiler {
         for expression in ctx.assignmentExpression_all().iter() {
             if expression.Number().is_some() {
                 let number_value = &expression.Number().unwrap().symbol.text;
-                self.current_chunk().add_constant(Value::Number(parse_number(number_value)));
+                self.current_chunk().add_constant(Constant::Number(parse_number(number_value)));
             }
         }
         self.visit_children(ctx);
@@ -155,11 +206,53 @@ impl RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
-        self.visit_children(ctx)
+        let left = ctx.assignmentLeftExpression();
+        if left.is_some() {
+            self.visit_assignmentOperator(&ctx.assignmentOperator().unwrap());
+            self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+            let left = left.unwrap();
+            self.visit_assignmentLeftExpression(&left);
+        } else {
+            self.visit_children(ctx);
+        }
     }
 
+    fn visit_assignmentLeftExpression(&mut self, ctx: &AssignmentLeftExpressionContext<'input>) {
+        if ctx.Identifier().is_some() {
+            // Number + char permanent variable (ie: not ending with '$', nor having any scope) match Identifier instead of variable.
+            let name = ctx.Identifier().unwrap().symbol.text.deref().to_string();
+            self.current_chunk().add_global(Identifier::Variable(Variable {
+                name: name,
+                scope: Scope::Character,
+                variable_type: VariableType::Number
+            }));
+            self.current_chunk().emit_op_code(OpCode::StoreGlobal);
+        } else if ctx.variable().is_some() {
+            let variable_identifier = Self::build_variable_identifier(&ctx.variable().unwrap());
+            match variable_identifier.to_variable().unwrap().scope {
+                Scope::Server | Scope::Account | Scope::Character | Scope::Npc => {
+                    self.current_chunk().emit_op_code(StoreGlobal);
+                    self.current_chunk().add_global(variable_identifier);
+                },
+                Scope::Local => {
+                    self.current_chunk().emit_op_code(StoreLocal);
+                    self.current_chunk().add_local(variable_identifier);
+                },
+                Scope::Instance => {
+                    self.current_chunk().emit_op_code(StoreInstance);
+                    self.current_chunk().add_instance(variable_identifier);
+                },
+            }
+        }
+    }
+
+
     fn visit_assignmentOperator(&mut self, ctx: &AssignmentOperatorContext<'input>) {
-        self.visit_children(ctx)
+        if ctx.Equal().is_some() {
+            self.current_chunk().emit_op_code(OpCode::Equal);
+        } else {
+            panic!("Compiler does not handle assigment operator {:?}", ctx);
+        }
     }
 
     fn visit_expression(&mut self, ctx: &ExpressionContext<'input>) {
@@ -271,17 +364,7 @@ impl RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_blockItem(&mut self, ctx: &BlockItemContext<'input>) {
-        let parent = if self.current_chunk_id.is_none() {
-            self.current_chunk_id = Some(0);
-            None
-        } else {
-            let previous_id = self.current_chunk_id.unwrap();
-            self.current_chunk_id = Some(previous_id + 1);
-            Some(previous_id)
-        };
-        if self.chunks.get(self.current_chunk_id.unwrap()).is_none() {
-            self.chunks.push(Chunk::new(self.current_chunk_id.unwrap(), parent));
-        }
+        // TODO push nested function to current function,
         self.visit_children(ctx)
     }
 
@@ -346,48 +429,13 @@ impl RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_scope_specifier(&mut self, ctx: &Scope_specifierContext<'input>) {
-        let scope = if ctx.At().is_some() {
-            VariableScope::Temporary
-        } else if ctx.Dollar().is_some() {
-            VariableScope::GlobalPermanent
-        } else if ctx.DollarAt().is_some() {
-            VariableScope::GlobalTemporary
-        } else if ctx.Dot().is_some() {
-            VariableScope::Npc
-        } else if ctx.DotAt().is_some() {
-            VariableScope::InstanceLocal
-        } else if ctx.Quote().is_some() {
-            VariableScope::Instance
-        } else if ctx.Sharp().is_some() || ctx.DoubleSharp().is_some() {
-            VariableScope::PermanentAccount
-        } else {
-            VariableScope::Default
-        };
         self.visit_children(ctx)
     }
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
-        if ctx.scope_specifier().is_some() {
-            let scope_specifier = ctx.scope_specifier().unwrap();
-            // if scope_specifier.At().is_some() {
-            //     VariableScope::Temporary
-            // } else if scope_specifier.Dollar().is_some() {
-            //     VariableScope::GlobalPermanent
-            // } else if scope_specifier.DollarAt().is_some() {
-            //     VariableScope::GlobalTemporary
-            // } else if scope_specifier.Dot().is_some() {
-            //     VariableScope::Npc
-            // } else if scope_specifier.DotAt().is_some() {
-            //     VariableScope::InstanceLocal
-            // } else if scope_specifier.Quote().is_some() {
-            //     VariableScope::Instance
-            // } else if scope_specifier.Sharp().is_some() || scope_specifier.DoubleSharp().is_some() {
-            //     VariableScope::PermanentAccount
-            // } else {
-            //     VariableScope::Default
-            // }
-        } else {}
-        println!("Visit variable {}", ctx.variable_name().unwrap().Identifier().unwrap().symbol.text);
+        let identifier = Self::build_variable_identifier(ctx);
+        self.current_chunk().emit_op_code(LoadLocal);
+        self.current_chunk().load_local(identifier);
     }
 
     fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) {
@@ -398,7 +446,6 @@ impl RathenaScriptLangVisitor<'input> for Compiler {
         // };
         self.visit_children(ctx)
     }
-
 }
 
 fn parse_number(num: &Cow<str>) -> u32 {

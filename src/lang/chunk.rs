@@ -1,163 +1,95 @@
-
-
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::hash::{BuildHasher, Hash, Hasher};
+use std::process::id;
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::noop_hasher::NoopHasher;
+use crate::lang::value::{Constant, Identifier, Variable};
+use crate::Vm;
 
-pub type AccountId = String;
-pub type CharId = String;
-pub type NpcName = String;
-pub type InstanceId = String;
-
-#[derive(Debug, Clone, Hash)]
-pub enum Value {
-    Nil,
-    Number(u32),
-    String(String),
-    Function(Function),
-    Native(Native),
-}
-
-pub enum Scope {
-    Server,
-    Account(AccountId),
-    Character(CharId),
-    Npc(NpcName),
-    Instance(InstanceId),
-    Local,
-}
-
-#[derive(Debug, Clone, Hash)]
-pub struct Function {arity: usize, name: String, chunk: usize}
-#[derive(Debug, Clone, Hash)]
-pub struct Native {
-    pub(crate) arity: usize, pub(crate) name: String}
-
-impl Display for Function {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "function {}(<{}>)", self.name, self.arity)
-    }
-}
-impl Display for Native {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "native function {}(<{}>)", self.name, self.arity)
-    }
-}
-
-impl Display for Value {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Value::Nil => f.write_str("nil"),
-            Value::Number(v) => write!(f, "{}", v),
-            Value::String(v) => write!(f, "{}", v),
-            Value::Function(v) => write!(f, "{}", v),
-            Value::Native(v) => write!(f, "{}", v),
-        }
-    }
-}
 
 #[derive(Debug)]
 pub struct Chunk {
-    id: usize,
-    parent_chunk: Option<usize>,
-    op_codes: Vec<OpCode>,
-    bytes: Vec<u64>,
-    identifiers_storage: HashMap<u64, String, NoopHasher>,
-    constants_storage: HashMap<u64, Value, NoopHasher>,
+    pub op_codes: Vec<OpCode>,
+    pub references: Vec<u64>,
+    pub globals: HashMap<u64, Identifier, NoopHasher>,
+    pub instances: HashMap<u64, Identifier, NoopHasher>,
+    pub locals: Vec<Identifier>,
+    pub constants_storage: HashMap<u64, Constant, NoopHasher>,
+}
 
-    current_bytes: usize,
-    current_op_code: usize,
+impl Default for Chunk {
+    fn default() -> Self {
+        Self {
+            op_codes: vec![],
+            references: vec![],
+            globals: HashMap::with_hasher(NoopHasher::default()),
+            instances: HashMap::with_hasher(NoopHasher::default()),
+            locals: vec![],
+            constants_storage: HashMap::with_hasher(NoopHasher::default()),
+        }
+    }
 }
 
 impl Chunk {
-    pub fn new(id: usize, parent_chunk: Option<usize>) -> Self {
-        Self {
-            id,
-            parent_chunk,
-            op_codes: vec![],
-            bytes: vec![],
-            identifiers_storage: HashMap::with_hasher(NoopHasher::default()),
-            constants_storage: HashMap::with_hasher(NoopHasher::default()),
-            current_bytes: 0,
-            current_op_code: 0,
-        }
-    }
-
     pub fn emit_op_code(&mut self, op_code: OpCode) {
+        println!("emit opcode {:?}", op_code);
         self.op_codes.push(op_code);
     }
 
-    pub fn emit_bytes(&mut self, bytes: u64) {
-        self.bytes.push(bytes);
+    pub fn emit_reference(&mut self, reference: u64) {
+        println!("emit reference {:?}", reference);
+        self.references.push(reference);
     }
 
-    pub fn add_constant(&mut self, constant: Value) {
-        let hash = Self::calculate_hash(&constant);
+    pub fn add_constant(&mut self, constant: Constant) {
+        let hash = Vm::calculate_hash(&constant);
         self.constants_storage.insert(hash, constant);
-        self.emit_bytes(hash);
+        self.emit_reference(hash);
     }
 
-    pub fn add_identifiers(&mut self, identifier: String) {
-        let hash = Self::calculate_hash(&identifier);
-        self.identifiers_storage.insert(hash,identifier);
-        self.emit_bytes(hash);
+    pub fn add_global(&mut self, identifier: Identifier) {
+        let hash = Vm::calculate_hash(identifier.value());
+        self.globals.insert(hash, identifier);
+        self.emit_reference(hash);
     }
 
-    pub fn next_bytes(&mut self) -> Option<u64> {
-        if self.current_bytes >= self.bytes.len() {
-            return None;
+    pub fn add_instance(&mut self, identifier: Identifier) {
+        let hash = Vm::calculate_hash(identifier.value());
+        self.instances.insert(hash, identifier);
+        self.emit_reference(hash);
+    }
+
+    pub fn add_local(&mut self, identifier: Identifier) {
+
+        self.locals.push(identifier);
+        let index = self.locals.len() - 1;
+        self.emit_reference(index as u64);
+    }
+
+    pub fn load_local(&mut self, identifier: Identifier) -> Result<usize, String> {
+        let maybe_found = self.locals.iter().enumerate().find(|(_, local)| **local == identifier);
+        if maybe_found.is_some() {
+            let (index, _) = maybe_found.unwrap();
+            self.emit_reference(index as u64);
+            Ok(index)
+        } else {
+            Err(format!("Can't find local identifier: {}", identifier))
         }
-        let bytes = self.bytes[self.current_bytes];
-        self.current_bytes += 1;
-        Some(bytes)
-    }
-
-    pub fn next_op_code(&mut self) -> Option<&OpCode> {
-        if self.current_op_code >= self.op_codes.len() {
-            return None;
-        }
-        let op_code = &self.op_codes[self.current_op_code];
-        self.current_op_code += 1;
-        Some(op_code)
-    }
-
-    pub fn next_constant(&mut self) -> Option<&Value> {
-        let maybe_bytes = self.next_bytes();
-        if maybe_bytes.is_none() {
-            return None;
-        }
-        self.constants_storage.get(&maybe_bytes.unwrap())
-    }
-    pub fn next_identifiers(&mut self) -> Option<&String> {
-        let maybe_bytes = self.next_bytes();
-        if maybe_bytes.is_none() {
-            return None;
-        }
-        self.identifiers_storage.get(&maybe_bytes.unwrap())
-    }
-
-    pub fn reset(&mut self) {
-        self.current_bytes = 0;
-        self.current_op_code = 0;
-    }
-
-    pub fn calculate_hash<T: Hash>(t: &T) -> u64 {
-        let mut s = DefaultHasher::new();
-        t.hash(&mut s);
-        s.finish()
     }
 }
 
 #[derive(Debug)]
 pub enum OpCode {
-    Constant,
+    LoadConstant,
     Pop,
-    DefineIdentifier,
-    SetIdentifier,
-    GetIdentifier,
+    StoreGlobal,
+    LoadGlobal,
+    StoreLocal,
+    LoadLocal,
+    StoreInstance,
+    LoadInstance,
     Equal,
     Greater,
     Less,

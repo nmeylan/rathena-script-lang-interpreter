@@ -1,6 +1,7 @@
 use std::hash::{BuildHasher, Hasher};
 
-pub(crate) struct NoopHasher {
+#[derive(Clone)]
+pub struct NoopHasher {
     hash: u64
 }
 

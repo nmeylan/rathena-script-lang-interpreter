@@ -88,9 +88,11 @@ conditionalExpression
 
 assignmentExpression
     :   conditionalExpression
-    |   unaryExpression assignmentOperator assignmentExpression
+    |   assignmentLeftExpression assignmentOperator assignmentExpression
     |   Number // for
     ;
+assignmentLeftExpression
+    : Identifier | variable;
 
 assignmentOperator
     :   '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='
@@ -293,8 +295,10 @@ externalDeclaration
     ;
 
 functionDefinition
-    :   Function Identifier compoundStatement?
+    :  Function Identifier ('(' functionDefinitionArguments ')')? compoundStatement?
     ;
+functionDefinitionArguments
+    : Identifier? (',' Identifier)*;
 scriptInitialization
     : '-' (Identifier | '::')* ','? compoundStatement? ;
 

@@ -226,6 +226,17 @@ fn enter_assignmentExpression(&mut self, _ctx: &AssignmentExpressionContext<'inp
 fn exit_assignmentExpression(&mut self, _ctx: &AssignmentExpressionContext<'input>) { }
 
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#assignmentLeftExpression}.
+ * @param ctx the parse tree
+ */
+fn enter_assignmentLeftExpression(&mut self, _ctx: &AssignmentLeftExpressionContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#assignmentLeftExpression}.
+ * @param ctx the parse tree
+ */
+fn exit_assignmentLeftExpression(&mut self, _ctx: &AssignmentLeftExpressionContext<'input>) { }
+
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#assignmentOperator}.
  * @param ctx the parse tree
  */
