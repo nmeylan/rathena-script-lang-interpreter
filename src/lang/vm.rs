@@ -3,18 +3,36 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::{io, mem};
+use std::cell::RefCell;
 use std::io::Write;
 use std::rc::Rc;
+use std::sync::Arc;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::noop_hasher::NoopHasher;
+use crate::lang::program::Program;
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Constant, Function, Identifier, Native, Scope, Value};
+use crate::lang::value::{Constant, Function, Native, Scope, Value, Variable};
+
+#[derive(Clone, Debug, Hash)]
+pub enum HeapEntry {
+    Variable(Variable)
+}
+
+impl HeapEntry {
+    pub fn value(&self) -> Value {
+        match self {
+            HeapEntry::Variable(var) => {
+                var.value.clone()
+            }
+        }
+    }
+}
 
 pub struct Vm {
-    stack: Stack,
-    global_identifiers_pool: HashMap<u64, Identifier, NoopHasher>,
-    constants_pool: HashMap<u64, Constant, NoopHasher>,
+    heap: RefCell<HashMap<u64, HeapEntry, NoopHasher>>,
+    constants_pool: RefCell<HashMap<u64, Constant, NoopHasher>>,
+    native_pool: HashMap<u64, Native, NoopHasher>,
     native_method_handler: Box<dyn NativeMethodHandler>,
 }
 
@@ -27,6 +45,9 @@ pub enum RuntimeError {
 impl RuntimeError {
     pub fn new(message: &str) -> Self {
         Self::Other(message.to_string())
+    }
+    pub fn new_string(message: String) -> Self {
+        Self::Other(message)
     }
 }
 
@@ -43,173 +64,53 @@ impl Display for RuntimeError {
 }
 
 pub trait NativeMethodHandler {
-    fn handle(&self, native: &Native, params: Vec<Value>, identifiers_pool: &HashMap<u64, Identifier, NoopHasher>, constant_pool: &HashMap<u64, Constant, NoopHasher>) {
+    fn handle(&self, native: &Native, params: Vec<Value>) {
         panic!("Native function {}", native.name);
     }
 }
 
 impl Vm {
     pub fn new(native_method_handler: Box<dyn NativeMethodHandler>) -> Vm {
-        let mut identifiers_pool: HashMap<u64, Identifier, NoopHasher> = Default::default();
-        identifiers_pool.insert(Self::calculate_hash(&"print".to_string()),
-                                Identifier::Native(Native { arity: 255, name: "println".to_string() }));
+        let mut native_pool: HashMap<u64, Native, NoopHasher> = Default::default();
+        native_pool.insert(Self::calculate_hash(&"print".to_string()),
+                                Native { name: "println".to_string() });
         Self {
-            stack: Stack::new(),
-            global_identifiers_pool: identifiers_pool,
-            native_method_handler,
+            heap: Default::default(),
             constants_pool: Default::default(),
+            native_method_handler,
+            native_pool
         }
     }
 
-    pub fn run_main(&mut self, mut function: Function) -> Result<(), RuntimeError> {
-        let mut chunk = &mut function.chunk;
-        self.constants_pool.extend(mem::replace(&mut chunk.constants_storage, HashMap::default()));
+    pub fn execute_program(vm: Arc<Vm>, mut function: Function) -> Result<(), RuntimeError> {
         let function_name = function.name.clone();
-        let mut call_frame = CallFrame::new(chunk, self.stack.len() + 1, function_name);
-        self.stack.push(StackEntry::Identifier(Identifier::Function(function)));
-        self.run(&mut call_frame)
+        let mut chunk = &mut function.chunk;
+        vm.extend_constant_pool(mem::replace(&mut chunk.constants_storage, HashMap::default()));
+        let mut program = Program::new(vm);
+        program.run(&mut CallFrame::new(chunk, 1, function_name))
     }
 
-    pub fn run(&mut self, call_frame: &mut CallFrame) -> Result<(), RuntimeError> {
-        println!("=========   VM    ========");
-        self.dump();
-        println!();
-        println!("========= Call frame ========");
-        call_frame.dump();
-        loop {
-            println!("=========   Stack    ========");
-            println!("{}", self.stack);
-            let maybe_next_op_code = call_frame.next_op_code();
-            if maybe_next_op_code.is_none() {
-                break;
-            }
-            let next_op_code = maybe_next_op_code.unwrap();
-
-            match next_op_code {
-                OpCode::LoadConstant => {
-                    let hash = call_frame.next_reference().unwrap();
-                    self.stack.push(StackEntry::ConstantPoolReference(hash));
-                }
-                OpCode::Pop => {}
-                OpCode::StoreGlobal => {
-                    let hash = call_frame.next_reference().unwrap();
-                    call_frame.get_identifier(hash);
-                }
-                OpCode::LoadGlobal => {
-                    let hash = call_frame.next_reference().unwrap();
-                    // println!("identifier {}", hash);
-                    // self.global_identifiers_pool.iter().for_each(|(k, v)| println!("{}, {}", k, v));
-                    let maybe_global_identifier = self.global_identifiers_pool.get(&hash);
-                    let identifier = if maybe_global_identifier.is_some() {
-                        maybe_global_identifier.unwrap()
-                    } else {
-                        let stack_entry = self.stack.get(hash  as usize + call_frame.stack_pointer)
-                            .or(Err(RuntimeError::new("Can't find identifier from global identifier pool nor in the stack")))?;
-                        match stack_entry {
-                            StackEntry::Identifier(identifier) => identifier,
-                            _ => return Err(RuntimeError::new("LoadIdentifier - Expected to find an Identifier from stack but was a reference")),
-                        }
-                    };
-                    match identifier {
-                        Identifier::Variable(var) => {
-                            match var.scope {
-                                Scope::Server => {
-
-                                }
-                                Scope::Account => {}
-                                Scope::Character => {}
-                                Scope::Npc => {}
-                                Scope::Instance => {}
-                                Scope::Local => {
-                                    // self.stack.push(StackEntry::Identifier(identifier));
-                                }
-                            }
-                        }
-                        Identifier::Function(_) => {
-
-                        }
-                        Identifier::Native(_) => {
-                            self.stack.push(StackEntry::GlobalIdentifierPoolReference(hash));
-                        }
-                        Identifier::String(_) => {
-                            self.stack.push(StackEntry::GlobalIdentifierPoolReference(hash));
-                        }
-                    }
-                }
-                OpCode::StoreLocal => {
-
-                }
-                OpCode::LoadLocal => {}
-                OpCode::StoreInstance => {}
-                OpCode::LoadInstance => {}
-                OpCode::Equal => {}
-                OpCode::Greater => {}
-                OpCode::Less => {}
-                OpCode::Add => {}
-                OpCode::Subtract => {}
-                OpCode::Multiply => {}
-                OpCode::Divide => {}
-                OpCode::Not => {}
-                OpCode::Jump => {}
-                OpCode::Invoke => {}
-                OpCode::Call => {
-                    let argument_count = call_frame.next_reference().ok_or(RuntimeError::new("Function arguments count"))?;
-                    let mut arguments: Vec<Value> = vec![];
-                    for _ in 0..argument_count {
-                        let instruction = self.stack.pop()?;
-                        match instruction {
-                            StackEntry::Identifier(_) => {
-                                panic!("don't know how to handle identifier in function arguments, yet");
-                            }
-                            StackEntry::ConstantPoolReference(reference) => {
-                                arguments.push((self.constants_pool.get(&reference).ok_or(RuntimeError::new("Can't find constant in constant pool"))?).value());
-                            }
-                            StackEntry::GlobalIdentifierPoolReference(_) => {
-                                panic!("don't know how to handle identifier pool reference in function arguments, yet");
-                            }
-                        }
-                    }
-                    arguments.reverse();
-                   match self.stack.pop()? {
-                        StackEntry::Identifier(identifier) => {
-                            self.execute_call(arguments, &identifier);
-                        },
-                        StackEntry::ConstantPoolReference(_) => return Err(RuntimeError::new("Call - Expected call to received an Identifier but was a ConstantPoolReference")),
-                        StackEntry::GlobalIdentifierPoolReference(reference) => {
-                            let identifier = self.global_identifiers_pool.get(&reference).ok_or(RuntimeError::new(format!("Call - cannot find global identifiers with reference {}", reference).as_str()))?;
-                            self.execute_call(arguments, identifier);
-                        }
-                    };
-
-                }
-                OpCode::Return => {}
-                OpCode::Command => {}
-            }
-        }
-        Ok(())
+    pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {
+        let mut constant_pool_ref_mut = self.constants_pool.borrow_mut();
+        constant_pool_ref_mut.extend(constant_pool);
     }
 
-    fn execute_call(&self, mut arguments: Vec<Value>, identifier: &Identifier) -> Result<(), RuntimeError> {
-        match identifier {
-            Identifier::Function(_) => {}
-            Identifier::Native(native) => {
-                self.native_method_handler.handle(native, arguments, &self.global_identifiers_pool, &self.constants_pool);
-            }
-            _ => return Err(RuntimeError::new(format!("Expected either a Function or a Native to be called, but it was: {:?}", identifier).as_str()))
-        }
-        Ok(())
+    pub fn get_from_constant_pool(&self, reference: u64) -> Option<Constant> {
+        let constant_pool_ref = self.constants_pool.borrow();
+        constant_pool_ref.get(&reference).map(|v| v.clone())
     }
 
-    fn dump(&self) {
-        let mut out = io::stdout();
-        writeln!(out, "========= Constants =========");
-        for (reference, constant) in self.constants_pool.iter() {
-            writeln!(out, "({}) {}", reference, constant);
-        }
-        writeln!(out, "========= Globals =========");
-        for (reference, constant) in self.global_identifiers_pool.iter() {
-            writeln!(out, "({}) {}", reference, constant);
-        }
+    pub fn get_from_heap_pool(&self, reference: u64) -> Option<HeapEntry> {
+        let heap_ref = self.heap.borrow();
+        heap_ref.get(&reference).map(|v| v.clone())
+    }
+
+    pub fn get_from_native_pool(&self, reference: u64) -> Option<&Native> {
+        self.native_pool.get(&reference)
+    }
+
+    pub fn native_method_handler(&self) -> &Box<dyn NativeMethodHandler> {
+        &self.native_method_handler
     }
 
     pub fn calculate_hash<T: Hash>(t: &T) -> u64 {

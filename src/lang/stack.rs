@@ -1,13 +1,16 @@
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
-use crate::lang::value::{Constant, Identifier};
+use crate::lang::value::{Constant};
 use crate::lang::vm::RuntimeError;
 
 #[derive(Debug)]
 pub enum StackEntry {
-    Identifier(Identifier),
     ConstantPoolReference(u64),
-    GlobalIdentifierPoolReference(u64),
+    HeapReference(u64),
+    LocalVariableReference(u64),
+    NativeReference(u64),
+    FunctionReference(u64),
+    InstanceReference(u64),
 }
 
 #[derive(Debug)]

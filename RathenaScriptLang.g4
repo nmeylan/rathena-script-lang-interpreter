@@ -14,7 +14,7 @@ primaryExpression
     ;
 
 functionCallExpression
-    : primaryExpression '(' argumentExpressionList? ')';
+    : Identifier '(' argumentExpressionList? ')';
 
 postfixExpression
     : functionCallExpression (expression)* | primaryExpression ('[' expression ']' | ('++' | '--') )*

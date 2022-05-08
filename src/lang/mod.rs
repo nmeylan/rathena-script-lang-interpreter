@@ -5,3 +5,4 @@ pub mod noop_hasher;
 pub(crate) mod stack;
 pub mod value;
 pub(crate) mod call_frame;
+pub(crate) mod program;

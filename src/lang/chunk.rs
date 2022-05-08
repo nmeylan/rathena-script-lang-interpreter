@@ -5,7 +5,7 @@ use std::hash::{BuildHasher, Hash, Hasher};
 use std::process::id;
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Constant, Identifier, Variable};
+use crate::lang::value::{Constant, Function, Native, Variable};
 use crate::Vm;
 
 
@@ -13,9 +13,11 @@ use crate::Vm;
 pub struct Chunk {
     pub op_codes: Vec<OpCode>,
     pub references: Vec<u64>,
-    pub globals: HashMap<u64, Identifier, NoopHasher>,
-    pub instances: HashMap<u64, Identifier, NoopHasher>,
-    pub locals: Vec<Identifier>,
+    pub functions: HashMap<u64, Function, NoopHasher>,
+    pub natives: HashMap<u64, Native, NoopHasher>,
+    pub globals: HashMap<u64, Variable, NoopHasher>,
+    pub instances: HashMap<u64, Variable, NoopHasher>,
+    pub locals: HashMap<u64, Variable, NoopHasher>,
     pub constants_storage: HashMap<u64, Constant, NoopHasher>,
 }
 
@@ -24,9 +26,11 @@ impl Default for Chunk {
         Self {
             op_codes: vec![],
             references: vec![],
+            functions: HashMap::with_hasher(NoopHasher::default()),
+            natives: HashMap::with_hasher(NoopHasher::default()),
             globals: HashMap::with_hasher(NoopHasher::default()),
             instances: HashMap::with_hasher(NoopHasher::default()),
-            locals: vec![],
+            locals: HashMap::with_hasher(NoopHasher::default()),
             constants_storage: HashMap::with_hasher(NoopHasher::default()),
         }
     }
@@ -38,58 +42,71 @@ impl Chunk {
         self.op_codes.push(op_code);
     }
 
-    pub fn emit_reference(&mut self, reference: u64) {
-        println!("emit reference {:?}", reference);
-        self.references.push(reference);
-    }
+    // pub fn emit_reference(&mut self, reference: u64) {
+    //     println!("emit reference {:?}", reference);
+    //     self.references.push(reference);
+    // }
 
-    pub fn add_constant(&mut self, constant: Constant) {
+    pub fn add_constant(&mut self, constant: Constant) -> u64 {
         let hash = Vm::calculate_hash(&constant);
         self.constants_storage.insert(hash, constant);
-        self.emit_reference(hash);
+        hash
     }
 
-    pub fn add_global(&mut self, identifier: Identifier) {
-        let hash = Vm::calculate_hash(identifier.value());
-        self.globals.insert(hash, identifier);
-        self.emit_reference(hash);
+    pub fn add_global(&mut self, variable: Variable) -> u64 {
+        let hash = Vm::calculate_hash(&variable);
+        self.globals.insert(hash, variable);
+        hash
     }
 
-    pub fn add_instance(&mut self, identifier: Identifier) {
-        let hash = Vm::calculate_hash(identifier.value());
-        self.instances.insert(hash, identifier);
-        self.emit_reference(hash);
+    pub fn add_instance(&mut self, variable: Variable) -> u64 {
+        let hash = Vm::calculate_hash(&variable);
+        self.instances.insert(hash, variable);
+        hash
     }
 
-    pub fn add_local(&mut self, identifier: Identifier) {
-
-        self.locals.push(identifier);
-        let index = self.locals.len() - 1;
-        self.emit_reference(index as u64);
+    pub fn add_local(&mut self, variable: Variable) -> u64 {
+        let hash = Vm::calculate_hash(&variable);
+        self.locals.insert(hash, variable);
+        hash
     }
 
-    pub fn load_local(&mut self, identifier: Identifier) -> Result<usize, String> {
-        let maybe_found = self.locals.iter().enumerate().find(|(_, local)| **local == identifier);
-        if maybe_found.is_some() {
-            let (index, _) = maybe_found.unwrap();
-            self.emit_reference(index as u64);
-            Ok(index)
-        } else {
-            Err(format!("Can't find local identifier: {}", identifier))
-        }
+    pub fn add_function(&mut self, function: Function) -> u64 {
+        let hash = Vm::calculate_hash(&function);
+        self.functions.insert(hash, function);
+        hash
     }
+
+    pub fn add_native(&mut self, native: Native) -> u64 {
+        let hash = Vm::calculate_hash(&native);
+        self.natives.insert(hash, native);
+        hash
+    }
+
+    // pub fn load_local(&mut self, identifier: Identifier) -> Option<> {
+    //     let maybe_found = self.locals.iter().enumerate().find(|(_, local)| **local == identifier);
+    //     if maybe_found.is_some() {
+    //         let (index, _) = maybe_found.unwrap();
+    //         self.emit_reference(index as u64);
+    //         Ok(index)
+    //     } else {
+    //         Err(format!("Can't find local identifier: {}", identifier))
+    //     }
+    // }
 }
 
 #[derive(Debug)]
 pub enum OpCode {
-    LoadConstant,
+    LoadConstant(u64),
     Pop,
-    StoreGlobal,
-    LoadGlobal,
-    StoreLocal,
-    LoadLocal,
-    StoreInstance,
-    LoadInstance,
+    StoreGlobal(u64),
+    LoadGlobal(u64),
+    StoreLocal(u64),
+    LoadLocal(u64),
+    StoreInstance(u64),
+    LoadInstance(u64),
+    DefineFunction(u64),
+    CallNative { reference: u64, argument_count: usize },
     Equal,
     Greater,
     Less,

@@ -387,6 +387,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#functionDefinitionArguments}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_functionDefinitionArguments(&mut self, ctx: &FunctionDefinitionArgumentsContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptInitialization}.
 	 * @param ctx the parse tree
 	 */
