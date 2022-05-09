@@ -12,7 +12,7 @@ use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::program::Program;
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Constant, Function, Native, Scope, Value, Variable};
+use crate::lang::value::{Constant, Function, Native, Scope, Value, ValueRef, Variable};
 
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
@@ -20,10 +20,10 @@ pub enum HeapEntry {
 }
 
 impl HeapEntry {
-    pub fn value(&self) -> Value {
+    pub fn value_ref(&self) -> ValueRef {
         match self {
             HeapEntry::Variable(var) => {
-                var.value.clone()
+                var.value_ref.borrow().clone()
             }
         }
     }
@@ -83,11 +83,16 @@ impl Vm {
     }
 
     pub fn execute_program(vm: Arc<Vm>, mut function: Function) -> Result<(), RuntimeError> {
-        let function_name = function.name.clone();
-        let mut chunk = &mut function.chunk;
-        vm.extend_constant_pool(mem::replace(&mut chunk.constants_storage, HashMap::default()));
+        {
+            let mut chunk = &mut function.chunk;
+            vm.extend_constant_pool(mem::replace(&mut chunk.constants_storage, HashMap::default()));
+        }
         let mut program = Program::new(vm);
-        program.run(&mut CallFrame::new(chunk, 1, function_name))
+        // TODO: init local variable pool
+        // TODO: init instance variable pool
+        // TODO: init program function pool
+        // Surement besoin de passer un chunk plutot que CallFrame dans la fonction run
+        program.run(function)
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {
@@ -117,5 +122,17 @@ impl Vm {
         let mut s = DefaultHasher::new();
         t.hash(&mut s);
         s.finish()
+    }
+
+    pub fn dump(&self) {
+        let mut out = io::stdout();
+        writeln!(out, "========= Constants Pool =========");
+        for (reference, constant) in self.constants_pool.borrow().iter() {
+            writeln!(out, "({}) {}", reference, constant);
+        }
+        writeln!(out, "========= Heap =========");
+        for (reference, constant) in self.heap.borrow().iter() {
+            writeln!(out, "({}) {:?}", reference, constant);
+        }
     }
 }

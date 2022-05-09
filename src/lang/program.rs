@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 use std::{io, mem};
+use std::borrow::Borrow;
 use std::fmt::format;
 use std::sync::{Arc, RwLock};
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Function, Native, Scope, Variable};
-use crate::{NoopHasher, Value, Vm};
+use crate::lang::value::{Function, Native, Scope, ValueRef, Variable};
+use crate::{Constant, NoopHasher, Value, Vm};
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
 use crate::lang::vm::RuntimeError;
 use std::io::Write;
+use std::default::Default;
 
 pub struct Program {
     vm: Arc<Vm>,
@@ -29,7 +31,13 @@ impl Program {
         }
     }
 
-    pub fn run(&mut self, call_frame: &CallFrame) -> Result<(), RuntimeError> {
+    pub fn run(&mut self, mut function: Function) -> Result<(), RuntimeError> {
+        let mut chunk = &mut function.chunk;
+        let function_name = function.name.clone();
+        let locals = mem::replace(&mut chunk.locals, Default::default());
+        let mut call_frame = CallFrame::new(chunk, 1, function_name, locals);
+        println!("=========   VM    ========");
+        self.vm.dump();
         println!("=========   Thread    ========");
         self.dump();
         println!();
@@ -45,8 +53,16 @@ impl Program {
                 OpCode::Pop => {}
                 OpCode::StoreGlobal(_) => {}
                 OpCode::LoadGlobal(_) => {}
-                OpCode::StoreLocal(_) => {}
-                OpCode::LoadLocal(_) => {}
+                OpCode::StoreLocal(reference) => {
+                    let stack_entry = self.stack.pop()?;
+                    let constant_reference = self.constant_ref_from_stack_entry(stack_entry)?;
+                    let variable = call_frame.get_local(*reference).ok_or(RuntimeError::new(format!("Can't find local variable with reference {}", reference).as_str()))?;
+                    variable.set_value_ref(constant_reference);
+                    println!("locals size: {}", call_frame.locals.len());
+                }
+                OpCode::LoadLocal(reference) => {
+                    self.stack.push(StackEntry::LocalVariableReference(*reference));
+                }
                 OpCode::StoreInstance(_) => {}
                 OpCode::LoadInstance(_) => {}
                 OpCode::DefineFunction(_) => {}
@@ -64,7 +80,7 @@ impl Program {
                     let mut arguments: Vec<Value> = vec![];
                     for _ in 0..*argument_count {
                         let stack_entry = self.stack.pop()?;
-                        arguments.push(self.value_from_stack_entry(stack_entry, call_frame)?);
+                        arguments.push(self.value_from_stack_entry(stack_entry, &call_frame)?);
                     }
                     arguments.reverse();
                     let native_method_name = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
@@ -189,15 +205,15 @@ impl Program {
     // }
 
     fn dump(&self) {
-        // let mut out = io::stdout();
-        // writeln!(out, "========= Constants =========");
-        // for (reference, constant) in self.constants_pool.iter() {
-        //     writeln!(out, "({}) {}", reference, constant);
-        // }
-        // writeln!(out, "========= Globals =========");
-        // for (reference, constant) in self.global_identifiers_pool.iter() {
-        //     writeln!(out, "({}) {}", reference, constant);
-        // }
+        let mut out = io::stdout();
+        writeln!(out, "========= Functions =========");
+        for (reference, func) in self.functions_pool.iter() {
+            writeln!(out, "({}) {}", reference, func);
+        }
+        writeln!(out, "========= Instance Variables =========");
+        for (reference, variable) in self.instances_variable_pool.iter() {
+            writeln!(out, "({}) {:?}", reference, variable);
+        }
     }
 
     fn value_from_stack_entry(&self, stack_entry: StackEntry, call_frame: &CallFrame) -> Result<Value, RuntimeError> {
@@ -208,11 +224,12 @@ impl Program {
             }
             StackEntry::HeapReference(reference) => {
                 let heap_entry = self.vm.get_from_heap_pool(reference).ok_or(RuntimeError::new(format!("Can't find value in VM heap for given reference ({})", reference).as_str()))?;
-                Ok(heap_entry.value())
+                let value_ref = heap_entry.value_ref();
+                Ok(self.value_from_value_ref(&value_ref)?)
             }
             StackEntry::LocalVariableReference(reference) => {
-                let function = call_frame.get_local(reference).ok_or(RuntimeError::new(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
-                Ok(Value::String(Some(function.name.clone())))
+                let variable = call_frame.get_local(reference).ok_or(RuntimeError::new(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
+                Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::NativeReference(reference) => {
                 let native =self.vm.get_from_native_pool(reference).ok_or(RuntimeError::new(format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
@@ -224,7 +241,22 @@ impl Program {
             }
             StackEntry::InstanceReference(reference) => {
                 let variable = self.instances_variable_pool.get(&reference).ok_or(RuntimeError::new(format!("Can't find instance variable in PROGRAM instance variable pool for given reference ({})", reference).as_str()))?;
-                Ok(Value::String(Some(variable.name.clone())))
+                Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
+            }
+        }
+    }
+
+    fn value_from_value_ref(&self, value_ref: &ValueRef) -> Result<Value, RuntimeError> {
+        match value_ref {
+            ValueRef::String(reference) => {
+                let option = self.vm.get_from_constant_pool(reference.ok_or(RuntimeError::new(format!("String ValueRef does not contains reference. Variable has been not initialized.").as_str()))?);
+                let constant = option.ok_or(RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", reference.unwrap()).as_str()))?;
+                Ok(constant.value())
+            }
+            ValueRef::Number(reference) => {
+                let option = self.vm.get_from_constant_pool(reference.ok_or(RuntimeError::new(format!("Number ValueRef does not contains reference. Variable has been not initialized.").as_str()))?);
+                let constant = option.ok_or(RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", reference.unwrap()).as_str()))?;
+                Ok(constant.value())
             }
         }
     }
@@ -236,6 +268,16 @@ impl Program {
                 Ok(native)
             },
             x => Err(RuntimeError::new_string(format!("Expected stack entry to be a reference to Native method but was {:?}", x)))
+        }
+    }
+
+    fn constant_ref_from_stack_entry(&self, stack_entry: StackEntry) -> Result<u64, RuntimeError> {
+        match stack_entry {
+            StackEntry::ConstantPoolReference(reference) => {
+                self.vm.get_from_constant_pool(reference).ok_or(RuntimeError::new(format!("Can't find constant in VM native pool for given reference ({})", reference).as_str()))?;
+                Ok(reference)
+            },
+            x => Err(RuntimeError::new_string(format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
     }
 }

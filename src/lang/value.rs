@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::env::var;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
@@ -39,6 +40,36 @@ impl Value {
 }
 
 #[derive(Debug, Clone, Hash, PartialEq)]
+pub enum ValueRef {
+    String(Option<u64>),
+    Number(Option<u64>),
+}
+
+impl ValueRef {
+    pub fn new_empty_string() -> ValueRef {
+        ValueRef::String(None)
+    }
+    pub fn new_empty_number() -> ValueRef {
+        ValueRef::Number(None)
+    }
+
+    pub fn new_string(reference: u64) -> ValueRef {
+        ValueRef::String(Some(reference))
+    }
+
+    pub fn new_number(reference: u64) -> ValueRef {
+        ValueRef::Number(Some(reference))
+    }
+
+    pub fn duplicate_with_reference(&self, reference: u64) -> ValueRef {
+        match self {
+            ValueRef::String(_) => ValueRef::new_string(reference),
+            ValueRef::Number(_) => ValueRef::new_number(reference)
+        }
+    }
+}
+
+#[derive(Debug, Clone, Hash, PartialEq)]
 pub enum Scope {
     Server,
     Account,
@@ -48,11 +79,26 @@ pub enum Scope {
     Local,
 }
 
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Variable {
     pub(crate) name: String,
     pub(crate) scope: Scope,
-    pub value: Value
+    pub value_ref: RefCell<ValueRef>
+}
+
+impl Variable {
+    pub fn set_value_ref(&self, reference: u64) {
+        let mut ref_mut = self.value_ref.borrow_mut();
+        *ref_mut = ref_mut.duplicate_with_reference(reference);
+    }
+}
+
+impl Hash for Variable {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write(self.name.as_bytes());
+        self.scope.hash(state);
+        self.value_ref.borrow().hash(state);
+    }
 }
 
 #[derive(Debug)]

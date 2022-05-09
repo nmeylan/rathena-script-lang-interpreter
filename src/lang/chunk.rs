@@ -4,6 +4,7 @@ use std::fmt::{Display, Formatter};
 use std::hash::{BuildHasher, Hash, Hasher};
 use std::process::id;
 use crate::lang::chunk::OpCode::{*};
+use crate::lang::compiler::CompilationError;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Constant, Function, Native, Variable};
 use crate::Vm;
@@ -42,11 +43,6 @@ impl Chunk {
         self.op_codes.push(op_code);
     }
 
-    // pub fn emit_reference(&mut self, reference: u64) {
-    //     println!("emit reference {:?}", reference);
-    //     self.references.push(reference);
-    // }
-
     pub fn add_constant(&mut self, constant: Constant) -> u64 {
         let hash = Vm::calculate_hash(&constant);
         self.constants_storage.insert(hash, constant);
@@ -83,16 +79,15 @@ impl Chunk {
         hash
     }
 
-    // pub fn load_local(&mut self, identifier: Identifier) -> Option<> {
-    //     let maybe_found = self.locals.iter().enumerate().find(|(_, local)| **local == identifier);
-    //     if maybe_found.is_some() {
-    //         let (index, _) = maybe_found.unwrap();
-    //         self.emit_reference(index as u64);
-    //         Ok(index)
-    //     } else {
-    //         Err(format!("Can't find local identifier: {}", identifier))
-    //     }
-    // }
+    pub fn load_local(&mut self, variable: Variable) -> Result<u64, CompilationError> {
+        let maybe_found = self.locals.iter().find(|(reference, local)| **local == variable);
+        if maybe_found.is_some() {
+            let (reference, _) = maybe_found.unwrap();
+            Ok(*reference)
+        } else {
+            Err(CompilationError::UndefinedVariable(format!("Undefined local variable: {}", variable.name)))
+        }
+    }
 }
 
 #[derive(Debug)]

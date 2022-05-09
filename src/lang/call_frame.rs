@@ -26,13 +26,13 @@ impl Display for CallFrame {
 }
 
 impl CallFrame {
-    pub fn new(mut chunk: &mut Chunk, stack_pointer: usize, name: String) -> Self {
+    pub fn new(mut chunk: &mut Chunk, stack_pointer: usize, name: String, locals: HashMap<u64, Variable, NoopHasher>) -> Self {
         Self {
             code: mem::replace(&mut chunk.op_codes, vec![]),
             stack_pointer,
             current_op_code: 0,
             name,
-            locals: Default::default(),
+            locals,
         }
     }
 

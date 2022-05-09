@@ -1,6 +1,4 @@
 #![feature(try_blocks)]
-#![feature(in_band_lifetimes)]
-
 extern crate core;
 
 mod parser;
@@ -31,8 +29,8 @@ impl NativeMethodHandler for Native {
 }
 
 fn main() {
-    // let script = ".@a = \"hello world\";\nprint(.@a);";
-    let script = "print(\"hello world\", \"console\");";
+    let script = ".@a$ = \"hello world\";.@a$ = \"console\";\nprint(.@a$);";
+    // let script = "print(\"hello world\", \"console\");";
     let charstream = InputStream::new(script);
 
 
