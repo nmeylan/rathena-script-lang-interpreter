@@ -29,7 +29,8 @@ impl NativeMethodHandler for Native {
 }
 
 fn main() {
-    let script = ".@a$ = \"hello world\";.@a$ = \"console\";\nprint(.@a$);";
+    let script = ".@a$ = \"hello world\" + \"console\" + \"toto\";\nprint(.@a$);";
+    // let script = ".@a$ = \"hello world\";.@a$ = \"console\";\nprint(.@a$);";
     // let script = "print(\"hello world\", \"console\");";
     let charstream = InputStream::new(script);
 

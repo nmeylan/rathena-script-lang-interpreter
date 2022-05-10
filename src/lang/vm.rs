@@ -105,6 +105,16 @@ impl Vm {
         constant_pool_ref.get(&reference).map(|v| v.clone())
     }
 
+    pub fn add_in_constant_pool(&self, value: Value) -> u64 {
+        let constant = match value {
+            Value::String(str) => Constant::String(str.unwrap()),
+            Value::Number(num) => Constant::Number(num.unwrap()),
+        };
+        let hash = Self::calculate_hash(&constant);
+        self.constants_pool.borrow_mut().insert(hash, constant);
+        hash
+    }
+
     pub fn get_from_heap_pool(&self, reference: u64) -> Option<HeapEntry> {
         let heap_ref = self.heap.borrow();
         heap_ref.get(&reference).map(|v| v.clone())

@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::env::var;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
+use std::mem;
 use crate::lang::chunk::Chunk;
 
 pub type AccountId = String;
@@ -36,6 +37,24 @@ impl Value {
     }
     pub fn new_number() -> Value {
         Value::Number(None)
+    }
+    pub fn is_string(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&Value::new_string())
+    }
+    pub fn is_number(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&Value::new_number())
+    }
+    pub fn string_value(&self) -> &String {
+        match self {
+            Value::String(str) => str.as_ref().unwrap(),
+            Value::Number(_) => {panic!("Value is not a string.")}
+        }
+    }
+    pub fn number_value(&self) -> u32 {
+        match self {
+            Value::Number(num) => num.unwrap(),
+            Value::String(_) => {panic!("Value is not a number.")},
+        }
     }
 }
 

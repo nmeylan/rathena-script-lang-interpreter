@@ -69,7 +69,19 @@ impl Program {
                 OpCode::Equal => {}
                 OpCode::Greater => {}
                 OpCode::Less => {}
-                OpCode::Add => {}
+                OpCode::Add => {
+                    let stack_entry1 = self.stack.pop()?;
+                    let stack_entry2 = self.stack.pop()?;
+                    let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
+                    let new_value = if v1.is_string() || v2.is_string() {
+                        Value::String(Some(format!("{}{}", v2.string_value(), v1.string_value())))
+                    } else {
+                        Value::Number(Some(v1.number_value() + v2.number_value()))
+                    };
+                    let reference = self.vm.add_in_constant_pool(new_value);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                }
                 OpCode::Subtract => {}
                 OpCode::Multiply => {}
                 OpCode::Divide => {}
@@ -90,119 +102,9 @@ impl Program {
                 OpCode::Return => {}
                 OpCode::Command => {}
             }
-            // match next_op_code {
-            //     // LoadConstant(reference) => {
-            //     //     self.stack.push(StackEntry::ConstantPoolReference(*reference));
-            //     // }
-            //     Pop => {}
-            //     StoreGlobal => {
-            //         // let hash = call_frame.next_reference().unwrap();
-            //         // call_frame.get_identifier(hash);
-            //     }
-            //     LoadGlobal => {
-            //         // let hash = call_frame.next_reference().unwrap();
-            //         // // println!("identifier {}", hash);
-            //         // // self.global_identifiers_pool.iter().for_each(|(k, v)| println!("{}, {}", k, v));
-            //         // let maybe_global_identifier = self.global_identifiers_pool.get(&hash);
-            //         // let identifier = if maybe_global_identifier.is_some() {
-            //         //     maybe_global_identifier.unwrap()
-            //         // } else {
-            //         //     let stack_entry = self.stack.get(hash  as usize + call_frame.stack_pointer)
-            //         //         .or(Err(RuntimeError::new("Can't find identifier from global identifier pool nor in the stack")))?;
-            //         //     match stack_entry {
-            //         //         StackEntry::Identifier(identifier) => identifier,
-            //         //         _ => return Err(RuntimeError::new("LoadIdentifier - Expected to find an Identifier from stack but was a reference")),
-            //         //     }
-            //         // };
-            //         // match identifier {
-            //         //     Identifier::Variable(var) => {
-            //         //         match var.scope {
-            //         //             Scope::Server => {
-            //         //
-            //         //             }
-            //         //             Scope::Account => {}
-            //         //             Scope::Character => {}
-            //         //             Scope::Npc => {}
-            //         //             Scope::Instance => {}
-            //         //             Scope::Local => {
-            //         //                 // self.stack.push(StackEntry::Identifier(identifier));
-            //         //             }
-            //         //         }
-            //         //     }
-            //         //     Identifier::Function(_) => {
-            //         //
-            //         //     }
-            //         //     Identifier::Native(_) => {
-            //         //         self.stack.push(StackEntry::GlobalIdentifierPoolReference(hash));
-            //         //     }
-            //         //     Identifier::String(_) => {
-            //         //         self.stack.push(StackEntry::GlobalIdentifierPoolReference(hash));
-            //         //     }
-            //         // }
-            //     }
-            //     StoreLocal => {
-            //
-            //     }
-            //     LoadLocal => {}
-            //     StoreInstance => {}
-            //     LoadInstance => {}
-            //     Equal => {}
-            //     Greater => {}
-            //     Less => {}
-            //     Add => {}
-            //     Subtract => {}
-            //     Multiply => {}
-            //     Divide => {}
-            //     Not => {}
-            //     Jump => {}
-            //     Invoke => {}
-            //     Call => {
-            //         // let argument_count = call_frame.next_reference().ok_or(RuntimeError::new("Function arguments count"))?;
-            //         // let mut arguments: Vec<Value> = vec![];
-            //         // for _ in 0..argument_count {
-            //         //     let instruction = self.stack.pop()?;
-            //         //     match instruction {
-            //         //         StackEntry::Identifier(_) => {
-            //         //             panic!("don't know how to handle identifier in function arguments, yet");
-            //         //         }
-            //         //         StackEntry::ConstantPoolReference(reference) => {
-            //         //             arguments.push((self.constants_pool.get(&reference).ok_or(RuntimeError::new("Can't find constant in constant pool"))?).value());
-            //         //         }
-            //         //         StackEntry::GlobalIdentifierPoolReference(_) => {
-            //         //             panic!("don't know how to handle identifier pool reference in function arguments, yet");
-            //         //         }
-            //         //     }
-            //         // }
-            //         // arguments.reverse();
-            //         // match self.stack.pop()? {
-            //         //     StackEntry::Identifier(identifier) => {
-            //         //         self.execute_call(arguments, &identifier);
-            //         //     },
-            //         //     StackEntry::ConstantPoolReference(_) => return Err(RuntimeError::new("Call - Expected call to received an Identifier but was a ConstantPoolReference")),
-            //         //     StackEntry::GlobalIdentifierPoolReference(reference) => {
-            //         //         let identifier = self.global_identifiers_pool.get(&reference).ok_or(RuntimeError::new(format!("Call - cannot find global identifiers with reference {}", reference).as_str()))?;
-            //         //         self.execute_call(arguments, identifier);
-            //         //     }
-            //         // };
-            //
-            //     }
-            //     Return => {}
-            //     Command => {}
-            // }
         }
         Ok(())
     }
-
-    // fn execute_call(&self, mut arguments: Vec<Value>, identifier: &Identifier) -> Result<(), RuntimeError> {
-    //     match identifier {
-    //         Identifier::Function(_) => {}
-    //         Identifier::Native(native) => {
-    //             self.native_method_handler.handle(native, arguments, &self.global_identifiers_pool, &self.constants_pool);
-    //         }
-    //         _ => return Err(RuntimeError::new(format!("Expected either a Function or a Native to be called, but it was: {:?}", identifier).as_str()))
-    //     }
-    //     Ok(())
-    // }
 
     fn dump(&self) {
         let mut out = io::stdout();

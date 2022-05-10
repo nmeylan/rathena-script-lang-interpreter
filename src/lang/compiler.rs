@@ -190,7 +190,11 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_children(ctx);
+
+        if !ctx.Plus_all().is_empty() {
+            self.current_chunk().emit_op_code(OpCode::Add);
+        }
     }
 
     fn visit_shiftExpression(&mut self, ctx: &ShiftExpressionContext<'input>) {
