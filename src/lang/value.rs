@@ -47,13 +47,13 @@ impl Value {
     pub fn string_value(&self) -> &String {
         match self {
             Value::String(str) => str.as_ref().unwrap(),
-            Value::Number(_) => {panic!("Value is not a string.")}
+            Value::Number(_) => {panic!("Value is a number not a string.")}
         }
     }
     pub fn number_value(&self) -> u32 {
         match self {
             Value::Number(num) => num.unwrap(),
-            Value::String(_) => {panic!("Value is not a number.")},
+            Value::String(_) => {panic!("Value is string not a number.")},
         }
     }
 }

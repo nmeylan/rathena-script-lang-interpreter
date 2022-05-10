@@ -126,7 +126,9 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_primaryExpression(&mut self, ctx: &PrimaryExpressionContext<'input>) {
         if ctx.String().is_some() {
-            let reference = self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()));
+            let reference = self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()
+                .replace("\"", "") // TODO check if it can be done by antlr skip instead.
+            ));
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
         if ctx.Number().is_some() {
@@ -190,9 +192,10 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>) {
-        self.visit_children(ctx);
-
-        if !ctx.Plus_all().is_empty() {
+        // self.visit_children(ctx);
+        self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(0).unwrap());
+        for (i, _) in ctx.Plus_all().iter().enumerate() {
+            self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i + 1).unwrap());
             self.current_chunk().emit_op_code(OpCode::Add);
         }
     }

@@ -23,13 +23,13 @@ struct Native;
 impl NativeMethodHandler for Native {
     fn handle(&self, native: &lang::value::Native, params: Vec<Value>) {
         if native.name.eq("println") {
-            println!("{}", params.iter().fold(String::new(), |acc, arg| acc + format!("{}", arg).as_str()));
+            println!("{}", params.iter().map(|p| p.string_value().clone()).collect::<Vec<String>>().join(" "));
         }
     }
 }
 
 fn main() {
-    let script = ".@a$ = \"hello world\" + \"console\" + \"toto\";\nprint(.@a$);";
+    let script = ".@a$ = \"hello world\" + \" console \" + 1;\nprint(.@a$);";
     // let script = ".@a$ = \"hello world\";.@a$ = \"console\";\nprint(.@a$);";
     // let script = "print(\"hello world\", \"console\");";
     let charstream = InputStream::new(script);

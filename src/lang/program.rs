@@ -27,7 +27,7 @@ impl Program {
             vm,
             stack,
             functions_pool,
-            instances_variable_pool: Default::default()
+            instances_variable_pool: Default::default(),
         }
     }
 
@@ -75,7 +75,9 @@ impl Program {
                     let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
                     let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
-                        Value::String(Some(format!("{}{}", v2.string_value(), v1.string_value())))
+                        Value::String(Some(format!("{}{}",
+                                                   if v2.is_string() { v2.string_value().clone() } else { v2.number_value().to_string() },
+                                                   if v1.is_string() { v1.string_value().clone() } else { v1.number_value().to_string() })))
                     } else {
                         Value::Number(Some(v1.number_value() + v2.number_value()))
                     };
@@ -88,7 +90,7 @@ impl Program {
                 OpCode::Not => {}
                 OpCode::Jump => {}
                 OpCode::Invoke => {}
-                OpCode::CallNative {argument_count, reference} => {
+                OpCode::CallNative { argument_count, reference } => {
                     let mut arguments: Vec<Value> = vec![];
                     for _ in 0..*argument_count {
                         let stack_entry = self.stack.pop()?;
@@ -134,7 +136,7 @@ impl Program {
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::NativeReference(reference) => {
-                let native =self.vm.get_from_native_pool(reference).ok_or(RuntimeError::new(format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
+                let native = self.vm.get_from_native_pool(reference).ok_or(RuntimeError::new(format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
                 Ok(Value::String(Some(native.name.clone())))
             }
             StackEntry::FunctionReference(reference) => {
@@ -166,9 +168,9 @@ impl Program {
     fn native_from_stack_entry(&self, stack_entry: StackEntry) -> Result<&Native, RuntimeError> {
         match stack_entry {
             StackEntry::NativeReference(reference) => {
-                let native =self.vm.get_from_native_pool(reference).ok_or(RuntimeError::new(format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
+                let native = self.vm.get_from_native_pool(reference).ok_or(RuntimeError::new(format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
                 Ok(native)
-            },
+            }
             x => Err(RuntimeError::new_string(format!("Expected stack entry to be a reference to Native method but was {:?}", x)))
         }
     }
@@ -178,7 +180,7 @@ impl Program {
             StackEntry::ConstantPoolReference(reference) => {
                 self.vm.get_from_constant_pool(reference).ok_or(RuntimeError::new(format!("Can't find constant in VM native pool for given reference ({})", reference).as_str()))?;
                 Ok(reference)
-            },
+            }
             x => Err(RuntimeError::new_string(format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
     }
