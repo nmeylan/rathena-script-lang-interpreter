@@ -7,7 +7,7 @@ use crate::lang::chunk::OpCode::{*};
 use crate::lang::compiler::CompilationError;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Constant, Function, Native, Variable};
-use crate::Vm;
+use crate::lang::vm::Vm;
 
 
 #[derive(Debug)]

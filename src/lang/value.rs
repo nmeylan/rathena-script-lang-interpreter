@@ -153,7 +153,7 @@ impl Function {
 
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub struct Native {
-    pub(crate) name: String,
+    pub name: String,
 }
 
 

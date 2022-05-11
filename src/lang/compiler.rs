@@ -10,12 +10,14 @@ use antlr_rust::parser::ParserNodeType;
 use antlr_rust::parser_rule_context::BaseParserRuleContext;
 use antlr_rust::rule_context::{CustomRuleContext, RuleContext};
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Visitable, VisitChildren};
-use crate::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
-use crate::{Constant, RathenaScriptLangLexer, RathenaScriptLangParser, Vm};
+use crate::parser::rathenascriptlangvisitor::{*};
+use crate::parser::rathenascriptlanglexer::{*};
+use crate::parser::rathenascriptlangparser::{*};
+use crate::lang::vm::Vm;
+use crate::parser::{*};
 use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::value::{*};
-use crate::parser::rathenascriptlangparser::{*};
 
 pub struct Compiler {
     function: Function,

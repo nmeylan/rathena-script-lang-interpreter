@@ -1,27 +1,24 @@
 #![feature(try_blocks)]
 extern crate core;
 
-mod parser;
-mod lang;
-
 use std::collections::HashMap;
 use std::sync::Arc;
 use antlr_rust::{InputStream};
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::tree::ParseTree;
-use crate::lang::compiler::Compiler;
-use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Constant, Value};
-use crate::lang::vm::{NativeMethodHandler, Vm};
-use crate::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
-use crate::parser::rathenascriptlangparser::RathenaScriptLangParser;
-use crate::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
+use ragnarok_script_interpreter::lang::compiler::Compiler;
+use ragnarok_script_interpreter::lang::noop_hasher::NoopHasher;
+use ragnarok_script_interpreter::lang::value::{Constant, Value};
+use ragnarok_script_interpreter::lang::vm::{NativeMethodHandler, Vm};
+use ragnarok_script_interpreter::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
+use ragnarok_script_interpreter::parser::rathenascriptlangparser::RathenaScriptLangParser;
+use ragnarok_script_interpreter::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
 
 #[derive(Default)]
 struct Native;
 
 impl NativeMethodHandler for Native {
-    fn handle(&self, native: &lang::value::Native, params: Vec<Value>) {
+    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>) {
         if native.name.eq("println") {
             println!("{}", params.iter().map(|p| p.string_value().clone()).collect::<Vec<String>>().join(" "));
         }
