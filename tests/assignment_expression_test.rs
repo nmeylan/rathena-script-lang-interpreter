@@ -11,7 +11,7 @@ use common::Event;
 
 pub fn compile(script: &str) -> Function {
     let char_stream = InputStream::new(script);
-    Compiler::compile("test_script".to_string(), char_stream)
+    Compiler::compile("test_script".to_string(), char_stream).unwrap()
 }
 
 #[test]

@@ -32,7 +32,7 @@ fn main() {
     let charstream = InputStream::new(script);
 
 
-    let mut function = Compiler::compile("test_script".to_string(), charstream);
+    let mut function = Compiler::compile("test_script".to_string(), charstream).unwrap();
     // for chunk in chunks {
     //     println!("{:?}", chunk);
     // }

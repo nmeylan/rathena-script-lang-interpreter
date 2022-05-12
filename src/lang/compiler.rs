@@ -21,6 +21,7 @@ use crate::lang::value::{*};
 
 pub struct Compiler {
     function: Function,
+    errors: Vec<CompilationError>
 }
 
 pub enum State {
@@ -56,10 +57,11 @@ impl Display for CompilationError {
 impl Compiler {
     fn new(name: String) -> Self {
         Self {
-            function: Function::new(format!("{}_main", name))
+            function: Function::new(format!("{}_main", name)),
+            errors: vec![]
         }
     }
-    pub fn compile(name: String, script: InputStream<&str>) -> Function {
+    pub fn compile(name: String, script: InputStream<&str>) -> Result<Function, Vec<CompilationError>> {
         let mut compiler = Compiler::new(name);
         let lexer = RathenaScriptLangLexer::new(script);
         let token_stream = CommonTokenStream::new(lexer);
@@ -69,7 +71,11 @@ impl Compiler {
 
         compiler.visit_compilationUnit(tree.as_ref().unwrap());
 
-        compiler.function
+        if compiler.errors.is_empty() {
+            Ok(compiler.function)
+        } else {
+            Err(compiler.errors)
+        }
     }
 
     fn current_chunk(&mut self) -> &mut Chunk {
@@ -78,6 +84,10 @@ impl Compiler {
 
     fn variable_value(has_dollar: bool) -> ValueRef {
         if has_dollar { ValueRef::new_empty_string() } else { ValueRef::new_empty_number() }
+    }
+
+    fn register_error(&mut self, error: CompilationError) {
+        self.errors.push(error);
     }
 
     fn get_variable_scope(ctx: &VariableContext) -> Scope {
