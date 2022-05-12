@@ -1,16 +1,8 @@
 use std::hash::{BuildHasher, Hasher};
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct NoopHasher {
     hash: u64
-}
-
-impl Default for NoopHasher {
-    fn default() -> Self {
-        Self {
-            hash: 0
-        }
-    }
 }
 
 impl BuildHasher for NoopHasher {

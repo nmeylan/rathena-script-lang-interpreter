@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 use std::{io, mem};
 use std::borrow::Borrow;
-use std::fmt::format;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc};
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Function, Native, Constant, Scope, ValueRef, Variable};
+use crate::lang::value::{Function, Native, Constant, ValueRef, Variable};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::vm::Vm;
 use crate::lang::value::Value;
