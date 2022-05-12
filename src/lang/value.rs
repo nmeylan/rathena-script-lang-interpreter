@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
+use std::ops::Deref;
 use crate::lang::chunk::Chunk;
 
 pub type AccountId = String;
@@ -109,6 +110,29 @@ impl Variable {
     pub fn set_value_ref(&self, reference: u64) {
         let mut ref_mut = self.value_ref.borrow_mut();
         *ref_mut = ref_mut.duplicate_with_reference(reference);
+    }
+
+    pub fn to_script_identifier(&self) -> String {
+        format!("{}{}{}", self.prefix(), self.name, self.suffix())
+    }
+
+    pub fn prefix(&self) -> String {
+        match self.scope {
+            Scope::Server => String::from("$"),
+            Scope::Account => String::from(""),
+            Scope::Character => String::from("@"),
+            Scope::Npc => String::from("."),
+            Scope::Instance => String::from("#"),
+            Scope::Local => String::from(".@"),
+        }
+    }
+
+    pub fn suffix(&self) -> String {
+        let value_ref = self.value_ref.borrow();
+        match value_ref.deref() {
+            ValueRef::String(_) => String::from("$"),
+            ValueRef::Number(_) => String::from(""),
+        }
     }
 }
 

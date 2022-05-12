@@ -41,6 +41,16 @@ pub enum CompilationError {
     UndefinedVariable(String),
 }
 
+impl CompilationError {
+    pub fn message(&self) -> &String {
+        match self {
+            CompilationError::Generic(str) | CompilationError::UndefinedVariable(str) => {
+                str
+            }
+        }
+    }
+}
+
 impl Display for CompilationError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -120,6 +130,15 @@ impl Compiler {
             value_ref: RefCell::new(Self::variable_value(variable_name.Dollar().is_some())),
             name,
             scope,
+        }
+    }
+
+    fn load_local(&mut self, variable: &Variable) {
+        let maybe_local_variable = self.current_chunk().load_local(&variable);
+        if let Ok(reference) = maybe_local_variable {
+            self.current_chunk().emit_op_code(LoadLocal(reference));
+        } else {
+            self.register_error(CompilationError::UndefinedVariable(format!("Variable {} is undefined", variable.to_script_identifier())))
         }
     }
 }
@@ -255,10 +274,8 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
             // Convert a += 1; into a = a + 1;
             if assignment_operator.PlusEqual().is_some() {
                 if left.variable().is_some() {
-                    let variable_identifier = Self::build_variable(&left.variable().unwrap());
-                    let maybe_local_variable = self.current_chunk().load_local(variable_identifier);
-                    let reference = maybe_local_variable.unwrap();
-                    self.current_chunk().emit_op_code(LoadLocal(reference));
+                    let variable = Self::build_variable(&left.variable().unwrap());
+                    self.load_local(&variable);
                 }
                 self.current_chunk().emit_op_code(Add);
             }
@@ -480,10 +497,8 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
-        let identifier = Self::build_variable(ctx);
-        let maybe_local_variable = self.current_chunk().load_local(identifier);
-        let reference = maybe_local_variable.unwrap();
-        self.current_chunk().emit_op_code(LoadLocal(reference));
+        let variable = Self::build_variable(ctx);
+        self.load_local(&variable);
     }
 
     fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) {
