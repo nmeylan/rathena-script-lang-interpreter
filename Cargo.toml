@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", branch = "master"}
+antlr-rust = "0.2.2"
+#antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", branch = "master"}
 
-[patch."https://github.com/nmeylan/antlr4rust"]
-antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"}
+#[patch."https://github.com/nmeylan/antlr4rust"]
+#antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"}

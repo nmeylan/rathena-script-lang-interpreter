@@ -25,13 +25,13 @@ impl NativeMethodHandler for VmHook {
                 name: params[0].string_value().clone(),
                 value: params[1].clone(),
             });
-            return;
+            
         }
     }
 }
 
 pub fn setup_vm<F>(hook: F) -> Arc<Vm> where F: 'static + Fn(Event) {
-    let mut vm_hook = VmHook{hook: Box::new(hook)};
-    let mut vm = Vm::new(Box::new(vm_hook));
+    let vm_hook = VmHook{hook: Box::new(hook)};
+    let vm = Vm::new(Box::new(vm_hook));
     Arc::new(vm)
 }

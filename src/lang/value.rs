@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::env::var;
+
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -20,7 +20,7 @@ impl Constant {
     pub fn value(&self) -> Value {
         match self {
             Constant::String(s) => Value::String(Some(s.clone())),
-            Constant::Number(n) => Value::Number(Some(n.clone()))
+            Constant::Number(n) => Value::Number(Some(*n))
         }
     }
 }

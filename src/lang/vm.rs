@@ -2,17 +2,17 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{Hash, Hasher};
-use std::{io, mem};
+use std::{io};
 use std::cell::RefCell;
 use std::io::Write;
-use std::rc::Rc;
+
 use std::sync::Arc;
-use crate::lang::call_frame::CallFrame;
-use crate::lang::chunk::{Chunk, OpCode};
+
+
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::program::Program;
-use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Constant, Function, Native, Scope, Value, ValueRef, Variable};
+
+use crate::lang::value::{Constant, Function, Native, Value, ValueRef, Variable};
 
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
@@ -64,7 +64,7 @@ impl Display for RuntimeError {
 }
 
 pub trait NativeMethodHandler {
-    fn handle(&self, native: &Native, params: Vec<Value>) {
+    fn handle(&self, native: &Native, _params: Vec<Value>) {
         panic!("Native function {}", native.name);
     }
 }
@@ -84,8 +84,8 @@ impl Vm {
 
     pub fn execute_program(vm: Arc<Vm>, mut function: Function) -> Result<(), RuntimeError> {
         {
-            let mut chunk = &mut function.chunk;
-            vm.extend_constant_pool(mem::replace(&mut chunk.constants_storage, HashMap::default()));
+            let chunk = &mut function.chunk;
+            vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
         }
         let mut program = Program::new(vm);
         // TODO: init local variable pool
@@ -102,7 +102,7 @@ impl Vm {
 
     pub fn get_from_constant_pool(&self, reference: u64) -> Option<Constant> {
         let constant_pool_ref = self.constants_pool.borrow();
-        constant_pool_ref.get(&reference).map(|v| v.clone())
+        constant_pool_ref.get(&reference).cloned()
     }
 
     pub fn add_in_constant_pool(&self, value: Value) -> u64 {
@@ -117,7 +117,7 @@ impl Vm {
 
     pub fn get_from_heap_pool(&self, reference: u64) -> Option<HeapEntry> {
         let heap_ref = self.heap.borrow();
-        heap_ref.get(&reference).map(|v| v.clone())
+        heap_ref.get(&reference).cloned()
     }
 
     pub fn get_from_native_pool(&self, reference: u64) -> Option<&Native> {
@@ -136,13 +136,13 @@ impl Vm {
 
     pub fn dump(&self) {
         let mut out = io::stdout();
-        writeln!(out, "========= Constants Pool =========");
+        writeln!(out, "========= Constants Pool =========").unwrap();
         for (reference, constant) in self.constants_pool.borrow().iter() {
-            writeln!(out, "({}) {}", reference, constant);
+            writeln!(out, "({}) {}", reference, constant).unwrap();
         }
-        writeln!(out, "========= Heap =========");
+        writeln!(out, "========= Heap =========").unwrap();
         for (reference, constant) in self.heap.borrow().iter() {
-            writeln!(out, "({}) {:?}", reference, constant);
+            writeln!(out, "({}) {:?}", reference, constant).unwrap();
         }
     }
 }

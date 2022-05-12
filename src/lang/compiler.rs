@@ -1,21 +1,17 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
-use std::collections::HashMap;
+
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
-use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream, TidExt};
-use antlr_rust::parser::ParserNodeType;
-use antlr_rust::parser_rule_context::BaseParserRuleContext;
-use antlr_rust::rule_context::{CustomRuleContext, RuleContext};
-use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Visitable, VisitChildren};
+use antlr_rust::{InputStream};
+use antlr_rust::tree::{ParseTreeVisitor};
 use crate::parser::rathenascriptlangvisitor::{*};
 use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
 use crate::lang::vm::Vm;
-use crate::parser::{*};
-use crate::lang::chunk::{Chunk, OpCode};
+
+use crate::lang::chunk::{Chunk};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::value::{*};
 
@@ -123,7 +119,7 @@ impl Compiler {
         Variable {
             value_ref: RefCell::new(Self::variable_value(variable_name.Dollar().is_some())),
             name,
-            scope: scope.clone(),
+            scope,
         }
     }
 }
@@ -139,13 +135,13 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_primaryExpression(&mut self, ctx: &PrimaryExpressionContext<'input>) {
         if ctx.String().is_some() {
             let reference = self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()
-                .replace("\"", "") // TODO check if it can be done by antlr skip instead.
+                .replace('\"', "") // TODO check if it can be done by antlr skip instead.
             ));
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
         if ctx.Number().is_some() {
             let number_value = &ctx.Number().unwrap().symbol.text;
-            let reference = self.current_chunk().add_constant(Constant::Number(parse_number(number_value)));
+            let reference = self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
         if ctx.Identifier().is_some() {
@@ -181,7 +177,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
         for expression in ctx.assignmentExpression_all().iter() {
             if expression.Number().is_some() {
                 let number_value = &expression.Number().unwrap().symbol.text;
-                self.current_chunk().add_constant(Constant::Number(parse_number(number_value)));
+                self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
             }
         }
         self.visit_children(ctx);
@@ -252,11 +248,10 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
-        let left = ctx.assignmentLeftExpression();
-        if left.is_some() {
+        let maybe_left = ctx.assignmentLeftExpression();
+        if let Some(left) = maybe_left {
             let assignment_operator = &ctx.assignmentOperator().unwrap();
             self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
-            let left = left.unwrap();
             // Convert a += 1; into a = a + 1;
             if assignment_operator.PlusEqual().is_some() {
                 if left.variable().is_some() {
@@ -496,7 +491,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     }
 }
 
-fn parse_number(num: &Cow<str>) -> u32 {
+fn parse_number(num: Cow<str>) -> u32 {
     let maybe_u32 = num.parse::<u32>();
     if maybe_u32.is_err() {
         panic!("Expected number to be u32, but was {}", num);

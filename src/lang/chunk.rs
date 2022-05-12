@@ -1,9 +1,5 @@
-use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
-use std::fmt::{Display, Formatter};
-use std::hash::{BuildHasher, Hash, Hasher};
-use std::process::id;
-use crate::lang::chunk::OpCode::{*};
+
 use crate::lang::compiler::CompilationError;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Constant, Function, Native, Variable};
@@ -80,9 +76,8 @@ impl Chunk {
     }
 
     pub fn load_local(&mut self, variable: Variable) -> Result<u64, CompilationError> {
-        let maybe_found = self.locals.iter().find(|(reference, local)| **local == variable);
-        if maybe_found.is_some() {
-            let (reference, _) = maybe_found.unwrap();
+        let maybe_found = self.locals.iter().find(|(_reference, local)| **local == variable);
+        if let Some((reference, _)) = maybe_found {
             Ok(*reference)
         } else {
             Err(CompilationError::UndefinedVariable(format!("Undefined local variable: {}", variable.name)))
