@@ -195,10 +195,13 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>) {
         // self.visit_children(ctx);
-        self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(0).unwrap());
-        for (i, _) in ctx.Plus_all().iter().enumerate() {
-            self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i + 1).unwrap());
-            self.current_chunk().emit_op_code(OpCode::Add);
+        self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(ctx.multiplicativeExpression_all().len() - 1).unwrap());
+        for (i, _) in ctx.Plus_all().iter().enumerate().rev() {
+            if i == ctx.multiplicativeExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i ).unwrap());
+            self.current_chunk().emit_op_code(Add);
         }
     }
 
@@ -241,9 +244,19 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
         let left = ctx.assignmentLeftExpression();
         if left.is_some() {
-            self.visit_assignmentOperator(&ctx.assignmentOperator().unwrap());
+            let assignment_operator = &ctx.assignmentOperator().unwrap();
             self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
             let left = left.unwrap();
+            // Convert a += 1; into a = a + 1;
+            if assignment_operator.PlusEqual().is_some() {
+                if left.variable().is_some() {
+                    let variable_identifier = Self::build_variable(&left.variable().unwrap());
+                    let maybe_local_variable = self.current_chunk().load_local(variable_identifier);
+                    let reference = maybe_local_variable.unwrap();
+                    self.current_chunk().emit_op_code(LoadLocal(reference));
+                }
+                self.current_chunk().emit_op_code(Add);
+            }
             self.visit_assignmentLeftExpression(&left);
         } else {
             self.visit_children(ctx);
@@ -281,11 +294,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
 
 
     fn visit_assignmentOperator(&mut self, ctx: &AssignmentOperatorContext<'input>) {
-        if ctx.Equal().is_some() {
-            self.current_chunk().emit_op_code(OpCode::Equal);
-        } else {
-            panic!("Compiler does not handle assigment operator {:?}", ctx);
-        }
+       self.visit_children(ctx);
     }
 
     fn visit_expression(&mut self, ctx: &ExpressionContext<'input>) {

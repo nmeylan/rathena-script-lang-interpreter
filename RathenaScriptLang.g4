@@ -1,6 +1,5 @@
 grammar RathenaScriptLang;
 
-
 compilationUnit
     :   translationUnit EOF
     ;
@@ -355,6 +354,11 @@ LeftCaretEqual : '<=';
 RightCaret : '>';
 DoubleRightCaret : '>>';
 RightCaretEqual : '>=';
+PlusEqual : '+=';
+MinusEqual : '-=';
+MultiplyEqual : '*=';
+DivideEqual : '/=';
+PercentEqual : '%=';
 
 // Keywords
 If : 'if';
