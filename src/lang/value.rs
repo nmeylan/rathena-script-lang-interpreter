@@ -98,7 +98,7 @@ pub enum Scope {
     Local,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Variable {
     pub(crate) name: String,
     pub(crate) scope: Scope,
@@ -119,6 +119,15 @@ impl Hash for Variable {
         self.value_ref.borrow().hash(state);
     }
 }
+
+impl PartialEq<Self> for Variable {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+        && self.scope == other.scope
+    }
+}
+
+impl Eq for Variable{}
 
 #[derive(Debug)]
 pub struct Function {

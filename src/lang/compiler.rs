@@ -85,10 +85,10 @@ impl Compiler {
             let scope_specifier = ctx.scope_specifier().unwrap();
             if scope_specifier.At().is_some() {
                 Scope::Character // TODO: Temporary
-            } else if scope_specifier.Dollar().is_some() {
+            } else if scope_specifier.Dollar().is_some() || scope_specifier.DollarAt().is_some() {
                 Scope::Server
-            } else if scope_specifier.DollarAt().is_some() {
-                Scope::Server // TODO: Temporary
+            // } else if scope_specifier.DollarAt().is_some() {
+            //     Scope::Server // TODO: Temporary
             } else if scope_specifier.Dot().is_some() {
                 Scope::Npc
             } else if scope_specifier.DotAt().is_some() {

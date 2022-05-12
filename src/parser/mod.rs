@@ -1,3 +1,4 @@
+#![deny(clippy)]
 #![allow(unused_braces)]
 #![allow(unused_parens)]
 
