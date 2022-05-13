@@ -1,4 +1,4 @@
-use std::borrow::{Cow};
+use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
@@ -19,10 +19,12 @@ pub struct Compiler {
     name: String,
     function: Function,
     errors: Vec<CompilationError>,
+    state: State,
 }
 
-pub enum State {
-    Variable
+#[derive(Default)]
+pub struct State {
+    current_variable_type: Option<ValueType>,
 }
 
 pub enum VariableScope {
@@ -37,27 +39,38 @@ pub enum VariableScope {
 }
 
 #[derive(Debug)]
-pub enum CompilationError {
-    Generic(String),
-    UndefinedVariable(String),
+pub struct CompilationError {
+    error_type: CompilationErrorType,
+    message: String,
+    file_name: String,
+    line: isize,
+    column: isize,
+}
+#[derive(Debug)]
+pub enum CompilationErrorType {
+    Generic,
+    UndefinedVariable,
+    Type,
 }
 
 impl CompilationError {
-    pub fn message(&self) -> &String {
-        match self {
-            CompilationError::Generic(str) | CompilationError::UndefinedVariable(str) => {
-                str
-            }
+    pub fn new(error_type: CompilationErrorType, message: String, file_name: String, line: isize, column: isize) -> Self {
+        Self {
+            error_type,
+            message,
+            file_name,
+            line,
+            column
         }
+    }
+    pub fn message(&self) -> String {
+        format!("{} {}:{}. {}", self.file_name, self.line, self.column, self.message)
     }
 }
 
 impl Display for CompilationError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CompilationError::Generic(err) => write!(f, "{}", err),
-            CompilationError::UndefinedVariable(err) => write!(f, "{}", err),
-        }
+        write!(f, "{}", self.message())
     }
 }
 
@@ -67,6 +80,7 @@ impl Compiler {
             name: name.clone(),
             function: Function::new(format!("{}_main", name)),
             errors: vec![],
+            state: Default::default()
         }
     }
     pub fn compile(name: String, script: InputStream<&str>) -> Result<Function, Vec<CompilationError>> {
@@ -94,7 +108,8 @@ impl Compiler {
         if has_dollar { ValueRef::new_empty_string() } else { ValueRef::new_empty_number() }
     }
 
-    fn register_error(&mut self, error: CompilationError) {
+    fn register_error<'input>(&mut self, error_type: CompilationErrorType, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), message: String) {
+        let error = CompilationError::new(error_type, message, self.name.clone(), node.start().get_line(), node.start().get_column());
         self.errors.push(error);
     }
 
@@ -124,6 +139,17 @@ impl Compiler {
         scope
     }
 
+    fn set_current_variable_type_from_variable(&mut self, var: &Variable) {
+        match var.value_ref.borrow().deref() {
+            ValueRef::String(_) => self.set_current_variable_type(ValueType::String),
+            ValueRef::Number(_) => self.set_current_variable_type(ValueType::Number),
+        }
+    }
+
+    fn set_current_variable_type(&mut self, value_type: ValueType) {
+        self.state.current_variable_type = Some(value_type)
+    }
+
     fn build_variable(ctx: &VariableContext) -> Variable {
         let scope = Self::get_variable_scope(ctx);
         let variable_name = ctx.variable_name().unwrap();
@@ -140,12 +166,10 @@ impl Compiler {
         if let Ok(reference) = maybe_local_variable {
             self.current_chunk().emit_op_code(LoadLocal(reference));
         } else {
-            self.register_error(CompilationError::UndefinedVariable(format!("{}Variable \"{}\" is undefined.", self.error_prefix(node), variable.to_script_identifier())))
+            self.register_error(
+                CompilationErrorType::UndefinedVariable, node,
+                                format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
         }
-    }
-
-    fn error_prefix<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> String {
-        format!("{} {}:{}. ", self.name, node.start().get_line(), node.start().get_column())
     }
 }
 
@@ -161,11 +185,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let reference = self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()
                                                                                    .replace('\"', "") // TODO check if it can be done by antlr skip instead.
             ));
+            self.set_current_variable_type(ValueType::String);
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
         if ctx.Number().is_some() {
             let number_value = &ctx.Number().unwrap().symbol.text;
             let reference = self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
+            self.set_current_variable_type(ValueType::Number);
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
         if ctx.Identifier().is_some() {
@@ -302,6 +328,21 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(StoreGlobal(reference));
         } else if ctx.variable().is_some() {
             let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
+            let current_variable_type = self.state.current_variable_type.as_ref().unwrap().borrow();
+            match variable_identifier.value_ref.borrow().deref() {
+                ValueRef::String(_) => {
+                    if current_variable_type.is_number() {
+                        self.register_error(CompilationErrorType::Type, ctx,
+                                            format!("Variable \"{}\" is a String but was assigned to a Number.", variable_identifier.to_script_identifier()));
+                    }
+                }
+                ValueRef::Number(_) => {
+                    if current_variable_type.is_string() {
+                        self.register_error(CompilationErrorType::Type, ctx,
+                                            format!("Variable \"{}\" is a Number but was assigned to a String.", variable_identifier.to_script_identifier()));
+                    }
+                }
+            }
             match variable_identifier.scope {
                 Scope::Server | Scope::Account | Scope::Character | Scope::Npc => {
                     let reference = self.current_chunk().add_global(variable_identifier);
@@ -503,6 +544,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
         let variable = Self::build_variable(ctx);
+        self.set_current_variable_type_from_variable(&variable);
         self.load_local(&variable, ctx);
     }
 

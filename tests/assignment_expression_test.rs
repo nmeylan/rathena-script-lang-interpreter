@@ -94,9 +94,9 @@ fn plus_equal_num_addition() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let function = compile(r#"
-    .@a$ = 1;
-    .@a$ += 2;
-    vm_dump_var("a", .@a$);"#);
+    .@a = 1;
+    .@a += 2;
+    vm_dump_var("a", .@a);"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When

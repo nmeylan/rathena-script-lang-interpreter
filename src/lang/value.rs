@@ -48,13 +48,13 @@ impl Value {
     pub fn string_value(&self) -> &String {
         match self {
             Value::String(str) => str.as_ref().unwrap(),
-            Value::Number(_) => {panic!("Value is a number not a string.")}
+            Value::Number(_) => { panic!("Value is a number not a string.") }
         }
     }
     pub fn number_value(&self) -> u32 {
         match self {
             Value::Number(num) => num.unwrap(),
-            Value::String(_) => {panic!("Value is string not a number.")},
+            Value::String(_) => { panic!("Value is string not a number.") }
         }
     }
 }
@@ -63,6 +63,20 @@ impl Value {
 pub enum ValueRef {
     String(Option<u64>),
     Number(Option<u64>),
+}
+
+pub enum ValueType {
+    String,
+    Number,
+}
+
+impl ValueType {
+    pub fn is_string(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&ValueType::String)
+    }
+    pub fn is_number(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&ValueType::Number)
+    }
 }
 
 impl ValueRef {
@@ -76,7 +90,6 @@ impl ValueRef {
     pub fn new_string(reference: u64) -> ValueRef {
         ValueRef::String(Some(reference))
     }
-
     pub fn new_number(reference: u64) -> ValueRef {
         ValueRef::Number(Some(reference))
     }
@@ -86,6 +99,14 @@ impl ValueRef {
             ValueRef::String(_) => ValueRef::new_string(reference),
             ValueRef::Number(_) => ValueRef::new_number(reference)
         }
+    }
+
+    pub fn is_string(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&ValueRef::new_empty_string())
+    }
+
+    pub fn is_number(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&ValueRef::new_empty_number())
     }
 }
 
@@ -103,7 +124,7 @@ pub enum Scope {
 pub struct Variable {
     pub(crate) name: String,
     pub(crate) scope: Scope,
-    pub value_ref: RefCell<ValueRef>
+    pub value_ref: RefCell<ValueRef>,
 }
 
 impl Variable {
@@ -147,11 +168,11 @@ impl Hash for Variable {
 impl PartialEq<Self> for Variable {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
-        && self.scope == other.scope
+            && self.scope == other.scope
     }
 }
 
-impl Eq for Variable{}
+impl Eq for Variable {}
 
 #[derive(Debug)]
 pub struct Function {
@@ -179,7 +200,7 @@ impl Function {
             name,
             arity: 0,
             chunk: Default::default(),
-            nested_functions: vec![]
+            nested_functions: vec![],
         }
     }
 }
@@ -188,7 +209,6 @@ impl Function {
 pub struct Native {
     pub name: String,
 }
-
 
 
 impl Display for Function {

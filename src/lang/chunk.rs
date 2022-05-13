@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use crate::lang::compiler::CompilationError;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Constant, Function, Native, Variable};
 use crate::lang::vm::Vm;
@@ -75,12 +74,12 @@ impl Chunk {
         hash
     }
 
-    pub fn load_local(&mut self, variable: &Variable) -> Result<u64, CompilationError> {
+    pub fn load_local(&mut self, variable: &Variable) -> Result<u64, ()> {
         let maybe_found = self.locals.iter().find(|(_reference, local)| *local == variable);
         if let Some((reference, _)) = maybe_found {
             Ok(*reference)
         } else {
-            Err(CompilationError::UndefinedVariable(format!("Undefined local variable: {}", variable.name)))
+            Err(())
         }
     }
 }
