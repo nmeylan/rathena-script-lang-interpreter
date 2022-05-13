@@ -1,4 +1,3 @@
-use std::mem::transmute;
 use antlr_rust::InputStream;
 use ragnarok_script_interpreter::lang::compiler::{CompilationError, Compiler};
 use ragnarok_script_interpreter::lang::value::Function;
@@ -18,7 +17,7 @@ fn undefined_variable() {
     let result = compile(script);
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!("Variable .@a$ is undefined", result.err().unwrap().get(0).unwrap().message());
+    assert_eq!("test_script 1:6. Variable \".@a$\" is undefined.", result.err().unwrap().get(0).unwrap().message());
 }
 
 #[test]

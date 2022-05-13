@@ -1,10 +1,10 @@
-use std::borrow::Cow;
+use std::borrow::{Cow};
 use std::cell::RefCell;
-
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream};
+use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTreeVisitor};
 use crate::parser::rathenascriptlangvisitor::{*};
 use crate::parser::rathenascriptlanglexer::{*};
@@ -16,8 +16,9 @@ use crate::lang::chunk::OpCode::{*};
 use crate::lang::value::{*};
 
 pub struct Compiler {
+    name: String,
     function: Function,
-    errors: Vec<CompilationError>
+    errors: Vec<CompilationError>,
 }
 
 pub enum State {
@@ -63,8 +64,9 @@ impl Display for CompilationError {
 impl Compiler {
     fn new(name: String) -> Self {
         Self {
+            name: name.clone(),
             function: Function::new(format!("{}_main", name)),
-            errors: vec![]
+            errors: vec![],
         }
     }
     pub fn compile(name: String, script: InputStream<&str>) -> Result<Function, Vec<CompilationError>> {
@@ -103,8 +105,8 @@ impl Compiler {
                 Scope::Character // TODO: Temporary
             } else if scope_specifier.Dollar().is_some() || scope_specifier.DollarAt().is_some() {
                 Scope::Server
-            // } else if scope_specifier.DollarAt().is_some() {
-            //     Scope::Server // TODO: Temporary
+                // } else if scope_specifier.DollarAt().is_some() {
+                //     Scope::Server // TODO: Temporary
             } else if scope_specifier.Dot().is_some() {
                 Scope::Npc
             } else if scope_specifier.DotAt().is_some() {
@@ -133,20 +135,23 @@ impl Compiler {
         }
     }
 
-    fn load_local(&mut self, variable: &Variable) {
+    fn load_local<'input>(&mut self, variable: &Variable, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
         let maybe_local_variable = self.current_chunk().load_local(&variable);
         if let Ok(reference) = maybe_local_variable {
             self.current_chunk().emit_op_code(LoadLocal(reference));
         } else {
-            self.register_error(CompilationError::UndefinedVariable(format!("Variable {} is undefined", variable.to_script_identifier())))
+            self.register_error(CompilationError::UndefinedVariable(format!("{}Variable \"{}\" is undefined.", self.error_prefix(node), variable.to_script_identifier())))
         }
+    }
+
+    fn error_prefix<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> String {
+        format!("{} {}:{}. ", self.name, node.start().get_line(), node.start().get_column())
     }
 }
 
+impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
 
-impl <'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
-
-impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
+impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_compilationUnit(&mut self, ctx: &CompilationUnitContext<'input>) {
         self.visit_children(ctx)
     }
@@ -154,7 +159,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_primaryExpression(&mut self, ctx: &PrimaryExpressionContext<'input>) {
         if ctx.String().is_some() {
             let reference = self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()
-                .replace('\"', "") // TODO check if it can be done by antlr skip instead.
+                                                                                   .replace('\"', "") // TODO check if it can be done by antlr skip instead.
             ));
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
@@ -185,7 +190,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
         let identifier = ctx.Identifier().unwrap();
 
         // TODO check if we want to call a native or a function. Native list to be defined
-        self.current_chunk().emit_op_code(CallNative{ reference: Vm::calculate_hash(&identifier.symbol.text), argument_count});
+        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&identifier.symbol.text), argument_count });
     }
 
     fn visit_postfixExpression(&mut self, ctx: &PostfixExpressionContext<'input>) {
@@ -225,7 +230,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
             if i == ctx.multiplicativeExpression_all().len() - 1 {
                 continue;
             }
-            self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i ).unwrap());
+            self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i).unwrap());
             self.current_chunk().emit_op_code(Add);
         }
     }
@@ -275,7 +280,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
             if assignment_operator.PlusEqual().is_some() {
                 if left.variable().is_some() {
                     let variable = Self::build_variable(&left.variable().unwrap());
-                    self.load_local(&variable);
+                    self.load_local(&variable, ctx);
                 }
                 self.current_chunk().emit_op_code(Add);
             }
@@ -292,7 +297,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
             let reference = self.current_chunk().add_global(Variable {
                 name,
                 scope: Scope::Character,
-                value_ref: RefCell::new(ValueRef::new_empty_number())
+                value_ref: RefCell::new(ValueRef::new_empty_number()),
             });
             self.current_chunk().emit_op_code(StoreGlobal(reference));
         } else if ctx.variable().is_some() {
@@ -301,22 +306,22 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
                 Scope::Server | Scope::Account | Scope::Character | Scope::Npc => {
                     let reference = self.current_chunk().add_global(variable_identifier);
                     self.current_chunk().emit_op_code(StoreGlobal(reference));
-                },
+                }
                 Scope::Local => {
                     let reference = self.current_chunk().add_local(variable_identifier);
                     self.current_chunk().emit_op_code(StoreLocal(reference));
-                },
+                }
                 Scope::Instance => {
                     let reference = self.current_chunk().add_instance(variable_identifier);
                     self.current_chunk().emit_op_code(StoreInstance(reference));
-                },
+                }
             }
         }
     }
 
 
     fn visit_assignmentOperator(&mut self, ctx: &AssignmentOperatorContext<'input>) {
-       self.visit_children(ctx);
+        self.visit_children(ctx);
     }
 
     fn visit_expression(&mut self, ctx: &ExpressionContext<'input>) {
@@ -498,7 +503,7 @@ impl <'input>RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
         let variable = Self::build_variable(ctx);
-        self.load_local(&variable);
+        self.load_local(&variable, ctx);
     }
 
     fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) {
