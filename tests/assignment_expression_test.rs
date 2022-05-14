@@ -3,15 +3,13 @@ mod common;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use antlr_rust::InputStream;
 use ragnarok_script_interpreter::lang::value::Function;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
 use common::Event;
 
 pub fn compile(script: &str) -> Function {
-    let char_stream = InputStream::new(script);
-    Compiler::compile("test_script".to_string(), char_stream).unwrap()
+    Compiler::compile("test_script".to_string(), script).unwrap()
 }
 
 #[test]

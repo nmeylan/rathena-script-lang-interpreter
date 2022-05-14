@@ -1,6 +1,7 @@
-use std::borrow::{Borrow, Cow};
+use std::borrow::{Cow};
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
+use std::mem;
 use std::ops::Deref;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream};
@@ -20,11 +21,12 @@ pub struct Compiler {
     function: Function,
     errors: Vec<CompilationError>,
     state: State,
+    script_lines: Vec<String>,
 }
 
 #[derive(Default)]
 pub struct State {
-    current_variable_type: Option<ValueType>,
+    current_assignment_types: Vec<ValueType>,
 }
 
 pub enum VariableScope {
@@ -39,13 +41,18 @@ pub enum VariableScope {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct CompilationError {
     error_type: CompilationErrorType,
     message: String,
     file_name: String,
-    line: isize,
-    column: isize,
+    start_line: usize,
+    start_column: usize,
+    end_line: usize,
+    end_column: usize,
+    text: String,
 }
+
 #[derive(Debug)]
 pub enum CompilationErrorType {
     Generic,
@@ -54,38 +61,32 @@ pub enum CompilationErrorType {
 }
 
 impl CompilationError {
-    pub fn new(error_type: CompilationErrorType, message: String, file_name: String, line: isize, column: isize) -> Self {
-        Self {
-            error_type,
-            message,
-            file_name,
-            line,
-            column
-        }
-    }
     pub fn message(&self) -> String {
-        format!("{} {}:{}. {}", self.file_name, self.line, self.column, self.message)
+        format!("{}", self)
     }
 }
 
 impl Display for CompilationError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.message())
+        writeln!(f, "{} {}:{}. {}", self.file_name, self.start_line, self.start_column, self.message).unwrap();
+        writeln!(f, "l{}\t{}", self.start_line, self.text).unwrap();
+        writeln!(f, "\t{}{}", " ".repeat(self.start_column), "^".repeat(self.end_column - self.start_column + 1))
     }
 }
 
 impl Compiler {
-    fn new(name: String) -> Self {
+    fn new(name: String, script: String) -> Self {
         Self {
             name: name.clone(),
             function: Function::new(format!("{}_main", name)),
             errors: vec![],
-            state: Default::default()
+            state: Default::default(),
+            script_lines: script.split("\n").map(|l| l.to_string()).collect::<Vec<String>>(),
         }
     }
-    pub fn compile(name: String, script: InputStream<&str>) -> Result<Function, Vec<CompilationError>> {
-        let mut compiler = Compiler::new(name);
-        let lexer = RathenaScriptLangLexer::new(script);
+    pub fn compile(name: String, script: &str) -> Result<Function, Vec<CompilationError>> {
+        let mut compiler = Compiler::new(name, script.to_string());
+        let lexer = RathenaScriptLangLexer::new(InputStream::new(script));
         let token_stream = CommonTokenStream::new(lexer);
         let mut parser = RathenaScriptLangParser::new(token_stream);
         let tree = parser.compilationUnit();
@@ -109,7 +110,16 @@ impl Compiler {
     }
 
     fn register_error<'input>(&mut self, error_type: CompilationErrorType, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), message: String) {
-        let error = CompilationError::new(error_type, message, self.name.clone(), node.start().get_line(), node.start().get_column());
+        let error = CompilationError {
+            error_type,
+            message,
+            file_name: self.name.clone(),
+            start_line: node.start().get_line() as usize,
+            start_column: node.start().get_column() as usize,
+            end_line: node.stop().get_line() as usize,
+            end_column: node.stop().get_column() as usize,
+            text: self.script_lines[node.start().get_line() as usize - 1].clone(),
+        };
         self.errors.push(error);
     }
 
@@ -139,15 +149,24 @@ impl Compiler {
         scope
     }
 
-    fn set_current_variable_type_from_variable(&mut self, var: &Variable) {
+    fn add_current_assignment_type_from_variable(&mut self, var: &Variable) {
         match var.value_ref.borrow().deref() {
-            ValueRef::String(_) => self.set_current_variable_type(ValueType::String),
-            ValueRef::Number(_) => self.set_current_variable_type(ValueType::Number),
+            ValueRef::String(_) => self.add_current_assigment_type(ValueType::String),
+            ValueRef::Number(_) => self.add_current_assigment_type(ValueType::Number),
         }
     }
 
-    fn set_current_variable_type(&mut self, value_type: ValueType) {
-        self.state.current_variable_type = Some(value_type)
+    fn add_current_assigment_type(&mut self, value_type: ValueType) {
+        self.state.current_assignment_types.push(value_type)
+    }
+
+    fn current_assignment_type(&mut self) -> ValueType {
+        let assignment_types = mem::replace(&mut self.state.current_assignment_types, Vec::<ValueType>::new());
+        if assignment_types.iter().all(|v| v.is_number()) {
+            ValueType::Number
+        } else {
+            ValueType::String
+        }
     }
 
     fn build_variable(ctx: &VariableContext) -> Variable {
@@ -168,7 +187,7 @@ impl Compiler {
         } else {
             self.register_error(
                 CompilationErrorType::UndefinedVariable, node,
-                                format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
+                format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
         }
     }
 }
@@ -185,13 +204,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let reference = self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()
                                                                                    .replace('\"', "") // TODO check if it can be done by antlr skip instead.
             ));
-            self.set_current_variable_type(ValueType::String);
+            self.add_current_assigment_type(ValueType::String);
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
         if ctx.Number().is_some() {
             let number_value = &ctx.Number().unwrap().symbol.text;
             let reference = self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
-            self.set_current_variable_type(ValueType::Number);
+            self.add_current_assigment_type(ValueType::Number);
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
         if ctx.Identifier().is_some() {
@@ -328,7 +347,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(StoreGlobal(reference));
         } else if ctx.variable().is_some() {
             let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
-            let current_variable_type = self.state.current_variable_type.as_ref().unwrap().borrow();
+            let current_variable_type = self.current_assignment_type();
             match variable_identifier.value_ref.borrow().deref() {
                 ValueRef::String(_) => {
                     if current_variable_type.is_number() {
@@ -544,7 +563,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
         let variable = Self::build_variable(ctx);
-        self.set_current_variable_type_from_variable(&variable);
+        self.add_current_assignment_type_from_variable(&variable);
         self.load_local(&variable, ctx);
     }
 
