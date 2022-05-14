@@ -65,6 +65,7 @@ pub enum ValueRef {
     Number(Option<u64>),
 }
 
+#[derive(Debug)]
 pub enum ValueType {
     String,
     Number,

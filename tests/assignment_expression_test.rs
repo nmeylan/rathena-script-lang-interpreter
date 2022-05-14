@@ -58,6 +58,21 @@ fn assignment_with_number_addition() {
 }
 
 #[test]
+fn assignment_with_number_subtraction() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let function = compile(r#"
+    .@a = 4 - 1;
+    vm_dump_var("a", .@a);"#);
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::execute_program(vm, function);
+    // Then
+    assert_eq!(3, events.borrow().get("a").unwrap().value.number_value().clone());
+}
+
+#[test]
 fn simple_re_assigment() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));

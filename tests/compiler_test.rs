@@ -44,12 +44,15 @@ fn type_checking_string_valid() {
 #[test]
 fn type_checking_string_invalid() {
     // Given
-    let script = r#".@a$ = 1;"#;
+    let script = r#".@a$ = 1;
+.@b$ = "1" - "2";
+"#;
     // When
     let result = compile(script);
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!("test_script 1:0. Variable \".@a$\" is a String but was assigned to a Number.\nl1\t.@a$ = 1;\n\t^^^^\n", result.err().unwrap().get(0).unwrap().message());
+    assert_eq!("test_script 1:0. Variable \".@a$\" is a String but was assigned to a Number.\nl1\t.@a$ = 1;\n\t^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!("test_script 1:0. Variable \".@a$\" is a String but was assigned to a Number.\nl1\t.@a$ = 1;\n\t^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
 }
 
 #[test]

@@ -46,7 +46,7 @@ multiplicativeExpression
     ;
 
 additiveExpression
-    :   multiplicativeExpression (('+'|'-') multiplicativeExpression)*
+    :   multiplicativeExpression ((Plus | Minus) multiplicativeExpression)*
     ;
 
 shiftExpression

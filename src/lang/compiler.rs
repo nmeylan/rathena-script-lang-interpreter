@@ -271,10 +271,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>) {
         // self.visit_children(ctx);
         self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(ctx.multiplicativeExpression_all().len() - 1).unwrap());
-        for (i, _) in ctx.Plus_all().iter().enumerate().rev() {
+        println!("{:?}",self.state.current_assignment_types);
+        println!("plus_all {:?}, minus_all {:?}",ctx.Plus_all().len(),ctx.Minus_all().len());
+        for (i, plus) in ctx.Plus_all().iter().enumerate().rev() {
             if i == ctx.multiplicativeExpression_all().len() - 1 {
                 continue;
             }
+            println!("plus{:?}", plus.symbol);
             self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i).unwrap());
             self.current_chunk().emit_op_code(Add);
         }
