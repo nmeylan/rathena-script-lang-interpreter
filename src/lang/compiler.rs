@@ -14,6 +14,7 @@ use crate::lang::vm::Vm;
 
 use crate::lang::chunk::{Chunk};
 use crate::lang::chunk::OpCode::{*};
+use crate::lang::compiler::CompilationErrorType::Type;
 use crate::lang::value::{*};
 
 pub struct Compiler {
@@ -160,9 +161,17 @@ impl Compiler {
         self.state.current_assignment_types.push(value_type)
     }
 
-    fn current_assignment_type(&mut self) -> ValueType {
+    fn current_assignment_type_drop(&mut self) -> ValueType {
         let assignment_types = mem::replace(&mut self.state.current_assignment_types, Vec::<ValueType>::new());
         if assignment_types.iter().all(|v| v.is_number()) {
+            ValueType::Number
+        } else {
+            ValueType::String
+        }
+    }
+
+    fn current_assignment_type(&mut self) -> ValueType {
+        if self.state.current_assignment_types.iter().all(|v| v.is_number()) {
             ValueType::Number
         } else {
             ValueType::String
@@ -271,15 +280,23 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>) {
         // self.visit_children(ctx);
         self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(ctx.multiplicativeExpression_all().len() - 1).unwrap());
-        println!("{:?}",self.state.current_assignment_types);
-        println!("plus_all {:?}, minus_all {:?}",ctx.Plus_all().len(),ctx.Minus_all().len());
         for (i, plus) in ctx.Plus_all().iter().enumerate().rev() {
             if i == ctx.multiplicativeExpression_all().len() - 1 {
                 continue;
             }
-            println!("plus{:?}", plus.symbol);
             self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i).unwrap());
             self.current_chunk().emit_op_code(Add);
+        }
+
+        for (i, plus) in ctx.Minus_all().iter().enumerate().rev() {
+            if i == ctx.multiplicativeExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i).unwrap());
+            if self.current_assignment_type().is_string() {
+                self.register_error(Type, ctx, "Subtraction operator \"-\" is not allowed for String".to_string());
+            }
+            self.current_chunk().emit_op_code(Subtract);
         }
     }
 
@@ -350,7 +367,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(StoreGlobal(reference));
         } else if ctx.variable().is_some() {
             let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
-            let current_variable_type = self.current_assignment_type();
+            let current_variable_type = self.current_assignment_type_drop();
             match variable_identifier.value_ref.borrow().deref() {
                 ValueRef::String(_) => {
                     if current_variable_type.is_number() {
@@ -575,10 +592,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 }
 
-fn parse_number(num: Cow<str>) -> u32 {
-    let maybe_u32 = num.parse::<u32>();
-    if maybe_u32.is_err() {
+fn parse_number(num: Cow<str>) -> i32 {
+    let maybe_i32 = num.parse::<i32>();
+    if maybe_i32.is_err() {
         panic!("Expected number to be u32, but was {}", num);
     }
-    maybe_u32.unwrap()
+    maybe_i32.unwrap()
 }

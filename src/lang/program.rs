@@ -3,6 +3,7 @@ use std::{io};
 use std::sync::{Arc};
 use std::io::Write;
 use std::default::Default;
+use std::fmt::format;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Function, Native, ValueRef, Variable};
@@ -57,7 +58,7 @@ impl Program {
                 OpCode::StoreLocal(reference) => {
                     let stack_entry = self.stack.pop()?;
                     let constant_reference = self.constant_ref_from_stack_entry(stack_entry)?;
-                    let variable = call_frame.get_local(*reference).ok_or_else(||RuntimeError::new(format!("Can't find local variable with reference {}", reference).as_str()))?;
+                    let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find local variable with reference {}", reference).as_str()))?;
                     variable.set_value_ref(constant_reference);
                     println!("locals size: {}", call_frame.locals.len());
                 }
@@ -71,21 +72,33 @@ impl Program {
                 OpCode::Greater => {}
                 OpCode::Less => {}
                 OpCode::Add => {
-                    let stack_entry2 = self.stack.pop()?;
                     let stack_entry1 = self.stack.pop()?;
+                    let stack_entry2 = self.stack.pop()?;
                     let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
                     let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         Value::String(Some(format!("{}{}",
-                                                   if v2.is_string() { v2.string_value().clone() } else { v2.number_value().to_string() },
-                                                   if v1.is_string() { v1.string_value().clone() } else { v1.number_value().to_string() })))
+                                                   if v1.is_string() { v1.string_value().clone() } else { v1.number_value().to_string() },
+                                                   if v2.is_string() { v2.string_value().clone() } else { v2.number_value().to_string() })))
                     } else {
                         Value::Number(Some(v1.number_value() + v2.number_value()))
                     };
                     let reference = self.vm.add_in_constant_pool(new_value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
-                OpCode::Subtract => {}
+                OpCode::Subtract => {
+                    let stack_entry1 = self.stack.pop()?;
+                    let stack_entry2 = self.stack.pop()?;
+                    let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
+                    let new_value = if v1.is_string() || v2.is_string() {
+                        return Err(RuntimeError::new(format!("Attempt to substract strings: {} - {}", v1, v2).as_str()));
+                    } else {
+                        Value::Number(Some(v1.number_value() - v2.number_value()))
+                    };
+                    let reference = self.vm.add_in_constant_pool(new_value);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                }
                 OpCode::Multiply => {}
                 OpCode::Divide => {}
                 OpCode::Not => {}

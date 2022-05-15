@@ -1,4 +1,4 @@
-// Generated from RathenaScriptLang.g4 by ANTLR 4.8
+// Generated from RathenaScriptLang.g4 by ANTLR 4.9.3
 #![allow(dead_code)]
 #![allow(nonstandard_style)]
 #![allow(unused_imports)]

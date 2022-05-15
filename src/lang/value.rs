@@ -14,7 +14,7 @@ pub type InstanceId = String;
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub enum Constant {
     String(String),
-    Number(u32),
+    Number(i32),
 }
 
 impl Constant {
@@ -29,7 +29,7 @@ impl Constant {
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub enum Value {
     String(Option<String>),
-    Number(Option<u32>),
+    Number(Option<i32>),
 }
 
 impl Value {
@@ -51,7 +51,7 @@ impl Value {
             Value::Number(_) => { panic!("Value is a number not a string.") }
         }
     }
-    pub fn number_value(&self) -> u32 {
+    pub fn number_value(&self) -> i32 {
         match self {
             Value::Number(num) => num.unwrap(),
             Value::String(_) => { panic!("Value is string not a number.") }

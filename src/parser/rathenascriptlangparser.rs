@@ -1,4 +1,4 @@
-// Generated from RathenaScriptLang.g4 by ANTLR 4.8
+// Generated from RathenaScriptLang.g4 by ANTLR 4.9.3
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
@@ -906,7 +906,7 @@ fn primaryExpression(&self) -> Option<Rc<PrimaryExpressionContextAll<'input>>> w
 }
 /// Retrieves all `TerminalNode`s corresponding to token LeftBracket in current rule
 fn LeftBracket_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(LeftBracket)
 }
 /// Retrieves 'i's TerminalNode corresponding to token LeftBracket, starting from 0.
 /// Returns `None` if number of children corresponding to token LeftBracket is less or equal than `i`.
@@ -915,7 +915,7 @@ fn LeftBracket(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLa
 }
 /// Retrieves all `TerminalNode`s corresponding to token RightBracket in current rule
 fn RightBracket_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(RightBracket)
 }
 /// Retrieves 'i's TerminalNode corresponding to token RightBracket, starting from 0.
 /// Returns `None` if number of children corresponding to token RightBracket is less or equal than `i`.
@@ -924,7 +924,7 @@ fn RightBracket(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptL
 }
 /// Retrieves all `TerminalNode`s corresponding to token IncrementOp in current rule
 fn IncrementOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(IncrementOp)
 }
 /// Retrieves 'i's TerminalNode corresponding to token IncrementOp, starting from 0.
 /// Returns `None` if number of children corresponding to token IncrementOp is less or equal than `i`.
@@ -933,7 +933,7 @@ fn IncrementOp(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLa
 }
 /// Retrieves all `TerminalNode`s corresponding to token DecrementOp in current rule
 fn DecrementOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(DecrementOp)
 }
 /// Retrieves 'i's TerminalNode corresponding to token DecrementOp, starting from 0.
 /// Returns `None` if number of children corresponding to token DecrementOp is less or equal than `i`.
@@ -1129,7 +1129,7 @@ fn assignmentExpression(&self, i: usize) -> Option<Rc<AssignmentExpressionContex
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -1277,7 +1277,7 @@ fn RightParen(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserCon
 }
 /// Retrieves all `TerminalNode`s corresponding to token IncrementOp in current rule
 fn IncrementOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(IncrementOp)
 }
 /// Retrieves 'i's TerminalNode corresponding to token IncrementOp, starting from 0.
 /// Returns `None` if number of children corresponding to token IncrementOp is less or equal than `i`.
@@ -1286,7 +1286,7 @@ fn IncrementOp(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLa
 }
 /// Retrieves all `TerminalNode`s corresponding to token DecrementOp in current rule
 fn DecrementOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(DecrementOp)
 }
 /// Retrieves 'i's TerminalNode corresponding to token DecrementOp, starting from 0.
 /// Returns `None` if number of children corresponding to token DecrementOp is less or equal than `i`.
@@ -1706,7 +1706,7 @@ fn castExpression(&self, i: usize) -> Option<Rc<CastExpressionContextAll<'input>
 }
 /// Retrieves all `TerminalNode`s corresponding to token Star in current rule
 fn Star_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Star)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Star, starting from 0.
 /// Returns `None` if number of children corresponding to token Star is less or equal than `i`.
@@ -1715,7 +1715,7 @@ fn Star(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParse
 }
 /// Retrieves all `TerminalNode`s corresponding to token Slash in current rule
 fn Slash_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Slash)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Slash, starting from 0.
 /// Returns `None` if number of children corresponding to token Slash is less or equal than `i`.
@@ -1724,7 +1724,7 @@ fn Slash(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangPars
 }
 /// Retrieves all `TerminalNode`s corresponding to token Percent in current rule
 fn Percent_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Percent)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Percent, starting from 0.
 /// Returns `None` if number of children corresponding to token Percent is less or equal than `i`.
@@ -1862,7 +1862,7 @@ fn multiplicativeExpression(&self, i: usize) -> Option<Rc<MultiplicativeExpressi
 }
 /// Retrieves all `TerminalNode`s corresponding to token Plus in current rule
 fn Plus_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Plus)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Plus, starting from 0.
 /// Returns `None` if number of children corresponding to token Plus is less or equal than `i`.
@@ -1871,7 +1871,7 @@ fn Plus(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParse
 }
 /// Retrieves all `TerminalNode`s corresponding to token Minus in current rule
 fn Minus_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Minus)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Minus, starting from 0.
 /// Returns `None` if number of children corresponding to token Minus is less or equal than `i`.
@@ -2009,7 +2009,7 @@ fn additiveExpression(&self, i: usize) -> Option<Rc<AdditiveExpressionContextAll
 }
 /// Retrieves all `TerminalNode`s corresponding to token DoubleLeftCaret in current rule
 fn DoubleLeftCaret_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(DoubleLeftCaret)
 }
 /// Retrieves 'i's TerminalNode corresponding to token DoubleLeftCaret, starting from 0.
 /// Returns `None` if number of children corresponding to token DoubleLeftCaret is less or equal than `i`.
@@ -2018,7 +2018,7 @@ fn DoubleLeftCaret(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScri
 }
 /// Retrieves all `TerminalNode`s corresponding to token DoubleRightCaret in current rule
 fn DoubleRightCaret_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(DoubleRightCaret)
 }
 /// Retrieves 'i's TerminalNode corresponding to token DoubleRightCaret, starting from 0.
 /// Returns `None` if number of children corresponding to token DoubleRightCaret is less or equal than `i`.
@@ -2156,7 +2156,7 @@ fn shiftExpression(&self, i: usize) -> Option<Rc<ShiftExpressionContextAll<'inpu
 }
 /// Retrieves all `TerminalNode`s corresponding to token LeftCaret in current rule
 fn LeftCaret_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(LeftCaret)
 }
 /// Retrieves 'i's TerminalNode corresponding to token LeftCaret, starting from 0.
 /// Returns `None` if number of children corresponding to token LeftCaret is less or equal than `i`.
@@ -2165,7 +2165,7 @@ fn LeftCaret(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLang
 }
 /// Retrieves all `TerminalNode`s corresponding to token RightCaret in current rule
 fn RightCaret_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(RightCaret)
 }
 /// Retrieves 'i's TerminalNode corresponding to token RightCaret, starting from 0.
 /// Returns `None` if number of children corresponding to token RightCaret is less or equal than `i`.
@@ -2174,7 +2174,7 @@ fn RightCaret(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLan
 }
 /// Retrieves all `TerminalNode`s corresponding to token LeftCaretEqual in current rule
 fn LeftCaretEqual_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(LeftCaretEqual)
 }
 /// Retrieves 'i's TerminalNode corresponding to token LeftCaretEqual, starting from 0.
 /// Returns `None` if number of children corresponding to token LeftCaretEqual is less or equal than `i`.
@@ -2183,7 +2183,7 @@ fn LeftCaretEqual(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScrip
 }
 /// Retrieves all `TerminalNode`s corresponding to token RightCaretEqual in current rule
 fn RightCaretEqual_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(RightCaretEqual)
 }
 /// Retrieves 'i's TerminalNode corresponding to token RightCaretEqual, starting from 0.
 /// Returns `None` if number of children corresponding to token RightCaretEqual is less or equal than `i`.
@@ -2321,7 +2321,7 @@ fn relationalExpression(&self, i: usize) -> Option<Rc<RelationalExpressionContex
 }
 /// Retrieves all `TerminalNode`s corresponding to token DoubleEqual in current rule
 fn DoubleEqual_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(DoubleEqual)
 }
 /// Retrieves 'i's TerminalNode corresponding to token DoubleEqual, starting from 0.
 /// Returns `None` if number of children corresponding to token DoubleEqual is less or equal than `i`.
@@ -2330,7 +2330,7 @@ fn DoubleEqual(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLa
 }
 /// Retrieves all `TerminalNode`s corresponding to token BangEqual in current rule
 fn BangEqual_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(BangEqual)
 }
 /// Retrieves 'i's TerminalNode corresponding to token BangEqual, starting from 0.
 /// Returns `None` if number of children corresponding to token BangEqual is less or equal than `i`.
@@ -2468,7 +2468,7 @@ fn equalityExpression(&self, i: usize) -> Option<Rc<EqualityExpressionContextAll
 }
 /// Retrieves all `TerminalNode`s corresponding to token LogicalAnd in current rule
 fn LogicalAnd_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(LogicalAnd)
 }
 /// Retrieves 'i's TerminalNode corresponding to token LogicalAnd, starting from 0.
 /// Returns `None` if number of children corresponding to token LogicalAnd is less or equal than `i`.
@@ -2717,7 +2717,7 @@ fn exclusiveOrExpression(&self, i: usize) -> Option<Rc<ExclusiveOrExpressionCont
 }
 /// Retrieves all `TerminalNode`s corresponding to token LogicalOr in current rule
 fn LogicalOr_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(LogicalOr)
 }
 /// Retrieves 'i's TerminalNode corresponding to token LogicalOr, starting from 0.
 /// Returns `None` if number of children corresponding to token LogicalOr is less or equal than `i`.
@@ -2846,7 +2846,7 @@ fn inclusiveOrExpression(&self, i: usize) -> Option<Rc<InclusiveOrExpressionCont
 }
 /// Retrieves all `TerminalNode`s corresponding to token AndOp in current rule
 fn AndOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(AndOp)
 }
 /// Retrieves 'i's TerminalNode corresponding to token AndOp, starting from 0.
 /// Returns `None` if number of children corresponding to token AndOp is less or equal than `i`.
@@ -2975,7 +2975,7 @@ fn logicalAndExpression(&self, i: usize) -> Option<Rc<LogicalAndExpressionContex
 }
 /// Retrieves all `TerminalNode`s corresponding to token OrOp in current rule
 fn OrOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(OrOp)
 }
 /// Retrieves 'i's TerminalNode corresponding to token OrOp, starting from 0.
 /// Returns `None` if number of children corresponding to token OrOp is less or equal than `i`.
@@ -3633,7 +3633,7 @@ fn assignmentExpression(&self, i: usize) -> Option<Rc<AssignmentExpressionContex
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -4276,7 +4276,7 @@ fn initDeclarator(&self, i: usize) -> Option<Rc<InitDeclaratorContextAll<'input>
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -5037,7 +5037,7 @@ pub trait NestedParenthesesBlockContextAttrs<'input>: RathenaScriptLangParserCon
 
 /// Retrieves all `TerminalNode`s corresponding to token LeftParen in current rule
 fn LeftParen_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(LeftParen)
 }
 /// Retrieves 'i's TerminalNode corresponding to token LeftParen, starting from 0.
 /// Returns `None` if number of children corresponding to token LeftParen is less or equal than `i`.
@@ -5052,7 +5052,7 @@ fn nestedParenthesesBlock(&self, i: usize) -> Option<Rc<NestedParenthesesBlockCo
 }
 /// Retrieves all `TerminalNode`s corresponding to token RightParen in current rule
 fn RightParen_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(RightParen)
 }
 /// Retrieves 'i's TerminalNode corresponding to token RightParen, starting from 0.
 /// Returns `None` if number of children corresponding to token RightParen is less or equal than `i`.
@@ -5330,7 +5330,7 @@ fn parameterDeclaration(&self, i: usize) -> Option<Rc<ParameterDeclarationContex
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -5593,7 +5593,7 @@ pub trait IdentifierListContextAttrs<'input>: RathenaScriptLangParserContext<'in
 
 /// Retrieves all `TerminalNode`s corresponding to token Identifier in current rule
 fn Identifier_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Identifier)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Identifier, starting from 0.
 /// Returns `None` if number of children corresponding to token Identifier is less or equal than `i`.
@@ -5602,7 +5602,7 @@ fn Identifier(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLan
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -6047,7 +6047,7 @@ fn designation(&self, i: usize) -> Option<Rc<DesignationContextAll<'input>>> whe
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -7814,7 +7814,7 @@ pub trait ForConditionContextAttrs<'input>: RathenaScriptLangParserContext<'inpu
 
 /// Retrieves all `TerminalNode`s corresponding to token SemiColon in current rule
 fn SemiColon_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(SemiColon)
 }
 /// Retrieves 'i's TerminalNode corresponding to token SemiColon, starting from 0.
 /// Returns `None` if number of children corresponding to token SemiColon is less or equal than `i`.
@@ -8095,7 +8095,7 @@ fn assignmentExpression(&self, i: usize) -> Option<Rc<AssignmentExpressionContex
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -8407,7 +8407,7 @@ fn menuItem(&self, i: usize) -> Option<Rc<MenuItemContextAll<'input>>> where Sel
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -8667,7 +8667,7 @@ fn expression(&self, i: usize) -> Option<Rc<ExpressionContextAll<'input>>> where
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -9325,7 +9325,7 @@ pub trait FunctionDefinitionArgumentsContextAttrs<'input>: RathenaScriptLangPars
 
 /// Retrieves all `TerminalNode`s corresponding to token Identifier in current rule
 fn Identifier_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Identifier)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Identifier, starting from 0.
 /// Returns `None` if number of children corresponding to token Identifier is less or equal than `i`.
@@ -9334,7 +9334,7 @@ fn Identifier(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLan
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
 fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Comma)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
 /// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
@@ -9474,7 +9474,7 @@ fn compoundStatement(&self) -> Option<Rc<CompoundStatementContextAll<'input>>> w
 }
 /// Retrieves all `TerminalNode`s corresponding to token Identifier in current rule
 fn Identifier_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_type()
+	self.children_of_given_type(Identifier)
 }
 /// Retrieves 'i's TerminalNode corresponding to token Identifier, starting from 0.
 /// Returns `None` if number of children corresponding to token Identifier is less or equal than `i`.

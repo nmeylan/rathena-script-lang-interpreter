@@ -5,8 +5,7 @@ version = 3
 [[package]]
 name = "antlr-rust"
 version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94946f8fdc01e6422a2da2783747c651a851b7a5e25f6871d6e2cebdc64a38de"
+source = "git+https://github.com/nmeylan/antlr4rust?rev=9d5ad2d780e7c6ccdb0703885348ece4bab06130#9d5ad2d780e7c6ccdb0703885348ece4bab06130"
 dependencies = [
  "better_any",
  "bit-set",

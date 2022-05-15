@@ -115,5 +115,5 @@ fn plus_equal_num_addition() {
     // When
     Vm::execute_program(vm, function);
     // Then
-    assert_eq!(3_u32, events.borrow().get("a").unwrap().value.number_value());
+    assert_eq!(3_i32, events.borrow().get("a").unwrap().value.number_value());
 }
