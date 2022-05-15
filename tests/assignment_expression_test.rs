@@ -9,7 +9,9 @@ use ragnarok_script_interpreter::lang::vm::Vm;
 use common::Event;
 
 pub fn compile(script: &str) -> Function {
-    Compiler::compile("test_script".to_string(), script).unwrap()
+    Compiler::compile("test_script".to_string(), script).map_err(|e| {
+        e.iter().for_each(|e| println!("\n{}", e))
+    }).unwrap()
 }
 
 #[test]
@@ -43,33 +45,36 @@ fn assignment_with_string_concat() {
 }
 
 #[test]
-fn assignment_with_number_addition() {
+fn assignment_with_number_operation() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let function = compile(r#"
     .@a = 1 + 1;
-    vm_dump_var("a", .@a);"#);
+    .@b = 4 - 1;
+    .@c = 4 * 2;
+    .@d = 4 / 2;
+    .@e = 3 % 2;
+    .@f = 2 + 3 * 2;
+    .@g = (2 + 3) * 2;
+    vm_dump_var("g", .@g);
+    vm_dump_var("f", .@f);
+    vm_dump_var("e", .@e);
+    vm_dump_var("d", .@d);
+    vm_dump_var("c", .@c);
+    vm_dump_var("a", .@a);
+    vm_dump_var("b", .@b);"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::execute_program(vm, function);
     // Then
     assert_eq!(2, events.borrow().get("a").unwrap().value.number_value().clone());
-}
-
-#[test]
-fn assignment_with_number_subtraction() {
-    // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let function = compile(r#"
-    .@a = 4 - 1;
-    vm_dump_var("a", .@a);"#);
-    let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    // When
-    Vm::execute_program(vm, function);
-    // Then
-    assert_eq!(3, events.borrow().get("a").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("b").unwrap().value.number_value().clone());
+    assert_eq!(8, events.borrow().get("c").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("d").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("e").unwrap().value.number_value().clone());
+    assert_eq!(8, events.borrow().get("f").unwrap().value.number_value().clone());
+    assert_eq!(10, events.borrow().get("g").unwrap().value.number_value().clone());
 }
 
 #[test]

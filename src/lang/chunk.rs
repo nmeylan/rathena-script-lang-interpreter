@@ -103,6 +103,7 @@ pub enum OpCode {
     Subtract,
     Multiply,
     Divide,
+    Modulo,
     Not,
     Jump,
     Invoke,

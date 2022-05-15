@@ -274,13 +274,46 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_multiplicativeExpression(&mut self, ctx: &MultiplicativeExpressionContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_castExpression(&ctx.castExpression(ctx.castExpression_all().len() - 1).unwrap());
+        for (i, _) in ctx.Star_all().iter().enumerate().rev() {
+            if i == ctx.castExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_castExpression(&ctx.castExpression(i).unwrap());
+            if self.current_assignment_type().is_string() {
+                self.register_error(Type, ctx, "Multiply operator \"*\" is not allowed for String".to_string());
+            }
+            self.current_chunk().emit_op_code(Multiply);
+        }
+
+        for (i, _) in ctx.Percent_all().iter().enumerate().rev() {
+            if i == ctx.castExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_castExpression(&ctx.castExpression(i).unwrap());
+            if self.current_assignment_type().is_string() {
+                self.register_error(Type, ctx, "Modulo operator \"%\" is not allowed for String".to_string());
+            }
+            self.current_chunk().emit_op_code(Modulo);
+        }
+
+        for (i, _) in ctx.Slash_all().iter().enumerate().rev() {
+            if i == ctx.castExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_castExpression(&ctx.castExpression(i).unwrap());
+
+            if self.current_assignment_type().is_string() {
+                self.register_error(Type, ctx, "Divide operator \"\\\" is not allowed for String".to_string());
+            }
+            self.current_chunk().emit_op_code(Divide);
+        }
     }
 
     fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>) {
         // self.visit_children(ctx);
         self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(ctx.multiplicativeExpression_all().len() - 1).unwrap());
-        for (i, plus) in ctx.Plus_all().iter().enumerate().rev() {
+        for (i, _) in ctx.Plus_all().iter().enumerate().rev() {
             if i == ctx.multiplicativeExpression_all().len() - 1 {
                 continue;
             }
@@ -288,7 +321,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(Add);
         }
 
-        for (i, plus) in ctx.Minus_all().iter().enumerate().rev() {
+        for (i, _) in ctx.Minus_all().iter().enumerate().rev() {
             if i == ctx.multiplicativeExpression_all().len() - 1 {
                 continue;
             }
