@@ -54,8 +54,11 @@ fn assignment_with_number_operation() {
     .@c = 4 * 2;
     .@d = 4 / 2;
     .@e = 3 % 2;
+    .@i = 4 * .@c;
     .@f = 2 + 3 * 2;
-    .@g = (2 + 3) * 2;
+    .@g = 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
+    vm_dump_var("g", .@g);
+    vm_dump_var("i", .@i);
     vm_dump_var("g", .@g);
     vm_dump_var("f", .@f);
     vm_dump_var("e", .@e);
@@ -73,8 +76,9 @@ fn assignment_with_number_operation() {
     assert_eq!(8, events.borrow().get("c").unwrap().value.number_value().clone());
     assert_eq!(2, events.borrow().get("d").unwrap().value.number_value().clone());
     assert_eq!(1, events.borrow().get("e").unwrap().value.number_value().clone());
+    assert_eq!(32, events.borrow().get("i").unwrap().value.number_value().clone());
     assert_eq!(8, events.borrow().get("f").unwrap().value.number_value().clone());
-    assert_eq!(10, events.borrow().get("g").unwrap().value.number_value().clone());
+    assert_eq!(171, events.borrow().get("g").unwrap().value.number_value().clone());
 }
 
 #[test]

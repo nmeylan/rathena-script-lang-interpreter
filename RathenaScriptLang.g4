@@ -9,6 +9,7 @@ primaryExpression
     | variable
     |   Number
     |   String
+    | '(' expression ')'
     |   '-' // it is a special arguments for command, lets see if it can cause weird parse issue
     ;
 

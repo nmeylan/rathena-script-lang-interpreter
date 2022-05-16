@@ -231,6 +231,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
         }
+        if ctx.expression().is_some() {
+            self.visit_expression(ctx.expression().as_ref().unwrap());
+        }
         // self.visit_children(ctx)
     }
 
