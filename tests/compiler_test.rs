@@ -48,16 +48,22 @@ fn type_checking_string_invalid() {
 .@a$ = "1" - "2";
 .@a$ = 1 - "2";
 .@a$ = "1" - 2;
+.@a$ = "1" * 2;
+.@a$ = "1" % 2;
+.@a$ = "1" / 2;
 "#;
     // When
     let result = compile(script);
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!(4, result.as_ref().err().unwrap().len());
+    assert_eq!(7, result.as_ref().err().unwrap().len());
     assert_eq!("test_script 1:0. Variable \".@a$\" is a String but was assigned to a Number.\nl1\t.@a$ = 1;\n\t^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
     assert_eq!("test_script 2:7. Subtraction operator \"-\" is not allowed for String\nl2\t.@a$ = \"1\" - \"2\";\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
     assert_eq!("test_script 3:7. Subtraction operator \"-\" is not allowed for String\nl3\t.@a$ = 1 - \"2\";\n\t       ^^^^^\n", result.as_ref().err().unwrap().get(2).unwrap().message());
     assert_eq!("test_script 4:7. Subtraction operator \"-\" is not allowed for String\nl4\t.@a$ = \"1\" - 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(3).unwrap().message());
+    assert_eq!("test_script 5:7. Multiply operator \"*\" is not allowed for String\nl5\t.@a$ = \"1\" * 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(4).unwrap().message());
+    assert_eq!("test_script 6:7. Modulo operator \"%\" is not allowed for String\nl6\t.@a$ = \"1\" % 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(5).unwrap().message());
+    assert_eq!("test_script 7:7. Divide operator \"/\" is not allowed for String\nl7\t.@a$ = \"1\" / 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(6).unwrap().message());
 }
 
 #[test]

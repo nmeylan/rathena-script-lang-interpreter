@@ -25,7 +25,6 @@ impl NativeMethodHandler for VmHook {
                 name: params[0].string_value().clone(),
                 value: params[1].clone(),
             });
-            
         }
     }
 }

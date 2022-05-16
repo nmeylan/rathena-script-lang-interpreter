@@ -307,7 +307,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.visit_castExpression(&ctx.castExpression(i).unwrap());
 
             if self.current_assignment_type().is_string() {
-                self.register_error(Type, ctx, "Divide operator \"\\\" is not allowed for String".to_string());
+                self.register_error(Type, ctx, "Divide operator \"/\" is not allowed for String".to_string());
             }
             self.current_chunk().emit_op_code(Divide);
         }
