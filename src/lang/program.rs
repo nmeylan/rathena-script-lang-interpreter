@@ -15,7 +15,7 @@ use crate::lang::chunk::{*};
 use crate::lang::vm::RuntimeError;
 
 pub struct Program {
-    vm: Arc<Vm>,
+    pub vm: Arc<Vm>,
     stack: Stack,
     functions_pool: HashMap<u64, Function, NoopHasher>,
     instances_variable_pool: HashMap<u64, Variable, NoopHasher>,
@@ -149,7 +149,7 @@ impl Program {
                     }
                     arguments.reverse();
                     let native_method_name = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
-                    self.vm.native_method_handler().handle(native_method_name, arguments);
+                    self.vm.native_method_handler().handle(native_method_name, arguments, &self, &call_frame);
                 }
                 OpCode::Call => {}
                 OpCode::Return => {}

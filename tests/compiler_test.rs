@@ -19,16 +19,6 @@ fn undefined_variable() {
 }
 
 #[test]
-fn undefined_function() {
-    // Given
-    let script = r#"undefined();"#;
-    // When
-    let result = compile(script);
-    // Then
-    assert_eq!(true, result.is_err());
-}
-
-#[test]
 fn type_checking_string_valid() {
     // Given
     let script = r#".@a$ = "toto";
@@ -91,4 +81,29 @@ fn type_checking_number_invalid() {
     assert_eq!(true, result.is_err());
     assert_eq!("test_script 1:0. Variable \".@a\" is a Number but was assigned to a String.\nl1\t.@a = \"1\";\n\t^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
     assert_eq!("test_script 2:0. Variable \".@b\" is a Number but was assigned to a String.\nl2\t.@b = 1 + \"2\";\n\t^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
+}
+
+#[test]
+fn undefined_function() {
+    // Given
+    let script = r#"undefined();"#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+}
+
+#[test]
+fn function_definition() {
+
+}
+
+#[test]
+fn function_redefinition_should_be_an_error() {
+
+}
+
+#[test]
+fn function_call_with_wrong_number_of_arguments() {
+
 }

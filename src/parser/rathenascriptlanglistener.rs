@@ -635,16 +635,6 @@ fn enter_functionDefinition(&mut self, _ctx: &FunctionDefinitionContext<'input>)
  */
 fn exit_functionDefinition(&mut self, _ctx: &FunctionDefinitionContext<'input>) { }
 /**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#functionDefinitionArguments}.
- * @param ctx the parse tree
- */
-fn enter_functionDefinitionArguments(&mut self, _ctx: &FunctionDefinitionArgumentsContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#functionDefinitionArguments}.
- * @param ctx the parse tree
- */
-fn exit_functionDefinitionArguments(&mut self, _ctx: &FunctionDefinitionArgumentsContext<'input>) { }
-/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#scriptInitialization}.
  * @param ctx the parse tree
  */

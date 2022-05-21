@@ -1,4 +1,7 @@
+use std::ops::Deref;
 use std::sync::Arc;
+use ragnarok_script_interpreter::lang::call_frame::CallFrame;
+use ragnarok_script_interpreter::lang::program::Program;
 use ragnarok_script_interpreter::lang::value::{Value};
 use ragnarok_script_interpreter::lang::vm::{NativeMethodHandler, Vm};
 
@@ -11,7 +14,7 @@ pub struct VmHook {
     hook: Box<dyn Fn(Event)>
 }
 impl NativeMethodHandler for VmHook {
-    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>) {
+    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, program: &Program, call_frame: &CallFrame) {
         if native.name.eq("println") {
             println!("{}", params.iter().map(|p| p.string_value().clone()).collect::<Vec<String>>().join(" "));
             return;
@@ -24,6 +27,14 @@ impl NativeMethodHandler for VmHook {
             (self.hook)(Event {
                 name: params[0].string_value().clone(),
                 value: params[1].clone(),
+            });
+        }
+        if native.name.eq("vm_dump_locals") {
+            call_frame.locals().for_each(|(_, var)| {
+                (self.hook)(Event {
+                    name: var.name.clone(),
+                    value: program.vm.get_from_constant_pool(var.value_ref.clone().borrow().get_ref()).map(|constant| constant.value()).unwrap(),
+                });
             });
         }
     }

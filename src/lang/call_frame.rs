@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::{io};
+use std::collections::hash_map::Iter;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::chunk::{Chunk, OpCode};
 use std::io::Write;
@@ -38,6 +39,10 @@ impl CallFrame {
 
     pub fn get_local(&self, reference: u64) -> Option<&Variable> {
         self.locals.get(&reference)
+    }
+
+    pub fn locals(&self) -> Iter<'_, u64, Variable> {
+        self.locals.iter()
     }
 
     pub fn dump(&self) {

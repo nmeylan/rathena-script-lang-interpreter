@@ -388,12 +388,6 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>) { self.visit_children(ctx) }
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#functionDefinitionArguments}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_functionDefinitionArguments(&mut self, ctx: &FunctionDefinitionArgumentsContext<'input>) { self.visit_children(ctx) }
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptInitialization}.
 	 * @param ctx the parse tree
 	 */
@@ -925,14 +919,6 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#functionDefinitionArguments}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_functionDefinitionArguments(&mut self, ctx: &FunctionDefinitionArgumentsContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptInitialization}.
 	 * @param ctx the parse tree
 	 */
@@ -1282,11 +1268,6 @@ where
 
 	fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_functionDefinition(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_functionDefinitionArguments(&mut self, ctx: &FunctionDefinitionArgumentsContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_functionDefinitionArguments(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

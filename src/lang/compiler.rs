@@ -23,6 +23,9 @@ pub struct Compiler {
     errors: Vec<CompilationError>,
     state: State,
     script_lines: Vec<String>,
+    // To check if called function exists. it can be done at the end of the compilation
+    declared_functions: Vec<String>,
+    called_functions: Vec<String>,
 }
 
 #[derive(Default)]
@@ -83,6 +86,8 @@ impl Compiler {
             errors: vec![],
             state: Default::default(),
             script_lines: script.split("\n").map(|l| l.to_string()).collect::<Vec<String>>(),
+            declared_functions: vec![],
+            called_functions: vec![]
         }
     }
     pub fn compile(name: String, script: &str) -> Result<Function, Vec<CompilationError>> {

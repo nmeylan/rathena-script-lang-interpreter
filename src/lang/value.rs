@@ -109,6 +109,13 @@ impl ValueRef {
     pub fn is_number(&self) -> bool {
         mem::discriminant(self) == mem::discriminant(&ValueRef::new_empty_number())
     }
+
+    pub fn get_ref(&self) -> u64 {
+        match self {
+            ValueRef::String(reference) => reference.unwrap(),
+            ValueRef::Number(reference) => reference.unwrap()
+        }
+    }
 }
 
 #[derive(Debug, Clone, Hash, PartialEq)]
@@ -123,8 +130,8 @@ pub enum Scope {
 
 #[derive(Debug, Clone)]
 pub struct Variable {
-    pub(crate) name: String,
-    pub(crate) scope: Scope,
+    pub name: String,
+    pub scope: Scope,
     pub value_ref: RefCell<ValueRef>,
 }
 

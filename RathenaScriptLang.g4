@@ -295,10 +295,8 @@ externalDeclaration
     ;
 
 functionDefinition
-    :  Function Identifier ('(' functionDefinitionArguments ')')? compoundStatement?
+    :  Function Identifier  compoundStatement?
     ;
-functionDefinitionArguments
-    : Identifier? (',' Identifier)*;
 scriptInitialization
     : '-' (Identifier | '::')* ','? compoundStatement? ;
 

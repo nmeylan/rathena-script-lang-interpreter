@@ -57,15 +57,7 @@ fn assignment_with_number_operation() {
     .@i = 4 * .@c;
     .@f = 2 + 3 * 2;
     .@g = 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
-    vm_dump_var("g", .@g);
-    vm_dump_var("i", .@i);
-    vm_dump_var("g", .@g);
-    vm_dump_var("f", .@f);
-    vm_dump_var("e", .@e);
-    vm_dump_var("d", .@d);
-    vm_dump_var("c", .@c);
-    vm_dump_var("a", .@a);
-    vm_dump_var("b", .@b);"#);
+    vm_dump_locals();"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When

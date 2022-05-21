@@ -7,6 +7,7 @@ use std::cell::RefCell;
 use std::io::Write;
 
 use std::sync::Arc;
+use crate::lang::call_frame::CallFrame;
 
 
 use crate::lang::noop_hasher::NoopHasher;
@@ -64,7 +65,7 @@ impl Display for RuntimeError {
 }
 
 pub trait NativeMethodHandler {
-    fn handle(&self, native: &Native, _params: Vec<Value>) {
+    fn handle(&self, native: &Native, _params: Vec<Value>, program: &Program, call_frame: &CallFrame) {
         panic!("Native function {}", native.name);
     }
 }
@@ -74,6 +75,7 @@ impl Vm {
         let mut native_pool: HashMap<u64, Native, NoopHasher> = Default::default();
         native_pool.insert(Self::calculate_hash(&"print".to_string()), Native { name: "println".to_string() });
         native_pool.insert(Self::calculate_hash(&"vm_dump_var".to_string()), Native { name: "vm_dump_var".to_string() });
+        native_pool.insert(Self::calculate_hash(&"vm_dump_locals".to_string()), Native { name: "vm_dump_locals".to_string() });
         Self {
             heap: Default::default(),
             constants_pool: Default::default(),
