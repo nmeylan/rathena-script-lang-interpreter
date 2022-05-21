@@ -1,8 +1,9 @@
-use std::borrow::{Cow};
+use std::borrow::{BorrowMut, Cow};
 use std::cell::RefCell;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Display, format, Formatter};
 use std::mem;
 use std::ops::Deref;
+use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream};
 use antlr_rust::token::Token;
@@ -14,18 +15,26 @@ use crate::lang::vm::Vm;
 
 use crate::lang::chunk::{Chunk};
 use crate::lang::chunk::OpCode::{*};
-use crate::lang::compiler::CompilationErrorType::Type;
+use crate::lang::compiler::CompilationErrorType::{Type, UndefinedFunction};
 use crate::lang::value::{*};
+
+const NATIVE_METHODS: &'static [&'static str] = &[
+    "print",
+    // internal vm instrumentation
+    "vm_dump_locals",
+    "vm_dump_var"
+];
 
 pub struct Compiler {
     name: String,
-    function: Function,
+    main_function: Function,
     errors: Vec<CompilationError>,
     state: State,
     script_lines: Vec<String>,
     // To check if called function exists. it can be done at the end of the compilation
     declared_functions: Vec<String>,
-    called_functions: Vec<String>,
+    called_functions: Vec<(String, CompilationErrorDetails)>,
+    current_declared_function: Option<Function>,
 }
 
 #[derive(Default)]
@@ -50,6 +59,11 @@ pub struct CompilationError {
     error_type: CompilationErrorType,
     message: String,
     file_name: String,
+    details: CompilationErrorDetails,
+}
+
+#[derive(Debug, Clone)]
+pub struct CompilationErrorDetails {
     start_line: usize,
     start_column: usize,
     end_line: usize,
@@ -61,6 +75,7 @@ pub struct CompilationError {
 pub enum CompilationErrorType {
     Generic,
     UndefinedVariable,
+    UndefinedFunction,
     Type,
 }
 
@@ -72,22 +87,24 @@ impl CompilationError {
 
 impl Display for CompilationError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{} {}:{}. {}", self.file_name, self.start_line, self.start_column, self.message).unwrap();
-        writeln!(f, "l{}\t{}", self.start_line, self.text).unwrap();
-        writeln!(f, "\t{}{}", " ".repeat(self.start_column), "^".repeat(self.end_column - self.start_column + 1))
+        writeln!(f, "{} {}:{}. {}", self.file_name, self.details.start_line, self.details.start_column, self.message).unwrap();
+        writeln!(f, "l{}\t{}", self.details.start_line, self.details.text).unwrap();
+        writeln!(f, "\t{}{}", " ".repeat(self.details.start_column), "^".repeat(self.details.end_column - self.details.start_column + 1))
     }
 }
 
 impl Compiler {
     fn new(name: String, script: String) -> Self {
+        let main_function = Function::new(format!("{}_main", name));
         Self {
             name: name.clone(),
-            function: Function::new(format!("{}_main", name)),
+            main_function: main_function,
             errors: vec![],
             state: Default::default(),
             script_lines: script.split("\n").map(|l| l.to_string()).collect::<Vec<String>>(),
             declared_functions: vec![],
-            called_functions: vec![]
+            called_functions: vec![],
+            current_declared_function: None,
         }
     }
     pub fn compile(name: String, script: &str) -> Result<Function, Vec<CompilationError>> {
@@ -99,16 +116,24 @@ impl Compiler {
         // println!("{}", tree.unwrap().to_string_tree(&parser));
 
         compiler.visit_compilationUnit(tree.as_ref().unwrap());
-
+        for (function_name, compilationErrorDetails) in compiler.called_functions.clone().iter() {
+            if !compiler.declared_functions.contains(function_name) {
+                compiler.register_error_with_details(UndefinedFunction, compilationErrorDetails.clone(), format!("Function \"{}\" is not defined", function_name))
+            }
+        }
         if compiler.errors.is_empty() {
-            Ok(compiler.function)
+            Ok(compiler.main_function)
         } else {
             Err(compiler.errors)
         }
     }
 
     fn current_chunk(&mut self) -> &mut Chunk {
-        &mut self.function.chunk
+        if let Some(function) = self.current_declared_function.as_mut() {
+            &mut function.chunk
+        } else {
+            &mut self.main_function.chunk
+        }
     }
 
     fn variable_value(has_dollar: bool) -> ValueRef {
@@ -120,13 +145,29 @@ impl Compiler {
             error_type,
             message,
             file_name: self.name.clone(),
+            details: self.compilation_error_details_from_context(node),
+        };
+        self.errors.push(error);
+    }
+
+    fn register_error_with_details<'input>(&mut self, error_type: CompilationErrorType, details: CompilationErrorDetails, message: String) {
+        let error = CompilationError {
+            error_type,
+            message,
+            file_name: self.name.clone(),
+            details,
+        };
+        self.errors.push(error);
+    }
+
+    fn compilation_error_details_from_context<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> CompilationErrorDetails {
+        CompilationErrorDetails {
             start_line: node.start().get_line() as usize,
             start_column: node.start().get_column() as usize,
             end_line: node.stop().get_line() as usize,
             end_column: node.stop().get_column() as usize,
             text: self.script_lines[node.start().get_line() as usize - 1].clone(),
-        };
-        self.errors.push(error);
+        }
     }
 
     fn get_variable_scope(ctx: &VariableContext) -> Scope {
@@ -252,7 +293,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         let identifier = ctx.Identifier().unwrap();
 
         // TODO check if we want to call a native or a function. Native list to be defined
-        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&identifier.symbol.text), argument_count });
+        let function_or_native_name = &identifier.symbol.text;
+        if NATIVE_METHODS.contains(&function_or_native_name.as_ref()) {
+            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
+        } else {
+            self.called_functions.push((String::from(function_or_native_name.clone()), self.compilation_error_details_from_context(ctx)));
+            self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
+        }
     }
 
     fn visit_postfixExpression(&mut self, ctx: &PostfixExpressionContext<'input>) {
@@ -611,7 +658,18 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>) {
-        self.visit_children(ctx)
+        let function_name = &ctx.Identifier().unwrap().symbol.text;
+        let index = self.declared_functions.len();
+        let function = Function {
+            name: function_name.clone().to_string(),
+            arity: 0,
+            chunk: Default::default()
+        };
+        self.declared_functions.push(function_name.clone().to_string());
+        self.current_declared_function = Some(function);
+        self.visit_children(ctx);
+        let current_declared_function = mem::replace(&mut self.current_declared_function, None);
+        self.current_chunk().add_function(current_declared_function.unwrap());
     }
 
     fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>) {

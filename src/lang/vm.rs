@@ -4,7 +4,7 @@ use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::{io};
 use std::cell::RefCell;
-use std::io::Write;
+use std::io::{Stdout, Write};
 
 use std::sync::Arc;
 use crate::lang::call_frame::CallFrame;
@@ -94,7 +94,10 @@ impl Vm {
         // TODO: init instance variable pool
         // TODO: init program function pool
         // Surement besoin de passer un chunk plutot que CallFrame dans la fonction run
-        program.run(function)
+        program.run_main(&mut function).map_err(|e| {
+            println!("{}", e);
+            e
+        })
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {
@@ -136,8 +139,7 @@ impl Vm {
         s.finish()
     }
 
-    pub fn dump(&self) {
-        let mut out = io::stdout();
+    pub fn dump(&self, out: &mut Stdout) {
         writeln!(out, "========= Constants Pool =========").unwrap();
         for (reference, constant) in self.constants_pool.borrow().iter() {
             writeln!(out, "({}) {}", reference, constant).unwrap();

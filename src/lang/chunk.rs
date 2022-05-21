@@ -5,7 +5,7 @@ use crate::lang::value::{Constant, Function, Native, Variable};
 use crate::lang::vm::Vm;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Chunk {
     pub op_codes: Vec<OpCode>,
     pub references: Vec<u64>,
@@ -63,7 +63,7 @@ impl Chunk {
     }
 
     pub fn add_function(&mut self, function: Function) -> u64 {
-        let hash = Vm::calculate_hash(&function);
+        let hash = Vm::calculate_hash(&function.name);
         self.functions.insert(hash, function);
         hash
     }
@@ -84,7 +84,7 @@ impl Chunk {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum OpCode {
     LoadConstant(u64),
     Pop,
@@ -96,6 +96,7 @@ pub enum OpCode {
     LoadInstance(u64),
     DefineFunction(u64),
     CallNative { reference: u64, argument_count: usize },
+    CallFunction { reference: u64, argument_count: usize },
     Equal,
     Greater,
     Less,

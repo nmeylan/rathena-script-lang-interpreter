@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::{io};
 use std::sync::{Arc};
-use std::io::Write;
+use std::io::{Stdout, Write};
 use std::default::Default;
 use std::fmt::format;
 
@@ -33,21 +33,30 @@ impl Program {
         }
     }
 
-    pub fn run(&mut self, mut function: Function) -> Result<(), RuntimeError> {
+    pub fn run_main(&mut self, function: &mut Function) -> Result<(), RuntimeError> {
         let chunk = &mut function.chunk;
         let function_name = function.name.clone();
-        let locals = std::mem::take(&mut chunk.locals);
-        let call_frame = CallFrame::new(chunk, 1, function_name, locals);
-        println!("=========   VM    ========");
-        self.vm.dump();
-        println!("=========   Thread    ========");
-        self.dump();
-        println!();
-        println!("========= Call frame ========");
-        call_frame.dump();
-        for next_op_code in call_frame.code.iter() {
-            println!("=========   Stack    ========");
-            println!("{}", self.stack);
+        self.functions_pool = std::mem::take(&mut chunk.functions);
+        let call_frame = CallFrame::new(chunk, 1, function_name);
+        self.run(call_frame)
+    }
+
+    pub fn run(&mut self, call_frame: CallFrame) -> Result<(), RuntimeError> {
+        let mut stdout = io::stdout();
+        writeln!(stdout, "=========   VM    ========").unwrap();
+        self.vm.dump(&mut stdout);
+        writeln!(stdout, "=========   Thread    ========").unwrap();
+        self.dump(&mut stdout);
+        writeln!(stdout).unwrap();
+        writeln!(stdout, "========= Call frame ========").unwrap();
+        stdout.flush();
+        call_frame.dump(&mut stdout);
+        for (index, next_op_code) in call_frame.code.iter().enumerate() {
+            writeln!(stdout, "=========   Executing    ========").unwrap();
+            writeln!(stdout, "[{}] {:?}", index, next_op_code).unwrap();
+            writeln!(stdout, "=========   Stack    ========").unwrap();
+            writeln!(stdout, "{}", self.stack).unwrap();
+            stdout.flush();
             match next_op_code {
                 OpCode::LoadConstant(reference) => {
                     self.stack.push(StackEntry::ConstantPoolReference(*reference));
@@ -151,6 +160,13 @@ impl Program {
                     let native_method_name = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
                     self.vm.native_method_handler().handle(native_method_name, arguments, &self, &call_frame);
                 }
+                OpCode::CallFunction { argument_count, reference } => {
+                    let function = self.functions_pool.get(reference).unwrap();
+                    let mut chunk = function.chunk.clone();
+                    self.vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
+                    let call_frame = CallFrame::new(&mut chunk, 1, function.name.clone());
+                    self.run(call_frame)?
+                }
                 OpCode::Call => {}
                 OpCode::Return => {}
                 OpCode::Command => {}
@@ -159,8 +175,7 @@ impl Program {
         Ok(())
     }
 
-    fn dump(&self) {
-        let mut out = io::stdout();
+    fn dump(&self, out: &mut Stdout) {
         writeln!(out, "========= Functions =========").unwrap();
         for (reference, func) in self.functions_pool.iter() {
             writeln!(out, "({}) {}", reference, func).unwrap();
@@ -229,7 +244,7 @@ impl Program {
     fn constant_ref_from_stack_entry(&self, stack_entry: StackEntry) -> Result<u64, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
-                self.vm.get_from_constant_pool(reference).ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM native pool for given reference ({})", reference).as_str()))?;
+                self.vm.get_from_constant_pool(reference).ok_or_else(|| RuntimeError::new(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(reference)
             }
             x => Err(RuntimeError::new_string(format!("Expected stack entry to be a reference to Constant but was {:?}", x)))

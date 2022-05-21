@@ -4,7 +4,7 @@ use std::{io};
 use std::collections::hash_map::Iter;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::chunk::{Chunk, OpCode};
-use std::io::Write;
+use std::io::{Stdout, Write};
 use crate::lang::value::Variable;
 
 #[derive(Debug)]
@@ -27,13 +27,13 @@ impl Display for CallFrame {
 }
 
 impl CallFrame {
-    pub fn new(chunk: &mut Chunk, stack_pointer: usize, name: String, locals: HashMap<u64, Variable, NoopHasher>) -> Self {
+    pub fn new(chunk: &mut Chunk, stack_pointer: usize, name: String) -> Self {
         Self {
             code: std::mem::take(&mut chunk.op_codes),
             stack_pointer,
             current_op_code: 0,
             name,
-            locals,
+            locals: std::mem::take(&mut chunk.locals),
         }
     }
 
@@ -45,8 +45,7 @@ impl CallFrame {
         self.locals.iter()
     }
 
-    pub fn dump(&self) {
-        let mut out = io::stdout();
+    pub fn dump(&self, out: &mut Stdout) {
         writeln!(out, "========= OpCode =========").unwrap();
         for (index, op_code) in self.code.iter().enumerate() {
             writeln!(out, "[{}] {:?}", index, op_code).unwrap();

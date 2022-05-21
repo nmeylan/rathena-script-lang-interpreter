@@ -182,12 +182,11 @@ impl PartialEq<Self> for Variable {
 
 impl Eq for Variable {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Function {
     pub name: String,
     pub arity: usize,
     pub(crate) chunk: Chunk,
-    pub nested_functions: Vec<Function>,
 }
 
 impl PartialEq for Function {
@@ -208,7 +207,6 @@ impl Function {
             name,
             arity: 0,
             chunk: Default::default(),
-            nested_functions: vec![],
         }
     }
 }
