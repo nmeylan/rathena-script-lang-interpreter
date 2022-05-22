@@ -95,15 +95,40 @@ fn undefined_function() {
 
 #[test]
 fn function_definition() {
-
+    // Given
+    let script = r#"function my_func() {}"#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_ok());
 }
 
 #[test]
 fn function_redefinition_should_be_an_error() {
-
-}
-
-#[test]
-fn function_call_with_wrong_number_of_arguments() {
-
+    // Given
+    let script = r#"
+    function my_func {
+        .@a = 1;
+    }
+    function my_func {
+        .@a = 2;
+    }
+    function print { // this is a native function, it is forbidden to declare a func with the same name as native function.
+        .@a = 2;
+    }
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(2, result.as_ref().err().unwrap().len());
+    result.as_ref().err().unwrap().iter().for_each(|e| println!("{}", e));
+    assert_eq!(r#"test_script 5:4. A function with name "my_func" already exists.
+l5	    function my_func {
+	    ^
+"#, result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!(r#"test_script 8:4. A native function with name "print" already exists.
+l8	    function print { // this is a native function, it is forbidden to declare a func with the same name as native function.
+	    ^
+"#, result.as_ref().err().unwrap().get(1).unwrap().message());
 }

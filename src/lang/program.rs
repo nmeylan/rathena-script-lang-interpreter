@@ -14,6 +14,9 @@ use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
 use crate::lang::vm::RuntimeError;
 
+const NATIVE_METHODS_INTERNAL_IMPLEMENTATION: &'static [&'static str] = &[
+    "getarg"
+];
 pub struct Program {
     pub vm: Arc<Vm>,
     stack: Stack,
@@ -37,7 +40,7 @@ impl Program {
         let chunk = &mut function.chunk;
         let function_name = function.name.clone();
         self.functions_pool = std::mem::take(&mut chunk.functions);
-        let call_frame = CallFrame::new(chunk, 1, function_name);
+        let call_frame = CallFrame::new(chunk, 1, function_name, 0);
         self.run(call_frame)
     }
 
@@ -55,7 +58,7 @@ impl Program {
             writeln!(stdout, "=========   Executing    ========").unwrap();
             writeln!(stdout, "[{}] {:?}", index, next_op_code).unwrap();
             writeln!(stdout, "=========   Stack    ========").unwrap();
-            writeln!(stdout, "{}", self.stack).unwrap();
+            self.dump_stack(&mut stdout, &call_frame);
             stdout.flush();
             match next_op_code {
                 OpCode::LoadConstant(reference) => {
@@ -83,8 +86,8 @@ impl Program {
                 OpCode::Add => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         Value::String(Some(format!("{}{}",
                                                    if v1.is_string() { v1.string_value().clone() } else { v1.number_value().to_string() },
@@ -98,8 +101,8 @@ impl Program {
                 OpCode::Subtract => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         return Err(RuntimeError::new(format!("Attempt to substract strings: {} - {}", v1, v2).as_str()));
                     } else {
@@ -111,8 +114,8 @@ impl Program {
                 OpCode::Multiply => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         return Err(RuntimeError::new(format!("Attempt to multiply strings: {} - {}", v1, v2).as_str()));
                     } else {
@@ -124,8 +127,8 @@ impl Program {
                 OpCode::Divide => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         return Err(RuntimeError::new(format!("Attempt to divide strings: {} - {}", v1, v2).as_str()));
                     } else {
@@ -137,8 +140,8 @@ impl Program {
                 OpCode::Modulo => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(stack_entry2, &call_frame)?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         return Err(RuntimeError::new(format!("Attempt to perform modulo strings: {} - {}", v1, v2).as_str()));
                     } else {
@@ -154,17 +157,21 @@ impl Program {
                     let mut arguments: Vec<Value> = vec![];
                     for _ in 0..*argument_count {
                         let stack_entry = self.stack.pop()?;
-                        arguments.push(self.value_from_stack_entry(stack_entry, &call_frame)?);
+                        arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame)?);
                     }
                     arguments.reverse();
-                    let native_method_name = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
-                    self.vm.native_method_handler().handle(native_method_name, arguments, &self, &call_frame);
+                    let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
+                    if NATIVE_METHODS_INTERNAL_IMPLEMENTATION.contains(&native_method.name.as_str()) {
+                        self.handle_native_method(native_method, &call_frame, arguments)?;
+                    } else {
+                        self.vm.native_method_handler().handle(native_method, arguments, &self, &call_frame);
+                    }
                 }
                 OpCode::CallFunction { argument_count, reference } => {
                     let function = self.functions_pool.get(reference).unwrap();
                     let mut chunk = function.chunk.clone();
                     self.vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
-                    let call_frame = CallFrame::new(&mut chunk, 1, function.name.clone());
+                    let call_frame = CallFrame::new(&mut chunk, self.stack.len() - argument_count, function.name.clone(), *argument_count);
                     self.run(call_frame)?
                 }
                 OpCode::Call => {}
@@ -186,31 +193,46 @@ impl Program {
         }
     }
 
-    fn value_from_stack_entry(&self, stack_entry: StackEntry, call_frame: &CallFrame) -> Result<Value, RuntimeError> {
+    fn dump_stack(&self, out: &mut Stdout, call_frame: &CallFrame) {
+        if self.stack.contents().is_empty() {
+            writeln!(out, "         <empty stack>").unwrap();
+        } else {
+            for (i, val) in self.stack.contents().iter().enumerate() {
+                write!(out, "    [{}]  {:?}", i, val).unwrap();
+                let maybe_value = self.value_from_stack_entry(val, call_frame);
+                if maybe_value.is_ok() {
+                    write!(out, " - {}", maybe_value.unwrap()).unwrap();
+                }
+                writeln!(out).unwrap();
+            }
+        }
+    }
+
+    fn value_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame) -> Result<Value, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
-                let constant = self.vm.get_from_constant_pool(reference).ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                let constant = self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant.value())
             }
             StackEntry::HeapReference(reference) => {
-                let heap_entry = self.vm.get_from_heap_pool(reference).ok_or_else(|| RuntimeError::new(format!("Can't find value in VM heap for given reference ({})", reference).as_str()))?;
+                let heap_entry = self.vm.get_from_heap_pool(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find value in VM heap for given reference ({})", reference).as_str()))?;
                 let value_ref = heap_entry.value_ref();
                 Ok(self.value_from_value_ref(&value_ref)?)
             }
             StackEntry::LocalVariableReference(reference) => {
-                let variable = call_frame.get_local(reference).ok_or_else(|| RuntimeError::new(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
+                let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::NativeReference(reference) => {
-                let native = self.vm.get_from_native_pool(reference).ok_or_else(|| RuntimeError::new(format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
+                let native = self.vm.get_from_native_pool(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
                 Ok(Value::String(Some(native.name.clone())))
             }
             StackEntry::FunctionReference(reference) => {
-                let function = self.functions_pool.get(&reference).ok_or_else(|| RuntimeError::new(format!("Can't find function in PROGRAM function pool for given reference ({})", reference).as_str()))?;
+                let function = self.functions_pool.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find function in PROGRAM function pool for given reference ({})", reference).as_str()))?;
                 Ok(Value::String(Some(function.name.clone())))
             }
             StackEntry::InstanceReference(reference) => {
-                let variable = self.instances_variable_pool.get(&reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in PROGRAM instance variable pool for given reference ({})", reference).as_str()))?;
+                let variable = self.instances_variable_pool.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in PROGRAM instance variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
         }
@@ -249,5 +271,20 @@ impl Program {
             }
             x => Err(RuntimeError::new_string(format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
+    }
+
+    fn handle_native_method(&self, native: &Native, call_frame: &CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+        match native.name.as_str() {
+            "getarg" => {
+                let index = arguments[0].number_value() as usize;
+                if arguments.len() == 1 && index > (call_frame.arguments_count - 1) {
+                    return Err(RuntimeError::Other(format!("Can't call getarg({}) which is greater than number of arguments provided: {}. Maximum allow index is {}. Consider calling getarg with a default value: getarg({}, DEFAULT_VALUE)", index, call_frame.arguments_count, call_frame.arguments_count - 1, index)));
+                }
+                let stack_entry = self.stack.peek(call_frame.stack_pointer + index)?;
+                self.stack.push(stack_entry.clone());
+            }
+            _ => {}
+        }
+        Ok(())
     }
 }

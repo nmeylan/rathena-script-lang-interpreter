@@ -74,6 +74,7 @@ impl Vm {
     pub fn new(native_method_handler: Box<dyn NativeMethodHandler>) -> Vm {
         let mut native_pool: HashMap<u64, Native, NoopHasher> = Default::default();
         native_pool.insert(Self::calculate_hash(&"print".to_string()), Native { name: "println".to_string() });
+        native_pool.insert(Self::calculate_hash(&"getarg".to_string()), Native { name: "getarg".to_string() });
         native_pool.insert(Self::calculate_hash(&"vm_dump_var".to_string()), Native { name: "vm_dump_var".to_string() });
         native_pool.insert(Self::calculate_hash(&"vm_dump_locals".to_string()), Native { name: "vm_dump_locals".to_string() });
         Self {

@@ -17,7 +17,7 @@ functionCallExpression
     : Identifier '(' argumentExpressionList? ')';
 
 postfixExpression
-    : functionCallExpression (expression)* | primaryExpression ('[' expression ']' | ('++' | '--') )*
+    : functionCallExpression | primaryExpression ('[' expression ']' | ('++' | '--') )*
     ;
 
 argumentExpressionList
@@ -29,7 +29,6 @@ unaryExpression
     ('++' |  '--')*
     (postfixExpression
     |   unaryOperator castExpression
-    |   'getarraysize' '(' variable ')'
     )
     ;
 

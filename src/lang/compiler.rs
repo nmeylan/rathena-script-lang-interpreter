@@ -15,10 +15,14 @@ use crate::lang::vm::Vm;
 
 use crate::lang::chunk::{Chunk};
 use crate::lang::chunk::OpCode::{*};
-use crate::lang::compiler::CompilationErrorType::{Type, UndefinedFunction};
+use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, NativeAlreadyDefined, Type, UndefinedFunction};
 use crate::lang::value::{*};
 
 const NATIVE_METHODS: &'static [&'static str] = &[
+    // Part of rathena script lang: implemented in VM.
+    "getarg",
+    // Part of rathena script lang: to be implemented in NativeMethodHandler
+    // Not part of rathena script lang
     "print",
     // internal vm instrumentation
     "vm_dump_locals",
@@ -76,6 +80,8 @@ pub enum CompilationErrorType {
     Generic,
     UndefinedVariable,
     UndefinedFunction,
+    FunctionAlreadyDefined,
+    NativeAlreadyDefined,
     Type,
 }
 
@@ -292,7 +298,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         };
         let identifier = ctx.Identifier().unwrap();
 
-        // TODO check if we want to call a native or a function. Native list to be defined
         let function_or_native_name = &identifier.symbol.text;
         if NATIVE_METHODS.contains(&function_or_native_name.as_ref()) {
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
@@ -659,13 +664,21 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>) {
         let function_name = &ctx.Identifier().unwrap().symbol.text;
-        let index = self.declared_functions.len();
+        let function_name = function_name.clone().to_string();
+        if self.declared_functions.contains(&function_name) {
+            self.register_error(FunctionAlreadyDefined, ctx, format!("A function with name \"{}\" already exists.", function_name));
+            return;
+        }
+        if NATIVE_METHODS.contains(&function_name.as_str()) {
+            self.register_error(NativeAlreadyDefined, ctx, format!("A native function with name \"{}\" already exists.", function_name));
+            return;
+        }
         let function = Function {
-            name: function_name.clone().to_string(),
+            name: function_name.clone(),
             arity: 0,
             chunk: Default::default()
         };
-        self.declared_functions.push(function_name.clone().to_string());
+        self.declared_functions.push(function_name);
         self.current_declared_function = Some(function);
         self.visit_children(ctx);
         let current_declared_function = mem::replace(&mut self.current_declared_function, None);

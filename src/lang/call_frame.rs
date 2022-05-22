@@ -11,6 +11,7 @@ use crate::lang::value::Variable;
 pub struct CallFrame {
     pub code: Vec<OpCode>,
     pub stack_pointer: usize,
+    pub arguments_count: usize,
     pub name: String,
     pub locals: HashMap<u64, Variable, NoopHasher>,
     current_op_code: usize,
@@ -27,13 +28,14 @@ impl Display for CallFrame {
 }
 
 impl CallFrame {
-    pub fn new(chunk: &mut Chunk, stack_pointer: usize, name: String) -> Self {
+    pub fn new(chunk: &mut Chunk, stack_pointer: usize, name: String, arguments_count: usize) -> Self {
         Self {
             code: std::mem::take(&mut chunk.op_codes),
             stack_pointer,
             current_op_code: 0,
             name,
             locals: std::mem::take(&mut chunk.locals),
+            arguments_count
         }
     }
 

@@ -1,9 +1,10 @@
+use std::cell::{Ref, RefCell};
 use std::fmt::{Display, Formatter};
 
 
 use crate::lang::vm::RuntimeError;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum StackEntry {
     ConstantPoolReference(u64),
@@ -16,25 +17,35 @@ pub enum StackEntry {
 
 #[derive(Debug)]
 pub struct Stack {
-    values: Vec<StackEntry>,
+    values: RefCell<Vec<StackEntry>>,
 }
 
 impl Stack {
     pub fn new() -> Self {
-        Stack { values: vec![] }
+        Stack { values: RefCell::new(vec![]) }
     }
 
-    pub fn push(&mut self, value: StackEntry) {
-        self.values.push(value)
+    pub fn push(&self, value: StackEntry) {
+        self.values.borrow_mut().push(value)
     }
 
-    pub fn pop(&mut self) -> Result<StackEntry, RuntimeError> {
-        self.values
+    pub fn pop(&self) -> Result<StackEntry, RuntimeError> {
+        self.values.borrow_mut()
             .pop()
             .ok_or_else(|| RuntimeError::new("Tried to pop an empty stack."))
     }
-    pub fn contents(&self) -> &Vec<StackEntry> {
-        &self.values
+
+    pub fn peek(&self, index: usize) -> Result<StackEntry, RuntimeError> {
+        self.values.borrow()
+            .get(index).map(|value| value.clone())
+            .ok_or_else(|| RuntimeError::new_string(format!("Tried to access index \"{}\" is out of bounds \"{}\"", index, self.len() - 1)))
+    }
+    pub fn contents(&self) -> Ref<Vec<StackEntry>> {
+        self.values.borrow()
+    }
+
+    pub fn len(&self) -> usize {
+        self.values.borrow().len()
     }
 }
 
@@ -43,7 +54,7 @@ impl Display for Stack {
         if self.contents().is_empty() {
             f.write_str("         <empty stack>\n")?;
         } else {
-            for (i, val) in self.values.iter().enumerate() {
+            for (i, val) in self.contents().iter().enumerate() {
                 f.write_str(&format!("    [{}]  {:?}\n", i, val))?;
             }
         }
