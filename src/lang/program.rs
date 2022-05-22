@@ -279,9 +279,16 @@ impl Program {
                 let index = arguments[0].number_value() as usize;
                 if arguments.len() == 1 && index > (call_frame.arguments_count - 1) {
                     return Err(RuntimeError::Other(format!("Can't call getarg({}) which is greater than number of arguments provided: {}. Maximum allow index is {}. Consider calling getarg with a default value: getarg({}, DEFAULT_VALUE)", index, call_frame.arguments_count, call_frame.arguments_count - 1, index)));
+                } else if arguments.len() == 2 && index > (call_frame.arguments_count - 1) {
+                    let value = arguments[1].clone();
+                    let reference = self.vm.add_in_constant_pool(value);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                } else if arguments.len() > 2 {
+                    return Err(RuntimeError::Other(format!("Can't call getarg with more than 2 arguments")));
+                } else {
+                    let stack_entry = self.stack.peek(call_frame.stack_pointer + index)?;
+                    self.stack.push(stack_entry.clone());
                 }
-                let stack_entry = self.stack.peek(call_frame.stack_pointer + index)?;
-                self.stack.push(stack_entry.clone());
             }
             _ => {}
         }

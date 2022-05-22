@@ -132,3 +132,23 @@ l8	    function print { // this is a native function, it is forbidden to declare
 	    ^
 "#, result.as_ref().err().unwrap().get(1).unwrap().message());
 }
+
+#[test]
+fn function_call_with_number_arguments_with_default_different_type_assigned_to_number() {
+    // Given
+    let script = r#"
+    my_func(2);
+    function my_func {
+        .@a = getarg(1, "3") + 4;
+        vm_dump_var("a", .@a);
+    }
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(r#"test_script 4:8. Variable ".@a" is a Number but was assigned to a String.
+l4	        .@a = getarg(1, "3") + 4;
+	        ^^^
+"#, result.as_ref().err().unwrap().get(0).unwrap().message());
+}

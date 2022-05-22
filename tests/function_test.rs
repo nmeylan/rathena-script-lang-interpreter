@@ -80,7 +80,6 @@ fn function_call_with_arguments_with_default() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    // TODO test with getarg(1)
     let function = compile(r#"
     my_func("hello");
     function my_func {
@@ -92,4 +91,58 @@ fn function_call_with_arguments_with_default() {
     Vm::execute_program(vm, function).unwrap();
     // Then
     assert_eq!(String::from("default world"), events.borrow().get("a").unwrap().value.string_value().clone());
+}
+#[test]
+fn function_call_with_number_arguments() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let function = compile(r#"
+    my_func(2);
+    function my_func {
+        .@a = getarg(0) + 4;
+        vm_dump_var("a", .@a);
+    }
+    "#);
+    // When
+    Vm::execute_program(vm, function).unwrap();
+    // Then
+    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
+}
+#[test]
+fn function_call_with_number_arguments_with_default() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let function = compile(r#"
+    my_func(2);
+    function my_func {
+        .@a = getarg(1, 3) + 4;
+        vm_dump_var("a", .@a);
+    }
+    "#);
+    // When
+    Vm::execute_program(vm, function).unwrap();
+    // Then
+    assert_eq!(7_i32, events.borrow().get("a").unwrap().value.number_value().clone());
+}
+#[test]
+fn function_call_with_number_arguments_with_default_different_type_assigned_to_string() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let function = compile(r#"
+    my_func(2);
+    function my_func {
+        .@a$ = getarg(1, "3") + 4;
+        vm_dump_var("a", .@a$);
+    }
+    "#);
+    // When
+    Vm::execute_program(vm, function).unwrap();
+    // Then
+    assert_eq!(String::from("34"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
