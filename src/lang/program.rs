@@ -18,6 +18,7 @@ use crate::lang::vm::RuntimeError;
 const NATIVE_METHODS_INTERNAL_IMPLEMENTATION: &'static [&'static str] = &[
     "getarg"
 ];
+
 pub struct Program {
     pub vm: Arc<Vm>,
     stack: Stack,
@@ -191,13 +192,17 @@ impl Program {
                     }
                 }
                 OpCode::Call => {}
-                OpCode::Return => {
-                    let returned_stack_entry = self.stack.pop()?;
-                    self.stack.truncate(call_frame.stack_pointer);
-                    let returned_value = self.value_from_stack_entry(&returned_stack_entry, &call_frame)?;
-                    let reference = self.vm.add_in_constant_pool(returned_value);
-                    self.stack.push(StackEntry::ConstantPoolReference(reference));
-                    return Ok(true);
+                OpCode::Return(not_empty_return) => {
+                    return if *not_empty_return {
+                        let returned_stack_entry = self.stack.pop()?;
+                        self.stack.truncate(call_frame.stack_pointer);
+                        let returned_value = self.value_from_stack_entry(&returned_stack_entry, &call_frame)?;
+                        let reference = self.vm.add_in_constant_pool(returned_value);
+                        self.stack.push(StackEntry::ConstantPoolReference(reference));
+                        Ok(true)
+                    } else {
+                        Ok(false)
+                    }
                 }
                 OpCode::Command => {}
             }

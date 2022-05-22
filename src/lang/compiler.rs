@@ -637,7 +637,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_jumpStatement(&mut self, ctx: &JumpStatementContext<'input>) {
         self.visit_children(ctx);
         if ctx.Return().is_some() {
-            self.current_chunk().emit_op_code(OpCode::Return);
+            let not_empty_return = ctx.expression().is_some();
+            self.current_chunk().emit_op_code(OpCode::Return(not_empty_return));
         }
     }
 

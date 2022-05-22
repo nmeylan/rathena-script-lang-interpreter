@@ -109,6 +109,6 @@ pub enum OpCode {
     Jump,
     Invoke,
     Call,
-    Return,
+    Return(bool),
     Command,
 }
