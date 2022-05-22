@@ -615,7 +615,25 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_selectionStatement(&mut self, ctx: &SelectionStatementContext<'input>) {
-        self.visit_children(ctx)
+        if ctx.If().is_some() {
+            self.visit_expression(ctx.expression().as_ref().unwrap());
+            self.current_chunk().emit_op_code(OpCode::If(0));
+            let if_index = self.current_chunk().last_op_code_index();
+            self.visit_statement(ctx.statement(0).as_ref().unwrap());
+            let jump_to_index = self.current_chunk().last_op_code_index() + 2;
+            self.current_chunk().set_op_code_at(if_index, OpCode::If(jump_to_index));
+
+            if ctx.Else().is_some() {
+                self.current_chunk().emit_op_code(OpCode::Jump(jump_to_index - 1));
+                let then_jump_index = self.current_chunk().last_op_code_index();
+                self.current_chunk().emit_op_code(OpCode::Else);
+                self.visit_statement(ctx.statement(1).as_ref().unwrap());
+                let jump_to_index = self.current_chunk().last_op_code_index() + 1;
+                self.current_chunk().set_op_code_at(then_jump_index, OpCode::Jump(jump_to_index));
+            }
+        } else {
+            self.visit_children(ctx);
+        }
     }
 
     fn visit_iterationStatement(&mut self, ctx: &IterationStatementContext<'input>) {

@@ -33,6 +33,14 @@ impl Default for Chunk {
 }
 
 impl Chunk {
+    pub fn last_op_code_index(&self) -> usize {
+        self.op_codes.len() - 1
+    }
+
+    pub fn set_op_code_at(&mut self, index: usize, op_code: OpCode) {
+        self.op_codes[index] = op_code;
+    }
+
     pub fn emit_op_code(&mut self, op_code: OpCode) {
         println!("emit opcode {:?}", op_code);
         self.op_codes.push(op_code);
@@ -106,9 +114,12 @@ pub enum OpCode {
     Divide,
     Modulo,
     Not,
-    Jump,
+    Jump(usize), // OpCode index to jump to
     Invoke,
     Call,
     Return(bool),
+    If(usize), // OpCode index to jump to when condition is evaluated to false.
+    Else,
+    SkipOp,
     Command,
 }

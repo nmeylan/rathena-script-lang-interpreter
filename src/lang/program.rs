@@ -56,9 +56,14 @@ impl Program {
         writeln!(stdout, "========= Call frame ========").unwrap();
         stdout.flush();
         call_frame.dump(&mut stdout);
-        for (index, next_op_code) in call_frame.code.iter().enumerate() {
+        let mut op_index = 0;
+        loop {
+            if op_index >= call_frame.code.len() {
+                break;
+            }
+            let next_op_code = call_frame.code.get(op_index).unwrap();
             writeln!(stdout, "=========   Executing    ========").unwrap();
-            writeln!(stdout, "[{}] {:?}", index, next_op_code).unwrap();
+            writeln!(stdout, "[{}] {:?}", op_index, next_op_code).unwrap();
             writeln!(stdout, "=========   Stack    ========").unwrap();
             self.dump_stack(&mut stdout, &call_frame);
             stdout.flush();
@@ -153,7 +158,9 @@ impl Program {
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
                 OpCode::Not => {}
-                OpCode::Jump => {}
+                OpCode::Jump(jump_to_index) => {
+                    op_index = *jump_to_index - 1;
+                }
                 OpCode::Invoke => {}
                 OpCode::CallNative { argument_count, reference } => {
                     let mut arguments: Vec<Value> = vec![];
@@ -205,7 +212,21 @@ impl Program {
                     }
                 }
                 OpCode::Command => {}
+                OpCode::If(jump_to_index) => {
+                    let stack_entry = self.stack.pop()?;
+                    let value = self.value_from_stack_entry(&stack_entry, &call_frame)?;
+                    if value.number_value() != 1 {
+                        op_index = *jump_to_index - 1;
+                    }
+                }
+                OpCode::Else => {
+                    // does nothing
+                }
+                OpCode::SkipOp => {
+                    op_index += 1;
+                }
             }
+            op_index += 1;
         }
         Ok(false)
     }

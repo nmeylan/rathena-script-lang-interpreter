@@ -116,6 +116,13 @@ impl ValueRef {
             ValueRef::Number(reference) => reference.unwrap()
         }
     }
+
+    pub fn is_set(&self) -> bool {
+        match self {
+            ValueRef::String(reference) => reference.is_some(),
+            ValueRef::Number(reference) => reference.is_some()
+        }
+    }
 }
 
 #[derive(Debug, Clone, Hash, PartialEq)]

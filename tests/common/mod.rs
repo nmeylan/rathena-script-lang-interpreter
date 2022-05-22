@@ -37,10 +37,19 @@ impl NativeMethodHandler for VmHook {
         }
         if native.name.eq("vm_dump_locals") {
             call_frame.locals().for_each(|(_, var)| {
-                (self.hook)(Event {
-                    name: var.name.clone(),
-                    value: program.vm.get_from_constant_pool(var.value_ref.clone().borrow().get_ref()).map(|constant| constant.value()).unwrap(),
-                });
+                if !var.value_ref.clone().borrow().is_set() {
+                    return;
+                }
+                let maybe_local_variable_value = program.vm.get_from_constant_pool(var.value_ref.clone().borrow().get_ref())
+                    .map(|constant| {
+                        constant.value()
+                    });
+                if maybe_local_variable_value.is_some() {
+                    (self.hook)(Event {
+                        name: var.name.clone(),
+                        value: program.vm.get_from_constant_pool(var.value_ref.clone().borrow().get_ref()).map(|constant| constant.value()).unwrap(),
+                    });
+                }
             });
         }
     }
