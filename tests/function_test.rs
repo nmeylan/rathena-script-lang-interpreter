@@ -54,6 +54,26 @@ fn function_call_with_arguments() {
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
 
+#[test]
+fn function_call_with_variable_arguments() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // TODO test with getarg(1)
+    let function = compile(r#"
+    .@a$ = "hello";
+    my_func(.@a$);
+    function my_func {
+        .@a$ = getarg(0) + " world";
+        vm_dump_var("a", .@a$);
+    }
+    "#);
+    // When
+    Vm::execute_program(vm, function).unwrap();
+    // Then
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+}
 
 #[test]
 fn function_call_with_arguments_out_of_bounds() {
@@ -145,4 +165,52 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
     Vm::execute_program(vm, function).unwrap();
     // Then
     assert_eq!(String::from("34"), events.borrow().get("a").unwrap().value.string_value().clone());
+}
+
+#[test]
+fn function_with_return_type() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let function = compile(r#"
+    function plus_four {
+        .@a = getarg(0) + 4;
+        .@b = 0;
+        return .@a + .@b;
+    }
+    .@a = plus_four(2);
+    vm_dump_var("a", .@a);
+    "#);
+    // When
+    Vm::execute_program(vm, function).unwrap();
+    // Then
+    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
+}
+
+#[test]
+fn function_with_return_type_multicall() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let function = compile(r#"
+    function plus_four {
+        .@a = getarg(0) + 4;
+        return .@a;
+    }
+    function minus_one {
+        return getarg(0) - 1;
+    }
+    function print_arg {
+        print(getarg(0));
+    }
+    .@a = minus_one(plus_four(2));
+    print_arg(.@a);
+    vm_dump_var("a", .@a);
+    "#);
+    // When
+    Vm::execute_program(vm, function).unwrap();
+    // Then
+    assert_eq!(5_i32, events.borrow().get("a").unwrap().value.number_value().clone());
 }

@@ -16,7 +16,13 @@ pub struct VmHook {
 impl NativeMethodHandler for VmHook {
     fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, program: &Program, call_frame: &CallFrame) {
         if native.name.eq("println") {
-            println!("{}", params.iter().map(|p| p.string_value().clone()).collect::<Vec<String>>().join(" "));
+            println!("{}", params.iter().map(|p| {
+                match p {
+                    Value::String(v) => v.as_ref().unwrap().clone(),
+                    Value::Number(v) => format!("{}", v.as_ref().unwrap())
+                }
+
+            }).collect::<Vec<String>>().join(" "));
             return;
         }
         if native.name.eq("vm_dump_var") {

@@ -5,7 +5,7 @@ use std::mem;
 use std::ops::Deref;
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream};
+use antlr_rust::{InputStream, TidExt};
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTreeVisitor};
 use crate::parser::rathenascriptlangvisitor::{*};
@@ -13,7 +13,7 @@ use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
 use crate::lang::vm::Vm;
 
-use crate::lang::chunk::{Chunk};
+use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, NativeAlreadyDefined, Type, UndefinedFunction};
 use crate::lang::value::{*};
@@ -635,7 +635,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_jumpStatement(&mut self, ctx: &JumpStatementContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_children(ctx);
+        if ctx.Return().is_some() {
+            self.current_chunk().emit_op_code(OpCode::Return);
+        }
     }
 
     fn visit_menuStatement(&mut self, ctx: &MenuStatementContext<'input>) {

@@ -12,6 +12,7 @@ use crate::lang::vm::Vm;
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
+use crate::lang::stack::StackEntry::ConstantPoolReference;
 use crate::lang::vm::RuntimeError;
 
 const NATIVE_METHODS_INTERNAL_IMPLEMENTATION: &'static [&'static str] = &[
@@ -41,10 +42,10 @@ impl Program {
         let function_name = function.name.clone();
         self.functions_pool = std::mem::take(&mut chunk.functions);
         let call_frame = CallFrame::new(chunk, 1, function_name, 0);
-        self.run(call_frame)
+        self.run(call_frame).map(|_| ())
     }
 
-    pub fn run(&mut self, call_frame: CallFrame) -> Result<(), RuntimeError> {
+    pub fn run(&mut self, call_frame: CallFrame) -> Result<bool, RuntimeError> {
         let mut stdout = io::stdout();
         writeln!(stdout, "=========   VM    ========").unwrap();
         self.vm.dump(&mut stdout);
@@ -171,15 +172,37 @@ impl Program {
                     let function = self.functions_pool.get(reference).unwrap();
                     let mut chunk = function.chunk.clone();
                     self.vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
-                    let call_frame = CallFrame::new(&mut chunk, self.stack.len() - argument_count, function.name.clone(), *argument_count);
-                    self.run(call_frame)?
+                    let stack_pointer = self.stack.len() - argument_count;
+                    // Convert function argument to heap ref. If we use current frame variable as argument, we need to retrieve value in sub callframe.
+                    // We can do that by putting retrieving constant reference and put them in the stack.
+                    let mut arguments: Vec<Value> = vec![];
+                    for _ in 0..*argument_count {
+                        let stack_entry = self.stack.pop()?;
+                        arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame)?);
+                    }
+                    for value in arguments {
+                        let reference = self.vm.add_in_constant_pool(value);
+                        self.stack.push(ConstantPoolReference(reference));
+                    }
+                    let new_function_call_frame = CallFrame::new(&mut chunk, stack_pointer, function.name.clone(), *argument_count);
+                    let as_returned = self.run(new_function_call_frame)?;
+                    if !as_returned {
+                        self.stack.truncate(stack_pointer);
+                    }
                 }
                 OpCode::Call => {}
-                OpCode::Return => {}
+                OpCode::Return => {
+                    let returned_stack_entry = self.stack.pop()?;
+                    self.stack.truncate(call_frame.stack_pointer);
+                    let returned_value = self.value_from_stack_entry(&returned_stack_entry, &call_frame)?;
+                    let reference = self.vm.add_in_constant_pool(returned_value);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                    return Ok(true);
+                }
                 OpCode::Command => {}
             }
         }
-        Ok(())
+        Ok(false)
     }
 
     fn dump(&self, out: &mut Stdout) {
