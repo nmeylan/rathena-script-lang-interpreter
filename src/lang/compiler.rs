@@ -267,8 +267,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_primaryExpression(&mut self, ctx: &PrimaryExpressionContext<'input>) {
         if ctx.String().is_some() {
-            let reference = self.current_chunk().add_constant(Constant::String(ctx.String().unwrap().symbol.text.deref().to_string()
-                                                                                   .replace('\"', "") // TODO check if it can be done by antlr skip instead.
+            let reference = self.current_chunk().add_constant(
+                Constant::String(
+                    remove_quote_from_string(ctx.String().as_ref().unwrap().symbol.text.as_ref()) // TODO check if it can be done by antlr skip instead.
             ));
             self.add_current_assigment_type(ValueType::String);
             self.current_chunk().emit_op_code(LoadConstant(reference));
@@ -301,9 +302,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else {
             0
         };
-        let identifier = ctx.Identifier().unwrap();
-
-        let function_or_native_name = &identifier.symbol.text;
+        let function_or_native_name = if ctx.Identifier().is_some() {
+            ctx.Identifier().unwrap().symbol.text.to_string()
+        } else if ctx.String().is_some() {
+            remove_quote_from_string(ctx.String().as_ref().unwrap().symbol.text.as_ref())
+        }else {
+            return;
+        };
         if NATIVE_METHODS.contains(&function_or_native_name.as_ref()) {
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
         } else {
@@ -790,4 +795,8 @@ fn parse_number(num: Cow<str>) -> i32 {
         panic!("Expected number to be u32, but was {}", num);
     }
     maybe_i32.unwrap()
+}
+
+fn remove_quote_from_string(string: &str) -> String {
+    (&string[1..string.len() - 1]).to_string()
 }

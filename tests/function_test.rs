@@ -40,7 +40,6 @@ fn function_call_with_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    // TODO test with getarg(1)
     let function = compile(r#"
     my_func("hello");
     function my_func {
@@ -60,7 +59,6 @@ fn function_call_with_variable_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    // TODO test with getarg(1)
     let function = compile(r#"
     .@a$ = "hello";
     my_func(.@a$);
@@ -81,7 +79,6 @@ fn function_call_with_arguments_out_of_bounds() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    // TODO test with getarg(1)
     let function = compile(r#"
     my_func("hello");
     function my_func {
@@ -180,12 +177,14 @@ fn function_with_return_type() {
         return .@a + .@b;
     }
     .@a = plus_four(2);
-    vm_dump_var("a", .@a);
+    .@b = callfunc "plus_four", 4;
+    vm_dump_locals();
     "#);
     // When
     Vm::execute_program(vm, function).unwrap();
     // Then
     assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
+    assert_eq!(8_i32, events.borrow().get("b").unwrap().value.number_value().clone());
 }
 
 #[test]

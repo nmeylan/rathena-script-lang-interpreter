@@ -14,7 +14,7 @@ primaryExpression
     ;
 
 functionCallExpression
-    : Identifier '(' argumentExpressionList? ')';
+    : Identifier '(' argumentExpressionList? ')' | 'callfunc' String ( ',' argumentExpressionList)?;
 
 postfixExpression
     : functionCallExpression | primaryExpression ('[' expression ']' | ('++' | '--') )*
@@ -386,6 +386,7 @@ Case : 'case';
 Function : 'function';
 Break : 'break';
 SetArray: 'setarray';
+Callfunc: 'callfunc';
 GetArraySize: 'getarraysize';
 Close: 'close';
 Close2: 'close2';
