@@ -42,16 +42,25 @@ castExpression
     ;
 
 multiplicativeExpression
-    :   castExpression (('*'|'/'|'%') castExpression)*
+    :   castExpression (multiplicativeOperator castExpression)*
     ;
+
+multiplicativeOperator
+    : ('*'|'/'|'%');
 
 additiveExpression
-    :   multiplicativeExpression ((Plus | Minus) multiplicativeExpression)*
+    :   multiplicativeExpression (additiveOperator multiplicativeExpression)*
     ;
 
+additiveOperator
+    : (Plus | Minus);
+
 shiftExpression
-    :   additiveExpression (('<<'|'>>') additiveExpression)*
+    :   additiveExpression (shiftOperator additiveExpression)*
     ;
+
+shiftOperator
+    : ('<<'|'>>');
 
 relationalExpression
     :   shiftExpression (('<'|'>'|'<='|'>=') shiftExpression)*

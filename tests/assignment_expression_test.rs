@@ -57,6 +57,7 @@ fn assignment_with_number_operation() {
     .@i = 4 * .@c;
     .@f = 2 + 3 * 2;
     .@g = 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
+    .@h = 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
     vm_dump_locals();"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
@@ -71,6 +72,7 @@ fn assignment_with_number_operation() {
     assert_eq!(32, events.borrow().get("i").unwrap().value.number_value().clone());
     assert_eq!(8, events.borrow().get("f").unwrap().value.number_value().clone());
     assert_eq!(171, events.borrow().get("g").unwrap().value.number_value().clone());
+    assert_eq!(-1, events.borrow().get("h").unwrap().value.number_value().clone());
 }
 
 #[test]

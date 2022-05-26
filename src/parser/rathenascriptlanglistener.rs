@@ -95,6 +95,16 @@ fn enter_multiplicativeExpression(&mut self, _ctx: &MultiplicativeExpressionCont
  */
 fn exit_multiplicativeExpression(&mut self, _ctx: &MultiplicativeExpressionContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#multiplicativeOperator}.
+ * @param ctx the parse tree
+ */
+fn enter_multiplicativeOperator(&mut self, _ctx: &MultiplicativeOperatorContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#multiplicativeOperator}.
+ * @param ctx the parse tree
+ */
+fn exit_multiplicativeOperator(&mut self, _ctx: &MultiplicativeOperatorContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#additiveExpression}.
  * @param ctx the parse tree
  */
@@ -105,6 +115,16 @@ fn enter_additiveExpression(&mut self, _ctx: &AdditiveExpressionContext<'input>)
  */
 fn exit_additiveExpression(&mut self, _ctx: &AdditiveExpressionContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#additiveOperator}.
+ * @param ctx the parse tree
+ */
+fn enter_additiveOperator(&mut self, _ctx: &AdditiveOperatorContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#additiveOperator}.
+ * @param ctx the parse tree
+ */
+fn exit_additiveOperator(&mut self, _ctx: &AdditiveOperatorContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#shiftExpression}.
  * @param ctx the parse tree
  */
@@ -114,6 +134,16 @@ fn enter_shiftExpression(&mut self, _ctx: &ShiftExpressionContext<'input>) { }
  * @param ctx the parse tree
  */
 fn exit_shiftExpression(&mut self, _ctx: &ShiftExpressionContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#shiftOperator}.
+ * @param ctx the parse tree
+ */
+fn enter_shiftOperator(&mut self, _ctx: &ShiftOperatorContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#shiftOperator}.
+ * @param ctx the parse tree
+ */
+fn exit_shiftOperator(&mut self, _ctx: &ShiftOperatorContext<'input>) { }
 /**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#relationalExpression}.
  * @param ctx the parse tree

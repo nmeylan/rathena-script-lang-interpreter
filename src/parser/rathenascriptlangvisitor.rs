@@ -64,16 +64,34 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_multiplicativeExpression(&mut self, ctx: &MultiplicativeExpressionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#multiplicativeOperator}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_multiplicativeOperator(&mut self, ctx: &MultiplicativeOperatorContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#additiveExpression}.
 	 * @param ctx the parse tree
 	 */
 	fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#additiveOperator}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_additiveOperator(&mut self, ctx: &AdditiveOperatorContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#shiftExpression}.
 	 * @param ctx the parse tree
 	 */
 	fn visit_shiftExpression(&mut self, ctx: &ShiftExpressionContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#shiftOperator}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_shiftOperator(&mut self, ctx: &ShiftOperatorContext<'input>) { self.visit_children(ctx) }
 
 	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#relationalExpression}.
@@ -487,6 +505,14 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#multiplicativeOperator}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_multiplicativeOperator(&mut self, ctx: &MultiplicativeOperatorContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#additiveExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -495,10 +521,26 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#additiveOperator}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_additiveOperator(&mut self, ctx: &AdditiveOperatorContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#shiftExpression}.
 	 * @param ctx the parse tree
 	 */
 		fn visit_shiftExpression(&mut self, ctx: &ShiftExpressionContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#shiftOperator}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_shiftOperator(&mut self, ctx: &ShiftOperatorContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -1001,13 +1043,28 @@ where
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
+	fn visit_multiplicativeOperator(&mut self, ctx: &MultiplicativeOperatorContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_multiplicativeOperator(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
 	fn visit_additiveExpression(&mut self, ctx: &AdditiveExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_additiveExpression(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
+	fn visit_additiveOperator(&mut self, ctx: &AdditiveOperatorContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_additiveOperator(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
 	fn visit_shiftExpression(&mut self, ctx: &ShiftExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_shiftExpression(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_shiftOperator(&mut self, ctx: &ShiftOperatorContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_shiftOperator(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
