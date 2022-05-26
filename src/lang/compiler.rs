@@ -665,6 +665,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.visit_statement(ctx.statement(1).as_ref().unwrap());
                 let jump_to_index = self.current_chunk().last_op_code_index() + 1;
                 self.current_chunk().set_op_code_at(then_jump_index, OpCode::Jump(jump_to_index));
+            } else {
+                self.current_chunk().set_op_code_at(if_index, OpCode::If(jump_to_index - 1));
             }
         } else {
             self.visit_children(ctx);

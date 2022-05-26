@@ -166,7 +166,7 @@ fn type_checking_conditional_statement() {
     let result = compile(script);
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!(2, result.as_ref().err().unwrap().len());
+    assert_eq!(3, result.as_ref().err().unwrap().len());
     assert_eq!(r#"test_script 3:10. Can't perform comparison when left and right are not same types
 l3	    .@b = 1 == "1";
 	          ^^^^^^

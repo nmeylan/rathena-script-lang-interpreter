@@ -41,6 +41,9 @@ fn simple_condition() {
     if(1) {
         .@i$ = "i am true";
     }
+    if(0) {
+        .@j$ = "i am false";
+    }
     vm_dump_locals();
     "#);
     let events_clone = events.clone();

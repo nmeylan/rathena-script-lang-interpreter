@@ -54,8 +54,8 @@ impl Program {
         self.dump(&mut stdout);
         writeln!(stdout).unwrap();
         writeln!(stdout, "========= Call frame ========").unwrap();
-        stdout.flush();
         call_frame.dump(&mut stdout);
+        stdout.flush();
         let mut op_index = 0;
         loop {
             if op_index >= call_frame.code.len() {
@@ -280,6 +280,12 @@ impl Program {
             }
             op_index += 1;
         }
+        writeln!(stdout, "*********   Final status ********").unwrap();
+        writeln!(stdout, "=========   Thread   ========").unwrap();
+        self.dump(&mut stdout);
+        writeln!(stdout, "========= Call frame ========").unwrap();
+        call_frame.dump(&mut stdout);
+        stdout.flush();
         Ok(false)
     }
 
