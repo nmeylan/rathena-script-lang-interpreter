@@ -109,8 +109,7 @@ pub enum OpCode {
     NotEqual,
     LogicalAnd,
     LogicalOr,
-    Greater,
-    Less,
+    Relational(Relational),
     Add,
     Subtract,
     Multiply,
@@ -125,4 +124,12 @@ pub enum OpCode {
     Else,
     SkipOp,
     Command,
+}
+
+#[derive(Debug, Clone)]
+pub enum Relational {
+    GT,
+    GTE,
+    LT,
+    LTE
 }

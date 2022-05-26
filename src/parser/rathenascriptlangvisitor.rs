@@ -100,6 +100,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_relationalExpression(&mut self, ctx: &RelationalExpressionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#relationalOperator}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_relationalOperator(&mut self, ctx: &RelationalOperatorContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#equalityExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -555,6 +561,14 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 	 * @param ctx the parse tree
 	 */
 		fn visit_relationalExpression(&mut self, ctx: &RelationalExpressionContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#relationalOperator}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_relationalOperator(&mut self, ctx: &RelationalOperatorContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -1084,6 +1098,11 @@ where
 
 	fn visit_relationalExpression(&mut self, ctx: &RelationalExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_relationalExpression(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_relationalOperator(&mut self, ctx: &RelationalOperatorContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_relationalOperator(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

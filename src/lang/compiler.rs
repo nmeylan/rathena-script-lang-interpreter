@@ -13,7 +13,7 @@ use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
 use crate::lang::vm::Vm;
 
-use crate::lang::chunk::{Chunk, OpCode};
+use crate::lang::chunk::{Chunk, OpCode, Relational};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, NativeAlreadyDefined, Type, UndefinedFunction};
 use crate::lang::value::{*};
@@ -392,7 +392,28 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_relationalExpression(&mut self, ctx: &RelationalExpressionContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_shiftExpression(&ctx.shiftExpression(ctx.shiftExpression_all().len() - 1).unwrap());
+        for (i, _) in ctx.shiftExpression_all().iter().enumerate().rev() {
+            if i == ctx.shiftExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_shiftExpression(&ctx.shiftExpression(i).unwrap());
+            if !self.current_assignment_types_are_same_type() {
+                self.register_error(Type, ctx, "Can't perform comparison when left and right are not same types".to_string());
+            }
+            let operator = ctx.relationalOperator(i).unwrap();
+            if operator.RightCaret().is_some() {
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::GT));
+            } else if operator.RightCaretEqual().is_some() {
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::GTE));
+            } else if operator.LeftCaret().is_some() {
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::LT));
+            } else if operator.LeftCaretEqual().is_some() {
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::LTE));
+            }
+            self.current_assignment_type_drop();
+            self.add_current_assigment_type(ValueType::Number);
+        }
     }
 
     fn visit_equalityExpression(&mut self, ctx: &EqualityExpressionContext<'input>) {

@@ -100,6 +100,12 @@ fn conditional_statements() {
     .@e = 0 == 1 && 1 == 1;
     .@f = (0 == 1 && 1 == 1) || 1 == 1;
     .@g = 0 == 1 && (1 == 1 || 1 == 1);
+    .@h = 1000;
+    .@i = .@h > 999 && .@h < 10000;
+    .@j = .@h > 1000 && .@h < 10000;
+    .@k = .@h >= 1000 && .@h < 10000;
+    .@l = .@h > 999 && .@h <= 1000;
+    .@m = .@h > 999 && .@h < 1000;
     vm_dump_locals();
     "#);
     let events_clone = events.clone();
@@ -114,4 +120,8 @@ fn conditional_statements() {
     assert_eq!(0, events.borrow().get("e").unwrap().value.number_value().clone());
     assert_eq!(1, events.borrow().get("f").unwrap().value.number_value().clone());
     assert_eq!(0, events.borrow().get("g").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("i").unwrap().value.number_value().clone());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("k").unwrap().value.number_value().clone());
+    assert_eq!(0, events.borrow().get("m").unwrap().value.number_value().clone());
 }

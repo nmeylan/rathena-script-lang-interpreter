@@ -155,6 +155,16 @@ fn enter_relationalExpression(&mut self, _ctx: &RelationalExpressionContext<'inp
  */
 fn exit_relationalExpression(&mut self, _ctx: &RelationalExpressionContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#relationalOperator}.
+ * @param ctx the parse tree
+ */
+fn enter_relationalOperator(&mut self, _ctx: &RelationalOperatorContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#relationalOperator}.
+ * @param ctx the parse tree
+ */
+fn exit_relationalOperator(&mut self, _ctx: &RelationalOperatorContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#equalityExpression}.
  * @param ctx the parse tree
  */

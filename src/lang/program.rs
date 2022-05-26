@@ -4,6 +4,7 @@ use std::sync::{Arc};
 use std::io::{Stdout, Write};
 use std::default::Default;
 use std::fmt::format;
+use std::fs::read;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Function, Native, ValueRef, Variable};
@@ -109,7 +110,7 @@ impl Program {
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let comparison_result = if v1.is_string() && v2.is_string() {
                         v1.string_value() != v2.string_value()
-                    } else if v2.is_number() && v2.is_number() {
+                    } else if v2.is_number() && v1.is_number() {
                         v1.number_value() != v2.number_value()
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
@@ -121,7 +122,7 @@ impl Program {
                     let stack_entry2 = self.stack.pop()?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
-                    let comparison_result = if v2.is_number() && v2.is_number() {
+                    let comparison_result = if v2.is_number() && v1.is_number() {
                         v1.number_value() == 1 && v2.number_value() == 1
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
@@ -133,15 +134,30 @@ impl Program {
                     let stack_entry2 = self.stack.pop()?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
-                    let comparison_result = if v2.is_number() && v2.is_number() {
+                    let comparison_result = if v2.is_number() && v1.is_number() {
                         v1.number_value() == 1 || v2.number_value() == 1
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
-                OpCode::Greater => {}
-                OpCode::Less => {}
+                OpCode::Relational(Relational) => {
+                    let stack_entry1 = self.stack.pop()?;
+                    let stack_entry2 = self.stack.pop()?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
+                    let comparison_result = if v2.is_number() && v2.is_number() {
+                        match Relational {
+                            Relational::GT => v1.number_value() > v2.number_value(),
+                            Relational::GTE => v1.number_value() >= v2.number_value(),
+                            Relational::LT => v1.number_value() < v2.number_value(),
+                            Relational::LTE => v1.number_value() <= v2.number_value(),
+                        }
+                    } else { false };
+                    let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
+                    let reference = self.vm.add_in_constant_pool(result_as_number);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                }
                 OpCode::Add => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;

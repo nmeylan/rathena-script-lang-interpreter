@@ -63,8 +63,10 @@ shiftOperator
     : ('<<'|'>>');
 
 relationalExpression
-    :   shiftExpression (('<'|'>'|'<='|'>=') shiftExpression)*
+    :   shiftExpression (relationalOperator shiftExpression)*
     ;
+relationalOperator
+    : ('<'|'>'|'<='|'>=');
 
 equalityExpression
     :   relationalExpression (equalityOperator relationalExpression)*
