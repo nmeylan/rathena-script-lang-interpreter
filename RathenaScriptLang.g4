@@ -67,8 +67,10 @@ relationalExpression
     ;
 
 equalityExpression
-    :   relationalExpression (('=='| '!=') relationalExpression)*
+    :   relationalExpression (equalityOperator relationalExpression)*
     ;
+equalityOperator
+    : ('=='| '!=');
 
 andExpression
     :   equalityExpression ( '&' equalityExpression)*

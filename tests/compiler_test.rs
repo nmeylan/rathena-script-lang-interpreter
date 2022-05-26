@@ -152,3 +152,51 @@ l4	        .@a = getarg(1, "3") + 4;
 	        ^^^
 "#, result.as_ref().err().unwrap().get(0).unwrap().message());
 }
+
+#[test]
+fn type_checking_conditional_statement() {
+    // Given
+    let script = r#"
+    .@a = 1 == 1;
+    .@b = 1 == "1";
+    .@c = "1" == "1";
+    .@d = "1" == "1" && 1 == "1";
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(2, result.as_ref().err().unwrap().len());
+    assert_eq!(r#"test_script 3:10. Can't perform comparison when left and right are not same types
+l3	    .@b = 1 == "1";
+	          ^^^^^^
+"#, result.as_ref().err().unwrap()[0].message());
+    assert_eq!(r#"test_script 5:24. Can't perform comparison when left and right are not same types
+l5	    .@d = "1" == "1" && 1 == "1";
+	                        ^^^^^^
+"#, result.as_ref().err().unwrap()[1].message());
+}
+
+#[test]
+fn type_checking_logical_and_or() {
+    // Given
+    let script = r#"
+    .@a = 1 && 1;
+    .@b = 1 && "1";
+    .@c = 1 || 0;
+    .@d = 1 && "0";
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(2, result.as_ref().err().unwrap().len());
+    assert_eq!(r#"test_script 3:10. Can't perform logical and (&&) when left and right are not same types
+l3	    .@b = 1 && "1";
+	          ^^^^^^
+"#, result.as_ref().err().unwrap()[0].message());
+    assert_eq!(r#"test_script 5:10. Can't perform logical and (&&) when left and right are not same types
+l5	    .@d = 1 && "0";
+	          ^^^^^^
+"#, result.as_ref().err().unwrap()[1].message());
+}

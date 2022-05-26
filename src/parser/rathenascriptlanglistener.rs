@@ -165,6 +165,16 @@ fn enter_equalityExpression(&mut self, _ctx: &EqualityExpressionContext<'input>)
  */
 fn exit_equalityExpression(&mut self, _ctx: &EqualityExpressionContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#equalityOperator}.
+ * @param ctx the parse tree
+ */
+fn enter_equalityOperator(&mut self, _ctx: &EqualityOperatorContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#equalityOperator}.
+ * @param ctx the parse tree
+ */
+fn exit_equalityOperator(&mut self, _ctx: &EqualityOperatorContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#andExpression}.
  * @param ctx the parse tree
  */

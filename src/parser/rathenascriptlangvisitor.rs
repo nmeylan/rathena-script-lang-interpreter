@@ -106,6 +106,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_equalityExpression(&mut self, ctx: &EqualityExpressionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#equalityOperator}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_equalityOperator(&mut self, ctx: &EqualityOperatorContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#andExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -557,6 +563,14 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 	 * @param ctx the parse tree
 	 */
 		fn visit_equalityExpression(&mut self, ctx: &EqualityExpressionContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#equalityOperator}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_equalityOperator(&mut self, ctx: &EqualityOperatorContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -1075,6 +1089,11 @@ where
 
 	fn visit_equalityExpression(&mut self, ctx: &EqualityExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_equalityExpression(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_equalityOperator(&mut self, ctx: &EqualityOperatorContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_equalityOperator(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

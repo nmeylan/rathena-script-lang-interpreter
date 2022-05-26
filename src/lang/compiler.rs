@@ -230,6 +230,11 @@ impl Compiler {
         }
     }
 
+    fn current_assignment_types_are_same_type(&self) -> bool {
+        self.state.current_assignment_types.iter().all(|v| v.is_number())
+            || self.state.current_assignment_types.iter().all(|v| v.is_string())
+    }
+
     fn build_variable(ctx: &VariableContext) -> Variable {
         let scope = Self::get_variable_scope(ctx);
         let variable_name = ctx.variable_name().unwrap();
@@ -391,15 +396,24 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_equalityExpression(&mut self, ctx: &EqualityExpressionContext<'input>) {
-        // self.visit_relationalExpression(&ctx.relationalExpression(ctx.relationalExpression_all().len() - 1).unwrap());
-        // for (i, _) in ctx.DoubleEqual_all().iter().enumerate().rev() {
-        //     if i == ctx.relationalExpression_all().len() - 1 {
-        //         continue;
-        //     }
-        //     self.visit_relationalExpression(&ctx.relationalExpression(i).unwrap());
-        //     self.current_chunk().emit_op_code(OpCode::Equal);
-        // }
-        self.visit_children(ctx)
+        self.visit_relationalExpression(&ctx.relationalExpression(ctx.relationalExpression_all().len() - 1).unwrap());
+        for (i, _) in ctx.relationalExpression_all().iter().enumerate().rev() {
+            if i == ctx.relationalExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_relationalExpression(&ctx.relationalExpression(i).unwrap());
+            if !self.current_assignment_types_are_same_type() {
+                self.register_error(Type, ctx, "Can't perform comparison when left and right are not same types".to_string());
+            }
+            let operator = ctx.equalityOperator(i).unwrap();
+            if operator.DoubleEqual().is_some() {
+                self.current_chunk().emit_op_code(OpCode::Equal);
+            } else if operator.BangEqual().is_some() {
+                self.current_chunk().emit_op_code(OpCode::NotEqual);
+            }
+            self.current_assignment_type_drop();
+            self.add_current_assigment_type(ValueType::Number);
+        }
     }
 
     fn visit_andExpression(&mut self, ctx: &AndExpressionContext<'input>) {
@@ -415,11 +429,35 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_logicalAndExpression(&mut self, ctx: &LogicalAndExpressionContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_inclusiveOrExpression(&ctx.inclusiveOrExpression(ctx.inclusiveOrExpression_all().len() - 1).unwrap());
+        for (i, _) in ctx.inclusiveOrExpression_all().iter().enumerate().rev() {
+            if i == ctx.inclusiveOrExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_inclusiveOrExpression(&ctx.inclusiveOrExpression(i).unwrap());
+            if !self.current_assignment_types_are_same_type() {
+                self.register_error(Type, ctx, "Can't perform logical and (&&) when left and right are not same types".to_string());
+            }
+            self.current_chunk().emit_op_code(OpCode::LogicalAnd);
+            self.current_assignment_type_drop();
+            self.add_current_assigment_type(ValueType::Number);
+        }
     }
 
     fn visit_logicalOrExpression(&mut self, ctx: &LogicalOrExpressionContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_logicalAndExpression(&ctx.logicalAndExpression(ctx.logicalAndExpression_all().len() - 1).unwrap());
+        for (i, _) in ctx.logicalAndExpression_all().iter().enumerate().rev() {
+            if i == ctx.logicalAndExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_logicalAndExpression(&ctx.logicalAndExpression(i).unwrap());
+            if !self.current_assignment_types_are_same_type() {
+                self.register_error(Type, ctx, "Can't perform logical or (||) when left and right are not same types".to_string());
+            }
+            self.current_chunk().emit_op_code(OpCode::LogicalOr);
+            self.current_assignment_type_drop();
+            self.add_current_assigment_type(ValueType::Number);
+        }
     }
 
     fn visit_conditionalExpression(&mut self, ctx: &ConditionalExpressionContext<'input>) {
@@ -695,7 +733,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         let function = Function {
             name: function_name.clone(),
             arity: 0,
-            chunk: Default::default()
+            chunk: Default::default(),
         };
         self.declared_functions.push(function_name);
         self.current_declared_function = Some(function);
