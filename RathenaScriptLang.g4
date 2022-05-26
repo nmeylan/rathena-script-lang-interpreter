@@ -263,13 +263,16 @@ iterationStatement
 //    |   For '(' declaration  expression? ';' expression? ')' statement
 
 forCondition
-	:   (forDeclaration | expression?) ';' forExpression? ';' forExpression?
+	:  forDeclaration ';' forStopExpression? ';' forExpression?
 	;
 
 forDeclaration
-    :  initDeclaratorList?
+    :  expression?
     ;
 
+forStopExpression
+    :   assignmentExpression (',' assignmentExpression)*
+    ;
 forExpression
     :   assignmentExpression (',' assignmentExpression)*
     ;

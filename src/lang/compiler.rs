@@ -1,5 +1,6 @@
 use std::borrow::{BorrowMut, Cow};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::fmt::{Display, format, Formatter};
 use std::mem;
 use std::ops::Deref;
@@ -44,6 +45,7 @@ pub struct Compiler {
 #[derive(Default)]
 pub struct State {
     current_assignment_types: Vec<ValueType>,
+    block_breaks: HashMap<String, Vec<usize>>,
 }
 
 pub enum VariableScope {
@@ -120,7 +122,7 @@ impl Compiler {
         let mut parser = RathenaScriptLangParser::new(token_stream);
         let tree = parser.compilationUnit();
         // println!("{}", tree.unwrap().to_string_tree(&parser));
-
+        compiler.state.block_breaks.insert("main".to_string(), vec![]);
         compiler.visit_compilationUnit(tree.as_ref().unwrap());
         for (function_name, compilationErrorDetails) in compiler.called_functions.clone().iter() {
             if !compiler.declared_functions.contains(function_name) {
@@ -254,6 +256,14 @@ impl Compiler {
             self.register_error(
                 CompilationErrorType::UndefinedVariable, node,
                 format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
+        }
+    }
+
+    fn block_breaks_index(&mut self) -> &Vec<usize> {
+        if self.current_declared_function.is_some() {
+            self.state.block_breaks.get(&self.current_declared_function.as_ref().unwrap().name).unwrap()
+        } else {
+            self.state.block_breaks.get("main").unwrap()
         }
     }
 }
@@ -502,6 +512,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     self.load_local(&variable, ctx);
                 }
                 self.current_chunk().emit_op_code(Add);
+            } else if assignment_operator.MinusEqual().is_some() {
+                if left.variable().is_some() {
+                    let variable = Self::build_variable(&left.variable().unwrap());
+                    self.load_local(&variable, ctx);
+                }
+                self.current_chunk().emit_op_code(Subtract);
             }
             self.visit_assignmentLeftExpression(&left);
         } else {
@@ -659,7 +675,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_compoundStatement(&mut self, ctx: &CompoundStatementContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_children(ctx);
+        let block_break_index = self.block_breaks_index();
     }
 
     fn visit_blockItemList(&mut self, ctx: &BlockItemListContext<'input>) {
@@ -667,7 +684,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_blockItem(&mut self, ctx: &BlockItemContext<'input>) {
-        // TODO push nested function to current function,
         self.visit_children(ctx)
     }
 
@@ -700,7 +716,32 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_iterationStatement(&mut self, ctx: &IterationStatementContext<'input>) {
-        self.visit_children(ctx)
+        if ctx.For().is_some() {
+            let option = ctx.forCondition();
+            let for_condition = option.as_ref().unwrap();
+            self.visit_forDeclaration(for_condition.forDeclaration().as_ref().unwrap());
+            let for_expression_index = self.current_chunk().last_op_code_index();
+            let mut for_start_index = 0;
+            if for_condition.forStopExpression().is_some() {
+                self.visit_forStopExpression(for_condition.forStopExpression().as_ref().unwrap());
+                self.current_chunk().emit_op_code(OpCode::If(0));
+                for_start_index = self.current_chunk().last_op_code_index();
+            }
+
+            if for_condition.forExpression().is_some() {
+                self.visit_forExpression(for_condition.forExpression().as_ref().unwrap());
+                if for_start_index == 0 {
+                    for_start_index = self.current_chunk().last_op_code_index()
+                }
+            }
+
+            self.visit_statement(ctx.statement().as_ref().unwrap());
+            self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1));
+            let for_statement_end = self.current_chunk().last_op_code_index();
+            self.current_chunk().set_op_code_at(for_start_index, OpCode::If(for_statement_end + 1));
+        } else {
+            self.visit_children(ctx)
+        }
     }
 
     fn visit_forCondition(&mut self, ctx: &ForConditionContext<'input>) {
@@ -712,6 +753,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_forExpression(&mut self, ctx: &ForExpressionContext<'input>) {
+        self.visit_children(ctx)
+    }
+
+    fn visit_forStopExpression(&mut self, ctx: &ForStopExpressionContext<'input>) {
         self.visit_children(ctx)
     }
 
@@ -763,11 +808,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             arity: 0,
             chunk: Default::default(),
         };
-        self.declared_functions.push(function_name);
+        self.declared_functions.push(function_name.clone());
         self.current_declared_function = Some(function);
+        self.state.block_breaks.insert(function_name.clone(), vec![]);
         self.visit_children(ctx);
         let current_declared_function = mem::replace(&mut self.current_declared_function, None);
         self.current_chunk().add_function(current_declared_function.unwrap());
+        self.state.block_breaks.remove(&function_name);
     }
 
     fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>) {

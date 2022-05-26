@@ -80,7 +80,6 @@ impl Program {
                     let constant_reference = self.constant_ref_from_stack_entry(stack_entry)?;
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find local variable with reference {}", reference).as_str()))?;
                     variable.set_value_ref(constant_reference);
-                    println!("locals size: {}", call_frame.locals.len());
                 }
                 OpCode::LoadLocal(reference) => {
                     self.stack.push(StackEntry::LocalVariableReference(*reference));

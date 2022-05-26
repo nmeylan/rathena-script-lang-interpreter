@@ -364,6 +364,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_forDeclaration(&mut self, ctx: &ForDeclarationContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#forStopExpression}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_forStopExpression(&mut self, ctx: &ForStopExpressionContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#forExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -917,6 +923,14 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#forStopExpression}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_forStopExpression(&mut self, ctx: &ForStopExpressionContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#forExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -1318,6 +1332,11 @@ where
 
 	fn visit_forDeclaration(&mut self, ctx: &ForDeclarationContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_forDeclaration(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_forStopExpression(&mut self, ctx: &ForStopExpressionContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_forStopExpression(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

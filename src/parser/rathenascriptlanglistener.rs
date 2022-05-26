@@ -595,6 +595,16 @@ fn enter_forDeclaration(&mut self, _ctx: &ForDeclarationContext<'input>) { }
  */
 fn exit_forDeclaration(&mut self, _ctx: &ForDeclarationContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#forStopExpression}.
+ * @param ctx the parse tree
+ */
+fn enter_forStopExpression(&mut self, _ctx: &ForStopExpressionContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#forStopExpression}.
+ * @param ctx the parse tree
+ */
+fn exit_forStopExpression(&mut self, _ctx: &ForStopExpressionContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#forExpression}.
  * @param ctx the parse tree
  */
