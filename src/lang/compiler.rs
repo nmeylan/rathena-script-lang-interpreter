@@ -721,29 +721,36 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let for_condition = option.as_ref().unwrap();
             self.visit_forDeclaration(for_condition.forDeclaration().as_ref().unwrap());
             let for_expression_index = self.current_chunk().last_op_code_index();
-            let mut for_start_index = 0;
+            let mut for_if_index = 0;
             if for_condition.forStopExpression().is_some() {
                 self.visit_forStopExpression(for_condition.forStopExpression().as_ref().unwrap());
                 self.current_chunk().emit_op_code(OpCode::If(0));
-                for_start_index = self.current_chunk().last_op_code_index();
+                for_if_index = self.current_chunk().last_op_code_index();
             }
 
             if for_condition.forExpression().is_some() {
                 self.visit_forExpression(for_condition.forExpression().as_ref().unwrap());
-                if for_start_index == 0 {
-                    for_start_index = self.current_chunk().last_op_code_index()
-                }
             }
 
             self.visit_statement(ctx.statement().as_ref().unwrap());
             self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1));
             let for_statement_end = self.current_chunk().last_op_code_index();
             if for_condition.forStopExpression().is_some() {
-                self.current_chunk().set_op_code_at(for_start_index, OpCode::If(for_statement_end + 1));
+                self.current_chunk().set_op_code_at(for_if_index, OpCode::If(for_statement_end + 1));
             }
             mem::replace(self.block_breaks_index(), vec![]).iter().for_each(|index| {
                 self.current_chunk().set_op_code_at(*index, OpCode::Jump(for_statement_end + 1));
             })
+        } else if ctx.While().is_some() {
+            let while_start_index = self.current_chunk().last_op_code_index();
+            self.visit_expression(ctx.expression().as_ref().unwrap());
+            self.current_chunk().emit_op_code(OpCode::If(0));
+            let while_if_index =  self.current_chunk().last_op_code_index();
+            self.visit_statement(ctx.statement().as_ref().unwrap());
+            self.current_chunk().emit_op_code(OpCode::Jump(while_start_index + 1));
+            let while_statement_end = self.current_chunk().last_op_code_index();
+            self.current_chunk().set_op_code_at(while_if_index, OpCode::If(while_statement_end + 1));
+
         } else {
             self.visit_children(ctx)
         }
