@@ -215,3 +215,26 @@ fn function_with_return_type_multicall() {
     // Then
     assert_eq!(5_i32, events.borrow().get("a").unwrap().value.number_value().clone());
 }
+
+#[test]
+fn recursive_function_call_with_return() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let function = compile(r#"
+    .@a = my_func(10);
+    function my_func {
+        .@my_local = getarg(0) - 1;
+        if (.@my_local > 0) {
+            return my_func(.@my_local);
+        }
+        return .@my_local;
+    }
+    vm_dump_locals();
+    "#);
+    // When
+    Vm::execute_program(vm, function).unwrap();
+    // Then
+    assert_eq!(0, events.borrow().get("a").unwrap().value.number_value().clone());
+}
