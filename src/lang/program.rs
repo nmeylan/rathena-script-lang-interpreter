@@ -280,6 +280,9 @@ impl Program {
                             }
                         }
                         CallFrameBreak::Goto(index) => {
+                            if depth > 0 {
+                                return Ok(CallFrameBreak::Goto(index));
+                            }
                             op_index = index - 1
                         }
                     }
