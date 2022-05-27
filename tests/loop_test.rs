@@ -55,6 +55,29 @@ fn simple_while_loop() {
 }
 
 #[test]
+fn simple_while_loop_in_a_function() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let while_loop_script = compile(r#"
+    function iterate {
+        .@i = getarg(0);
+        while (.@i >= 0) {
+            .@i -= 1;
+        }
+        return .@i;
+    }
+    .@j = iterate(100);
+    vm_dump_locals();
+    "#);
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::execute_program(vm, while_loop_script);
+    // Then
+    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value());
+}
+
+#[test]
 fn simple_for_loop_with_already_init() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));

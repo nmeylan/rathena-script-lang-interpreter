@@ -189,7 +189,7 @@ impl PartialEq<Self> for Variable {
 
 impl Eq for Variable {}
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Function {
     pub name: String,
     pub arity: usize,

@@ -1,7 +1,8 @@
 use std::borrow::{BorrowMut, Cow};
+use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt::{Display, format, Formatter};
+use std::fmt::{Debug, Display, format, Formatter};
 use std::mem;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -16,7 +17,7 @@ use crate::lang::vm::Vm;
 
 use crate::lang::chunk::{Chunk, OpCode, Relational};
 use crate::lang::chunk::OpCode::{*};
-use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, NativeAlreadyDefined, Type, UndefinedFunction};
+use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::value::{*};
 
 const NATIVE_METHODS: &'static [&'static str] = &[
@@ -30,16 +31,25 @@ const NATIVE_METHODS: &'static [&'static str] = &[
     "vm_dump_var"
 ];
 
+#[derive(Default)]
 pub struct Compiler {
     name: String,
     main_function: Function,
-    errors: Vec<CompilationError>,
+    errors: RefCell<Vec<CompilationError>>,
     state: State,
     script_lines: Vec<String>,
     // To check if called function exists. it can be done at the end of the compilation
     declared_functions: Vec<String>,
-    called_functions: Vec<(String, CompilationErrorDetails)>,
+    called_functions: Vec<(String, CompilationDetail)>,
     // Declared label
+    declared_labels: HashMap<String, Label>,
+    called_labels: Vec<(String, CompilationDetail)>,
+}
+
+pub struct Label {
+    name: String,
+    first_op_code_index: usize,
+    last_op_code_index: usize,
 }
 
 #[derive(Default)]
@@ -66,11 +76,11 @@ pub struct CompilationError {
     error_type: CompilationErrorType,
     message: String,
     file_name: String,
-    details: CompilationErrorDetails,
+    details: CompilationDetail,
 }
 
 #[derive(Debug, Clone)]
-pub struct CompilationErrorDetails {
+pub struct CompilationDetail {
     start_line: usize,
     start_column: usize,
     end_line: usize,
@@ -86,6 +96,8 @@ pub enum CompilationErrorType {
     FunctionAlreadyDefined,
     NativeAlreadyDefined,
     Type,
+    LabelNotInMain,
+    UndefinedLabel,
 }
 
 impl CompilationError {
@@ -108,11 +120,13 @@ impl Compiler {
         Self {
             name: name.clone(),
             main_function: main_function,
-            errors: vec![],
+            errors: RefCell::new(vec![]),
             state: Default::default(),
             script_lines: script.split("\n").map(|l| l.to_string()).collect::<Vec<String>>(),
             declared_functions: vec![],
             called_functions: vec![],
+            declared_labels: Default::default(),
+            called_labels: vec![],
         }
     }
     pub fn compile(name: String, script: &str) -> Result<Function, Vec<CompilationError>> {
@@ -129,10 +143,45 @@ impl Compiler {
                 compiler.register_error_with_details(UndefinedFunction, compilationErrorDetails.clone(), format!("Function \"{}\" is not defined", function_name))
             }
         }
-        if compiler.errors.is_empty() {
+        let label_gotos_op_code:HashMap<String, Vec<(usize, CompilationDetail)>> = mem::replace(&mut compiler.borrow_mut().main_function.chunk.label_gotos_op_code_indices, Default::default());
+        for (label_name, indices) in label_gotos_op_code.iter() {
+            let maybe_label = compiler.declared_labels.get(label_name);
+            if maybe_label.is_some() {
+                let label = maybe_label.unwrap();
+                for (index, _) in indices {
+                    compiler.main_function.chunk.set_op_code_at(*index, Jump(label.first_op_code_index));
+                }
+            } else {
+                for (_, compilation_detail) in indices {
+                    compiler.register_error_with_details(UndefinedLabel, compilation_detail.clone(),
+                                                         format!("Undefined label \"{}\"", label_name))
+                }
+            }
+        }
+
+        for (_, function) in compiler.main_function.chunk.functions.iter() {
+            let label_gotos_op_code = function.chunk.label_gotos_op_code_indices.clone();
+            for (label_name, indices) in label_gotos_op_code.iter() {
+                let maybe_label = compiler.declared_labels.get(label_name);
+                if maybe_label.is_some() {
+                    let label = maybe_label.unwrap();
+                    for (index, _) in indices {
+                        function.chunk.set_op_code_at(*index, OpCode::Goto(label.first_op_code_index));
+                    }
+                } else {
+                    for (_, compilation_detail) in indices {
+                        compiler.register_error_with_details(UndefinedLabel, compilation_detail.clone(),
+                                                             format!("Undefined label \"{}\"", label_name))
+                    }
+                }
+            }
+        }
+
+        if compiler.errors.borrow().is_empty() {
             Ok(compiler.main_function)
         } else {
-            Err(compiler.errors)
+            let errors_ref_cell = mem::replace(&mut compiler.errors, RefCell::new(vec![]));
+            Err(errors_ref_cell.take())
         }
     }
 
@@ -148,28 +197,28 @@ impl Compiler {
         if has_dollar { ValueRef::new_empty_string() } else { ValueRef::new_empty_number() }
     }
 
-    fn register_error<'input>(&mut self, error_type: CompilationErrorType, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), message: String) {
+    fn register_error<'input>(&self, error_type: CompilationErrorType, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), message: String) {
         let error = CompilationError {
             error_type,
             message,
             file_name: self.name.clone(),
             details: self.compilation_error_details_from_context(node),
         };
-        self.errors.push(error);
+        self.errors.borrow_mut().push(error);
     }
 
-    fn register_error_with_details<'input>(&mut self, error_type: CompilationErrorType, details: CompilationErrorDetails, message: String) {
+    fn register_error_with_details<'input>(&self, error_type: CompilationErrorType, details: CompilationDetail, message: String) {
         let error = CompilationError {
             error_type,
             message,
             file_name: self.name.clone(),
             details,
         };
-        self.errors.push(error);
+        self.errors.borrow_mut().push(error);
     }
 
-    fn compilation_error_details_from_context<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> CompilationErrorDetails {
-        CompilationErrorDetails {
+    fn compilation_error_details_from_context<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> CompilationDetail {
+        CompilationDetail {
             start_line: node.start().get_line() as usize,
             start_column: node.start().get_column() as usize,
             end_line: node.stop().get_line() as usize,
@@ -280,7 +329,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let reference = self.current_chunk().add_constant(
                 Constant::String(
                     remove_quote_from_string(ctx.String().as_ref().unwrap().symbol.text.as_ref()) // TODO check if it can be done by antlr skip instead.
-            ));
+                ));
             self.add_current_assigment_type(ValueType::String);
             self.current_chunk().emit_op_code(LoadConstant(reference));
         }
@@ -316,7 +365,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             ctx.Identifier().unwrap().symbol.text.to_string()
         } else if ctx.String().is_some() {
             remove_quote_from_string(ctx.String().as_ref().unwrap().symbol.text.as_ref())
-        }else {
+        } else {
             return;
         };
         if NATIVE_METHODS.contains(&function_or_native_name.as_ref()) {
@@ -671,7 +720,26 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_labeledStatement(&mut self, ctx: &LabeledStatementContext<'input>) {
-        self.visit_children(ctx)
+        if ctx.Label().is_some() {
+            let label_name = ctx.Label().unwrap().symbol.text.clone();
+            let label_name= label_name[0..label_name.len() - 1].to_string(); // remove ':' in label name
+            if self.state.current_declared_function.is_some() {
+                self.register_error(LabelNotInMain, ctx,
+                                    format!("Label \"{}\" is declared in \"{}\" function scope but label should be declared in script scope only.",
+                                            label_name, self.state.current_declared_function.as_ref().unwrap().name));
+                return;
+            }
+            let label_start_index = self.current_chunk().last_op_code_index() + 1;
+            self.visit_children(ctx);
+            let label_end_index = self.current_chunk().last_op_code_index();
+            self.declared_labels.insert(label_name.to_string().clone(), Label {
+                name: label_name.to_string(),
+                first_op_code_index: label_start_index,
+                last_op_code_index: label_end_index,
+            });
+        } else {
+            self.visit_children(ctx)
+        }
     }
 
     fn visit_compoundStatement(&mut self, ctx: &CompoundStatementContext<'input>) {
@@ -694,15 +762,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_selectionStatement(&mut self, ctx: &SelectionStatementContext<'input>) {
         if ctx.If().is_some() {
             self.visit_expression(ctx.expression().as_ref().unwrap());
-            self.current_chunk().emit_op_code(OpCode::If(0));
-            let if_index = self.current_chunk().last_op_code_index();
+            let if_index = self.current_chunk().emit_op_code(OpCode::If(0));
             self.visit_statement(ctx.statement(0).as_ref().unwrap());
             let jump_to_index = self.current_chunk().last_op_code_index() + 2;
             self.current_chunk().set_op_code_at(if_index, OpCode::If(jump_to_index));
 
             if ctx.Else().is_some() {
-                self.current_chunk().emit_op_code(OpCode::Jump(jump_to_index - 1));
-                let then_jump_index = self.current_chunk().last_op_code_index();
+                let then_jump_index = self.current_chunk().emit_op_code(OpCode::Jump(jump_to_index - 1));
                 self.current_chunk().emit_op_code(OpCode::Else);
                 self.visit_statement(ctx.statement(1).as_ref().unwrap());
                 let jump_to_index = self.current_chunk().last_op_code_index() + 1;
@@ -724,8 +790,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let mut for_if_index = 0;
             if for_condition.forStopExpression().is_some() {
                 self.visit_forStopExpression(for_condition.forStopExpression().as_ref().unwrap());
-                self.current_chunk().emit_op_code(OpCode::If(0));
-                for_if_index = self.current_chunk().last_op_code_index();
+                for_if_index = self.current_chunk().emit_op_code(OpCode::If(0));
             }
 
             if for_condition.forExpression().is_some() {
@@ -733,8 +798,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
 
             self.visit_statement(ctx.statement().as_ref().unwrap());
-            self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1));
-            let for_statement_end = self.current_chunk().last_op_code_index();
+            let for_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1));
             if for_condition.forStopExpression().is_some() {
                 self.current_chunk().set_op_code_at(for_if_index, OpCode::If(for_statement_end + 1));
             }
@@ -744,13 +808,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else if ctx.While().is_some() {
             let while_start_index = self.current_chunk().last_op_code_index();
             self.visit_expression(ctx.expression().as_ref().unwrap());
-            self.current_chunk().emit_op_code(OpCode::If(0));
-            let while_if_index =  self.current_chunk().last_op_code_index();
+            let while_if_index = self.current_chunk().emit_op_code(OpCode::If(0));
             self.visit_statement(ctx.statement().as_ref().unwrap());
-            self.current_chunk().emit_op_code(OpCode::Jump(while_start_index + 1));
-            let while_statement_end = self.current_chunk().last_op_code_index();
+            let while_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(while_start_index + 1));
             self.current_chunk().set_op_code_at(while_if_index, OpCode::If(while_statement_end + 1));
-
         } else {
             self.visit_children(ctx)
         }
@@ -778,9 +839,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let not_empty_return = ctx.expression().is_some();
             self.current_chunk().emit_op_code(OpCode::Return(not_empty_return));
         } else if ctx.Break().is_some() {
-            self.current_chunk().emit_op_code(OpCode::Jump(0));
-            let index = self.current_chunk().last_op_code_index();
+            let index = self.current_chunk().emit_op_code(OpCode::Jump(0));
             self.block_breaks_index().push(index);
+        } else if ctx.Goto().is_some() {
+            let index = self.current_chunk().emit_op_code(OpCode::Goto(0));
+            let label = ctx.Identifier().unwrap().symbol.text.clone();
+            let detail = self.compilation_error_details_from_context(ctx);
+            let gotos_op_code_indices = self.current_chunk().label_gotos_op_code_indices.entry(label.to_string().clone()).or_insert(vec![]);
+            gotos_op_code_indices.push((index, detail));
         }
     }
 

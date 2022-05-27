@@ -225,7 +225,7 @@ statement
     ;
 
 labeledStatement
-    :   Identifier ':' statement
+    :   Label statement
     |   'case' constantExpression ':' statement
     |   'default' ':' statement
     ;

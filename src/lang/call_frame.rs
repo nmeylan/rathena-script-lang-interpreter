@@ -30,7 +30,7 @@ impl Display for CallFrame {
 impl CallFrame {
     pub fn new(chunk: &mut Chunk, stack_pointer: usize, name: String, arguments_count: usize) -> Self {
         Self {
-            code: std::mem::take(&mut chunk.op_codes),
+            code: std::mem::take(&mut chunk.op_codes.borrow_mut()),
             stack_pointer,
             current_op_code: 0,
             name,

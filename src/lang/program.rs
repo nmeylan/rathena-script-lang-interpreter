@@ -20,6 +20,11 @@ const NATIVE_METHODS_INTERNAL_IMPLEMENTATION: &'static [&'static str] = &[
     "getarg"
 ];
 
+pub enum CallFrameBreak {
+    Return(bool),
+    Goto(usize),
+}
+
 pub struct Program {
     pub vm: Arc<Vm>,
     stack: Stack,
@@ -44,10 +49,10 @@ impl Program {
         let function_name = function.name.clone();
         self.functions_pool = std::mem::take(&mut chunk.functions);
         let call_frame = CallFrame::new(chunk, 1, function_name, 0);
-        self.run(call_frame).map(|_| ())
+        self.run(call_frame, 0).map(|_| ())
     }
 
-    pub fn run(&mut self, call_frame: CallFrame) -> Result<bool, RuntimeError> {
+    pub fn run(&mut self, call_frame: CallFrame, depth: usize) -> Result<CallFrameBreak, RuntimeError> {
         let mut stdout = io::stdout();
         writeln!(stdout, "=========   VM    ========").unwrap();
         self.vm.dump(&mut stdout);
@@ -228,6 +233,13 @@ impl Program {
                 OpCode::Jump(jump_to_index) => {
                     op_index = *jump_to_index - 1;
                 }
+                OpCode::Goto(index) => {
+                    if depth > 0 {
+                        return Ok(CallFrameBreak::Goto(*index));
+                    } else {
+                        op_index = *index - 1;
+                    }
+                }
                 OpCode::Invoke => {}
                 OpCode::CallNative { argument_count, reference } => {
                     let mut arguments: Vec<Value> = vec![];
@@ -260,9 +272,16 @@ impl Program {
                         self.stack.push(ConstantPoolReference(reference));
                     }
                     let new_function_call_frame = CallFrame::new(&mut chunk, stack_pointer, function.name.clone(), *argument_count);
-                    let as_returned = self.run(new_function_call_frame)?;
-                    if !as_returned {
-                        self.stack.truncate(stack_pointer);
+                    let break_type = self.run(new_function_call_frame, depth + 1)?;
+                    match break_type {
+                        CallFrameBreak::Return(has_returned) => {
+                            if !has_returned {
+                                self.stack.truncate(stack_pointer);
+                            }
+                        }
+                        CallFrameBreak::Goto(index) => {
+                            op_index = index - 1
+                        }
                     }
                 }
                 OpCode::Call => {}
@@ -273,9 +292,9 @@ impl Program {
                         let returned_value = self.value_from_stack_entry(&returned_stack_entry, &call_frame)?;
                         let reference = self.vm.add_in_constant_pool(returned_value);
                         self.stack.push(StackEntry::ConstantPoolReference(reference));
-                        Ok(true)
+                        Ok(CallFrameBreak::Return(true))
                     } else {
-                        Ok(false)
+                        Ok(CallFrameBreak::Return(false))
                     }
                 }
                 OpCode::Command => {}
@@ -301,7 +320,7 @@ impl Program {
         writeln!(stdout, "========= Call frame ========").unwrap();
         call_frame.dump(&mut stdout);
         stdout.flush();
-        Ok(false)
+        Ok(CallFrameBreak::Return(false))
     }
 
     fn dump(&self, out: &mut Stdout) {

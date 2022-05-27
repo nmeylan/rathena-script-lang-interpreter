@@ -1,4 +1,6 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
+use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Constant, Function, Native, Variable};
@@ -7,7 +9,7 @@ use crate::lang::vm::Vm;
 
 #[derive(Debug, Clone)]
 pub struct Chunk {
-    pub op_codes: Vec<OpCode>,
+    pub op_codes: RefCell<Vec<OpCode>>,
     pub references: Vec<u64>,
     pub functions: HashMap<u64, Function, NoopHasher>,
     pub natives: HashMap<u64, Native, NoopHasher>,
@@ -15,12 +17,14 @@ pub struct Chunk {
     pub instances: HashMap<u64, Variable, NoopHasher>,
     pub locals: HashMap<u64, Variable, NoopHasher>,
     pub constants_storage: HashMap<u64, Constant, NoopHasher>,
+    // state
+    pub(crate) label_gotos_op_code_indices: HashMap<String, Vec<(usize, CompilationDetail)>>, // key are label name, values are goto op code that goto this label
 }
 
 impl Default for Chunk {
     fn default() -> Self {
         Self {
-            op_codes: vec![],
+            op_codes: RefCell::new(vec![]),
             references: vec![],
             functions: HashMap::with_hasher(NoopHasher::default()),
             natives: HashMap::with_hasher(NoopHasher::default()),
@@ -28,22 +32,24 @@ impl Default for Chunk {
             instances: HashMap::with_hasher(NoopHasher::default()),
             locals: HashMap::with_hasher(NoopHasher::default()),
             constants_storage: HashMap::with_hasher(NoopHasher::default()),
+            label_gotos_op_code_indices: Default::default()
         }
     }
 }
 
 impl Chunk {
     pub fn last_op_code_index(&self) -> usize {
-        self.op_codes.len() - 1
+        self.op_codes.borrow().len() - 1
     }
 
-    pub fn set_op_code_at(&mut self, index: usize, op_code: OpCode) {
-        self.op_codes[index] = op_code;
+    pub fn set_op_code_at(&self, index: usize, op_code: OpCode) {
+        self.op_codes.borrow_mut()[index] = op_code;
     }
 
-    pub fn emit_op_code(&mut self, op_code: OpCode) {
+    pub fn emit_op_code(&mut self, op_code: OpCode) -> usize {
         println!("emit opcode {:?}", op_code);
-        self.op_codes.push(op_code);
+        self.op_codes.borrow_mut().push(op_code);
+        self.last_op_code_index()
     }
 
     pub fn add_constant(&mut self, constant: Constant) -> u64 {
@@ -117,6 +123,7 @@ pub enum OpCode {
     Modulo,
     Not,
     Jump(usize), // OpCode index to jump to
+    Goto(usize), // OpCode index to jump to. Using goto instead of jump allow to break function
     Invoke,
     Call,
     Return(bool),

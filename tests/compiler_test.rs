@@ -220,3 +220,23 @@ fn undefined_label() {
     // Then
 
 }
+
+
+#[test]
+fn label_defined_in_a_function_is_not_valid() {
+    // Given
+    let script = r#"
+        function my_func {
+            Assign:
+                .@a = 0;
+        }
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(r#"test_script 3:12. Label "Assign" is declared in "my_func" function scope but label should be declared in script scope only.
+l3	            Assign:
+	            ^^^^^^^^^^^^
+"#, result.as_ref().err().unwrap()[0].message());
+}
