@@ -208,3 +208,15 @@ l5	    .@a = 1 && "0";
 	          ^^^^^^
 "#, result.as_ref().err().unwrap()[1].message());
 }
+
+#[test]
+fn undefined_label() {
+    // Given
+    let script = r#"
+
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+
+}

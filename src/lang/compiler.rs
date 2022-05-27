@@ -40,6 +40,7 @@ pub struct Compiler {
     declared_functions: Vec<String>,
     called_functions: Vec<(String, CompilationErrorDetails)>,
     current_declared_function: Option<Function>,
+    // Declared label
 }
 
 #[derive(Default)]

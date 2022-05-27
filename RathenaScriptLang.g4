@@ -14,7 +14,7 @@ primaryExpression
     ;
 
 functionCallExpression
-    : Identifier '(' argumentExpressionList? ')' | 'callfunc' String ( ',' argumentExpressionList)?;
+    : Identifier '(' argumentExpressionList? ')' | 'callfunc' '('? String ( ',' argumentExpressionList)? ')' | 'callfunc' String ( ',' argumentExpressionList)?;
 
 postfixExpression
     : functionCallExpression | primaryExpression ('[' expression ']' | ('++' | '--') )*

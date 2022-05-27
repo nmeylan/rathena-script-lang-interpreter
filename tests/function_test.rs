@@ -178,6 +178,7 @@ fn function_with_return_type() {
     }
     .@a = plus_four(2);
     .@b = callfunc "plus_four", 4;
+    .@c = callfunc("plus_four", 6);
     vm_dump_locals();
     "#);
     // When
@@ -185,6 +186,7 @@ fn function_with_return_type() {
     // Then
     assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
     assert_eq!(8_i32, events.borrow().get("b").unwrap().value.number_value().clone());
+    assert_eq!(10_i32, events.borrow().get("c").unwrap().value.number_value().clone());
 }
 
 #[test]
