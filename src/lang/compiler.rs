@@ -259,11 +259,11 @@ impl Compiler {
         }
     }
 
-    fn block_breaks_index(&mut self) -> &Vec<usize> {
+    fn block_breaks_index(&mut self) -> &mut Vec<usize> {
         if self.current_declared_function.is_some() {
-            self.state.block_breaks.get(&self.current_declared_function.as_ref().unwrap().name).unwrap()
+            self.state.block_breaks.get_mut(&self.current_declared_function.as_ref().unwrap().name).unwrap()
         } else {
-            self.state.block_breaks.get("main").unwrap()
+            self.state.block_breaks.get_mut("main").unwrap()
         }
     }
 }
@@ -738,7 +738,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.visit_statement(ctx.statement().as_ref().unwrap());
             self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1));
             let for_statement_end = self.current_chunk().last_op_code_index();
-            self.current_chunk().set_op_code_at(for_start_index, OpCode::If(for_statement_end + 1));
+            if for_condition.forStopExpression().is_some() {
+                self.current_chunk().set_op_code_at(for_start_index, OpCode::If(for_statement_end + 1));
+            }
+            mem::replace(self.block_breaks_index(), vec![]).iter().for_each(|index| {
+                self.current_chunk().set_op_code_at(*index, OpCode::Jump(for_statement_end + 1));
+            })
         } else {
             self.visit_children(ctx)
         }
@@ -765,6 +770,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if ctx.Return().is_some() {
             let not_empty_return = ctx.expression().is_some();
             self.current_chunk().emit_op_code(OpCode::Return(not_empty_return));
+        } else if ctx.Break().is_some() {
+            self.current_chunk().emit_op_code(OpCode::Jump(0));
+            let index = self.current_chunk().last_op_code_index();
+            self.block_breaks_index().push(index);
         }
     }
 

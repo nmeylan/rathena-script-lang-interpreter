@@ -84,7 +84,7 @@ fn nested_simple_loop() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let loop_script = compile(r#"
     .@k = 0;
-    for(.@i = 0; .@i < 100; .@i += 1) {
+    for(.@i = 0; .@i < 10; .@i += 1) {
 		for(.@j = 10; .@j > 0; .@j -= 1) {
 		    .@k += 1;
         }
@@ -96,9 +96,9 @@ fn nested_simple_loop() {
     // When
     Vm::execute_program(vm, loop_script);
     // Then
-    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
+    assert_eq!(10, events.borrow().get("i").unwrap().value.number_value());
     assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
-    assert_eq!(1000, events.borrow().get("k").unwrap().value.number_value());
+    assert_eq!(100, events.borrow().get("k").unwrap().value.number_value());
 }
 
 // #[test]
@@ -106,7 +106,7 @@ fn return_should_stop_loop() {
 
 }
 
-// #[test]
+#[test]
 fn break_should_stop_loop() {
 // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
@@ -117,7 +117,7 @@ fn break_should_stop_loop() {
         if (.@i >= 100) {
          break;
         }
-		.@j -= 1;
+        .@j -= 1;
     }
     vm_dump_locals();
     "#);
@@ -128,4 +128,33 @@ fn break_should_stop_loop() {
     // Then
     assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
     assert_eq!(1, events.borrow().get("j").unwrap().value.number_value());
+}
+
+#[test]
+fn break_should_stop_loop2() {
+// Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let loop_script = compile(r#"
+    .@j = 100;
+    .@i = 0;
+    for(;; .@i += 1) {
+        if (.@i >= 100) {
+         break;
+        }
+
+		.@j -= 1;
+		if (.@j < 50) {
+         break;
+        }
+
+    }
+    vm_dump_locals();
+    "#);
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::execute_program(vm, loop_script);
+    // Then
+    assert_eq!(51, events.borrow().get("i").unwrap().value.number_value());
+    assert_eq!(49, events.borrow().get("j").unwrap().value.number_value());
 }
