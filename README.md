@@ -17,3 +17,20 @@ Grammar is defined in `RathenaScriptLang.g4` file. Parser is generated using `an
 # Architecture
 ## VM Memory layout
 ![](doc/vm%20architecture.png)
+
+## VM lifecycle
+```mermaid
+graph TD
+    Server[RagnarokServer] --> Boot --> Load[Load Script] --> Read[Read bytecode] --> VM1;
+    Compiler --> ReadTxt[Parse source] --> AST[Generate AST] --> Visit[Visit ast nodes] --> Chunk[Generate chunks] --> ByteCode[Write bytes code] --> Bytecode --> VM1;
+    VM1[VM] --> Startup;
+    Server --> Player[Player interact with NPC] --> VM2;
+    VM2[VM] --> Execute[Execute script] --> Instantiate[Instantiate script] --> Read2[Read byte code] --> Run[Execute program] --> I2[Execute op code];
+    Startup[Startup] --> CheckInit{is_initialized}
+    CheckInit --> |yes| Reload[reload script]
+    Reload --> Init
+    CheckInit --> |no| Init[Read bytecode]
+    Init --> I[Collect global functions <br>Collect static functions <br>Initialize static variables pool]
+
+
+```
