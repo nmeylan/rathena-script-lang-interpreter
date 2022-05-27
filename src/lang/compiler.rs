@@ -39,13 +39,13 @@ pub struct Compiler {
     // To check if called function exists. it can be done at the end of the compilation
     declared_functions: Vec<String>,
     called_functions: Vec<(String, CompilationErrorDetails)>,
-    current_declared_function: Option<Function>,
     // Declared label
 }
 
 #[derive(Default)]
 pub struct State {
     current_assignment_types: Vec<ValueType>,
+    current_declared_function: Option<Function>,
     block_breaks: HashMap<String, Vec<usize>>,
 }
 
@@ -113,7 +113,6 @@ impl Compiler {
             script_lines: script.split("\n").map(|l| l.to_string()).collect::<Vec<String>>(),
             declared_functions: vec![],
             called_functions: vec![],
-            current_declared_function: None,
         }
     }
     pub fn compile(name: String, script: &str) -> Result<Function, Vec<CompilationError>> {
@@ -138,7 +137,7 @@ impl Compiler {
     }
 
     fn current_chunk(&mut self) -> &mut Chunk {
-        if let Some(function) = self.current_declared_function.as_mut() {
+        if let Some(function) = self.state.current_declared_function.as_mut() {
             &mut function.chunk
         } else {
             &mut self.main_function.chunk
@@ -261,8 +260,8 @@ impl Compiler {
     }
 
     fn block_breaks_index(&mut self) -> &mut Vec<usize> {
-        if self.current_declared_function.is_some() {
-            self.state.block_breaks.get_mut(&self.current_declared_function.as_ref().unwrap().name).unwrap()
+        if self.state.current_declared_function.is_some() {
+            self.state.block_breaks.get_mut(&self.state.current_declared_function.as_ref().unwrap().name).unwrap()
         } else {
             self.state.block_breaks.get_mut("main").unwrap()
         }
@@ -826,10 +825,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             chunk: Default::default(),
         };
         self.declared_functions.push(function_name.clone());
-        self.current_declared_function = Some(function);
+        self.state.current_declared_function = Some(function);
         self.state.block_breaks.insert(function_name.clone(), vec![]);
         self.visit_children(ctx);
-        let current_declared_function = mem::replace(&mut self.current_declared_function, None);
+        let current_declared_function = mem::replace(&mut self.state.current_declared_function, None);
         self.current_chunk().add_function(current_declared_function.unwrap());
         self.state.block_breaks.remove(&function_name);
     }
