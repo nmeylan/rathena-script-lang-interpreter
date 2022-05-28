@@ -216,7 +216,7 @@ fn undefined_label() {
 
     "#;
     // When
-    let result = compile(script);
+    let _result = compile(script);
     // Then
 
 }

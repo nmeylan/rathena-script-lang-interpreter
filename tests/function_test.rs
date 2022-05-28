@@ -77,7 +77,7 @@ fn function_call_with_variable_arguments() {
 fn function_call_with_arguments_out_of_bounds() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     let function = compile(r#"
     my_func("hello");

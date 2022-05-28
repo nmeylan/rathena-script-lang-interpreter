@@ -3,8 +3,6 @@ use std::{io};
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
 use std::default::Default;
-use std::fmt::format;
-use std::fs::read;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Function, Native, ValueRef, Variable};
@@ -16,7 +14,7 @@ use crate::lang::chunk::{*};
 use crate::lang::stack::StackEntry::ConstantPoolReference;
 use crate::lang::vm::RuntimeError;
 
-const NATIVE_METHODS_INTERNAL_IMPLEMENTATION: &'static [&'static str] = &[
+const NATIVE_METHODS_INTERNAL_IMPLEMENTATION: &[&str] = &[
     "getarg"
 ];
 
@@ -61,7 +59,7 @@ impl Program {
         writeln!(stdout).unwrap();
         writeln!(stdout, "========= Call frame ========").unwrap();
         call_frame.dump(&mut stdout);
-        stdout.flush();
+        stdout.flush().unwrap();
         let mut op_index = 0;
         loop {
             if op_index >= call_frame.code.len() {
@@ -72,7 +70,7 @@ impl Program {
             writeln!(stdout, "[{}] {:?}", op_index, next_op_code).unwrap();
             writeln!(stdout, "=========   Stack    ========").unwrap();
             self.dump_stack(&mut stdout, &call_frame);
-            stdout.flush();
+            stdout.flush().unwrap();
             match next_op_code {
                 OpCode::LoadConstant(reference) => {
                     self.stack.push(StackEntry::ConstantPoolReference(*reference));
@@ -145,13 +143,13 @@ impl Program {
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
-                OpCode::Relational(Relational) => {
+                OpCode::Relational(relational) => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let comparison_result = if v2.is_number() && v2.is_number() {
-                        match Relational {
+                        match relational {
                             Relational::GT => v1.number_value() > v2.number_value(),
                             Relational::GTE => v1.number_value() >= v2.number_value(),
                             Relational::LT => v1.number_value() < v2.number_value(),
@@ -252,7 +250,7 @@ impl Program {
                     if NATIVE_METHODS_INTERNAL_IMPLEMENTATION.contains(&native_method.name.as_str()) {
                         self.handle_native_method(native_method, &call_frame, arguments)?;
                     } else {
-                        self.vm.native_method_handler().handle(native_method, arguments, &self, &call_frame);
+                        self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
                     }
                 }
                 OpCode::CallFunction { argument_count, reference } => {
@@ -322,7 +320,7 @@ impl Program {
         self.dump(&mut stdout);
         writeln!(stdout, "========= Call frame ========").unwrap();
         call_frame.dump(&mut stdout);
-        stdout.flush();
+        stdout.flush().unwrap();
         Ok(CallFrameBreak::Return(false))
     }
 
@@ -428,12 +426,13 @@ impl Program {
                     let reference = self.vm.add_in_constant_pool(value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 } else if arguments.len() > 2 {
-                    return Err(RuntimeError::Other(format!("Can't call getarg with more than 2 arguments")));
+                    return Err(RuntimeError::Other(String::from("Can't call getarg with more than 2 arguments")));
                 } else {
                     let stack_entry = self.stack.peek(call_frame.stack_pointer + index)?;
-                    self.stack.push(stack_entry.clone());
+                    self.stack.push(stack_entry);
                 }
             }
+            "getargcount" => {}
             _ => {}
         }
         Ok(())

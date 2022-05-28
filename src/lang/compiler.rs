@@ -2,12 +2,11 @@ use std::borrow::{BorrowMut, Cow};
 use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt::{Debug, Display, format, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::mem;
 use std::ops::Deref;
-use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream, TidExt};
+use antlr_rust::{InputStream};
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTreeVisitor};
 use crate::parser::rathenascriptlangvisitor::{*};
@@ -20,7 +19,7 @@ use crate::lang::chunk::OpCode::{*};
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::value::{*};
 
-const NATIVE_METHODS: &'static [&'static str] = &[
+const NATIVE_METHODS: &[&str] = &[
     // Part of rathena script lang: implemented in VM.
     "getarg",
     // Part of rathena script lang: to be implemented in NativeMethodHandler
@@ -31,6 +30,7 @@ const NATIVE_METHODS: &'static [&'static str] = &[
     "vm_dump_var"
 ];
 
+#[allow(dead_code)]
 #[derive(Default)]
 pub struct Compiler {
     name: String,
@@ -43,9 +43,9 @@ pub struct Compiler {
     called_functions: Vec<(String, CompilationDetail)>,
     // Declared label
     declared_labels: HashMap<String, Label>,
-    called_labels: Vec<(String, CompilationDetail)>,
 }
 
+#[allow(dead_code)]
 pub struct Label {
     name: String,
     first_op_code_index: usize,
@@ -79,6 +79,7 @@ pub struct CompilationError {
     details: CompilationDetail,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct CompilationDetail {
     start_line: usize,
@@ -118,15 +119,14 @@ impl Compiler {
     fn new(name: String, script: String) -> Self {
         let main_function = Function::new(format!("{}_main", name));
         Self {
-            name: name.clone(),
-            main_function: main_function,
+            name,
+            main_function,
             errors: RefCell::new(vec![]),
             state: Default::default(),
-            script_lines: script.split("\n").map(|l| l.to_string()).collect::<Vec<String>>(),
+            script_lines: script.split('\n').map(|l| l.to_string()).collect::<Vec<String>>(),
             declared_functions: vec![],
             called_functions: vec![],
             declared_labels: Default::default(),
-            called_labels: vec![],
         }
     }
     pub fn compile(name: String, script: &str) -> Result<Function, Vec<CompilationError>> {
@@ -138,16 +138,15 @@ impl Compiler {
         // println!("{}", tree.unwrap().to_string_tree(&parser));
         compiler.state.block_breaks.insert("main".to_string(), vec![]);
         compiler.visit_compilationUnit(tree.as_ref().unwrap());
-        for (function_name, compilationErrorDetails) in compiler.called_functions.clone().iter() {
+        for (function_name, compilation_error_details) in compiler.called_functions.clone().iter() {
             if !compiler.declared_functions.contains(function_name) {
-                compiler.register_error_with_details(UndefinedFunction, compilationErrorDetails.clone(), format!("Function \"{}\" is not defined", function_name))
+                compiler.register_error_with_details(UndefinedFunction, compilation_error_details.clone(), format!("Function \"{}\" is not defined", function_name))
             }
         }
-        let label_gotos_op_code:HashMap<String, Vec<(usize, CompilationDetail)>> = mem::replace(&mut compiler.borrow_mut().main_function.chunk.label_gotos_op_code_indices, Default::default());
+        let label_gotos_op_code:HashMap<String, Vec<(usize, CompilationDetail)>> = mem::take(&mut compiler.borrow_mut().main_function.chunk.label_gotos_op_code_indices);
         for (label_name, indices) in label_gotos_op_code.iter() {
             let maybe_label = compiler.declared_labels.get(label_name);
-            if maybe_label.is_some() {
-                let label = maybe_label.unwrap();
+            if let Some(label) = maybe_label {
                 for (index, _) in indices {
                     compiler.main_function.chunk.set_op_code_at(*index, Jump(label.first_op_code_index));
                 }
@@ -163,8 +162,7 @@ impl Compiler {
             let label_gotos_op_code = function.chunk.label_gotos_op_code_indices.clone();
             for (label_name, indices) in label_gotos_op_code.iter() {
                 let maybe_label = compiler.declared_labels.get(label_name);
-                if maybe_label.is_some() {
-                    let label = maybe_label.unwrap();
+                if let Some(label) = maybe_label {
                     for (index, _) in indices {
                         function.chunk.set_op_code_at(*index, OpCode::Goto(label.first_op_code_index));
                     }
@@ -207,7 +205,7 @@ impl Compiler {
         self.errors.borrow_mut().push(error);
     }
 
-    fn register_error_with_details<'input>(&self, error_type: CompilationErrorType, details: CompilationDetail, message: String) {
+    fn register_error_with_details(&self, error_type: CompilationErrorType, details: CompilationDetail, message: String) {
         let error = CompilationError {
             error_type,
             message,
@@ -265,7 +263,7 @@ impl Compiler {
     }
 
     fn current_assignment_type_drop(&mut self) -> ValueType {
-        let assignment_types = mem::replace(&mut self.state.current_assignment_types, Vec::<ValueType>::new());
+        let assignment_types = mem::take(&mut self.state.current_assignment_types);
         if assignment_types.iter().all(|v| v.is_number()) {
             ValueType::Number
         } else {
@@ -298,7 +296,7 @@ impl Compiler {
     }
 
     fn load_local<'input>(&mut self, variable: &Variable, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
-        let maybe_local_variable = self.current_chunk().load_local(&variable);
+        let maybe_local_variable = self.current_chunk().load_local(variable);
         if let Ok(reference) = maybe_local_variable {
             self.current_chunk().emit_op_code(LoadLocal(reference));
         } else {
@@ -371,7 +369,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if NATIVE_METHODS.contains(&function_or_native_name.as_ref()) {
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
         } else {
-            self.called_functions.push((String::from(function_or_native_name.clone()), self.compilation_error_details_from_context(ctx)));
+            self.called_functions.push((function_or_native_name.clone(), self.compilation_error_details_from_context(ctx)));
             self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
         }
     }
@@ -732,8 +730,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let label_start_index = self.current_chunk().last_op_code_index() + 1;
             self.visit_children(ctx);
             let label_end_index = self.current_chunk().last_op_code_index();
-            self.declared_labels.insert(label_name.to_string().clone(), Label {
-                name: label_name.to_string(),
+            self.declared_labels.insert(label_name.to_string(), Label {
+                name: label_name,
                 first_op_code_index: label_start_index,
                 last_op_code_index: label_end_index,
             });
@@ -744,7 +742,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_compoundStatement(&mut self, ctx: &CompoundStatementContext<'input>) {
         self.visit_children(ctx);
-        let block_break_index = self.block_breaks_index();
     }
 
     fn visit_blockItemList(&mut self, ctx: &BlockItemListContext<'input>) {
@@ -802,7 +799,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if for_condition.forStopExpression().is_some() {
                 self.current_chunk().set_op_code_at(for_if_index, OpCode::If(for_statement_end + 1));
             }
-            mem::replace(self.block_breaks_index(), vec![]).iter().for_each(|index| {
+            mem::take(self.block_breaks_index()).iter().for_each(|index| {
                 self.current_chunk().set_op_code_at(*index, OpCode::Jump(for_statement_end + 1));
             })
         } else if ctx.While().is_some() {
@@ -845,7 +842,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let index = self.current_chunk().emit_op_code(OpCode::Goto(0));
             let label = ctx.Identifier().unwrap().symbol.text.clone();
             let detail = self.compilation_error_details_from_context(ctx);
-            let gotos_op_code_indices = self.current_chunk().label_gotos_op_code_indices.entry(label.to_string().clone()).or_insert(vec![]);
+            let gotos_op_code_indices = self.current_chunk().label_gotos_op_code_indices.entry(label.to_string()).or_insert(vec![]);
             gotos_op_code_indices.push((index, detail));
         }
     }

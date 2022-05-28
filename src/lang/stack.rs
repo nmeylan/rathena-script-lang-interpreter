@@ -20,9 +20,15 @@ pub struct Stack {
     values: RefCell<Vec<StackEntry>>,
 }
 
+impl Default for Stack {
+    fn default() -> Self {
+        Stack { values: RefCell::new(vec![]) }
+    }
+}
+
 impl Stack {
     pub fn new() -> Self {
-        Stack { values: RefCell::new(vec![]) }
+        Self::default()
     }
 
     pub fn push(&self, value: StackEntry) {
@@ -37,7 +43,7 @@ impl Stack {
 
     pub fn peek(&self, index: usize) -> Result<StackEntry, RuntimeError> {
         self.values.borrow()
-            .get(index).map(|value| value.clone())
+            .get(index).cloned()
             .ok_or_else(|| RuntimeError::new_string(format!("Tried to access index \"{}\" is out of bounds \"{}\"", index, self.len() - 1)))
     }
     pub fn contents(&self) -> Ref<Vec<StackEntry>> {
@@ -50,6 +56,10 @@ impl Stack {
 
     pub fn len(&self) -> usize {
         self.values.borrow().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.values.borrow().is_empty()
     }
 }
 

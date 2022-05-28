@@ -1,7 +1,7 @@
 #![feature(try_blocks)]
 extern crate core;
 
-use std::iter::Product;
+
 use std::sync::Arc;
 use ragnarok_script_interpreter::lang::call_frame::CallFrame;
 
@@ -17,7 +17,7 @@ use ragnarok_script_interpreter::lang::vm::{NativeMethodHandler, Vm};
 struct Native;
 
 impl NativeMethodHandler for Native {
-    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, program: &Program, call_frame: &CallFrame) {
+    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, _program: &Program, _call_frame: &CallFrame) {
         if native.name.eq("println") {
             println!("{}", params.iter().map(|p| p.string_value().clone()).collect::<Vec<String>>().join(" "));
         }

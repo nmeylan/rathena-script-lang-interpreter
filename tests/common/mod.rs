@@ -1,4 +1,4 @@
-use std::ops::Deref;
+
 use std::sync::Arc;
 use ragnarok_script_interpreter::lang::call_frame::CallFrame;
 use ragnarok_script_interpreter::lang::program::Program;

@@ -88,12 +88,12 @@ impl Chunk {
         hash
     }
 
-    pub fn load_local(&mut self, variable: &Variable) -> Result<u64, ()> {
+    pub fn load_local(&mut self, variable: &Variable) -> Result<u64, String> {
         let maybe_found = self.locals.iter().find(|(_reference, local)| *local == variable);
         if let Some((reference, _)) = maybe_found {
             Ok(*reference)
         } else {
-            Err(())
+            Err(String::from("Undefined variable"))
         }
     }
 }

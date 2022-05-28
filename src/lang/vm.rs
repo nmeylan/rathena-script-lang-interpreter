@@ -2,7 +2,6 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{Hash, Hasher};
-use std::{io};
 use std::cell::RefCell;
 use std::io::{Stdout, Write};
 
@@ -65,7 +64,7 @@ impl Display for RuntimeError {
 }
 
 pub trait NativeMethodHandler {
-    fn handle(&self, native: &Native, _params: Vec<Value>, program: &Program, call_frame: &CallFrame) {
+    fn handle(&self, native: &Native, _params: Vec<Value>, _program: &Program, _call_frame: &CallFrame) {
         panic!("Native function {}", native.name);
     }
 }
