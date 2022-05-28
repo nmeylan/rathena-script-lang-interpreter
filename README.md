@@ -3,7 +3,9 @@ This project is work in progress, it will probably never be finished or never wo
 # rAthena script language interpreter
 A parser, compiler and VM implementation for rAthena script language.
 
-Inspired by [https://github.com/Doddler/Scripting-Language-Guide](https://github.com/Doddler/Scripting-Language-Guide) and [https://craftinginterpreters.com/](https://craftinginterpreters.com/)
+Inspired by [https://github.com/Doddler/Scripting-Language-Guide](https://github.com/Doddler/Scripting-Language-Guide) and [https://craftinginterpreters.com/](https://craftinginterpreters.com/).
+
+VM architecture inspired by [jvm](https://docs.oracle.com/javase/specs/jvms/se11/html/index.html)
 
 # Generate Parser
 `java -jar bin/antlr4.9.4-rust.jar RathenaScriptLang.g4 -Dlanguage=Rust -visitor -o src/parser`
