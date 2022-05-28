@@ -23,17 +23,13 @@ Grammar is defined in `RathenaScriptLang.g4` file. Parser is generated using `an
 ## VM lifecycle
 ```mermaid
 graph TD
-    Server[RagnarokServer] --> Boot --> Load[Load Script] --> Read[Read bytecode] --> VM1;
-    Compiler --> ReadTxt[Parse source] --> AST[Generate AST] --> Visit[Visit ast nodes] --> Chunk[Generate chunks] --> ByteCode[Write bytes code] --> Bytecode --> VM1;
-    VM1[VM] --> Startup;
+graph TD
+        Server[RagnarokServer] --> Boot --> Load[Load bytecode] --> VM;
+    Compiler --> ReadTxt[Parse source] --> AST[Generate AST] --> Visit[Visit ast nodes] --> Chunk[Generate chunks] --> ByteCode[Write bytes code] --> Bytecode;
+    VM[VM] --> Startup;
     Server --> Player[Player interact with NPC] --> Execute;
-    Bytecode --> VM2;
-    Execute[Execute script] --> VM2[VM] --> Instantiate[Instantiate script] --> Read2[Read byte code] --> Run[Execute program] --> I2[Execute op code];
-    Startup[Startup] --> CheckInit{is_initialized}
-    CheckInit --> |yes| Reload[reload script]
-    Reload --> Init
-    CheckInit --> |no| Init[Read bytecode]
-    Init --> I[Collect global functions <br>Collect static functions <br>Initialize static variables pool]
-
+    Execute[Execute script] --> VM[VM] --> Instantiate[Instantiate script] --> Read2[Read byte code] --> Run[Execute program] --> I2[Execute op code];
+    Startup[Bootstrap] --> Loading --> Linking --> Initialization
+ 
 
 ```
