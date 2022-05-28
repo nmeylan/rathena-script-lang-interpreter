@@ -1,4 +1,4 @@
-use std::borrow::{Borrow, BorrowMut, Cow};
+use std::borrow::{Borrow, Cow};
 use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -14,7 +14,7 @@ use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
 use crate::lang::vm::Vm;
 
-use crate::lang::chunk::{Chunk, OpCode, Relational};
+use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::value::{*};
@@ -404,17 +404,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Multiply operator \"*\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(Multiply);
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Multiply));
             } else if operator.Slash().is_some() {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Divide operator \"/\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(Divide);
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Divide));
             } else if operator.Percent().is_some() {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Modulo operator \"%\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(Modulo);
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Modulo));
             }
         }
     }
@@ -434,7 +434,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Subtraction operator \"-\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(Subtract);
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
             }
         }
     }
@@ -554,7 +554,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     let variable = Self::build_variable(&left.variable().unwrap());
                     self.load_local(&variable, ctx);
                 }
-                self.current_chunk().emit_op_code(Subtract);
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
             }
             self.visit_assignmentLeftExpression(&left);
         } else {

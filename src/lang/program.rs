@@ -175,54 +175,27 @@ impl Program {
                     let reference = self.vm.add_in_constant_pool(new_value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
-                OpCode::Subtract => {
+                OpCode::NumericOperation(operation) => {
                     let stack_entry1 = self.stack.pop()?;
                     let stack_entry2 = self.stack.pop()?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
                     let new_value = if v1.is_string() || v2.is_string() {
-                        return Err(RuntimeError::new(format!("Attempt to substract strings: {} - {}", v1, v2).as_str()));
+                        let operation_name = match operation {
+                            NumericOperation::Subtract => "subtract",
+                            NumericOperation::Multiply => "multiply",
+                            NumericOperation::Divide => "divide",
+                            NumericOperation::Modulo => "modulo"
+                        };
+                        return Err(RuntimeError::new(format!("Attempt to {} strings: {} - {}", operation_name, v1, v2).as_str()));
                     } else {
-                        Value::Number(Some(v1.number_value() - v2.number_value()))
-                    };
-                    let reference = self.vm.add_in_constant_pool(new_value);
-                    self.stack.push(StackEntry::ConstantPoolReference(reference));
-                }
-                OpCode::Multiply => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
-                    let new_value = if v1.is_string() || v2.is_string() {
-                        return Err(RuntimeError::new(format!("Attempt to multiply strings: {} - {}", v1, v2).as_str()));
-                    } else {
-                        Value::Number(Some(v1.number_value() * v2.number_value()))
-                    };
-                    let reference = self.vm.add_in_constant_pool(new_value);
-                    self.stack.push(StackEntry::ConstantPoolReference(reference));
-                }
-                OpCode::Divide => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
-                    let new_value = if v1.is_string() || v2.is_string() {
-                        return Err(RuntimeError::new(format!("Attempt to divide strings: {} - {}", v1, v2).as_str()));
-                    } else {
-                        Value::Number(Some(v1.number_value() / v2.number_value()))
-                    };
-                    let reference = self.vm.add_in_constant_pool(new_value);
-                    self.stack.push(StackEntry::ConstantPoolReference(reference));
-                }
-                OpCode::Modulo => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
-                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame)?;
-                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame)?;
-                    let new_value = if v1.is_string() || v2.is_string() {
-                        return Err(RuntimeError::new(format!("Attempt to perform modulo strings: {} - {}", v1, v2).as_str()));
-                    } else {
-                        Value::Number(Some(v1.number_value() % v2.number_value()))
+                        let res = match operation {
+                            NumericOperation::Subtract => v1.number_value() - v2.number_value(),
+                            NumericOperation::Multiply => v1.number_value() * v2.number_value(),
+                            NumericOperation::Divide => v1.number_value() / v2.number_value(),
+                            NumericOperation::Modulo => v1.number_value() % v2.number_value(),
+                        };
+                        Value::Number(Some(res))
                     };
                     let reference = self.vm.add_in_constant_pool(new_value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
@@ -296,7 +269,7 @@ impl Program {
                         Ok(CallFrameBreak::Return(true))
                     } else {
                         Ok(CallFrameBreak::Return(false))
-                    }
+                    };
                 }
                 OpCode::Command => {}
                 OpCode::If(jump_to_index) => {

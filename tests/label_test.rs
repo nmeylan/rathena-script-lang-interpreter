@@ -30,7 +30,7 @@ fn simple_label() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, script);
+    Vm::execute_program(vm, script).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
     assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().clone());
@@ -57,7 +57,7 @@ fn simple_label_with_goto() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, script);
+    Vm::execute_program(vm, script).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
     assert_eq!(true, events.borrow().get("b").is_none());
@@ -86,7 +86,7 @@ fn label_with_goto_inside() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, script);
+    Vm::execute_program(vm, script).unwrap();
     assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().clone());
     assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().clone());
     assert_eq!(true, events.borrow().get("d").is_none());

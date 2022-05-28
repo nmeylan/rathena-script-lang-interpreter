@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::mem;
-use std::ops::Deref;
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
@@ -128,10 +127,7 @@ pub enum OpCode {
     LogicalOr,
     Relational(Relational),
     Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Modulo,
+    NumericOperation(NumericOperation),
     Not,
     Jump(usize), // OpCode index to jump to
     Goto(usize), // OpCode index to jump to. Using goto instead of jump allow to break function
@@ -150,4 +146,12 @@ pub enum Relational {
     GTE,
     LT,
     LTE
+}
+
+#[derive(Debug, Clone)]
+pub enum NumericOperation {
+    Subtract,
+    Multiply,
+    Divide,
+    Modulo,
 }
