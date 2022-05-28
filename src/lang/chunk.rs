@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::mem;
+use std::ops::Deref;
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
@@ -18,7 +20,7 @@ pub struct Chunk {
     pub locals: HashMap<u64, Variable, NoopHasher>,
     pub constants_storage: HashMap<u64, Constant, NoopHasher>,
     // state
-    pub(crate) label_gotos_op_code_indices: HashMap<String, Vec<(usize, CompilationDetail)>>, // key are label name, values are goto op code that goto this label
+    label_gotos_op_code_indices: RefCell<HashMap<String, Vec<(usize, CompilationDetail)>>>, // key are label name, values are goto op code that goto this label
 }
 
 impl Default for Chunk {
@@ -32,7 +34,7 @@ impl Default for Chunk {
             instances: HashMap::with_hasher(NoopHasher::default()),
             locals: HashMap::with_hasher(NoopHasher::default()),
             constants_storage: HashMap::with_hasher(NoopHasher::default()),
-            label_gotos_op_code_indices: Default::default()
+            label_gotos_op_code_indices: RefCell::new(Default::default())
         }
     }
 }
@@ -95,6 +97,15 @@ impl Chunk {
         } else {
             Err(String::from("Undefined variable"))
         }
+    }
+
+    pub fn push_goto_index(&self, label: String, index: usize, compilation_detail: CompilationDetail) {
+        let mut ref_mut = self.label_gotos_op_code_indices.borrow_mut();
+        let gotos_op_code_indices = ref_mut.entry(label.to_string()).or_insert(vec![]);
+        gotos_op_code_indices.push((index, compilation_detail));
+    }
+    pub fn drop_goto_indices(&self) -> HashMap<String, Vec<(usize, CompilationDetail)>> {
+        mem::take(&mut self.label_gotos_op_code_indices.borrow_mut())
     }
 }
 

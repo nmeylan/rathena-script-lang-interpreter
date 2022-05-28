@@ -1,4 +1,4 @@
-use std::borrow::{BorrowMut, Cow};
+use std::borrow::{Borrow, BorrowMut, Cow};
 use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -143,36 +143,9 @@ impl Compiler {
                 compiler.register_error_with_details(UndefinedFunction, compilation_error_details.clone(), format!("Function \"{}\" is not defined", function_name))
             }
         }
-        let label_gotos_op_code:HashMap<String, Vec<(usize, CompilationDetail)>> = mem::take(&mut compiler.borrow_mut().main_function.chunk.label_gotos_op_code_indices);
-        for (label_name, indices) in label_gotos_op_code.iter() {
-            let maybe_label = compiler.declared_labels.get(label_name);
-            if let Some(label) = maybe_label {
-                for (index, _) in indices {
-                    compiler.main_function.chunk.set_op_code_at(*index, Jump(label.first_op_code_index));
-                }
-            } else {
-                for (_, compilation_detail) in indices {
-                    compiler.register_error_with_details(UndefinedLabel, compilation_detail.clone(),
-                                                         format!("Undefined label \"{}\"", label_name))
-                }
-            }
-        }
-
+        Self::update_goto_jump_index(&compiler, &compiler.borrow().main_function);
         for (_, function) in compiler.main_function.chunk.functions.iter() {
-            let label_gotos_op_code = function.chunk.label_gotos_op_code_indices.clone();
-            for (label_name, indices) in label_gotos_op_code.iter() {
-                let maybe_label = compiler.declared_labels.get(label_name);
-                if let Some(label) = maybe_label {
-                    for (index, _) in indices {
-                        function.chunk.set_op_code_at(*index, OpCode::Goto(label.first_op_code_index));
-                    }
-                } else {
-                    for (_, compilation_detail) in indices {
-                        compiler.register_error_with_details(UndefinedLabel, compilation_detail.clone(),
-                                                             format!("Undefined label \"{}\"", label_name))
-                    }
-                }
-            }
+            Self::update_goto_jump_index(&compiler, function);
         }
 
         if compiler.errors.borrow().is_empty() {
@@ -180,6 +153,23 @@ impl Compiler {
         } else {
             let errors_ref_cell = mem::replace(&mut compiler.errors, RefCell::new(vec![]));
             Err(errors_ref_cell.take())
+        }
+    }
+
+    fn update_goto_jump_index(compiler: &Compiler, function: &Function) {
+        let label_gotos_op_code = function.chunk.drop_goto_indices();
+        for (label_name, indices) in label_gotos_op_code.iter() {
+            let maybe_label = compiler.declared_labels.get(label_name);
+            if let Some(label) = maybe_label {
+                for (index, _) in indices {
+                    function.chunk.set_op_code_at(*index, OpCode::Goto(label.first_op_code_index));
+                }
+            } else {
+                for (_, compilation_detail) in indices {
+                    compiler.register_error_with_details(UndefinedLabel, compilation_detail.clone(),
+                                                         format!("Undefined label \"{}\"", label_name))
+                }
+            }
         }
     }
 
@@ -842,8 +832,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let index = self.current_chunk().emit_op_code(OpCode::Goto(0));
             let label = ctx.Identifier().unwrap().symbol.text.clone();
             let detail = self.compilation_error_details_from_context(ctx);
-            let gotos_op_code_indices = self.current_chunk().label_gotos_op_code_indices.entry(label.to_string()).or_insert(vec![]);
-            gotos_op_code_indices.push((index, detail));
+            self.current_chunk().push_goto_index(label.to_string(), index, detail);
         }
     }
 
