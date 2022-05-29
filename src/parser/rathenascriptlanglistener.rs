@@ -705,6 +705,26 @@ fn enter_scriptInitialization(&mut self, _ctx: &ScriptInitializationContext<'inp
  */
 fn exit_scriptInitialization(&mut self, _ctx: &ScriptInitializationContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#npcInitialization}.
+ * @param ctx the parse tree
+ */
+fn enter_npcInitialization(&mut self, _ctx: &NpcInitializationContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#npcInitialization}.
+ * @param ctx the parse tree
+ */
+fn exit_npcInitialization(&mut self, _ctx: &NpcInitializationContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#scriptName}.
+ * @param ctx the parse tree
+ */
+fn enter_scriptName(&mut self, _ctx: &ScriptNameContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#scriptName}.
+ * @param ctx the parse tree
+ */
+fn exit_scriptName(&mut self, _ctx: &ScriptNameContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#scope_specifier}.
  * @param ctx the parse tree
  */
