@@ -4,15 +4,20 @@ use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::cell::RefCell;
 use std::io::{Stdout, Write};
+use std::mem;
 
 use std::sync::Arc;
 use crate::lang::call_frame::CallFrame;
-
+use crate::lang::chunk::{ClassFile, FunctionDefinition};
+use crate::lang::class::{Class, Function};
 
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::program::Program;
 
-use crate::lang::value::{Constant, Function, Native, Value, ValueRef, Variable};
+use crate::lang::value::{Constant, Native, Value, ValueRef, Variable};
+
+pub const MAIN_FUNCTION: &'static str = "_main";
+
 
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
@@ -32,6 +37,7 @@ impl HeapEntry {
 pub struct Vm {
     heap: RefCell<HashMap<u64, HeapEntry, NoopHasher>>,
     constants_pool: RefCell<HashMap<u64, Constant, NoopHasher>>,
+    classes_pool: RefCell<HashMap<String, Class>>,
     native_pool: HashMap<u64, Native, NoopHasher>,
     native_method_handler: Box<dyn NativeMethodHandler>,
 }
@@ -80,24 +86,55 @@ impl Vm {
             heap: Default::default(),
             constants_pool: Default::default(),
             native_method_handler,
-            native_pool
+            native_pool,
+            classes_pool: RefCell::new(Default::default())
         }
     }
 
-    pub fn execute_program(vm: Arc<Vm>, mut function: Function) -> Result<(), RuntimeError> {
-        {
-            let chunk = &mut function.chunk;
-            vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
+    pub fn bootstrap(vm: Arc<Vm>, mut classes: Vec<ClassFile>) {
+        for class in classes.iter_mut() {
+            for function in class.functions.iter_mut() {
+                let chunk = &mut function.chunk;
+                vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
+            }
+            vm.register_class(class);
         }
-        let mut program = Program::new(vm);
-        // TODO: init local variable pool
-        // TODO: init instance variable pool
-        // TODO: init program function pool
-        // Surement besoin de passer un chunk plutot que CallFrame dans la fonction run
-        program.run_main(&mut function).map_err(|e| {
+
+    }
+
+    pub fn execute_main_script(vm: Arc<Vm>) -> Result<(), RuntimeError> {
+        let mut program = Program::new(vm.clone());
+        program.run_main(vm.classes_pool.borrow().get("_MainScript").as_ref().unwrap()).map_err(|e| {
             println!("{}", e);
             e
         })
+    }
+    // pub fn execute_program(vm: Arc<Vm>, mut function: FunctionDefinition) -> Result<(), RuntimeError> {
+    //     {
+    //         let chunk = &mut function.chunk;
+    //         vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
+    //     }
+    //     let mut program = Program::new(vm);
+    //     // TODO: init local variable pool
+    //     // TODO: init instance variable pool
+    //     // TODO: init program function pool
+    //     // Surement besoin de passer un chunk plutot que CallFrame dans la fonction run
+    //     program.run_main(&mut function).map_err(|e| {
+    //         println!("{}", e);
+    //         e
+    //     })
+    // }
+
+    pub fn register_class(&self, class: &mut ClassFile) {
+        let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
+        for function in mem::take(&mut class.functions).iter_mut() {
+            functions_pool.insert(Vm::calculate_hash(&function.name),
+                                  Function::from_chunk(function.name.clone(), mem::take(&mut function.chunk)));
+        }
+        self.classes_pool.borrow_mut().insert(class.name.clone(), Class {
+            name: class.name.clone(),
+            functions_pool
+        });
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {

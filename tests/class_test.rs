@@ -9,20 +9,20 @@ use crate::common::Event;
 mod common;
 
 pub fn compile(script: &str) -> Vec<ClassFile> {
-    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
+    Compiler::compile("test_script".to_string(), script).map_err(|e| {
         e.iter().for_each(|e| println!("\n{}", e))
     }).unwrap()
 }
 
 
-#[test]
-fn return_stop_script() {
+fn simple_class_test() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let classes = compile(r#"
-    .@a$ = "hello world";
-    return;
-    vm_dump_var("a", .@a$);
+    - script My class -1, {
+        .@a$ = "hello" + " world " + 1;
+        vm_dump_var("a", .@a$);
+    }
     "#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
@@ -30,5 +30,5 @@ fn return_stop_script() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(true, events.borrow().get("a").is_none());
+    assert_eq!(String::from("hello world 1"), events.borrow().get("a").unwrap().value.string_value().clone());
 }

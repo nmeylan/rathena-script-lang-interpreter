@@ -3,13 +3,13 @@ mod common;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use ragnarok_script_interpreter::lang::chunk::ClassFile;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
-use ragnarok_script_interpreter::lang::value::Function;
 use ragnarok_script_interpreter::lang::vm::Vm;
 use crate::common::Event;
 
-pub fn compile(script: &str) -> Function {
-    Compiler::compile("test_script".to_string(), script).map_err(|e| {
+pub fn compile(script: &str) -> Vec<ClassFile> {
+    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
         e.iter().for_each(|e| println!("\n{}", e))
     }).unwrap()
 }
@@ -21,7 +21,7 @@ fn simple_function_call() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     my_func();
     function my_func {
         .@a$ = "hello world";
@@ -29,7 +29,8 @@ fn simple_function_call() {
     }
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -40,7 +41,7 @@ fn function_call_with_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     my_func("hello");
     function my_func {
         .@a$ = getarg(0) + " world";
@@ -48,7 +49,8 @@ fn function_call_with_arguments() {
     }
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -59,7 +61,7 @@ fn function_call_with_variable_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a$ = "hello";
     my_func(.@a$);
     function my_func {
@@ -68,7 +70,8 @@ fn function_call_with_variable_arguments() {
     }
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -79,7 +82,7 @@ fn function_call_with_arguments_out_of_bounds() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events;
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     my_func("hello");
     function my_func {
         .@a$ = getarg(1) + " world";
@@ -87,7 +90,8 @@ fn function_call_with_arguments_out_of_bounds() {
     }
     "#);
     // When
-    let runtime_error = Vm::execute_program(vm, function).err().unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
     // Then
     assert_eq!(String::from("Can't call getarg(1) which is greater than number of arguments provided: 1. Maximum allow index is 0. Consider calling getarg with a default value: getarg(1, DEFAULT_VALUE)"), runtime_error.to_string());
 }
@@ -97,7 +101,7 @@ fn function_call_with_arguments_with_default() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     my_func("hello");
     function my_func {
         .@a$ = getarg(1, "default") + " world";
@@ -105,7 +109,8 @@ fn function_call_with_arguments_with_default() {
     }
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("default world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -115,7 +120,7 @@ fn function_call_with_number_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     my_func(2);
     function my_func {
         .@a = getarg(0) + 4;
@@ -123,7 +128,8 @@ fn function_call_with_number_arguments() {
     }
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
 }
@@ -133,7 +139,7 @@ fn function_call_with_number_arguments_with_default() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     my_func(2);
     function my_func {
         .@a = getarg(1, 3) + 4;
@@ -141,7 +147,8 @@ fn function_call_with_number_arguments_with_default() {
     }
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(7_i32, events.borrow().get("a").unwrap().value.number_value().clone());
 }
@@ -151,7 +158,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     my_func(2);
     function my_func {
         .@a$ = getarg(1, "3") + 4;
@@ -159,7 +166,8 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
     }
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("34"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -170,7 +178,7 @@ fn function_with_return_type() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     function plus_four {
         .@a = getarg(0) + 4;
         .@b = 0;
@@ -182,7 +190,8 @@ fn function_with_return_type() {
     vm_dump_locals();
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
     assert_eq!(8_i32, events.borrow().get("b").unwrap().value.number_value().clone());
@@ -195,7 +204,7 @@ fn function_with_return_type_multicall() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     function plus_four {
         .@a = getarg(0) + 4;
         return .@a;
@@ -211,7 +220,8 @@ fn function_with_return_type_multicall() {
     vm_dump_var("a", .@a);
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(5_i32, events.borrow().get("a").unwrap().value.number_value().clone());
 }
@@ -222,7 +232,7 @@ fn recursive_function_call_with_return() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a = my_func(10);
     function my_func {
         .@my_local = getarg(0) - 1;
@@ -234,7 +244,8 @@ fn recursive_function_call_with_return() {
     vm_dump_locals();
     "#);
     // When
-    Vm::execute_program(vm, function).unwrap();
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(0, events.borrow().get("a").unwrap().value.number_value().clone());
 }

@@ -304,7 +304,6 @@ translationUnit
 
 externalDeclaration
     : functionDefinition
-    | blockItem
     | scriptInitialization
     | npcInitialization
     |   ';' // stray ;
@@ -314,15 +313,15 @@ functionDefinition
     :  Function Identifier  compoundStatement?
     ;
 scriptInitialization
-    : '-' 'script' scriptName (Minus? Number) (',' (Minus? Number))* ',' compoundStatement+
-    | Identifier (',' Number?)+  'script'  scriptName  (Minus? Number) (',' (Minus? Number))* ',' compoundStatement+
+    : '-' 'script' scriptName (Minus? Number) (',' (Minus? Number))* ',' compoundStatement
+    | Identifier (',' Number?)+  'script'  scriptName  (Minus? Number) (',' (Minus? Number))* ',' compoundStatement
     ;
 npcInitialization
     : Identifier (',' Number?)+  Identifier  scriptName (Number | Identifier) (',' (Number | Identifier))*
     | Identifier (',' Number?)+  'duplicate' '(' Identifier ')' scriptName (Number | Identifier) (',' (Number | Identifier))*
     ;
 scriptName
-    : (Identifier | ':' | '#' | Colon | Label | Minus | Number)*
+    : (Identifier | ':' | '#' | Colon | Label | Number)*
     ;
 
 scope_specifier

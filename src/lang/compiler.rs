@@ -5,17 +5,20 @@ use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
 use std::mem;
 use std::ops::Deref;
+use std::slice::SliceIndex;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream};
 use antlr_rust::token::Token;
-use antlr_rust::tree::{ParseTreeVisitor};
+use antlr_rust::tree::{ParseTreeVisitor, Tree};
 use crate::parser::rathenascriptlangvisitor::{*};
 use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
-use crate::lang::vm::Vm;
+use crate::lang::vm::{MAIN_FUNCTION, Vm};
 
-use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational};
 use crate::lang::chunk::OpCode::{*};
+use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition};
+use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreGlobal, StoreInstance, StoreLocal};
+use crate::lang::class::Function;
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::value::{*};
 
@@ -33,8 +36,8 @@ const NATIVE_METHODS: &[&str] = &[
 #[allow(dead_code)]
 #[derive(Default)]
 pub struct Compiler {
-    name: String,
-    main_function: Function,
+    file_name: String,
+    classes: Vec<ClassFile>,
     errors: RefCell<Vec<CompilationError>>,
     state: State,
     script_lines: Vec<String>,
@@ -43,6 +46,10 @@ pub struct Compiler {
     called_functions: Vec<(String, CompilationDetail)>,
     // Declared label
     declared_labels: HashMap<String, Label>,
+}
+
+pub struct ClassesAndGlobalFunctions {
+    classes: Vec<ClassFile>,
 }
 
 #[allow(dead_code)]
@@ -55,7 +62,8 @@ pub struct Label {
 #[derive(Default)]
 pub struct State {
     current_assignment_types: Vec<ValueType>,
-    current_declared_function: Option<Function>,
+    current_declared_function: usize,
+    current_declared_class: usize,
     block_breaks: HashMap<String, Vec<usize>>,
 }
 
@@ -116,11 +124,13 @@ impl Display for CompilationError {
 }
 
 impl Compiler {
-    fn new(name: String, script: String) -> Self {
-        let main_function = Function::new(format!("{}_main", name));
+    fn new(file_name: String, script: String) -> Self {
         Self {
-            name,
-            main_function,
+            file_name,
+            classes: vec![ClassFile {
+                name: "_Global".to_string(),
+                functions: vec![]
+            }],
             errors: RefCell::new(vec![]),
             state: Default::default(),
             script_lines: script.split('\n').map(|l| l.to_string()).collect::<Vec<String>>(),
@@ -129,34 +139,41 @@ impl Compiler {
             declared_labels: Default::default(),
         }
     }
-    pub fn compile(name: String, script: &str) -> Result<Function, Vec<CompilationError>> {
+
+    pub fn compile_script(name: String, script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str())
+    }
+
+    pub fn compile(name: String, script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
         let mut compiler = Compiler::new(name, script.to_string());
         let lexer = RathenaScriptLangLexer::new(InputStream::new(script));
         let token_stream = CommonTokenStream::new(lexer);
         let mut parser = RathenaScriptLangParser::new(token_stream);
         let tree = parser.compilationUnit();
         // println!("{}", tree.unwrap().to_string_tree(&parser));
-        compiler.state.block_breaks.insert("main".to_string(), vec![]);
+        compiler.state.block_breaks.insert(MAIN_FUNCTION.to_string(), vec![]);
         compiler.visit_compilationUnit(tree.as_ref().unwrap());
         for (function_name, compilation_error_details) in compiler.called_functions.clone().iter() {
             if !compiler.declared_functions.contains(function_name) {
                 compiler.register_error_with_details(UndefinedFunction, compilation_error_details.clone(), format!("Function \"{}\" is not defined", function_name))
             }
         }
-        Self::update_goto_jump_index(&compiler, &compiler.borrow().main_function);
-        for (_, function) in compiler.main_function.chunk.functions.iter() {
-            Self::update_goto_jump_index(&compiler, function);
+        for class in compiler.classes.iter() {
+            for function in class.functions.iter() {
+                Self::update_goto_jump_index(&compiler, function);
+            }
         }
 
         if compiler.errors.borrow().is_empty() {
-            Ok(compiler.main_function)
+            compiler.classes.iter().for_each(|e| {println!("{}", e.name)});
+            Ok(mem::take(&mut compiler.classes))
         } else {
             let errors_ref_cell = mem::replace(&mut compiler.errors, RefCell::new(vec![]));
             Err(errors_ref_cell.take())
         }
     }
 
-    fn update_goto_jump_index(compiler: &Compiler, function: &Function) {
+    fn update_goto_jump_index(compiler: &Compiler, function: &FunctionDefinition) {
         let label_gotos_op_code = function.chunk.drop_goto_indices();
         for (label_name, indices) in label_gotos_op_code.iter() {
             let maybe_label = compiler.declared_labels.get(label_name);
@@ -173,12 +190,22 @@ impl Compiler {
         }
     }
 
+    fn add_function_to_current_class(&mut self, function: FunctionDefinition) -> usize {
+        &mut self.classes.get_mut(self.state.current_declared_class).unwrap().functions.push(function);
+        self.classes.get(self.state.current_declared_class).unwrap().functions.len()
+    }
+
+    fn current_declared_function(&self) -> &FunctionDefinition {
+        self.classes.get(self.state.current_declared_class).as_mut().unwrap().functions.get(self.state.current_declared_function).as_mut().unwrap()
+    }
+
     fn current_chunk(&mut self) -> &mut Chunk {
-        if let Some(function) = self.state.current_declared_function.as_mut() {
-            &mut function.chunk
-        } else {
-            &mut self.main_function.chunk
-        }
+        unsafe { &mut self.classes.get_unchecked_mut(self.state.current_declared_class)
+            .functions.get_unchecked_mut(self.state.current_declared_function).chunk }
+    }
+
+    fn is_inside_a_main_function(&self) -> bool {
+        self.state.current_declared_function == 0
     }
 
     fn variable_value(has_dollar: bool) -> ValueRef {
@@ -189,7 +216,7 @@ impl Compiler {
         let error = CompilationError {
             error_type,
             message,
-            file_name: self.name.clone(),
+            file_name: self.file_name.clone(),
             details: self.compilation_error_details_from_context(node),
         };
         self.errors.borrow_mut().push(error);
@@ -199,7 +226,7 @@ impl Compiler {
         let error = CompilationError {
             error_type,
             message,
-            file_name: self.name.clone(),
+            file_name: self.file_name.clone(),
             details,
         };
         self.errors.borrow_mut().push(error);
@@ -297,11 +324,8 @@ impl Compiler {
     }
 
     fn block_breaks_index(&mut self) -> &mut Vec<usize> {
-        if self.state.current_declared_function.is_some() {
-            self.state.block_breaks.get_mut(&self.state.current_declared_function.as_ref().unwrap().name).unwrap()
-        } else {
-            self.state.block_breaks.get_mut("main").unwrap()
-        }
+        let name = &self.current_declared_function().name.clone();
+        self.state.block_breaks.get_mut(name).unwrap()
     }
 }
 
@@ -711,10 +735,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if ctx.Label().is_some() {
             let label_name = ctx.Label().unwrap().symbol.text.clone();
             let label_name= label_name[0..label_name.len() - 1].to_string(); // remove ':' in label name
-            if self.state.current_declared_function.is_some() {
+            if !self.is_inside_a_main_function() {
                 self.register_error(LabelNotInMain, ctx,
                                     format!("Label \"{}\" is declared in \"{}\" function scope but label should be declared in script scope only.",
-                                            label_name, self.state.current_declared_function.as_ref().unwrap().name));
+                                            label_name, self.current_declared_function().name));
                 return;
             }
             let label_start_index = self.current_chunk().last_op_code_index() + 1;
@@ -871,22 +895,33 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.register_error(NativeAlreadyDefined, ctx, format!("A native function with name \"{}\" already exists.", function_name));
             return;
         }
-        let function = Function {
+        let function = FunctionDefinition {
             name: function_name.clone(),
-            arity: 0,
             chunk: Default::default(),
         };
         self.declared_functions.push(function_name.clone());
-        self.state.current_declared_function = Some(function);
+        let len = self.add_function_to_current_class(function);
+        self.state.current_declared_function = len - 1;
         self.state.block_breaks.insert(function_name.clone(), vec![]);
         self.visit_children(ctx);
-        let current_declared_function = mem::replace(&mut self.state.current_declared_function, None);
-        self.current_chunk().add_function(current_declared_function.unwrap());
+        self.state.current_declared_function = 0;
         self.state.block_breaks.remove(&function_name);
     }
 
     fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>) {
-        self.visit_children(ctx)
+        let mut name = String::from("");
+        for child in ctx.scriptName().as_ref().unwrap().get_children() {
+            name = format!("{}{}", name, child.get_text());
+        }
+        self.classes.push(
+            ClassFile {
+                name,
+                functions: vec![FunctionDefinition { name: MAIN_FUNCTION.to_string(), chunk: Default::default() }]
+            }
+        );
+        self.state.current_declared_function = 0;
+        self.state.current_declared_class += 1;
+        self.visit_compoundStatement(ctx.compoundStatement().as_ref().unwrap());
     }
 
     fn visit_scope_specifier(&mut self, ctx: &Scope_specifierContext<'input>) {
@@ -901,6 +936,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) {
         self.visit_children(ctx)
+    }
+
+    fn visit_scriptName(&mut self, ctx: &ScriptNameContext<'input>) {
+        let mut name = String::from("");
+        for child in ctx.get_children() {
+            name = format!("{}{}", name, child.get_text());
+        }
+        println!("{}", name);
     }
 }
 

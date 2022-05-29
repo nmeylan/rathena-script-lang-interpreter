@@ -1,18 +1,57 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
+use std::hash::{Hash, Hasher};
 use std::mem;
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Constant, Function, Native, Variable};
+use crate::lang::value::{Constant, Native, Variable};
 use crate::lang::vm::Vm;
 
+pub struct ClassFile {
+    pub name: String,
+    pub functions: Vec<FunctionDefinition>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct FunctionDefinition {
+    pub name: String,
+    pub(crate) chunk: Chunk,
+}
+
+impl PartialEq for FunctionDefinition {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl Hash for FunctionDefinition {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write(self.name.as_bytes());
+    }
+}
+
+impl FunctionDefinition {
+    pub fn new(name: String) -> Self {
+        Self {
+            name,
+            chunk: Default::default(),
+        }
+    }
+}
+
+impl Display for FunctionDefinition {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "function {}()", self.name)
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct Chunk {
     pub op_codes: RefCell<Vec<OpCode>>,
     pub references: Vec<u64>,
-    pub functions: HashMap<u64, Function, NoopHasher>,
+    pub functions: HashMap<u64, FunctionDefinition, NoopHasher>,
     pub natives: HashMap<u64, Native, NoopHasher>,
     pub globals: HashMap<u64, Variable, NoopHasher>,
     pub instances: HashMap<u64, Variable, NoopHasher>,
@@ -77,7 +116,7 @@ impl Chunk {
         hash
     }
 
-    pub fn add_function(&mut self, function: Function) -> u64 {
+    pub fn add_function(&mut self, function: FunctionDefinition) -> u64 {
         let hash = Vm::calculate_hash(&function.name);
         self.functions.insert(hash, function);
         hash
