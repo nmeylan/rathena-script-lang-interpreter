@@ -192,6 +192,16 @@ impl Compiler {
     fn visible_functions(&self) -> Vec<String> {
         self.current_class().functions().iter().map(|func| func.name.clone()).collect::<Vec<String>>()
     }
+    fn global_class(&self) -> &ClassFile {
+        self.classes.get(0).as_ref().unwrap()
+    }
+    fn function_returned_type(&self, function_name: &String) -> Option<ValueType>  {
+        let maybe_returned_type = self.current_class().get_function_returned_type(function_name);
+        if maybe_returned_type.is_some() {
+            return maybe_returned_type;
+        }
+        self.global_class().get_function_returned_type(function_name)
+    }
 
     fn variable_value(has_dollar: bool) -> ValueRef {
         if has_dollar { ValueRef::new_empty_string() } else { ValueRef::new_empty_number() }
@@ -264,12 +274,18 @@ impl Compiler {
         self.state.current_assignment_types.push(value_type)
     }
 
-    fn current_assignment_type_drop(&mut self) -> ValueType {
+    fn current_assignment_type_drop(&mut self) -> Option<ValueType> {
         let assignment_types = mem::take(&mut self.state.current_assignment_types);
+        for x in assignment_types.iter() {
+            println!("{:?}", x);
+        }
+        if assignment_types.is_empty() {
+            return None;
+        }
         if assignment_types.iter().all(|v| v.is_number()) {
-            ValueType::Number
+            Some(ValueType::Number)
         } else {
-            ValueType::String
+            Some(ValueType::String)
         }
     }
 
@@ -372,6 +388,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
         } else {
             self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_error_details_from_context(ctx)));
+            if let Some(returned_type) = self.function_returned_type(&function_or_native_name) {
+                self.add_current_assigment_type(returned_type);
+            }
             self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
         }
     }
@@ -586,18 +605,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(StoreGlobal(reference));
         } else if ctx.variable().is_some() {
             let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
-            let current_variable_type = self.current_assignment_type_drop();
-            match variable_identifier.value_ref.borrow().deref() {
-                ValueRef::String(_) => {
-                    if current_variable_type.is_number() {
-                        self.register_error(CompilationErrorType::Type, ctx,
-                                            format!("Variable \"{}\" is a String but was assigned to a Number.", variable_identifier.to_script_identifier()));
+            println!("{}", variable_identifier.to_script_identifier());
+            if let Some(current_value_type) = self.current_assignment_type_drop() {
+                match variable_identifier.value_ref.borrow().deref() {
+                    ValueRef::String(_) => {
+                        if current_value_type.is_number() {
+                            self.register_error(CompilationErrorType::Type, ctx,
+                                                format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable_identifier.to_script_identifier()));
+                        }
                     }
-                }
-                ValueRef::Number(_) => {
-                    if current_variable_type.is_string() {
-                        self.register_error(CompilationErrorType::Type, ctx,
-                                            format!("Variable \"{}\" is a Number but was assigned to a String.", variable_identifier.to_script_identifier()));
+                    ValueRef::Number(_) => {
+                        if current_value_type.is_string() {
+                            self.register_error(CompilationErrorType::Type, ctx,
+                                                format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable_identifier.to_script_identifier()));
+                        }
                     }
                 }
             }
@@ -632,7 +653,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_declaration(&mut self, ctx: &DeclarationContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_children(ctx);
+        self.current_assignment_type_drop();
     }
 
     fn visit_declarationSpecifiers(&mut self, ctx: &DeclarationSpecifiersContext<'input>) {
@@ -755,7 +777,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_expressionStatement(&mut self, ctx: &ExpressionStatementContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_children(ctx);
+        self.current_assignment_type_drop();
     }
 
     fn visit_selectionStatement(&mut self, ctx: &SelectionStatementContext<'input>) {
@@ -869,7 +892,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_externalDeclaration(&mut self, ctx: &ExternalDeclarationContext<'input>) {
-        self.visit_children(ctx)
+        self.visit_children(ctx);
+        self.current_assignment_type_drop();
     }
 
     fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>) {
@@ -886,6 +910,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         let function = FunctionDefinition::new(function_name);
         self.add_function_to_current_class(function);
         self.visit_children(ctx);
+        self.current_declared_function().set_returned_type(self.current_assignment_type_drop());
         self.current_class().set_current_declared_function_index(0);
     }
 

@@ -109,6 +109,13 @@ impl Vm {
             e
         })
     }
+    pub fn execute_class(vm: Arc<Vm>, class_name: String) -> Result<(), RuntimeError> {
+        let mut program = Program::new(vm.clone());
+        program.run_main(vm.classes_pool.borrow().get(&class_name.to_string()).as_ref().unwrap()).map_err(|e| {
+            println!("{}", e);
+            e
+        })
+    }
     // pub fn execute_program(vm: Arc<Vm>, mut function: FunctionDefinition) -> Result<(), RuntimeError> {
     //     {
     //         let chunk = &mut function.chunk;

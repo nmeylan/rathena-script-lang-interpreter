@@ -52,7 +52,7 @@ fn type_checking_string_invalid() {
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(7, result.as_ref().err().unwrap().len());
-    assert_eq!("test_script 2:0. Variable \".@a$\" is a String but was assigned to a Number.\nl2\t.@a$ = 1;\n\t^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!("test_script 2:0. Variable \".@a$\" is declared as a String but is assigned with a Number.\nl2\t.@a$ = 1;\n\t^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
     assert_eq!("test_script 3:7. Subtraction operator \"-\" is not allowed for String\nl3\t.@a$ = \"1\" - \"2\";\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
     assert_eq!("test_script 4:7. Subtraction operator \"-\" is not allowed for String\nl4\t.@a$ = 1 - \"2\";\n\t       ^^^^^\n", result.as_ref().err().unwrap().get(2).unwrap().message());
     assert_eq!("test_script 5:7. Subtraction operator \"-\" is not allowed for String\nl5\t.@a$ = \"1\" - 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(3).unwrap().message());
@@ -84,8 +84,40 @@ fn type_checking_number_invalid() {
     let result = compile(script);
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!("test_script 2:0. Variable \".@a\" is a Number but was assigned to a String.\nl2\t.@a = \"1\";\n\t^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
-    assert_eq!("test_script 3:0. Variable \".@b\" is a Number but was assigned to a String.\nl3\t.@b = 1 + \"2\";\n\t^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
+    assert_eq!("test_script 2:0. Variable \".@a\" is declared as a Number but is assigned with a String.\nl2\t.@a = \"1\";\n\t^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!("test_script 3:0. Variable \".@b\" is declared as a Number but is assigned with a String.\nl3\t.@b = 1 + \"2\";\n\t^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
+}
+
+#[test]
+fn type_checking_function_call() {
+    // Given
+    let script = r#"
+    function str {
+        return "hello";
+    }
+
+    function num {
+        return 1;
+    }
+    .@a$ = str();
+    .@b = num();
+    .@c = str();
+    .@d$ = num();
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    let errors = result.err().unwrap();
+    assert_eq!(2, errors.len());
+    assert_eq!(r#"test_script 12:4. Variable ".@c" is declared as a Number but is assigned with a String.
+l12	    .@c = str();
+	    ^^^
+"#, errors.get(0).unwrap().message());
+    assert_eq!(r#"test_script 13:4. Variable ".@d$" is declared as a String but is assigned with a Number.
+l13	    .@d$ = num();
+	    ^^^^
+"#, errors.get(1).unwrap().message());
 }
 
 #[test]
@@ -152,7 +184,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_n
     let result = compile(script);
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!(r#"test_script 5:8. Variable ".@a" is a Number but was assigned to a String.
+    assert_eq!(r#"test_script 5:8. Variable ".@a" is declared as a Number but is assigned with a String.
 l5	        .@a = getarg(1, "3") + 4;
 	        ^^^
 "#, result.as_ref().err().unwrap().get(0).unwrap().message());
@@ -223,7 +255,6 @@ fn undefined_label() {
     // When
     let _result = compile(script);
     // Then
-
 }
 
 

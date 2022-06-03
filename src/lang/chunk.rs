@@ -1,3 +1,4 @@
+use std::borrow::BorrowMut;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
@@ -7,7 +8,7 @@ use std::rc::Rc;
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Constant, Native, Variable};
+use crate::lang::value::{Constant, Native, ValueType, Variable};
 use crate::lang::vm::{MAIN_FUNCTION, Vm};
 
 pub struct ClassFile {
@@ -77,6 +78,15 @@ impl ClassFile {
         let main_function: &Rc<FunctionDefinition> = functions.get(0).as_ref().unwrap();
         main_function.get_label(label_name)
     }
+
+    pub fn get_function_returned_type(&self, function_name: &String) -> Option<ValueType> {
+        let functions = self.functions.borrow();
+        if let Some(function) = functions.iter().find(|f| &f.name == function_name) {
+            function.returnedType.borrow().clone()
+        } else {
+            None
+        }
+    }
 }
 
 impl ClassFileState {
@@ -89,6 +99,7 @@ pub struct FunctionDefinition {
     pub name: String,
     pub(crate) chunk: Rc<Chunk>,
     pub(crate) state: Option<FunctionDefinitionState>,
+    pub (crate) returnedType: RefCell<Option<ValueType>>,
 }
 
 impl FunctionDefinition {
@@ -97,6 +108,7 @@ impl FunctionDefinition {
             name,
             chunk: Default::default(),
             state: Some(Default::default()),
+            returnedType: RefCell::new(None)
         }
     }
     pub fn drop_block_breaks_index(&self) -> Vec<usize> {
@@ -113,6 +125,10 @@ impl FunctionDefinition {
     pub fn get_label(&self, label_name: &String) -> Option<Rc<Label>> {
         let declared_labels = self.state.as_ref().unwrap().declared_labels.borrow();
         declared_labels.get(label_name).cloned()
+    }
+
+    pub fn set_returned_type(&self, returned_type: Option<ValueType>) {
+        *self.returnedType.borrow_mut() = returned_type;
     }
 }
 
