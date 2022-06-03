@@ -84,6 +84,7 @@ pub enum CompilationErrorType {
     UndefinedVariable,
     UndefinedFunction,
     FunctionAlreadyDefined,
+    ClassAlreadyDefined,
     NativeAlreadyDefined,
     Type,
     LabelNotInMain,
@@ -108,7 +109,7 @@ impl Compiler {
     fn new(file_name: String, script: String) -> Self {
         Self {
             file_name,
-            classes: vec![ClassFile::new("_Global".to_string())],
+            classes: vec![ClassFile::new("_Global".to_string(), "_globa_class_".to_string(), 0)],
             errors: RefCell::new(vec![]),
             state: Default::default(),
             script_lines: script.split('\n').map(|l| l.to_string()).collect::<Vec<String>>(),
@@ -919,7 +920,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         for child in ctx.scriptName().as_ref().unwrap().get_children() {
             name = format!("{}{}", name, child.get_text());
         }
-        self.classes.push(ClassFile::new_with_main_function(name));
+        if let Some(class) = self.classes.iter().find(|c| c.name == name) {
+            self.register_error(CompilationErrorType::ClassAlreadyDefined, ctx, format!("Class {} is already defined in file \"{}\" at line \"l{}\"", name, class.defined_in_file_name, class.defined_at_line));
+        } else {
+            let detail = self.compilation_error_details_from_context(ctx);
+            self.classes.push(ClassFile::new_with_main_function(name, self.file_name.clone(), detail.start_line));
+        }
         self.state.current_declared_class += 1;
         self.visit_compoundStatement(ctx.compoundStatement().as_ref().unwrap());
     }

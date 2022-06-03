@@ -13,6 +13,8 @@ use crate::lang::vm::{MAIN_FUNCTION, Vm};
 
 pub struct ClassFile {
     pub name: String,
+    pub defined_in_file_name: String,
+    pub defined_at_line: usize,
     pub functions: RefCell<Vec<Rc<FunctionDefinition>>>,
     // state
     pub state: Option<ClassFileState>,
@@ -33,16 +35,20 @@ impl Default for ClassFileState {
 }
 
 impl ClassFile {
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String, file_name: String, line: usize) -> Self {
         Self {
             name,
+            defined_in_file_name: file_name,
+            defined_at_line: line,
             functions: RefCell::new(vec![]),
             state: Some(Default::default())
         }
     }
-    pub fn new_with_main_function(name: String) -> Self {
+    pub fn new_with_main_function(name: String, file_name: String, line: usize) -> Self {
         Self {
             name,
+            defined_in_file_name: file_name,
+            defined_at_line: line,
             functions: RefCell::new(vec![Rc::new(FunctionDefinition::new(MAIN_FUNCTION.to_string()))]),
             state: Some(Default::default())
         }

@@ -3,8 +3,11 @@ use ragnarok_script_interpreter::lang::compiler::{CompilationError, Compiler};
 
 mod common;
 
-pub fn compile(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+pub fn compile_script(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
     Compiler::compile_script("test_script".to_string(), script)
+}
+pub fn compile(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+    Compiler::compile("test_script".to_string(), script)
 }
 
 #[test]
@@ -16,7 +19,7 @@ print(.@b$);
 .@b$ = "hello world";
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!("test_script 3:6. Variable \".@a$\" is undefined.\nl3\tprint(.@a$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
@@ -31,7 +34,7 @@ fn type_checking_string_valid() {
 .@c$ = "toto" + 1;
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_ok());
 }
@@ -48,7 +51,7 @@ fn type_checking_string_invalid() {
 .@a$ = "1" / 2;
 "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(7, result.as_ref().err().unwrap().len());
@@ -69,7 +72,7 @@ fn type_checking_number_valid() {
     .@a = 1 + 3;
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_ok());
 }
@@ -81,7 +84,7 @@ fn type_checking_number_invalid() {
 .@b = 1 + "2";
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!("test_script 2:0. Variable \".@a\" is declared as a Number but is assigned with a String.\nl2\t.@a = \"1\";\n\t^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
@@ -105,7 +108,7 @@ fn type_checking_function_call() {
     .@d$ = num();
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     let errors = result.err().unwrap();
@@ -125,7 +128,7 @@ fn undefined_function() {
     // Given
     let script = r#"undefined();"#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
 }
@@ -135,7 +138,7 @@ fn function_definition() {
     // Given
     let script = r#"function my_func() {}"#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_ok());
 }
@@ -155,7 +158,7 @@ fn function_redefinition_should_be_an_error() {
     }
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(2, result.as_ref().err().unwrap().len());
@@ -170,6 +173,28 @@ l9	    function print { // this is a native function, it is forbidden to declare
 "#, result.as_ref().err().unwrap().get(1).unwrap().message());
 }
 
+
+#[test]
+fn class_redefinition_should_be_an_error() {
+    // Given
+    let script = r#"
+    - script My class -1, {
+    }
+    - script My class2 -1, {
+    }
+    - script My class -1, {
+    }
+    "#;
+    // When
+    let result = compile(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(r#"test_script 6:4. Class Myclass is already defined in file "test_script" at line "l2"
+l6	    - script My class -1, {
+	    ^
+"#, result.as_ref().err().unwrap().get(0).unwrap().message());
+}
+
 #[test]
 fn function_call_with_number_arguments_with_default_different_type_assigned_to_number() {
     // Given
@@ -181,7 +206,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_n
     }
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"test_script 5:8. Variable ".@a" is declared as a Number but is assigned with a String.
@@ -206,7 +231,7 @@ fn type_checking_conditional_statement() {
     .@a = 1 < 2;
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"test_script 4:10. Can't perform comparison when left and right are not same types
@@ -233,7 +258,7 @@ fn type_checking_logical_and_or() {
     .@a = 1 && "0";
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"test_script 4:10. Can't perform logical and (&&) when left and right are not same types
@@ -253,7 +278,7 @@ fn undefined_label() {
 
     "#;
     // When
-    let _result = compile(script);
+    let _result = compile_script(script);
     // Then
 }
 
@@ -268,7 +293,7 @@ fn label_defined_in_a_function_is_not_valid() {
         }
     "#;
     // When
-    let result = compile(script);
+    let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"test_script 4:12. Label "Assign" is declared in "my_func" function scope but label should be declared in script scope only.
