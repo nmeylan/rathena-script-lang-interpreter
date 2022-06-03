@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::collections::hash_map::Iter;
 use crate::lang::noop_hasher::NoopHasher;
 use std::io::{Stdout, Write};
-use crate::lang::chunk::{Chunk, OpCode};
+use crate::lang::chunk::{OpCode};
 use crate::lang::class::Function;
 use crate::lang::value::Variable;
 

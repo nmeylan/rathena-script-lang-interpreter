@@ -1,12 +1,9 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
 
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::Deref;
-use crate::lang::chunk::{Chunk, OpCode};
-use crate::lang::noop_hasher::NoopHasher;
 
 pub type AccountId = String;
 pub type CharId = String;

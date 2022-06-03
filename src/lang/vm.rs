@@ -1,14 +1,14 @@
+use std::borrow::Borrow;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::cell::RefCell;
 use std::io::{Stdout, Write};
-use std::mem;
 
 use std::sync::Arc;
 use crate::lang::call_frame::CallFrame;
-use crate::lang::chunk::{ClassFile, FunctionDefinition};
+use crate::lang::chunk::{Chunk, ClassFile};
 use crate::lang::class::{Class, Function};
 
 use crate::lang::noop_hasher::NoopHasher;
@@ -93,9 +93,9 @@ impl Vm {
 
     pub fn bootstrap(vm: Arc<Vm>, mut classes: Vec<ClassFile>) {
         for class in classes.iter_mut() {
-            for function in class.functions.iter_mut() {
-                let chunk = &mut function.chunk;
-                vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
+            for function in class.functions() {
+                let chunk = &mut function.chunk.clone();
+                vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage.borrow_mut()));
             }
             vm.register_class(class);
         }
@@ -127,9 +127,11 @@ impl Vm {
 
     pub fn register_class(&self, class: &mut ClassFile) {
         let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
-        for function in mem::take(&mut class.functions).iter_mut() {
+        for function in class.functions() {
+            let chunk_rc = function.chunk.clone();
+            let chunk: &Chunk = chunk_rc.borrow();
             functions_pool.insert(Vm::calculate_hash(&function.name),
-                                  Function::from_chunk(function.name.clone(), mem::take(&mut function.chunk)));
+                                  Function::from_chunk(function.name.clone(), chunk.clone()));
         }
         self.classes_pool.borrow_mut().insert(class.name.clone(), Class {
             name: class.name.clone(),

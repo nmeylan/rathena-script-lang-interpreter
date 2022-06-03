@@ -39,11 +39,11 @@ impl Function {
         }
     }
 
-    pub fn from_chunk(name: String, mut chunk: Chunk) -> Self {
+    pub fn from_chunk(name: String, chunk: Chunk) -> Self {
         Self {
             name,
             code: mem::take(&mut chunk.op_codes.borrow_mut()),
-            locals: mem::take(&mut chunk.locals)
+            locals: mem::take(&mut chunk.locals.borrow_mut())
         }
     }
 }

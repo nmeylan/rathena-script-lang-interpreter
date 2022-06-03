@@ -10,12 +10,17 @@ pub fn compile(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
 #[test]
 fn undefined_variable() {
     // Given
-    let script = r#"print(.@a$);"#;
+    let script = r#"
+print(.@a$);
+print(.@b$);
+.@b$ = "hello world";
+    "#;
     // When
     let result = compile(script);
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!("test_script 2:6. Variable \".@a$\" is undefined.\nl2\tprint(.@a$);\n\t      ^^^^\n", result.err().unwrap().get(0).unwrap().message());
+    assert_eq!("test_script 3:6. Variable \".@a$\" is undefined.\nl3\tprint(.@a$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!("test_script 4:6. Variable \".@b$\" is undefined.\nl4\tprint(.@b$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
 }
 
 #[test]
