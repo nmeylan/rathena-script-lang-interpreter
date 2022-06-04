@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
@@ -6,17 +7,59 @@ use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Variable};
 
+#[derive(Debug)]
 pub struct Class {
     pub(crate) name: String,
     pub(crate) functions_pool: HashMap<u64, Function, NoopHasher>,
+    pub(crate) instances_references: RefCell<u64>,
+    pub(crate) instance_variables: HashMap<u64, Variable, NoopHasher>, // Only instance variables definition
 }
 
+impl Class {
+    pub fn new(name: String, functions_pool: HashMap<u64, Function, NoopHasher>, instance_variables: HashMap<u64, Variable, NoopHasher>) -> Self {
+        Self {
+            name,
+            functions_pool,
+            instances_references: RefCell::new(0),
+            instance_variables
+        }
+    }
+
+    pub fn new_instance(&self) -> Instance {
+        *self.instances_references.borrow_mut() += 1;
+        Instance {
+            reference: self.instances_references.borrow().clone(),
+            class_name: self.name.clone(),
+            variables: self.instance_variables.clone()
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Instance {
+    pub reference: u64,
+    pub class_name: String,
+    pub variables: HashMap<u64, Variable, NoopHasher>,
+}
+
+impl Hash for Instance {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.reference.hash(state)
+    }
+}
+
+impl Instance {
+    pub fn get_variable(&self, reference: u64) -> Option<&Variable> {
+        self.variables.get(&reference)
+    }
+}
+
+#[derive(Debug)]
 pub struct Function {
     pub name: String,
     pub code: Vec<OpCode>,
     pub locals: HashMap<u64, Variable, NoopHasher>,
 }
-
 
 impl PartialEq for Function {
     fn eq(&self, other: &Self) -> bool {

@@ -1,5 +1,5 @@
 use std::borrow::BorrowMut;
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
@@ -8,7 +8,7 @@ use std::rc::Rc;
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Constant, Native, ValueType, Variable};
+use crate::lang::value::{Constant, Native, Scope, ValueType, Variable};
 use crate::lang::vm::{MAIN_FUNCTION, Vm};
 
 pub struct ClassFile {
@@ -16,6 +16,8 @@ pub struct ClassFile {
     pub defined_in_file_name: String,
     pub defined_at_line: usize,
     pub functions: RefCell<Vec<Rc<FunctionDefinition>>>,
+    pub instance_variables: RefCell<HashMap<u64, Variable, NoopHasher>>,
+    pub static_variables: RefCell<HashMap<u64, Variable, NoopHasher>>,
     // state
     pub state: Option<ClassFileState>,
 }
@@ -41,6 +43,8 @@ impl ClassFile {
             defined_in_file_name: file_name,
             defined_at_line: line,
             functions: RefCell::new(vec![]),
+            instance_variables: RefCell::new(Default::default()),
+            static_variables: RefCell::new(Default::default()),
             state: Some(Default::default())
         }
     }
@@ -50,6 +54,8 @@ impl ClassFile {
             defined_in_file_name: file_name,
             defined_at_line: line,
             functions: RefCell::new(vec![Rc::new(FunctionDefinition::new(MAIN_FUNCTION.to_string()))]),
+            instance_variables: RefCell::new(Default::default()),
+            static_variables: RefCell::new(Default::default()),
             state: Some(Default::default())
         }
     }
@@ -57,6 +63,18 @@ impl ClassFile {
         self.functions.borrow_mut().push(Rc::new(function));
         *self.state.as_ref().unwrap().current_declared_function_index.borrow_mut() = self.functions.borrow().len() - 1;
         self.functions.borrow().len()
+    }
+
+    pub fn add_instance_variable(&self, variable: Variable) -> u64 {
+        let hash = Vm::calculate_hash(&variable);
+        self.instance_variables.borrow_mut().insert(hash, variable);
+        hash
+    }
+
+    pub fn add_static_variable(&self, variable: Variable) -> u64 {
+        let hash = Vm::calculate_hash(&variable);
+        self.static_variables.borrow_mut().insert(hash, variable);
+        hash
     }
     pub fn set_current_declared_function_index(&self, index: usize) {
         *self.state.as_ref().unwrap().current_declared_function_index.borrow_mut() = index;
@@ -91,6 +109,21 @@ impl ClassFile {
             function.returnedType.borrow().clone()
         } else {
             None
+        }
+    }
+
+    pub fn load_variable(&self, variable: &Variable, scope: Scope) -> Result<u64, String> {
+        let cell = RefCell::new(Default::default());
+        let variables = match scope {
+            Scope::Npc => self.static_variables.borrow(),
+            Scope::Instance => self.instance_variables.borrow(),
+            _ => cell.borrow()
+        };
+        let maybe_found = variables.iter().find(|(_reference, local)| *local == variable);
+        if let Some((reference, _)) = maybe_found.as_ref() {
+            Ok(**reference)
+        } else {
+            Err(String::from("Undefined variable"))
         }
     }
 }
@@ -180,10 +213,6 @@ impl Display for FunctionDefinition {
 #[derive(Debug, Clone)]
 pub struct Chunk {
     pub op_codes: RefCell<Vec<OpCode>>,
-    pub references: Vec<u64>,
-    pub natives: RefCell<HashMap<u64, Native, NoopHasher>>,
-    pub globals: RefCell<HashMap<u64, Variable, NoopHasher>>,
-    pub instances: RefCell<HashMap<u64, Variable, NoopHasher>>,
     pub locals: RefCell<HashMap<u64, Variable, NoopHasher>>,
     pub constants_storage: RefCell<HashMap<u64, Constant, NoopHasher>>,
     // state
@@ -194,10 +223,6 @@ impl Default for Chunk {
     fn default() -> Self {
         Self {
             op_codes: RefCell::new(vec![]),
-            references: vec![],
-            natives:  RefCell::new(HashMap::with_hasher(NoopHasher::default())),
-            globals:  RefCell::new(HashMap::with_hasher(NoopHasher::default())),
-            instances:  RefCell::new(HashMap::with_hasher(NoopHasher::default())),
             locals:  RefCell::new(HashMap::with_hasher(NoopHasher::default())),
             constants_storage:  RefCell::new(HashMap::with_hasher(NoopHasher::default())),
             label_gotos_op_code_indices: RefCell::new(Default::default())
@@ -226,27 +251,9 @@ impl Chunk {
         hash
     }
 
-    pub fn add_global(&self, variable: Variable) -> u64 {
-        let hash = Vm::calculate_hash(&variable);
-        self.globals.borrow_mut().insert(hash, variable);
-        hash
-    }
-
-    pub fn add_instance(&self, variable: Variable) -> u64 {
-        let hash = Vm::calculate_hash(&variable);
-        self.instances.borrow_mut().insert(hash, variable);
-        hash
-    }
-
     pub fn add_local(&self, variable: Variable) -> u64 {
         let hash = Vm::calculate_hash(&variable);
         self.locals.borrow_mut().insert(hash, variable);
-        hash
-    }
-
-    pub fn add_native(&self, native: Native) -> u64 {
-        let hash = Vm::calculate_hash(&native);
-        self.natives.borrow_mut().insert(hash, native);
         hash
     }
 
@@ -280,6 +287,8 @@ pub enum OpCode {
     LoadLocal(u64),
     StoreInstance(u64),
     LoadInstance(u64),
+    StoreStatic(u64),
+    LoadStatic(u64),
     DefineFunction(u64),
     CallNative { reference: u64, argument_count: usize },
     CallFunction { reference: u64, argument_count: usize },

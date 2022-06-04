@@ -5,11 +5,12 @@ use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::cell::RefCell;
 use std::io::{Stdout, Write};
+use std::rc::Rc;
 
 use std::sync::Arc;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{Chunk, ClassFile};
-use crate::lang::class::{Class, Function};
+use crate::lang::class::{Class, Function, Instance};
 
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::program::Program;
@@ -21,23 +22,26 @@ pub const MAIN_FUNCTION: &'static str = "_main";
 
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
-    Variable(Variable)
+    Variable(Variable),
+    Instance(Instance),
 }
 
 impl HeapEntry {
-    pub fn value_ref(&self) -> ValueRef {
+    pub fn value_ref(&self) -> Option<ValueRef> {
         match self {
             HeapEntry::Variable(var) => {
-                var.value_ref.borrow().clone()
+                Some(var.value_ref.borrow().clone())
             }
+            _ => None
         }
     }
 }
 
+
 pub struct Vm {
     heap: RefCell<HashMap<u64, HeapEntry, NoopHasher>>,
     constants_pool: RefCell<HashMap<u64, Constant, NoopHasher>>,
-    classes_pool: RefCell<HashMap<String, Class>>,
+    classes_pool: RefCell<HashMap<String, Rc<Class>>>,
     native_pool: HashMap<u64, Native, NoopHasher>,
     native_method_handler: Box<dyn NativeMethodHandler>,
 }
@@ -104,33 +108,18 @@ impl Vm {
 
     pub fn execute_main_script(vm: Arc<Vm>) -> Result<(), RuntimeError> {
         let mut program = Program::new(vm.clone());
-        program.run_main(vm.classes_pool.borrow().get("_MainScript").as_ref().unwrap()).map_err(|e| {
+        program.run_main(vm.classes_pool.borrow().get("_MainScript").as_ref().unwrap().new_instance()).map_err(|e| {
             println!("{}", e);
             e
         })
     }
     pub fn execute_class(vm: Arc<Vm>, class_name: String) -> Result<(), RuntimeError> {
         let mut program = Program::new(vm.clone());
-        program.run_main(vm.classes_pool.borrow().get(&class_name.to_string()).as_ref().unwrap()).map_err(|e| {
+        program.run_main(vm.classes_pool.borrow().get(&class_name.to_string()).as_ref().unwrap().new_instance()).map_err(|e| {
             println!("{}", e);
             e
         })
     }
-    // pub fn execute_program(vm: Arc<Vm>, mut function: FunctionDefinition) -> Result<(), RuntimeError> {
-    //     {
-    //         let chunk = &mut function.chunk;
-    //         vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage));
-    //     }
-    //     let mut program = Program::new(vm);
-    //     // TODO: init local variable pool
-    //     // TODO: init instance variable pool
-    //     // TODO: init program function pool
-    //     // Surement besoin de passer un chunk plutot que CallFrame dans la fonction run
-    //     program.run_main(&mut function).map_err(|e| {
-    //         println!("{}", e);
-    //         e
-    //     })
-    // }
 
     pub fn register_class(&self, class: &mut ClassFile) {
         let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
@@ -140,10 +129,8 @@ impl Vm {
             functions_pool.insert(Vm::calculate_hash(&function.name),
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
         }
-        self.classes_pool.borrow_mut().insert(class.name.clone(), Class {
-            name: class.name.clone(),
-            functions_pool
-        });
+        self.classes_pool.borrow_mut().insert(class.name.clone(),
+                                              Rc::new(Class::new(class.name.clone(), functions_pool, class.instance_variables.borrow().clone())));
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {
@@ -173,6 +160,10 @@ impl Vm {
 
     pub fn get_from_native_pool(&self, reference: u64) -> Option<&Native> {
         self.native_pool.get(&reference)
+    }
+
+    pub fn get_class(&self, name: &String) -> Rc<Class> {
+        self.classes_pool.borrow().get(name).unwrap().clone()
     }
 
     pub fn native_method_handler(&self) -> &Box<dyn NativeMethodHandler> {

@@ -12,7 +12,7 @@ pub enum StackEntry {
     LocalVariableReference(u64),
     NativeReference(u64),
     FunctionReference(u64),
-    InstanceReference(u64),
+    InstanceVariableReference(u64),
 }
 
 #[derive(Debug)]

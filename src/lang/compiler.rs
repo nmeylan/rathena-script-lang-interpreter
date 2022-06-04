@@ -314,15 +314,34 @@ impl Compiler {
         }
     }
 
-    fn load_local<'input>(&mut self, variable: &Variable, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
-        let maybe_local_variable = self.current_chunk().load_local(variable);
-        if let Ok(reference) = maybe_local_variable {
-            self.current_chunk().emit_op_code(LoadLocal(reference));
-        } else {
-            self.register_error(
-                CompilationErrorType::UndefinedVariable, node,
-                format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
+    fn load_variable<'input>(&mut self, variable: &Variable, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
+        match variable.scope {
+            Scope::Server => {}
+            Scope::Account => {}
+            Scope::Character => {}
+            Scope::Npc => {
+                if let Ok(reference) = self.current_class().load_variable(variable, Scope::Npc) {
+                    self.current_chunk().emit_op_code(LoadStatic(reference));
+                } else {
+                    self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Static variable \"{}\" is undefined.", variable.to_script_identifier()));
+                }
+            }
+            Scope::Instance => {
+                if let Ok(reference) = self.current_class().load_variable(variable, Scope::Instance) {
+                    self.current_chunk().emit_op_code(LoadInstance(reference));
+                } else {
+                    self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Instance variable \"{}\" is undefined.", variable.to_script_identifier()));
+                }
+            }
+            Scope::Local => {
+                if let Ok(reference) = self.current_chunk().load_local(variable) {
+                    self.current_chunk().emit_op_code(LoadLocal(reference));
+                } else {
+                    self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
+                }
+            }
         }
+
     }
 
     fn block_breaks(&self) -> Vec<usize> {
@@ -578,13 +597,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if assignment_operator.PlusEqual().is_some() {
                 if left.variable().is_some() {
                     let variable = Self::build_variable(&left.variable().unwrap());
-                    self.load_local(&variable, ctx);
+                    self.load_variable(&variable, ctx);
                 }
                 self.current_chunk().emit_op_code(Add);
             } else if assignment_operator.MinusEqual().is_some() {
                 if left.variable().is_some() {
                     let variable = Self::build_variable(&left.variable().unwrap());
-                    self.load_local(&variable, ctx);
+                    self.load_variable(&variable, ctx);
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
             }
@@ -598,12 +617,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if ctx.Identifier().is_some() {
             // Number + char permanent variable (ie: not ending with '$', nor having any scope) match Identifier instead of variable.
             let name = ctx.Identifier().unwrap().symbol.text.deref().to_string();
-            let reference = self.current_chunk().add_global(Variable {
-                name,
-                scope: Scope::Character,
-                value_ref: RefCell::new(ValueRef::new_empty_number()),
-            });
-            self.current_chunk().emit_op_code(StoreGlobal(reference));
+            // TODO
         } else if ctx.variable().is_some() {
             let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
             println!("{}", variable_identifier.to_script_identifier());
@@ -624,17 +638,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
             }
             match variable_identifier.scope {
-                Scope::Server | Scope::Account | Scope::Character | Scope::Npc => {
-                    let reference = self.current_chunk().add_global(variable_identifier);
-                    self.current_chunk().emit_op_code(StoreGlobal(reference));
+                Scope::Server | Scope::Account | Scope::Character  => {
+                // TODO
                 }
                 Scope::Local => {
                     let reference = self.current_chunk().add_local(variable_identifier);
                     self.current_chunk().emit_op_code(StoreLocal(reference));
                 }
                 Scope::Instance => {
-                    let reference = self.current_chunk().add_instance(variable_identifier);
+                    let reference = self.current_class().add_instance_variable(variable_identifier);
                     self.current_chunk().emit_op_code(StoreInstance(reference));
+                }
+                Scope::Npc => {
+                    let reference = self.current_class().add_static_variable(variable_identifier);
+                    self.current_chunk().emit_op_code(StoreStatic(reference));
                 }
             }
         }
@@ -937,7 +954,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
         let variable = Self::build_variable(ctx);
         self.add_current_assignment_type_from_variable(&variable);
-        self.load_local(&variable, ctx);
+        self.load_variable(&variable, ctx);
     }
 
     fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) {

@@ -40,3 +40,53 @@ fn simple_class_test() {
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
+
+#[test]
+fn instance_variable_test() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    - script My class -1, {
+        'counter = 0;
+        function inc1 {
+            'counter = 'counter + 1;
+        }
+        function inc2 {
+            'counter = 'counter + 2;
+        }
+        inc1();
+        inc2();
+        vm_dump_var("counter", 'counter);
+    }
+    "#);
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    // Then
+    assert_eq!(3, events.borrow().get("counter").unwrap().value.number_value().clone());
+}
+
+// TODO
+fn on_init_hook_test() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    - script My class -1, {
+        function inc {
+            .counter = .counter + 1;
+            vm_dump_var("counter", .counter);
+        }
+        OnInit:
+            .counter = 0;
+    }
+    "#);
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    // Then
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+}

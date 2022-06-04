@@ -157,7 +157,7 @@ impl Variable {
             Scope::Account => String::from(""),
             Scope::Character => String::from("@"),
             Scope::Npc => String::from("."),
-            Scope::Instance => String::from("#"),
+            Scope::Instance => String::from("'"),
             Scope::Local => String::from(".@"),
         }
     }
