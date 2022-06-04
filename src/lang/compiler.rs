@@ -17,7 +17,7 @@ use crate::lang::vm::{Vm};
 
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition, Label};
-use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreGlobal, StoreInstance, StoreLocal};
+use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreInstance, StoreLocal};
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{*};
@@ -146,7 +146,6 @@ impl Compiler {
         }
 
         if compiler.errors.borrow().is_empty() {
-            compiler.classes.iter().for_each(|e| { println!("{}", e.name) });
             Ok(mem::take(&mut compiler.classes))
         } else {
             let errors_ref_cell = mem::replace(&mut compiler.errors, RefCell::new(vec![]));
@@ -155,11 +154,10 @@ impl Compiler {
     }
 
     fn check_called_function_are_defined(compiler: &Compiler, class: &ClassFile) {
-        let declared_functions = class.functions().iter().map(|func| func.name.clone()).collect::<Vec<String>>();
         for rc in class.called_functions().iter() {
             let rc = rc.clone();
             let (function_name, compilation_error_details) = rc.borrow();
-            if !declared_functions.contains(&function_name.clone()) {
+            if !class.functions().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
                 compiler.register_error_with_details(UndefinedFunction, compilation_error_details.clone(),
                                                      format!("Function \"{}\" is not defined", function_name))
             }
@@ -178,13 +176,10 @@ impl Compiler {
             let mut declared_local_variable_references: HashMap<u64, Variable, NoopHasher> = Default::default();
             for index in hook_label.first_op_code_index..hook_label.last_op_code_index {
                 let op_code = main_function.chunk.op_codes.borrow()[index].clone();
-                match op_code {
-                    StoreLocal(reference) => {
-                        if let Some(variable) = main_function.chunk.locals.borrow().get(&reference) {
-                            declared_local_variable_references.insert(reference, variable.clone());
-                        }
+                if let StoreLocal(reference) = op_code {
+                    if let Some(variable) = main_function.chunk.locals.borrow().get(&reference) {
+                        declared_local_variable_references.insert(reference, variable.clone());
                     }
-                    _ => {}
                 }
                 chunk.emit_op_code(op_code.clone());
             }
@@ -318,9 +313,6 @@ impl Compiler {
 
     fn current_assignment_type_drop(&mut self) -> Option<ValueType> {
         let assignment_types = mem::take(&mut self.state.current_assignment_types);
-        for x in assignment_types.iter() {
-            println!("{:?}", x);
-        }
         if assignment_types.is_empty() {
             return None;
         }
@@ -664,7 +656,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             // TODO
         } else if ctx.variable().is_some() {
             let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
-            println!("{}", variable_identifier.to_script_identifier());
             if let Some(current_value_type) = self.current_assignment_type_drop() {
                 match variable_identifier.value_ref.borrow().deref() {
                     ValueRef::String(_) => {
@@ -1012,7 +1003,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         for child in ctx.get_children() {
             name = format!("{}{}", name, child.get_text());
         }
-        println!("{}", name);
     }
 }
 

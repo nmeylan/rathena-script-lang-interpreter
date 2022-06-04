@@ -1,13 +1,10 @@
-use std::collections::HashMap;
 use std::{io};
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
-use std::default::Default;
 use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Native, ValueRef, Variable};
-use crate::lang::noop_hasher::NoopHasher;
+use crate::lang::value::{Native, ValueRef};
 use crate::lang::vm::Vm;
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;

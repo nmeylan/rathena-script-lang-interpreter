@@ -1,5 +1,4 @@
-use std::borrow::BorrowMut;
-use std::cell::{Ref, RefCell};
+use std::cell::{RefCell};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
@@ -8,7 +7,7 @@ use std::rc::Rc;
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Constant, Native, Scope, ValueType, Variable};
+use crate::lang::value::{Constant, Scope, ValueType, Variable};
 use crate::lang::vm::{MAIN_FUNCTION, Vm};
 
 #[derive(Debug)]
@@ -108,7 +107,7 @@ impl ClassFile {
     pub fn get_function_returned_type(&self, function_name: &String) -> Option<ValueType> {
         let functions = self.functions.borrow();
         if let Some(function) = functions.iter().find(|f| &f.name == function_name) {
-            function.returnedType.borrow().clone()
+            function.returned_type.borrow().clone()
         } else {
             None
         }
@@ -141,7 +140,7 @@ pub struct FunctionDefinition {
     pub name: String,
     pub(crate) chunk: Rc<Chunk>,
     pub(crate) state: Option<FunctionDefinitionState>,
-    pub (crate) returnedType: RefCell<Option<ValueType>>,
+    pub (crate) returned_type: RefCell<Option<ValueType>>,
 }
 
 impl FunctionDefinition {
@@ -150,7 +149,7 @@ impl FunctionDefinition {
             name,
             chunk: Default::default(),
             state: Some(Default::default()),
-            returnedType: RefCell::new(None)
+            returned_type: RefCell::new(None)
         }
     }
     pub fn new_with_chunk(name: String, chunk: Chunk) -> Self {
@@ -158,7 +157,7 @@ impl FunctionDefinition {
             name,
             chunk: Rc::new(chunk),
             state: Some(Default::default()),
-            returnedType: RefCell::new(None)
+            returned_type: RefCell::new(None)
         }
     }
     pub fn declared_labels(&self) -> Vec<Rc<Label>> {
@@ -181,7 +180,7 @@ impl FunctionDefinition {
     }
 
     pub fn set_returned_type(&self, returned_type: Option<ValueType>) {
-        *self.returnedType.borrow_mut() = returned_type;
+        *self.returned_type.borrow_mut() = returned_type;
     }
 }
 

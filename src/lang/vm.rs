@@ -17,7 +17,7 @@ use crate::lang::program::Program;
 
 use crate::lang::value::{Constant, Native, Value, ValueRef, Variable};
 
-pub const MAIN_FUNCTION: &'static str = "_main";
+pub const MAIN_FUNCTION: &str = "_main";
 
 
 #[derive(Clone, Debug, Hash)]
@@ -102,7 +102,7 @@ impl Vm {
                 vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage.borrow_mut()));
             }
             let class_rc = vm.register_class(class);
-            Self::init_class(vm.clone(), class_rc);
+            Self::init_class(vm.clone(), class_rc).unwrap();
         }
 
     }
@@ -116,7 +116,7 @@ impl Vm {
     }
     pub fn execute_class(vm: Arc<Vm>, class_name: String) -> Result<(), RuntimeError> {
         let mut program = Program::new(vm.clone());
-        program.run_main(vm.classes_pool.borrow().get(&class_name.to_string()).as_ref().unwrap().new_instance()).map_err(|e| {
+        program.run_main(vm.classes_pool.borrow().get(&class_name).as_ref().unwrap().new_instance()).map_err(|e| {
             println!("{}", e);
             e
         })
@@ -125,7 +125,7 @@ impl Vm {
     pub fn init_class(vm: Arc<Vm>, class: Rc<Class>) -> Result<(), RuntimeError> {
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInit".to_string()));
         if let Some(init_function) = maybe_init_function {
-            let mut program = Program::new(vm.clone());
+            let mut program = Program::new(vm);
             return program.run_function(class.clone(), None, init_function).map_err(|e| {
                 println!("{}", e);
                 e

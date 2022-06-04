@@ -120,12 +120,16 @@ fn on_init_hook_test() {
         inc();
         function inc {
             .counter = .counter + 1;
+            .hello$ = .hello$ + .hello$;
             vm_dump_var("counter", .counter);
+            vm_dump_var("hello_str", .hello$);
         }
         end;
         OnInit:
             .@zero = 0;
+            .@hello$ = "hello";
             .counter = .@zero;
+            .hello$ = .@hello$;
     }
     "#);
     let events_clone = events.clone();
@@ -141,5 +145,7 @@ fn on_init_hook_test() {
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("counter3").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hellohellohellohello"), events.borrow().get("hello_str4").unwrap().value.string_value().clone());
 }
