@@ -28,12 +28,12 @@ impl Display for CallFrame {
 }
 
 impl CallFrame {
-    pub fn new(function: &Function, stack_pointer: usize, name: String, arguments_count: usize) -> Self {
+    pub fn new(function: &Function, stack_pointer: usize, arguments_count: usize) -> Self {
         Self {
             code: function.code.clone(),
             stack_pointer,
             current_op_code: 0,
-            name,
+            name: function.name.clone(),
             locals: function.locals.clone(),
             arguments_count
         }

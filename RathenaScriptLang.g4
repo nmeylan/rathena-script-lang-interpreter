@@ -213,8 +213,7 @@ designator
 
 
 statement
-    :   labeledStatement
-    |   compoundStatement
+    :   compoundStatement
     |   expressionStatement
     |   selectionStatement
     |   iterationStatement
@@ -225,7 +224,7 @@ statement
     ;
 
 labeledStatement
-    :   Label statement
+    :   Label statement*
     |   'case' constantExpression ':' statement
     |   'default' ':' statement
     ;
@@ -240,6 +239,7 @@ blockItemList
 
 blockItem
     :   statement
+    |   labeledStatement
     |   functionDefinition
     |   declaration
     ;

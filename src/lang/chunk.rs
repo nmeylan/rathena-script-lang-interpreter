@@ -11,6 +11,7 @@ use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Constant, Native, Scope, ValueType, Variable};
 use crate::lang::vm::{MAIN_FUNCTION, Vm};
 
+#[derive(Debug)]
 pub struct ClassFile {
     pub name: String,
     pub defined_in_file_name: String,
@@ -22,6 +23,7 @@ pub struct ClassFile {
     pub state: Option<ClassFileState>,
 }
 
+#[derive(Debug)]
 pub struct ClassFileState {
     pub(crate) current_declared_function_index: RefCell<usize>,
     pub(crate) called_functions: RefCell<Vec<Rc<(String, CompilationDetail)>>>,
@@ -134,6 +136,7 @@ impl ClassFileState {
     }
 }
 
+#[derive(Debug)]
 pub struct FunctionDefinition {
     pub name: String,
     pub(crate) chunk: Rc<Chunk>,
@@ -149,6 +152,17 @@ impl FunctionDefinition {
             state: Some(Default::default()),
             returnedType: RefCell::new(None)
         }
+    }
+    pub fn new_with_chunk(name: String, chunk: Chunk) -> Self {
+        Self {
+            name,
+            chunk: Rc::new(chunk),
+            state: Some(Default::default()),
+            returnedType: RefCell::new(None)
+        }
+    }
+    pub fn declared_labels(&self) -> Vec<Rc<Label>> {
+       self.state.as_ref().unwrap().declared_labels.borrow().iter().map(|(_, label)| label.clone()).collect::<Vec<Rc<Label>>>()
     }
     pub fn drop_block_breaks_index(&self) -> Vec<usize> {
         mem::take(&mut *self.state.as_ref().unwrap().block_breaks.borrow_mut())
@@ -171,11 +185,13 @@ impl FunctionDefinition {
     }
 }
 
+#[derive(Debug)]
 pub struct FunctionDefinitionState {
     block_breaks: RefCell<Vec<usize>>,
     declared_labels: RefCell<HashMap<String, Rc<Label>>>,
 }
 
+#[derive(Debug)]
 #[allow(dead_code)]
 pub struct Label {
     pub(crate) name: String,
@@ -232,6 +248,9 @@ impl Default for Chunk {
 
 impl Chunk {
     pub fn last_op_code_index(&self) -> usize {
+        if self.op_codes.borrow().len() == 0 {
+            return 0;
+        }
         self.op_codes.borrow().len() - 1
     }
 
@@ -308,6 +327,7 @@ pub enum OpCode {
     If(usize), // OpCode index to jump to when condition is evaluated to false.
     Else,
     SkipOp,
+    End,
     Command,
 }
 

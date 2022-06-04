@@ -101,7 +101,8 @@ impl Vm {
                 let chunk = &mut function.chunk.clone();
                 vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage.borrow_mut()));
             }
-            vm.register_class(class);
+            let class_rc = vm.register_class(class);
+            Self::init_class(vm.clone(), class_rc);
         }
 
     }
@@ -121,7 +122,19 @@ impl Vm {
         })
     }
 
-    pub fn register_class(&self, class: &mut ClassFile) {
+    pub fn init_class(vm: Arc<Vm>, class: Rc<Class>) -> Result<(), RuntimeError> {
+        let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInit".to_string()));
+        if let Some(init_function) = maybe_init_function {
+            let mut program = Program::new(vm.clone());
+            return program.run_function(class.clone(), None, init_function).map_err(|e| {
+                println!("{}", e);
+                e
+            })
+        }
+        Ok(())
+    }
+
+    pub fn register_class(&self, class: &mut ClassFile) -> Rc<Class> {
         let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
         for function in class.functions() {
             let chunk_rc = function.chunk.clone();
@@ -129,11 +142,11 @@ impl Vm {
             functions_pool.insert(Vm::calculate_hash(&function.name),
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
         }
-        self.classes_pool.borrow_mut().insert(class.name.clone(),
-                                              Rc::new(Class::new(class.name.clone(), functions_pool,
-                                                                 class.static_variables.borrow().clone(),
-                                                                 class.instance_variables.borrow().clone()))
-        );
+        let class_rc = Rc::new(Class::new(class.name.clone(), functions_pool,
+                                    class.static_variables.borrow().clone(),
+                                    class.instance_variables.borrow().clone()));
+        self.classes_pool.borrow_mut().insert(class.name.clone(), class_rc.clone());
+        class_rc
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {

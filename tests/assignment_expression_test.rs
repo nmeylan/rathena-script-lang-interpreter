@@ -31,6 +31,26 @@ fn simple_assigment() {
 }
 
 #[test]
+fn assigment_to_local_variable() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    .@a$ = "hello world";
+    .@b$ = .@a$;
+    vm_dump_var("a", .@a$);
+    vm_dump_var("b", .@b$);
+    "#);
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("b").unwrap().value.string_value().clone());
+}
+
+#[test]
 fn assignment_with_string_concat() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));

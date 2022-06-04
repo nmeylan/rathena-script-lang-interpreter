@@ -19,6 +19,7 @@ use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition, Label};
 use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreGlobal, StoreInstance, StoreLocal};
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
+use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{*};
 
 const NATIVE_METHODS: &[&str] = &[
@@ -30,6 +31,13 @@ const NATIVE_METHODS: &[&str] = &[
     // internal vm instrumentation
     "vm_dump_locals",
     "vm_dump_var"
+];
+
+// Labels below will be turned into functions
+const HOOK_LABEL: &[&str] = &[
+    "OnInit",
+    "OnInstanceInit",
+    "OnInstanceDestroy",
 ];
 
 #[allow(dead_code)]
@@ -130,15 +138,8 @@ impl Compiler {
         compiler.visit_compilationUnit(tree.as_ref().unwrap());
 
         for class in compiler.classes.iter() {
-            let declared_functions = class.functions().iter().map(|func| func.name.clone()).collect::<Vec<String>>();
-            for rc in class.called_functions().iter() {
-                let rc = rc.clone();
-                let (function_name, compilation_error_details) = rc.borrow();
-                if !declared_functions.contains(&function_name.clone()) {
-                    compiler.register_error_with_details(UndefinedFunction, compilation_error_details.clone(),
-                                                         format!("Function \"{}\" is not defined", function_name))
-                }
-            }
+            Self::check_called_function_are_defined(&compiler, class);
+            Self::add_hook_functions(class);
             for function in class.functions().iter() {
                 Self::update_goto_jump_index(&compiler, class, function.as_ref());
             }
@@ -150,6 +151,46 @@ impl Compiler {
         } else {
             let errors_ref_cell = mem::replace(&mut compiler.errors, RefCell::new(vec![]));
             Err(errors_ref_cell.take())
+        }
+    }
+
+    fn check_called_function_are_defined(compiler: &Compiler, class: &ClassFile) {
+        let declared_functions = class.functions().iter().map(|func| func.name.clone()).collect::<Vec<String>>();
+        for rc in class.called_functions().iter() {
+            let rc = rc.clone();
+            let (function_name, compilation_error_details) = rc.borrow();
+            if !declared_functions.contains(&function_name.clone()) {
+                compiler.register_error_with_details(UndefinedFunction, compilation_error_details.clone(),
+                                                     format!("Function \"{}\" is not defined", function_name))
+            }
+        }
+    }
+
+    fn add_hook_functions(class: &ClassFile) {
+        if class.name == "_Global" {
+            return;
+        }
+        let functions = class.functions();
+        let main_function: &FunctionDefinition = functions.get(0).unwrap().borrow();
+        for hook_label in main_function.declared_labels().iter().filter(|label| HOOK_LABEL.contains(&label.name.as_str())) {
+            let mut function_definition = FunctionDefinition::new(format!("_{}", hook_label.name.clone()));
+            let mut chunk = Chunk::default();
+            let mut declared_local_variable_references: HashMap<u64, Variable, NoopHasher> = Default::default();
+            for index in hook_label.first_op_code_index..hook_label.last_op_code_index {
+                let op_code = main_function.chunk.op_codes.borrow()[index].clone();
+                match op_code {
+                    StoreLocal(reference) => {
+                        if let Some(variable) = main_function.chunk.locals.borrow().get(&reference) {
+                            declared_local_variable_references.insert(reference, variable.clone());
+                        }
+                    }
+                    _ => {}
+                }
+                chunk.emit_op_code(op_code.clone());
+            }
+            chunk.locals = RefCell::new(declared_local_variable_references);
+            function_definition.chunk = Rc::new(chunk);
+            class.add_function(function_definition);
         }
     }
 
@@ -196,7 +237,7 @@ impl Compiler {
     fn global_class(&self) -> &ClassFile {
         self.classes.get(0).as_ref().unwrap()
     }
-    fn function_returned_type(&self, function_name: &String) -> Option<ValueType>  {
+    fn function_returned_type(&self, function_name: &String) -> Option<ValueType> {
         let maybe_returned_type = self.current_class().get_function_returned_type(function_name);
         if maybe_returned_type.is_some() {
             return maybe_returned_type;
@@ -323,14 +364,18 @@ impl Compiler {
                 if let Ok(reference) = self.current_class().load_variable(variable, Scope::Npc) {
                     self.current_chunk().emit_op_code(LoadStatic(reference));
                 } else {
-                    self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Static variable \"{}\" is undefined.", variable.to_script_identifier()));
+                    // TODO fix
+                    self.current_chunk().emit_op_code(LoadStatic(Vm::calculate_hash(variable)));
+                    // self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Static variable \"{}\" is undefined.", variable.to_script_identifier()));
                 }
             }
             Scope::Instance => {
                 if let Ok(reference) = self.current_class().load_variable(variable, Scope::Instance) {
                     self.current_chunk().emit_op_code(LoadInstance(reference));
                 } else {
-                    self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Instance variable \"{}\" is undefined.", variable.to_script_identifier()));
+                    // TODO fix
+                    self.current_chunk().emit_op_code(LoadInstance(Vm::calculate_hash(variable)));
+                    // self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Instance variable \"{}\" is undefined.", variable.to_script_identifier()));
                 }
             }
             Scope::Local => {
@@ -341,7 +386,6 @@ impl Compiler {
                 }
             }
         }
-
     }
 
     fn block_breaks(&self) -> Vec<usize> {
@@ -638,8 +682,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
             }
             match variable_identifier.scope {
-                Scope::Server | Scope::Account | Scope::Character  => {
-                // TODO
+                Scope::Server | Scope::Account | Scope::Character => {
+                    // TODO
                 }
                 Scope::Local => {
                     let reference = self.current_chunk().add_local(variable_identifier);
@@ -771,7 +815,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             let label_start_index = self.current_chunk().last_op_code_index() + 1;
             self.visit_children(ctx);
-            let label_end_index = self.current_chunk().last_op_code_index();
+            let label_end_index = self.current_chunk().last_op_code_index() + 1;
             self.current_declared_function().insert_label(Label {
                 name: label_name,
                 first_op_code_index: label_start_index,
@@ -886,6 +930,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let label = ctx.Identifier().unwrap().symbol.text.clone();
             let detail = self.compilation_error_details_from_context(ctx);
             self.current_chunk().push_goto_index(label.to_string(), index, detail);
+        } else if ctx.End().is_some() {
+            self.current_chunk().emit_op_code(OpCode::End);
         }
     }
 
