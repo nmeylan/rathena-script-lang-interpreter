@@ -2,8 +2,9 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::collections::hash_map::Iter;
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::chunk::{Chunk, OpCode};
 use std::io::{Stdout, Write};
+use crate::lang::chunk::{OpCode};
+use crate::lang::class::Function;
 use crate::lang::value::Variable;
 
 #[derive(Debug)]
@@ -27,13 +28,13 @@ impl Display for CallFrame {
 }
 
 impl CallFrame {
-    pub fn new(chunk: &mut Chunk, stack_pointer: usize, name: String, arguments_count: usize) -> Self {
+    pub fn new(function: &Function, stack_pointer: usize, arguments_count: usize) -> Self {
         Self {
-            code: std::mem::take(&mut chunk.op_codes.borrow_mut()),
+            code: function.code.clone(),
             stack_pointer,
             current_op_code: 0,
-            name,
-            locals: std::mem::take(&mut chunk.locals),
+            name: function.name.clone(),
+            locals: function.locals.clone(),
             arguments_count
         }
     }

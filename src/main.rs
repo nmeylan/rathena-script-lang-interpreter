@@ -36,5 +36,5 @@ fn main() {
     // }
     let vm = Vm::new(Box::new(Native::default()));
     let vm_ref = Arc::new(vm);
-    Vm::execute_program(vm_ref, function).unwrap();
+    // Vm::execute_program(vm_ref, function).unwrap();
 }

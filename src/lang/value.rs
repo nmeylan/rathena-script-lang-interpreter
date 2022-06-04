@@ -4,7 +4,6 @@ use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::Deref;
-use crate::lang::chunk::Chunk;
 
 pub type AccountId = String;
 pub type CharId = String;
@@ -65,7 +64,7 @@ pub enum ValueRef {
     Number(Option<u64>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ValueType {
     String,
     Number,
@@ -158,7 +157,7 @@ impl Variable {
             Scope::Account => String::from(""),
             Scope::Character => String::from("@"),
             Scope::Npc => String::from("."),
-            Scope::Instance => String::from("#"),
+            Scope::Instance => String::from("'"),
             Scope::Local => String::from(".@"),
         }
     }
@@ -189,45 +188,10 @@ impl PartialEq<Self> for Variable {
 
 impl Eq for Variable {}
 
-#[derive(Debug, Clone, Default)]
-pub struct Function {
-    pub name: String,
-    pub arity: usize,
-    pub(crate) chunk: Chunk,
-}
-
-impl PartialEq for Function {
-    fn eq(&self, other: &Self) -> bool {
-        self.name == other.name && self.arity == other.arity
-    }
-}
-
-impl Hash for Function {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write(self.name.as_bytes());
-    }
-}
-
-impl Function {
-    pub fn new(name: String) -> Self {
-        Self {
-            name,
-            arity: 0,
-            chunk: Default::default(),
-        }
-    }
-}
 
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub struct Native {
     pub name: String,
-}
-
-
-impl Display for Function {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "function {}(<{}>)", self.name, self.arity)
-    }
 }
 
 impl Display for Native {

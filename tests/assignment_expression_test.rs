@@ -3,13 +3,13 @@ mod common;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use ragnarok_script_interpreter::lang::value::Function;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
 use common::Event;
+use ragnarok_script_interpreter::lang::chunk::ClassFile;
 
-pub fn compile(script: &str) -> Function {
-    Compiler::compile("test_script".to_string(), script).map_err(|e| {
+pub fn compile(script: &str) -> Vec<ClassFile> {
+    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
         e.iter().for_each(|e| println!("\n{}", e))
     }).unwrap()
 }
@@ -18,28 +18,50 @@ pub fn compile(script: &str) -> Function {
 fn simple_assigment() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a$ = "hello world";
     vm_dump_var("a", .@a$);"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, function);
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+}
+
+#[test]
+fn assigment_to_local_variable() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    .@a$ = "hello world";
+    .@b$ = .@a$;
+    vm_dump_var("a", .@a$);
+    vm_dump_var("b", .@b$);
+    "#);
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("b").unwrap().value.string_value().clone());
 }
 
 #[test]
 fn assignment_with_string_concat() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a$ = "hello" + " world " + 1;
     vm_dump_var("a", .@a$);"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, function);
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello world 1"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -48,7 +70,7 @@ fn assignment_with_string_concat() {
 fn assignment_with_number_operation() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a = 1 + 1;
     .@b = 4 - 1;
     .@c = 4 * 2;
@@ -62,7 +84,8 @@ fn assignment_with_number_operation() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, function);
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(2, events.borrow().get("a").unwrap().value.number_value().clone());
     assert_eq!(3, events.borrow().get("b").unwrap().value.number_value().clone());
@@ -79,14 +102,15 @@ fn assignment_with_number_operation() {
 fn simple_re_assigment() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a$ = "hello world";
     .@a$ = "hello wrld";
     vm_dump_var("a", .@a$);"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, function);
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello wrld"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -94,14 +118,15 @@ fn simple_re_assigment() {
 fn plus_equal_string_concat() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a$ = "hello";
     .@a$ += " world";
     vm_dump_var("a", .@a$);"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, function);
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
@@ -109,14 +134,15 @@ fn plus_equal_string_concat() {
 fn plus_equal_num_addition() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let function = compile(r#"
+    let classes = compile(r#"
     .@a = 1;
     .@a += 2;
     vm_dump_var("a", .@a);"#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::execute_program(vm, function);
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(3_i32, events.borrow().get("a").unwrap().value.number_value());
 }

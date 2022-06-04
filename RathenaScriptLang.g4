@@ -213,8 +213,7 @@ designator
 
 
 statement
-    :   labeledStatement
-    |   compoundStatement
+    :   compoundStatement
     |   expressionStatement
     |   selectionStatement
     |   iterationStatement
@@ -225,7 +224,7 @@ statement
     ;
 
 labeledStatement
-    :   Label statement
+    :   Label statement*
     |   'case' constantExpression ':' statement
     |   'default' ':' statement
     ;
@@ -240,6 +239,7 @@ blockItemList
 
 blockItem
     :   statement
+    |   labeledStatement
     |   functionDefinition
     |   declaration
     ;
@@ -304,8 +304,8 @@ translationUnit
 
 externalDeclaration
     : functionDefinition
-    | blockItem
     | scriptInitialization
+    | npcInitialization
     |   ';' // stray ;
     ;
 
@@ -313,7 +313,16 @@ functionDefinition
     :  Function Identifier  compoundStatement?
     ;
 scriptInitialization
-    : '-' (Identifier | '::')* ','? compoundStatement? ;
+    : '-' 'script' scriptName (Minus? Number) (',' (Minus? Number))* ',' compoundStatement
+    | Identifier (',' Number?)+  'script'  scriptName  (Minus? Number) (',' (Minus? Number))* ',' compoundStatement
+    ;
+npcInitialization
+    : Identifier (',' Number?)+  Identifier  scriptName (Number | Identifier) (',' (Number | Identifier))*
+    | Identifier (',' Number?)+  'duplicate' '(' Identifier ')' scriptName (Number | Identifier) (',' (Number | Identifier))*
+    ;
+scriptName
+    : (Identifier | ':' | '#' | Colon | Label | Number)*
+    ;
 
 scope_specifier
   :  '@' | '$' | '$@' | '.' | '.@' | '\'' | '#' | '##';
@@ -408,8 +417,6 @@ fragment Digit : [0-9];
 fragment Letter : [A-Za-z_];
 
 Number : Digit+;
-
-
 
 Whitespace
     :   [ \t]+
