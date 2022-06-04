@@ -13,6 +13,7 @@ pub enum StackEntry {
     NativeReference(u64),
     FunctionReference(u64),
     InstanceVariableReference(u64),
+    StaticVariableReference(u64),
 }
 
 #[derive(Debug)]

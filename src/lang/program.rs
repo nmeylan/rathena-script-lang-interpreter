@@ -93,6 +93,15 @@ impl Program {
                 OpCode::LoadInstance(reference) => {
                     self.stack.push(StackEntry::InstanceVariableReference(*reference));
                 }
+                OpCode::StoreStatic(reference) => {
+                    let stack_entry = self.stack.pop()?;
+                    let constant_reference = self.constant_ref_from_stack_entry(stack_entry)?;
+                    let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in class scope", reference).as_str()))?;
+                    variable.set_value_ref(constant_reference);
+                }
+                OpCode::LoadStatic(reference) => {
+                    self.stack.push(StackEntry::StaticVariableReference(*reference));
+                }
                 OpCode::DefineFunction(_) => {}
                 OpCode::Equal => {
                     let stack_entry1 = self.stack.pop()?;
@@ -287,8 +296,6 @@ impl Program {
                 OpCode::SkipOp => {
                     op_index += 1;
                 }
-                OpCode::StoreStatic(_) => {}
-                OpCode::LoadStatic(_) => {}
             }
             op_index += 1;
         }
@@ -350,9 +357,11 @@ impl Program {
                 Ok(Value::String(Some(function.name.clone())))
             }
             StackEntry::InstanceVariableReference(reference) => {
-                // let variable = self.instances_variable_pool.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in PROGRAM instance variable pool for given reference ({})", reference).as_str()))?;
-                // Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
                 let variable = instance.variables.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
+                Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
+            }
+            StackEntry::StaticVariableReference(reference) => {
+                let variable = class.static_variables.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
         }

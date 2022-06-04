@@ -130,7 +130,10 @@ impl Vm {
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
         }
         self.classes_pool.borrow_mut().insert(class.name.clone(),
-                                              Rc::new(Class::new(class.name.clone(), functions_pool, class.instance_variables.borrow().clone())));
+                                              Rc::new(Class::new(class.name.clone(), functions_pool,
+                                                                 class.static_variables.borrow().clone(),
+                                                                 class.instance_variables.borrow().clone()))
+        );
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {

@@ -12,15 +12,18 @@ pub struct Class {
     pub(crate) name: String,
     pub(crate) functions_pool: HashMap<u64, Function, NoopHasher>,
     pub(crate) instances_references: RefCell<u64>,
+    pub(crate) static_variables: HashMap<u64, Variable, NoopHasher>,
     pub(crate) instance_variables: HashMap<u64, Variable, NoopHasher>, // Only instance variables definition
 }
 
 impl Class {
-    pub fn new(name: String, functions_pool: HashMap<u64, Function, NoopHasher>, instance_variables: HashMap<u64, Variable, NoopHasher>) -> Self {
+    pub fn new(name: String, functions_pool: HashMap<u64, Function, NoopHasher>, static_variables: HashMap<u64, Variable, NoopHasher>,
+               instance_variables: HashMap<u64, Variable, NoopHasher>) -> Self {
         Self {
             name,
             functions_pool,
             instances_references: RefCell::new(0),
+            static_variables,
             instance_variables
         }
     }
@@ -32,6 +35,9 @@ impl Class {
             class_name: self.name.clone(),
             variables: self.instance_variables.clone()
         }
+    }
+    pub fn get_variable(&self, reference: u64) -> Option<&Variable> {
+        self.static_variables.get(&reference)
     }
 }
 
