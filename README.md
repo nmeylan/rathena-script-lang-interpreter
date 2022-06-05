@@ -1,4 +1,4 @@
-**WIP** [Check progress](https://github.com/nmeylan/rathena-script-lang-interpreter/issues/1)
+**WIP** [Check remaining todos](https://github.com/nmeylan/rathena-script-lang-interpreter/issues/1) or [code samples](https://github.com/nmeylan/rathena-script-lang-interpreter/tree/master/tests)
 
 # rAthena script language interpreter
 A grammar, parser, compiler and VM implementation for rAthena script language.
