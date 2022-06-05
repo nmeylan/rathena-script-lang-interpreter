@@ -1,0 +1,716 @@
+*mes "<string>"{,"<string>"{,...}};
+*next;
+*clear;
+*close;
+*close2;
+*end;
+*set <variable>,<expression>{,<char_id>};
+*set(<variable>,<expression>{,<char id>})
+*setd "<variable name>",<value>{,<char_id>};
+*getd("<variable name>")
+*getvariableofnpc(<variable>,"<npc name>")
+*getvar <variable>,<char_id>;
+*goto <label>;
+*menu "<option_text>",<target_label>{,"<option_text>",<target_label>,...};
+*select("<option>"{,"<option>",...})
+*prompt("<option>"{,"<option>",...})
+*input(<variable>{,<min>{,<max>}})
+*callfunc "<function>"{,<argument>,...<argument>};
+*callfunc("<function>"{,<argument>,...<argument>})
+*callsub <label>{,<argument>,...<argument>};
+*callsub(<label>{,<argument>,...<argument>})
+*getarg(<index>{,<default_value>})
+*getargcount()
+*return {<value>};
+*function <function name>;
+*<function name>{(<argument>,...<argument>)};
+*function <function name> {
+*is_function("<function name>")
+*if (<condition>) <statement>;
+*jump_zero (<condition>),<label>;
+*switch (expression);
+*while (<condition>) <statement>;
+*for (<variable initialization>; <condition>; <variable update>) <statement>;
+*do { <statement>; } while (<condition>);
+*freeloop({<toggle>})
+*setarray <array name>[<first value>],<value>{,<value>...<value>};
+*cleararray <array name>[<first value to alter>],<value>,<number of values to set>;
+*copyarray <destination array>[<first value>],<source array>[<first value>],<amount of data to copy>;
+*deletearray <array name>[<first value>]{,<how much to delete>};
+*inarray <array name>,<value>;
+*countinarray <array name>{[<start index>]},<array name>{[<start index>]};
+*getarraysize(<array name>)
+*getelementofarray(<array name>,<index>)
+
+
+*mes "<string>"{,"<string>"{,...}};
+*close;
+*close2;
+*strcharinfo(<type>{,<char_id>})
+*convertpcinfo(<char_id>,<type>)
+*convertpcinfo(<account_id>,<type>)
+*convertpcinfo(<player_name>,<type>)
+*strnpcinfo(<type>)
+*readparam(<parameter number>{,"<character name>"})
+*readparam(<parameter number>{,<char_id>})
+*getcharid(<type>{,"<character name>"})
+*getnpcid(<type>{,"<npc name>"});
+*getchildid({<char_id>})
+*getmotherid({<char_id>})
+*getfatherid({<char_id>})
+*ispartneron({<char_id>})
+*getpartnerid({<char_id>})
+*getlook(<type>{,<char_id>})
+*getsavepoint(<information type>{,<char_id>})
+*getcharip({"<character name>"|<account id>|<char id>})
+*vip_status(<type>,{"<character name>"})
+*vip_time <time>,{"<character name>"};
+*addspiritball <count>,<duration>{,<char_id>};
+*delspiritball <count>{,<char_id>};
+*countspiritball {<char_id>};
+*ignoretimeout <flag>{,<char_id>};
+*getequipid({<equipment slot>,<char_id>})
+*getequipuniqueid(<equipment slot>{,<char_id>})
+*getequipname(<equipment slot>{,<char_id>})
+*getitemname(<item id>)
+*getitemname(<aegis item name>)
+stored in the 'Name' field in item_db_*.yml for text version
+*getbrokenid(<number>{,<char_id>})
+*getequipisequiped(<equipment slot>{,<char_id>})
+*getequipisenableref(<equipment slot>{,<char_id>})
+*getequiprefinerycnt(<equipment slot>{,<char_id>})
+*getequipweaponlv({<equipment slot>{,<char_id>}})
+*getequiparmorlv({<equipment slot>{,<char_id>}})
+*getequippercentrefinery(<equipment slot>{,<enriched>,<char_id>})
+*getequiprefinecost(<equipment slot>,<type>,<information>{,<char id>})
+*getareadropitem("<map name>",<x1>,<y1>,<x2>,<y2>,<item>)
+*getequipcardcnt(<equipment slot>)
+*getinventorylist {<char_id>};
+*cardscnt()
+*getrefine()
+*getnameditem(<item id>,"<name to inscribe>"|<char id>);
+*getnameditem("<item name>","<name to inscribe>"|<char id>);
+*getitemslots(<item ID>)
+*getiteminfo(<item ID>,<type>)
+*getiteminfo(<item name>,<type>)
+*getiteminfo(<aegis item name>,<type>)
+*getequipcardid(<equipment slot>,<card slot>)
+*mergeitem({,<char_id>});
+*mergeitem2({<item_id>{,<char_id>}});
+*mergeitem2({"<item name>"{,<char_id>}});
+*getequiptradability(<equipment slot>{,<char id>});
+*identifyall({<type>{,<account_id>}});
+*getenchantgrade({<equipment slot>,<char_id>})
+*getitempos()
+function is called. (see EQP_* constants)
+*getmapxy("<variable for map name>",<variable for x>,<variable for y>{,<type>,"<search value>"})
+*mapid2name(<map ID>)
+*getgmlevel({<char_id>})
+*getgroupid({<char_id>})
+*gettimetick(<tick type>)
+*gettime(<type>)
+*gettimestr(<"time format">,<max length>{,<time_tick>})
+*getusers(<type>)
+*getmapusers("<map name>")
+*getareausers("<map name>",<x1>,<y1>,<x2>,<y2>)
+"*_in" maps, due to all the shops and houses.
+*getunits(<type>{,<array_variable>[<first value>]})
+*getmapunits(<type>,<"map name">{,<array_variable>[<first value>]})
+*getareaunits(<type>,<"map name">,<x1>,<y1>,<x2>,<y2>{,<array_variable>[<first value>]})
+*getguildname(<guild id>)
+*getguildmember <guild id>{,<type>{,<array_variable>}};
+*getguildmaster(<guild id>)
+*getguildmasterid(<guild id>)
+*is_guild_leader({<guild ID>})
+*getcastlename("<map name>")
+*getcastledata("<map name>",<type of data>)
+*setcastledata "<map name>",<type of data>,<value>;
+*getgdskilllv(<guild id>,<skill id>)
+*getgdskilllv(<guild id>,"<skill name>")
+Refer to 'db/(pre-)re/skill_db.yml' for the full list of skills. (GD_* are guild skills)
+*requestguildinfo <guild id>{,"<event label>"};
+*getmapguildusers("<map name>",<guild id>)
+*getskilllv(<skill id>)
+*getskilllv("<skill name>")
+*getskilllist({<char_id>});
+*getmonsterinfo(<mob ID>,<type>)
+*getmobdrops(<mob id>)
+*skillpointcount({<char_id>})
+*getscrate(<effect type>,<base rate>{,<GID>})
+*playerattached()
+*getattachedrid();
+*isloggedin(<account id>{,<char id>})
+*checkweight(<item id>,<amount>{,<item id>,<amount>,<item id>,<amount>,...});
+*checkweight("<item name>",<amount>{,"<item name>",<amount>,"<item name>",<amount>,...});
+*checkweight2(<id_array>,<amount_array>);
+*basicskillcheck()
+*checkoption(<option number>{,<char_id>})
+*checkoption1(<option number>{,<char_id>})
+*checkoption2(<option number>{,<char_id>})
+*setoption <option number>{,<flag>{,<char_id>}};
+*setcart {<type>{,<char_id>}};
+*checkcart({<char_id>});
+*setfalcon {<flag>{,<char_id>}};
+*checkfalcon({<char_id>});
+*setriding {<flag>{,<char_id>}};
+*checkriding({<char_id>});
+*setdragon {<color>{,<char_id>}};
+*checkdragon({<char_id>});
+*setmadogear {<flag>{,<type>{,<char_id>}}};
+*checkmadogear({<char_id>});
+*setmounting {<char_id>};
+*ismounting({<char_id>});
+*checkwug({<char_id>});
+*checkvending({"<Player Name>"})
+*checkchatting({"<Player Name>"})
+*checkidle({"<Player Name>"})
+*checkidlehom({"<Player Name>"})
+*checkidlemer({"<Player Name>"})
+*agitcheck()
+*agitcheck2()
+*agitcheck3()
+*isnight()
+*isday()
+*checkre(<type>)
+*isequipped(<id>{,<id>{,..}})
+*isequippedcnt(<id>{,<id>{,..}})
+*checkequipedcard(<item id>)
+*attachrid(<account ID>{,force})
+*detachrid;
+*addrid(<type>{,<flag>{,<parameters>}});
+*rid2name(<rid>)
+*message "<character name>","<message>";
+*dispbottom "<message>"{,<color>{,<char_id>}};
+*showscript "<message>"{,<GID>, <flag>};
+*warp "<map name>",<x>,<y>{,<char id>};
+*areawarp "<from map name>",<x1>,<y1>,<x2>,<y2>,"<to map name>",<x3>,<y3>{,<x4>,<y4>};
+*warpparty "<to_mapname>",<x>,<y>,<party_id>,{"<from_mapname>",<range x>,<range y>};
+*warpguild "<map name>",<x>,<y>,<guild_id>;
+*warppartner("<map name>",<x>,<y>);
+*savepoint "<map name>",<x>,<y>{,{<range x>,<range y>,}<char_id>};
+*save "<map name>",<x>,<y>{,{<range x>,<range y>,}<char_id>};
+*heal <hp>,<sp>{,<char_id>};
+*healap <ap>{,<char_id>};
+*itemheal <hp>,<sp>{,<char_id>};
+	heal = heal * [(100 + STATUS*2) / 100]
+*percentheal <hp>,<sp>{,<char_id>};
+*recovery <type>{,<option>,<revive_flag>{,<map name>}};
+*jobchange <job number>{,<upper flag>,<char_id>};
+*jobname(<job number>)
+*eaclass({<job number>,<char_id>})
+*roclass(<job number>{,<gender>})
+*changebase <job ID number>{,<account ID>};
+*classchange(<view id>{,"<NPC name>","<flag>"});
+*changesex({<char_id>});
+*changecharsex({<char_id>});
+*getexp <base_exp>,<job_exp>{,<char_id>};
+*getexp2 <base_exp>,<job_exp>{,<char_id>};
+*getbaseexp_ratio(<percent>{,<base_level>{,char_id});
+*getjobexp_ratio(<percent>{,<job_level>{,char_id});
+*setlook <look type>,<look value>{,<char_id>};
+*changelook <look type>,<look value>{,<char_id>};
+*pushpc <direction>,<cells>;
+can be specified by using one of the DIR_* constants (src/map/script_constants.hpp).
+*recalculatestat;
+*needed_status_point(<type>,<val>{,<char id>});
+*jobcanentermap("<mapname>"{,<JobID>});
+For optional 'JobID', see constant of Job_*, or use player's Class, BaseJob,
+*get_revision()
+*get_githash()
+*getitem <item id>,<amount>{,<account ID>};
+*getitem "<item name>",<amount>{,<account ID>};
+*getitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*getitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*getitem3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*getitem3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+	.@card2 = .@ele+((.@sc*5)<<8);
+*getitembound <item id>,<amount>,<bound type>{,<account ID>};
+*getitembound "<item name>",<amount>,<bound type>{,<account ID>};
+*getitembound2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>{,<account ID>};
+*getitembound2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>{,<account ID>};
+*getitembound3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*getitembound3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*getnameditem <item id>,<character name|character ID>;
+*getnameditem "<item name>",<character name|character ID>;
+*rentitem <item id>,<time>{,<account_id>};
+*rentitem "<item name>",<time>{,<account_id>};
+*rentitem2 <item id>,<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account_id>};
+*rentitem2 "<item name>",<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account_id>};
+*rentitem3 <item id>,<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account_id>};
+*rentitem3 "<item name>",<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account_id>};
+*makeitem <item id>,<amount>,"<map name>",<X>,<Y>{,<canShowEffect>};
+*makeitem "<item name>",<amount>,"<map name>",<X>,<Y>{,<canShowEffect>};
+*makeitem2 <item id>,<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<canShowEffect>};
+*makeitem2 "<item name>",<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<canShowEffect>};
+*makeitem3 <item id>,<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<canShowEffect>};
+*makeitem3 "<item name>",<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<canShowEffect>};
+*cleanarea "<map name>",<x1>,<y1>,<x2>,<y2>;
+*cleanmap "<map name>";
+*searchitem <array name>,"<item name>";
+*delitem <item id>,<amount>{,<account ID>};
+*delitem "<item name>",<amount>{,<account ID>};
+*cartdelitem <item id>,<amount>{,<account ID>};
+*cartdelitem "<item name>",<amount>{,<account ID>};
+*storagedelitem <item id>,<amount>{,<account ID>};
+*storagedelitem "<item name>",<amount>{,<account ID>};
+*guildstoragedelitem <item id>,<amount>{,<account ID>};
+*guildstoragedelitem "<item name>",<amount>{,<account ID>};
+*delitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*delitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*delitem3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*delitem3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*delitemidx <index>{,<amount>{,<char id>}}
+*cartdelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*cartdelitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*storagedelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*storagedelitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*guildstoragedelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*guildstoragedelitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*countitem(<item id>{,<accountID>})
+*countitem("<item name>"{,<accountID>})
+*cartcountitem(<item id>{,<accountID>})
+*cartcountitem("<item name>"{,<accountID>})
+*storagecountitem(<item id>{,<accountID>})
+*storagecountitem("<item name>"{,<accountID>})
+*guildstoragecountitem(<nameID>{,<accountID>})
+*guildstoragecountitem("<item name>"{,<accountID>})
+*countitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*countitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*countitem3(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<accountID>})
+*countitem3("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<accountID>})
+*cartcountitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*cartcountitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*storagecountitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*storagecountitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*guildstoragecountitem2(<nameID>,<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
+*guildstoragecountitem2("<item name>",<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
+*rentalcountitem(<item id>{,<accountID>})
+*rentalcountitem("<item name>"{,<accountID>})
+*rentalcountitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*rentalcountitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*rentalcountitem3(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<accountID>})
+*rentalcountitem3("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<accountID>})
+*countbound({<bound type>{,<char_id>}})
+*groupranditem <group id>{,<sub_group>};
+*getrandgroupitem <group_id>{,<quantity>{,<sub_group>{,<identify>{,<char_id>}}}};
+*getgroupitem <group_id>{,<identify>{,<char_id>}};
+*enable_items;
+*disable_items;
+*itemskill <skill id>,<skill level>{,<keep requirement>};
+*itemskill "<skill name>",<skill level>{,<keep requirement>};
+*consumeitem <item id>{,<char_id>};
+*consumeitem "<item name>"{,<char_id>};
+*produce <item level>;
+*cooking <dish level>;
+*makerune <% success bonus>{,<char_id>};
+*successremovecards <equipment slot>;
+*failedremovecards <equipment slot>,<type>;
+*repair <broken item number>{,<char_id>};
+*repairall {<char_id>};
+*successrefitem <equipment slot>{,<count>{,<char_id>}};
+*failedrefitem <equipment slot>{,<char_id>};
+*downrefitem <equipment slot>{,<count>{,<char_id>}};
+*unequip <equipment slot>{,<char_id>};
+*delequip <equipment slot>{,<char_id>};
+*breakequip <equipment slot>{,<char_id>};
+*clearitem {<char_id>};
+*equip <item id>{,<char_id>};
+*autoequip <item id>,<option>;
+*buyingstore <slots>;
+*searchstores <uses>,<effect>;
+*enable_command;
+*disable_command;
+*openstorage;
+*openstorage2 <storage_id>,<mode>{,<account_id>};
+*openmail({<char_id>});
+*mail <destination id>,"<sender name>","<title>","<body>"{,<zeny>{,<item id array>,<item amount array>{,refine{,bound{,<item card0 array>{,<item card1 array>{,<item card2 array>{,<item card3 array>
+*openauction({<char_id>});
+*guildopenstorage()
+*guildopenstorage_log({<char id>})
+*guild_has_permission(<permission>{,<char id>})
+*guildchangegm(<guild id>,<new master's name>)
+*guildgetexp <amount>;
+*guildskill <skill id>,<level>
+*guildskill "<skill name>",<level>
+*resetlvl <action type>{,<char_id>};
+*resetstatus({<char_id>});
+*resetskill({<char_id>});
+*resetfeel({<char_id>});
+*resethate({<char_id>});
+*sc_start <effect type>,<ticks>,<value 1>{,<rate>,<flag>{,<GID>}};
+*sc_start2 <effect type>,<ticks>,<value 1>,<value 2>{,<rate>,<flag>{,<GID>}};
+*sc_start4 <effect type>,<ticks>,<value 1>,<value 2>,<value 3>,<value 4>{,<rate>,<flag>{,<GID>}};
+*sc_end <effect type>{,<GID>};
+*sc_end_class {<char_id>{,<job_id>}};
+*getstatus(<effect type>{,<type>{,<char_id>}})
+*skilleffect <skill id>,<number>;
+*skilleffect "<skill name>",<number>;
+*npcskilleffect <skill id>,<number>,<x>,<y>;
+*npcskilleffect "<skill name>",<number>,<x>,<y>;
+*specialeffect <effect number>{,<send_target>{,"<NPC Name>"}};
+*specialeffect2 <effect number>{,<send_target>{,"<Player Name>"}};
+*removespecialeffect <effect number>{,<send_target>{,"<NPC Name>"}};
+*removespecialeffect2 <effect number>{,<send_target>{,"<Player Name>"}};
+*statusup <stat>{,<char_id>};
+*statusup2 <stat>,<amount>{,<char_id>};
+*traitstatusup <stat>{,<char_id>};
+*traitstatusup2 <stat>,<amount>{,<char_id>};
+*bonus <bonus type>,<val1>;
+*bonus2 <bonus type>,<val1>,<val2>;
+*bonus3 <bonus type>,<val1>,<val2>,<val3>;
+*bonus4 <bonus type>,<val1>,<val2>,<val3>,<val4>;
+*bonus5 <bonus type>,<val1>,<val2>,<val3>,<val4>,<val5>;
+*autobonus <bonus script>,<rate>,<duration>{,<flag>,{<other script>}};
+*autobonus2 <bonus script>,<rate>,<duration>{,<flag>,{<other script>}};
+*autobonus3 <bonus script>,<rate>,<duration>,<skill id>,{<other script>};
+*autobonus3 <bonus script>,<rate>,<duration>,"<skill name>",{<other script>};
+*bonus_script "<script code>",<duration>{,<flag>{,<type>{,<status_icon>{,<char_id>}}}};
+*bonus_script_clear {<flag>,{<char_id>}};
+*skill <skill id>,<level>{,<flag>};
+*skill "<skill name>",<level>{,<flag>};
+*addtoskill <skill id>,<level>{,<flag>};
+*addtoskill "<skill name>",<level>{,<flag>};
+*nude {<char_id>};
+*sit {"<character name>"};
+*stand {"<character name>"};
+*disguise <Monster ID>{,<char_id>};
+*undisguise {<char_id>};
+*transform <monster ID>,<duration>{,<sc type>,<val1>,<val2>,<val3>,<val4>};
+*transform "<monster name>",<duration>{,<sc type>,<val1>,<val2>,<val3>,<val4>};
+*active_transform <monster ID>,<duration>{,<sc type>,<val1>,<val2>,<val3>,<val4>};
+*active_transform "<monster name>",<duration>{,<sc type>,<val1>,<val2>,<val3>,<val4>};
+*marriage("<spouse name>");
+*wedding;
+*divorce({<char_id>})
+*adopt("<parent_name>","<baby_name>");
+*adopt(<parent_id>,<baby_id>);
+*pcfollow <id>,<target id>;
+*pcstopfollow <id>;
+*pcblockmove <id>,<option>;
+*unitblockmove <id>,<option>;
+*pcblockskill <id>,<option>;
+*unitblockskill <id>,<option>;
+*setpcblock <type>,<state>{,<account ID>};
+*getpcblock {<account ID>};
+*monster     "<map name>",<x>,<y>,"<name to show>",<mob id>,<amount>{,"<event label>",<size>,<ai>};
+*areamonster "<map name>",<x1>,<y1>,<x2>,<y2>,"<name to show>",<mob id>,<amount>{,"<event label>",<size>,<ai>};
+*areamobuseskill "<map name>",<x>,<y>,<range>,<mob id>,<skill id>,<skill level>,<cast time>,<cancelable>,<emotion>,<target type>;
+*areamobuseskill "<map name>",<x>,<y>,<range>,<mob id>,"<skill name>",<skill level>,<cast time>,<cancelable>,<emotion>,<target type>;
+*killmonster "<map name>","<event label>"{,<type>};
+*killmonsterall "<map name>"{,<type>};
+*strmobinfo(<type>,<monster id>);
+*mobcount("<map name>","<event label>")
+*clone "<map name>",<x>,<y>,"<event>",<char id>{,<master_id>{,<mode>{,<flag>,<duration>}}}
+*summon "monster name",<monster id>{,<Time Out>{,"event label"}};
+*addmonsterdrop <monster id>,<item id>,<rate>,{<steal protected>,{<random option group id>}};
+*addmonsterdrop "<monster name>",<item id>,<rate>,{<steal protected>,{<random option group id>}};
+*delmonsterdrop <monster id>,<item id>;
+*delmonsterdrop "<monster name>",<item id>;
+*mob_setidleevent <GID>,<event>;
+*disablenpc {"<NPC object name>"};
+*enablenpc {"<NPC object name>"};
+*hideonnpc {"<NPC object name>"};
+*hideoffnpc {"<NPC object name>"};
+*unloadnpc "<NPC object name>";
+*cloakonnpc {"<NPC object name>"{,<character ID>}};
+*cloakoffnpc {"<NPC object name>"{,<character ID>}};
+*cloakonnpcself {"<NPC object name>"};
+*cloakoffnpcself {"<NPC object name>"};
+*isnpccloaked {"<NPC object name>"{,<character ID>}};
+*doevent "<NPC object name>::<event label>";
+*donpcevent "<NPC object name>::<event label>";
+*cmdothernpc "<npc name>","<command>";
+*npctalk "<message>"{,"<NPC name>",<flag>{,<color>}};
+*chatmes "<message>"{,"<NPC name>"};
+*setnpcdisplay("<npc name>", "<display name>", <class id>, <size>)
+*setnpcdisplay("<npc name>", "<display name>", <class id>)
+*setnpcdisplay("<npc name>", "<display name>")
+*setnpcdisplay("<npc name>", <class id>)
+*addtimer <ticks>,"NPC::OnLabel";
+*deltimer "NPC::OnLabel";
+*addtimercount <ticks>,"NPC::OnLabel";
+*initnpctimer{ "<NPC name>" {, <Attach Flag>} } |
+*stopnpctimer{ "<NPC name>" {, <Detach Flag>}  } |
+*startnpctimer{ "<NPC name>" {, <Attach Flag>} } |
+*setnpctimer <tick>{,"<NPC name>"};
+*getnpctimer(<type of information>{,"<NPC name>"})
+*attachnpctimer {"<character name>"};
+*detachnpctimer {"<NPC name>"};
+*sleep {<milliseconds>};
+*sleep2 {<milliseconds>};
+*awake "<NPC name>";
+*progressbar "<color>",<seconds>;
+*progressbar_npc "<color>",<seconds>{,<"NPC Name">};
+*announce "<text>",<flag>{,<fontColor>{,<fontType>{,<fontSize>{,<fontAlign>{,<fontY>{,<char_id>}}}}}};
+*mapannounce "<map name>","<text>",<flag>{,<fontColor>{,<fontType>{,<fontSize>{,<fontAlign>{,<fontY>}}}}}};
+*areaannounce "<map name>",<x1>,<y1>,<x2>,<y2>,"<text>",<flag>{,<fontColor>{,<fontType>{,<fontSize>{,<fontAlign>{,<fontY>}}}}}};
+*callshop "<name>"{,<option>};
+*npcshopitem "<name>",<item id>,<price>{,<item id>,<price>{,<item id>,<price>{,...}}};
+*npcshopitem "<name>",<item id>,<price>,<stock>{,<item id>,<price>,<stock>{,<item id>,<price>,<stock>{,...}}};
+*npcshopadditem "<name>",<item id>,<price>{,<item id>,<price>{,<item id>,<price>{,...}}};
+*npcshopadditem "<name>",<item id>,<price>,<stock>{,<item id>,<price>,<stock>{,<item id>,<price>,<stock>{,...}}};
+*npcshopdelitem "<name>",<item id>{,<item id>{,<item id>{,...}}};
+*npcshopattach "<name>"{,<flag>};
+*npcshopupdate "<name>",<item_id>,<price>{,<stock>}
+*waitingroom "<chatroom name>",<limit>{,"<event label>"{,<trigger>{,<required zeny>{,<min lvl>{,<max lvl>}}}}};
+*delwaitingroom {"<NPC object name"};
+*enablewaitingroomevent {"<NPC object name>"};
+*disablewaitingroomevent {"<NPC object name>"};
+*enablearena;
+*disablearena;
+*getwaitingroomstate(<information type>{,"<NPC object name>"})
+*warpwaitingpc "<map name>",<x>,<y>{,<number of people>};
+*waitingroomkick "<NPC object name>" , "<character name>";
+*getwaitingroomusers "<NPC object name>";
+*kickwaitingroomall {"<NPC object name>"};
+*setmapflagnosave "<map name>","<alternate map name>",<x>,<y>;
+*setmapflag "<map name>",<flag>{,<zone>{,<type>}};
+*removemapflag "<map name>",<flag>{,<zone>};
+*getmapflag("<map name>",<flag>{,<type>})
+*setbattleflag "<battle flag>",<value>{,<reload>};
+*getbattleflag("<battle flag>")
+*warpportal <source x>,<source y>,"<map name>",<target x>,<target y>;
+*mapwarp "<from map>","<to map>",<x>,<y>{,<type>,<ID>};
+*maprespawnguildid "<map name>",<guild id>,<flag>;
+*agitstart;
+*agitend;
+*agitstart2;
+*agitend2;
+*agitstart3;
+*agitend3;
+*gvgon "<map name>";
+*gvgoff "<map name>";
+*gvgon3 "<map name>";
+*gvgoff3 "<map name>";
+*flagemblem <guild id>;
+*guardian "<map name>",<x>,<y>,"<name to show>",<mob id>{,"<event label>"{,<guardian index>}};
+*guardianinfo("<map name>", <guardian number>, <type>);
+*getguildalliance(<guild id1>, <guild id2>);
+*npcspeed <speed value>;
+*npcwalkto <x>,<y>;
+*npcstop;
+*movenpc "<NPC name>",<x>,<y>{,<dir>};
+*debugmes "<message>";
+*errormes "<message>";
+*logmes "<message>";
+*globalmes "<message>"{,"<NPC name>"};
+*rand(<number>{,<number>});
+*viewpoint <action>,<x>,<y>,<point number>,<color>{,<Char ID>};
+*viewpointmap "<map name>",<action>,<x>,<y>,<point number>,<color>;
+*cutin "<filename>",<position>;
+*emotion <emotion number>{,<target>};
+*misceffect <effect number>;
+*soundeffect "<effect filename>",<type>;
+*soundeffectall "<effect filename>",<type>{,"<map name>"}{,<x0>,<y0>,<x1>,<y1>};
+*playBGM "<BGM filename>";
+*playBGMall "<BGM filename>"{,"<map name>"{,<x0>,<y0>,<x1>,<y1>}};
+*pvpon "<map name>";
+*pvpoff "<map name>";
+*atcommand "<command>";
+*charcommand "<command>";
+*bindatcmd "<command>","<NPC object name>::<event label>"{,<atcommand level>,<charcommand level>};
+*unbindatcmd "<command>";
+*useatcmd "<command>";
+The three .@atcmd_***** variables will NOT be set when invoking script-bound atcommands
+*camerainfo <range>,<rotation>,<latitude>{,<char id>};
+*refineui({<char id>})
+*openstylist({<char id>})
+*laphine_synthesis()
+*laphine_upgrade()
+*openbank({<char id>})
+*unitwalk <GID>,<x>,<y>{,"<event label>"};
+*unitwalkto <GID>,<Target GID>{,"<event label>"};
+*unitattack <GID>,<Target ID>{,<action type>};
+*unitattack <GID>,"<Target Name>"{,<action type>};
+*unitkill <GID>;
+*unitwarp <GID>,"<map name>",<x>,<y>;
+*unitstopattack <GID>;
+*unitstopwalk <GID>{,<flag>};
+*unittalk <GID>,"<text>"{,flag};
+*unitskilluseid <GID>,<skill id>,<skill lvl>{,<target id>,<casttime>,<cancel>,<Line_ID>};
+*unitskilluseid <GID>,"<skill name>",<skill lvl>{,<target id>,<casttime>,<cancel>,<Line_ID>};
+*unitskillusepos <GID>,<skill id>,<skill lvl>,<x>,<y>{,<casttime>,<cancel>,<Line_ID>};
+*unitskillusepos <GID>,"<skill name>",<skill lvl>,<x>,<y>{,<casttime>,<cancel>,<Line_ID>};
+*unitexists <GID>;
+*getunittype <GID>;
+*getunitname <GID>;
+*setunitname <GID>,"<new name>";
+*setunittitle <GID>,<title>;
+*getunittitle <GID>;
+*getunitdata <GID>,<arrayname>;
+*setunitdata <GID>,<parameter>,<new value>;
+*geteleminfo <type>{,<char_id>};
+*npcskill <skill id>,<skill lvl>,<stat point>,<NPC level>;
+*npcskill "<skill name>",<skill lvl>,<stat point>,<NPC level>;
+*day;
+*night;
+*defpattern <set number>,"<regular expression pattern>","<event label>";
+*activatepset <set number>;
+*deactivatepset <set number>;
+*deletepset <set number>;
+*pow(<number>,<power>)
+*sqrt(<number>)
+*distance(<x0>,<y0>,<x1>,<y1>)
+*min(<number or array>{,<number or array>,...})
+*minimum(<number or array>{,<number or array>,...})
+*max(<number or array>{,<number or array>,...})
+*maximum(<number or array>{,<number or array>,...})
+*round(<number>,<precision>);
+*ceil(<number>,<precision>);
+*floor(<number>,<precision>);
+*md5("<string>")
+*query_sql("your MySQL query"{, <array variable>{, <array variable>{, ...}}});
+*query_logsql("your MySQL query"{, <array variable>{, <array variable>{, ...}}});
+*escape_sql(<value>)
+*setiteminfo(<item id>,<type>,<value>)
+*setiteminfo(<aegis item name>,<type>,<value>)
+*setitemscript(<item id>,<"{ new item script }">{,<type>});
+*atoi("<string>")
+*axtoi("<string>")
+*strtol("<string>", base)
+*compare("<string>","<substring>")
+*strcmp("<string>","<string>")
+*getstrlen("<string>")
+*charisalpha("<string>",<position>)
+*charat(<string>,<index>)
+*setchar(<string>,<char>,<index>)
+*insertchar(<string>,<char>,<index>)
+*delchar(<string>,<index>)
+*strtoupper(<string>)
+*strtolower(<string>)
+*charisupper(<string>,<index>)
+*charislower(<string>,<index>)
+*substr(<string>,<start_index>,<end_index>)
+*explode(<dest_array>,<string>,<delimiter>)
+*implode(<string_array>{,<glue>})
+*sprintf(<format>[,param[,param[,...]]])
+*sscanf(<string>,<format>[,param[,param[,...]]])
+*strpos(<haystack>,<needle>{,<offset>})
+*replacestr(<input>, <search>, <replace>{, <usecase>{, <count>}})
+*countstr(<input>, <search>{, <usecase>})
+*preg_match(<regular expression pattern>,<string>{,<offset>})
+*setfont <font>;
+fonts stored in data\*.eot by using an ID of the font. When the ID
+*showdigit <value>{,<type>};
+*setcell "<map name>",<x1>,<y1>,<x2>,<y2>,<type>,<flag>;
+*checkcell ("<map name>",<x>,<y>,<type>);
+*getfreecell "<map name>",<rX>,<rY>{,<x>,<y>,<rangeX>,<rangeY>,<flag>};
+*setwall "<map name>",<x>,<y>,<size>,<dir>,<shootable>,"<name>";
+*delwall "<name>";
+*checkwall "<name>";
+*readbook <book id>,<page>;
+*open_roulette( {char_id} )
+*instance_create("<instance name>"{,<instance mode>{,<owner id>}});
+*instance_destroy {<instance id>};
+*instance_enter("<instance name>",{<x>,<y>,<char_id>,<instance id>});
+*instance_npcname("<npc name>"{,<instance id>})
+*instance_mapname("<map name>"{,<instance id>})
+*instance_id({<instance mode>})
+*instance_warpall "<map name>",<x>,<y>{,<instance id>};
+*instance_announce <instance id>,"<text>",<flag>{,<fontColor>{,<fontType>{,<fontSize>{,<fontAlign>{,<fontY>}}}}};
+*instance_check_party(<party id>{,<amount>{,<min>{,<max>}}})
+*instance_check_guild(<guild id>{,<amount>{,<min>{,<max>}}})
+*instance_check_clan(<clan id>{,<amount>{,<min>{,<max>}}})
+*instance_info("<instance name>",<info type>{,<instance_db map index>});
+*instance_live_info(<info type>{,<instance id>});
+*instance_list(<"map name">{,<instance mode>});
+*getinstancevar(<variable>,<instance id>);
+*setinstancevar(<variable>,<value>,<instance id>);
+*questinfo <Icon>{,<Map Mark Color>{,"<condition>"}};
+*questinfo_refresh {<char_id>};
+*setquest <ID>{,<char_id>};
+*completequest <ID>{,<char_id>};
+*erasequest <ID>{,<char_id>};
+*changequest <ID>,<ID2>{,<char_id>};
+*checkquest(<ID>{,PLAYTIME|HUNTING{,<char_id>}})
+*isbegin_quest(<ID>{,<char_id>})
+*showevent <icon>{,<mark color>{,<char_id>}}
+*open_quest_ui {<quest ID>,{<char ID>}};
+*waitingroom2bg_single(<battle group>,{"<map name>",<x>,<y>{,"<npc name>"}});
+*waitingroom2bg("<map name>",<x>,<y>,{"<On Quit Event>","<On Death Event>"{,"<NPC Name>"}});
+*bg_create("<map name>",<x>,<y>{,"<On Quit Event>","<On Death Event>"});
+*bg_join(<battle group>,{"<map name>",{<x>,<y>{,<char id>}});
+*bg_team_setxy <Battle Group ID>,<x>,<y>;
+*bg_reserve("<battleground_map_name>"{,<ended>});
+*bg_unbook("<battleground_map_name>");
+*bg_desert({<char_id>});
+*bg_warp <Battle Group>,"<map name>",<x>,<y>;
+*bg_monster <Battle Group>,"<map name>",<x>,<y>,"<name to show>",<mob id>,"<event label>";
+*bg_monster(<Battle Group>,"<map name>",<x>,<y>,"<name to show>",<mob id>,"<event label>");
+*bg_monster_set_team <GID>,<Battle Group>;
+*bg_leave {<char_id>};
+*bg_destroy <Batte Group>;
+*areapercentheal "<map name>",<x1>,<y1>,<x2>,<y2>,<hp>,<sp>;
+*bg_get_data(<Battle Group>,<type>);
+*bg_getareausers(<Battle Group>,"<map name>",<x0>,<y0>,<x1>,<y1>);
+*bg_updatescore "<map name>",<Guillaume Score>,<Croix Score>;
+*bg_info("<battleground name>", <type>);
+*bpet;
+*birthpet;
+*pet <pet id>;
+*catchpet <pet id>;
+*makepet <pet id>;
+*getpetinfo(<type>{,<char_id>})
+*petskillbonus <bonus type>,<value>,<duration>,<delay>;
+*petrecovery <status type>,<delay>;
+*petloot <max items>;
+*petskillsupport <skill id>,<skill level>,<delay>,<percent hp>,<percent sp>;
+*petskillsupport "<skill name>",<skill level>,<delay>,<percent hp>,<percent sp>;
+*petskillattack <skill id>,<skill level>,<rate>,<bonusrate>;
+*petskillattack "<skill name>",<skill level>,<rate>,<bonusrate>;
+*petskillattack2 <skill id>,<damage>,<number of attacks>,<rate>,<bonusrate>;
+*petskillattack2 "<skill name>",<damage>,<number of attacks>,<rate>,<bonusrate>;
+*homevolution;
+*morphembryo;
+*hommutate {<ID>};
+*checkhomcall()
+*gethominfo(<type>{,<char_id>})
+*homshuffle;
+*addhomintimacy <amount>{,<char_id>};
+*mercenary_create <class>,<contract time>;
+*mercenary_delete {<char id>{,<reply>}};
+*mercenary_heal <hp>,<sp>;
+*mercenary_sc_start <type>,<tick>,<val1>;
+*mercenary_get_calls(<guild>);
+*mercenary_set_calls <guild>,<value>;
+*mercenary_get_faith(<guild>);
+*mercenary_set_faith <guild>,<value>;
+*getmercinfo(<type>{,<char id>});
+*getpartyname(<party id>)
+*getpartymember <party id>{,<type>{,<array_variable>}};
+*getpartyleader(<party id>{,<type>})
+*is_party_leader({<party ID>})
+*party_create("<party name>"{,<character id>{,<item share>,<item share type>}});
+*party_destroy(<party id>);
+*party_addmember(<party id>,<character id>);
+*party_delmember({<character id>,<party id>});
+*party_changeleader(<party id>,<character id>);
+*party_changeoption(<party id>,<option>,<flag>);
+*opendressroom(<flag>{,<char_id>});
+*navigateto("<map>"{,<x>,<y>,<flag>,<hide_window>,<monster_id>,<char_id>});
+*hateffect(<Hat Effect ID>,<State>);
+*getrandomoptinfo(<type>);
+*getequiprandomoption(<equipment index>,<index>,<type>{,<char id>});
+*setrandomoption(<equipment slot>,<index>,<id>,<value>,<param>{,<char id>});
+*randomoptgroup <random option group ID>;
+*clan_join(<clan id>{,<char id>});
+*clan_leave({<char id>});
+*channel_create "<chname>","<alias>"{,"<password>"{<option>{,<delay>{,<color>{,<char_id>}}}}};
+*channel_setopt "<chname>",<option>,<value>;
+*channel_getopt "<chname>",<option>;
+*channel_setcolor "<chname>",<color>;
+*channel_setpass "<chname>","<password>";
+*channel_setgroup "<chname>",<group_id>{,...,<group_id>};
+*channel_setgroup2 "<chname>",<array_of_groups>;
+*channel_chat "<chname>","<message>"{,<color>};
+*channel_ban "<chname>",<char_id>;
+*channel_unban "<chname>",<char_id>;
+*channel_kick "<chname>",<char_id>;
+*channel_kick "<chname>","<char_name>";
+*channel_delete "<chname>";
+*achievementadd(<achievement id>{,<char id>})
+*achievementremove(<achievement id>{,<char id>})
+*achievementinfo(<achievement id>,<type>{,<char id>})
+*achievementcomplete(<achievement id>{,<char id>})
+*achievementexists(<achievement id>{,<char id>});
+*achievementupdate(<achievement id>,<type>,<value>{,<char id>})
