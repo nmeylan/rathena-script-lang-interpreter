@@ -301,9 +301,10 @@ impl Compiler {
     }
 
     fn add_current_assignment_type_from_variable(&mut self, var: &Variable) {
-        match var.value_ref.borrow().deref() {
-            ValueRef::String(_) => self.add_current_assigment_type(ValueType::String),
-            ValueRef::Number(_) => self.add_current_assigment_type(ValueType::Number),
+        match var.value_ref.borrow().deref().value_type {
+            ValueType::String => self.add_current_assigment_type(ValueType::String),
+            ValueType::Number => self.add_current_assigment_type(ValueType::Number),
+            _ => {}// TODO
         }
     }
 
@@ -657,19 +658,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else if ctx.variable().is_some() {
             let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
             if let Some(current_value_type) = self.current_assignment_type_drop() {
-                match variable_identifier.value_ref.borrow().deref() {
-                    ValueRef::String(_) => {
+                match variable_identifier.value_ref.borrow().deref().value_type {
+                    ValueType::String => {
                         if current_value_type.is_number() {
                             self.register_error(CompilationErrorType::Type, ctx,
                                                 format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable_identifier.to_script_identifier()));
                         }
                     }
-                    ValueRef::Number(_) => {
+                    ValueType::Number => {
                         if current_value_type.is_string() {
                             self.register_error(CompilationErrorType::Type, ctx,
                                                 format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable_identifier.to_script_identifier()));
                         }
                     }
+                    _ => {} // TODO
                 }
             }
             match variable_identifier.scope {

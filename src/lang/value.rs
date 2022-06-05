@@ -59,15 +59,16 @@ impl Value {
 }
 
 #[derive(Debug, Clone, Hash, PartialEq)]
-pub enum ValueRef {
-    String(Option<u64>),
-    Number(Option<u64>),
+pub struct ValueRef {
+    pub reference: Option<u64>,
+    pub value_type: ValueType,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, PartialEq)]
 pub enum ValueType {
     String,
     Number,
+    Array(Box<ValueType>)
 }
 
 impl ValueType {
@@ -80,47 +81,74 @@ impl ValueType {
 }
 
 impl ValueRef {
-    pub fn new_empty_string() -> ValueRef {
-        ValueRef::String(None)
+    pub fn new_empty_string() -> Self {
+        Self {
+            reference: None,
+            value_type: ValueType::String,
+        }
     }
-    pub fn new_empty_number() -> ValueRef {
-        ValueRef::Number(None)
+    pub fn new_empty_number() -> Self {
+        Self {
+            reference: None,
+            value_type: ValueType::Number,
+        }
+    }
+    pub fn new_empty_array(value_type: ValueType) -> Self {
+        Self {
+            reference: None,
+            value_type: ValueType::Array(Box::new(value_type)),
+        }
     }
 
-    pub fn new_string(reference: u64) -> ValueRef {
-        ValueRef::String(Some(reference))
+    pub fn new_string(reference: u64) -> Self {
+        Self {
+            reference: Some(reference),
+            value_type: ValueType::String
+        }
     }
-    pub fn new_number(reference: u64) -> ValueRef {
-        ValueRef::Number(Some(reference))
+    pub fn new_number(reference: u64) -> Self {
+        Self {
+            reference: Some(reference),
+            value_type: ValueType::Number,
+        }
+    }
+    pub fn new_array(value_type: ValueType, reference: u64) -> Self {
+        Self {
+            reference: Some(reference),
+            value_type: ValueType::Array(Box::new(value_type)),
+        }
     }
 
-    pub fn duplicate_with_reference(&self, reference: u64) -> ValueRef {
-        match self {
-            ValueRef::String(_) => ValueRef::new_string(reference),
-            ValueRef::Number(_) => ValueRef::new_number(reference)
+    pub fn duplicate_with_reference(&self, reference: u64) -> Self {
+        Self {
+            reference: Some(reference),
+            value_type: self.value_type.clone()
         }
     }
 
     pub fn is_string(&self) -> bool {
-        mem::discriminant(self) == mem::discriminant(&ValueRef::new_empty_string())
+        mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::String)
     }
 
     pub fn is_number(&self) -> bool {
-        mem::discriminant(self) == mem::discriminant(&ValueRef::new_empty_number())
+        mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Number)
+    }
+
+
+    pub fn is_string_array(&self) -> bool {
+        mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Array(Box::from(ValueType::String)))
+    }
+
+    pub fn is_number_array(&self) -> bool {
+        mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Array(Box::from(ValueType::Number)))
     }
 
     pub fn get_ref(&self) -> u64 {
-        match self {
-            ValueRef::String(reference) => reference.unwrap(),
-            ValueRef::Number(reference) => reference.unwrap()
-        }
+        self.reference.unwrap()
     }
 
     pub fn is_set(&self) -> bool {
-        match self {
-            ValueRef::String(reference) => reference.is_some(),
-            ValueRef::Number(reference) => reference.is_some()
-        }
+        self.reference.is_some()
     }
 }
 
@@ -164,9 +192,10 @@ impl Variable {
 
     pub fn suffix(&self) -> String {
         let value_ref = self.value_ref.borrow();
-        match value_ref.deref() {
-            ValueRef::String(_) => String::from("$"),
-            ValueRef::Number(_) => String::from(""),
+        match value_ref.deref().value_type {
+            ValueType::String => String::from("$"),
+            ValueType::Number => String::from(""),
+            _ => String::from("ARR") //TODO
         }
     }
 }

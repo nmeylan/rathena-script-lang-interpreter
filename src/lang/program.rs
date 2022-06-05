@@ -4,7 +4,7 @@ use std::io::{Stdout, Write};
 use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Native, ValueRef};
+use crate::lang::value::{Native, ValueRef, ValueType};
 use crate::lang::vm::Vm;
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
@@ -386,17 +386,18 @@ impl Program {
     }
 
     fn value_from_value_ref(&self, value_ref: &ValueRef) -> Result<Value, RuntimeError> {
-        match value_ref {
-            ValueRef::String(reference) => {
-                let option = self.vm.get_from_constant_pool(reference.ok_or_else(|| RuntimeError::new("String ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
-                let constant = option.ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", reference.unwrap()).as_str()))?;
+        match value_ref.value_type {
+            ValueType::String => {
+                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| RuntimeError::new("String ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
+                let constant = option.ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap()).as_str()))?;
                 Ok(constant.value())
             }
-            ValueRef::Number(reference) => {
-                let option = self.vm.get_from_constant_pool(reference.ok_or_else(|| RuntimeError::new("Number ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
-                let constant = option.ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", reference.unwrap()).as_str()))?;
+            ValueType::Number => {
+                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| RuntimeError::new("Number ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
+                let constant = option.ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap()).as_str()))?;
                 Ok(constant.value())
             }
+            _ => Err(RuntimeError::new("value_from_value_ref - Array not implemented yet"))
         }
     }
 
