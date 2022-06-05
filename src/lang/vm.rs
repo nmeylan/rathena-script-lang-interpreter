@@ -115,8 +115,15 @@ impl Vm {
         })
     }
     pub fn execute_class(vm: Arc<Vm>, class_name: String) -> Result<(), RuntimeError> {
+        let instance = vm.classes_pool.borrow().get(&class_name).as_ref().unwrap().new_instance();
+        let class = vm.get_class(&instance.class_name);
+        let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
+        if let Some(init_function) = maybe_init_function {
+            let mut program = Program::new(vm.clone());
+            program.run_function(class.clone(), Some(&instance), init_function);
+        }
         let mut program = Program::new(vm.clone());
-        program.run_main(vm.classes_pool.borrow().get(&class_name).as_ref().unwrap().new_instance()).map_err(|e| {
+        program.run_main(instance).map_err(|e| {
             println!("{}", e);
             e
         })

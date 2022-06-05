@@ -149,3 +149,41 @@ fn on_init_hook_test() {
     assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
     assert_eq!(String::from("hellohellohellohello"), events.borrow().get("hello_str4").unwrap().value.string_value().clone());
 }
+#[test]
+fn on_instance_init_hook_test() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    - script My class -1, {
+        inc();
+        end;
+        function inc {
+            'counter = 'counter + 1;
+            'hello$ = 'hello$ + 'hello$;
+            vm_dump_var("counter", 'counter);
+            vm_dump_var("hello_str", 'hello$);
+        }
+        OnInstanceInit:
+            .@zero = 0;
+            .@hello$ = "hello";
+            'counter = .@zero;
+            'hello$ = .@hello$;
+    }
+    "#);
+    let events_clone = events.clone();
+    let i = Arc::new(RefCell::new(0));
+    let vm = crate::common::setup_vm(move |e| {
+        let i1 = *i.borrow();
+        *i.borrow_mut() = i1 + 1;
+        events_clone.borrow_mut().insert(format!("{}{}", e.name.clone(), *i.borrow()), e);
+    });
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    // Then
+    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("counter3").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str4").unwrap().value.string_value().clone());
+}
