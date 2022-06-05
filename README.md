@@ -7,7 +7,7 @@ Inspired by [https://github.com/Doddler/Scripting-Language-Guide](https://github
 
 VM architecture inspired by [jvm](https://docs.oracle.com/javase/specs/jvms/se11/html/index.html)
 
-This crate offers a compiler and VM to be embedded in server.
+This crate offers a compiler and VM to be embedded in game server.
 
 # Generate Parser
 `java -jar bin/antlr4.9.4-rust.jar RathenaScriptLang.g4 -Dlanguage=Rust -visitor -o src/parser`
