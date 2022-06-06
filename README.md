@@ -76,3 +76,8 @@ graph TD
  
 
 ```
+
+## Garbage collection (design in progress)
+All "data" pool store references to constant pool. Only constant pool store values.
+
+TBD
