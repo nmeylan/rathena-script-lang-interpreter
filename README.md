@@ -26,8 +26,36 @@ Compiler considers those command as "native" functions. VM require to implement 
 
 # Architecture
 ## VM Memory layout
-![](doc/vm%20architecture.png)
+```mermaid
+flowchart LR
+    subgraph S1[<b>VM</b>]
+        direction TB
+        A1["ConstantPool<hr><ul><li><i>String (#quot;hello world#quot;)</i></li><li><i>Number(1)</i></li></ul>"]
+        A2[NativeMethodPool<hr><ul><li><i>print</i></li><li><i>callfunc</i></li><li>...</li></ul>]
+        A3[Heap<hr><ul><li><i>Arrays</i></li><li><i>Instances</i></li></ul>]
+        A4[ClassPool<hr><i>Classes</i>]
+        A5[InstancePool*<hr><i>Instances</i>]
+        A3 --> A1
+        A3 --> A5
+    end
 
+    subgraph S3[<b>Callframe</b>]
+        direction TB
+        C1[Operand Stack]
+        C2["Local variable pool<hr><ul><li><i>String pointer</i></li><li><i>Number pointer</i></li></ul>"]
+        C2 --> A1
+    end
+
+    subgraph S2[<b>Thread</b>]
+        direction TB
+        B1[Stack<hr><ul><li><i>References</i></li></ul>]
+        B1 --> A1
+        B1 --> A2
+        B1 --> A3
+        B1 --> C2
+    end
+```
+*InstancePool does not actually exist as instance are destroyed once main function has been executed*
 ## VM lifecycle
 ```mermaid
 graph TD
