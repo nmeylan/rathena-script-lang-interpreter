@@ -1,14 +1,8 @@
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
 use ragnarok_script_interpreter::lang::compiler::{CompilationError, Compiler};
+use crate::common::{compile, compile_script};
 
 mod common;
-
-pub fn compile_script(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-    Compiler::compile_script("test_script".to_string(), script)
-}
-pub fn compile(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-    Compiler::compile("test_script".to_string(), script)
-}
 
 #[test]
 fn undefined_variable() {
@@ -199,11 +193,11 @@ l6	    - script My class -1, {
 fn function_call_with_number_arguments_with_default_different_type_assigned_to_number() {
     // Given
     let script = r#"
-    my_func(2);
-    function my_func {
+    // my_func(2);
+    // function my_func {
         .@a = getarg(1, "3") + 4;
-        vm_dump_var("a", .@a);
-    }
+        // vm_dump_var("a", .@a);
+    // }
     "#;
     // When
     let result = compile_script(script);
@@ -312,11 +306,13 @@ fn array_type_checking() {
     .@b[1] = "2";
     .@c$ = .@a$[0] + .@b[0];
     .@d = .@a$[0] + .@b[0];
+    .@a$ = "hello"; // variable .@a$ become a string
     "#;
     // When
     let result = compile_script(script);
     // Then
     assert_eq!(true, result.is_err());
+    assert_eq!(3, result.as_ref().err().unwrap().len());
     assert_eq!(r#"test_script 4:4. Variable ".@a$[]" is declared as an Array of string but index 1 is assigned with a Number.
 l4	    .@a$[1] = 2;
 	    ^^^^^^^

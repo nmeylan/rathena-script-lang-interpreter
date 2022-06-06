@@ -4,29 +4,22 @@ use std::rc::Rc;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
-use crate::common::Event;
+use crate::common::{compile_script, Event};
 
 mod common;
-
-pub fn compile(script: &str) -> Vec<ClassFile> {
-    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
-        e.iter().for_each(|e| println!("\n{}", e))
-    }).unwrap()
-}
-
 
 #[test]
 fn simple_label() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello world";
     ItDoesNothing:
         .@b$ = "variable in label 1";
     ItDoesNothing1:
         .@c$ = "variable in label 2";
         vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -43,7 +36,7 @@ fn simple_label() {
 fn simple_label_with_goto() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello world";
     goto AssignC;
     Skipped:
@@ -54,7 +47,7 @@ fn simple_label_with_goto() {
         .@d$ = "variable in label 3";
     vm_dump_locals();
 
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -71,7 +64,7 @@ fn simple_label_with_goto() {
 fn label_with_goto_inside() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello world";
     goto Second;
     First:
@@ -84,7 +77,7 @@ fn label_with_goto_inside() {
         .@d$ = "variable in label 3";
     End:
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -101,7 +94,7 @@ fn label_with_goto_inside() {
 fn label_with_goto_in_a_function() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     goto Second;
     First:
         .@b$ = "variable in label 1";
@@ -119,7 +112,7 @@ fn label_with_goto_in_a_function() {
     function goto_end {
         goto End;
     }
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -136,7 +129,7 @@ fn label_with_goto_in_a_function() {
 fn label_with_goto_in_a_nested_function() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     goto Second;
     First:
         .@b$ = "variable in label 1";
@@ -157,7 +150,7 @@ fn label_with_goto_in_a_nested_function() {
     function my_func {
         goto_end();
     }
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When

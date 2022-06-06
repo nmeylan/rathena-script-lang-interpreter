@@ -6,15 +6,9 @@ use std::sync::atomic::AtomicUsize;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
-use crate::common::Event;
+use crate::common::{compile, Event};
 
 mod common;
-
-pub fn compile(script: &str) -> Vec<ClassFile> {
-    Compiler::compile("test_script".to_string(), script).map_err(|e| {
-        e.iter().for_each(|e| println!("\n{}", e))
-    }).unwrap()
-}
 
 # [test]
 fn simple_class_test() {
@@ -33,7 +27,7 @@ fn simple_class_test() {
     function global_func_hello {
         return "hello";
     }
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -60,7 +54,7 @@ fn instance_variable_test() {
         inc2();
         vm_dump_var("counter", 'counter);
     }
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(RefCell::new(0));
     let vm = crate::common::setup_vm(move |e| {
@@ -94,7 +88,7 @@ fn static_variable_test() {
         inc2();
         vm_dump_var("counter", .counter);
     }
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(RefCell::new(0));
     let vm = crate::common::setup_vm(move |e| {
@@ -131,7 +125,7 @@ fn on_init_hook_test() {
             .counter = .@zero;
             .hello$ = .@hello$;
     }
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(RefCell::new(0));
     let vm = crate::common::setup_vm(move |e| {
@@ -169,7 +163,7 @@ fn on_instance_init_hook_test() {
             'counter = .@zero;
             'hello$ = .@hello$;
     }
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(RefCell::new(0));
     let vm = crate::common::setup_vm(move |e| {

@@ -1,6 +1,8 @@
 
 use std::sync::Arc;
 use ragnarok_script_interpreter::lang::call_frame::CallFrame;
+use ragnarok_script_interpreter::lang::chunk::ClassFile;
+use ragnarok_script_interpreter::lang::compiler::{CompilationError, Compiler};
 use ragnarok_script_interpreter::lang::thread::Thread;
 use ragnarok_script_interpreter::lang::value::{Value};
 use ragnarok_script_interpreter::lang::vm::{NativeMethodHandler, Vm};
@@ -59,4 +61,20 @@ pub fn setup_vm<F>(hook: F) -> Arc<Vm> where F: 'static + Fn(Event) {
     let vm_hook = VmHook{hook: Box::new(hook)};
     let vm = Vm::new(Box::new(vm_hook));
     Arc::new(vm)
+}
+
+
+pub fn compile_script(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+    Compiler::compile_script("test_script".to_string(), script, "native_functions_list.txt").map_err(|e| {
+        e.iter().for_each(|e| println!("\n{}", e));
+        e
+    })
+}
+
+
+pub fn compile(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+    Compiler::compile("test_script".to_string(), script, "native_functions_list.txt").map_err(|e| {
+        e.iter().for_each(|e| println!("\n{}", e));
+        e
+    })
 }

@@ -7,20 +7,16 @@ use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
 use common::Event;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
+use crate::common::compile_script;
 
-pub fn compile(script: &str) -> Vec<ClassFile> {
-    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
-        e.iter().for_each(|e| println!("\n{}", e))
-    }).unwrap()
-}
 
 #[test]
 fn simple_assigment() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello world";
-    vm_dump_var("a", .@a$);"#);
+    vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -34,12 +30,12 @@ fn simple_assigment() {
 fn assigment_to_local_variable() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello world";
     .@b$ = .@a$;
     vm_dump_var("a", .@a$);
     vm_dump_var("b", .@b$);
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -54,9 +50,9 @@ fn assigment_to_local_variable() {
 fn assignment_with_string_concat() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello" + " world " + 1;
-    vm_dump_var("a", .@a$);"#);
+    vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -70,7 +66,7 @@ fn assignment_with_string_concat() {
 fn assignment_with_number_operation() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a = 1 + 1;
     .@b = 4 - 1;
     .@c = 4 * 2;
@@ -80,7 +76,7 @@ fn assignment_with_number_operation() {
     .@f = 2 + 3 * 2;
     .@g = 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
     .@h = 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
-    vm_dump_locals();"#);
+    vm_dump_locals();"#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -102,10 +98,10 @@ fn assignment_with_number_operation() {
 fn simple_re_assigment() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello world";
     .@a$ = "hello wrld";
-    vm_dump_var("a", .@a$);"#);
+    vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -118,10 +114,10 @@ fn simple_re_assigment() {
 fn plus_equal_string_concat() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello";
     .@a$ += " world";
-    vm_dump_var("a", .@a$);"#);
+    vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -134,10 +130,10 @@ fn plus_equal_string_concat() {
 fn plus_equal_num_addition() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a = 1;
     .@a += 2;
-    vm_dump_var("a", .@a);"#);
+    vm_dump_var("a", .@a);"#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When

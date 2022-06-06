@@ -3,8 +3,11 @@ use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
-use std::mem;
+use std::{env, io, mem};
+use std::fs::File;
+use std::io::BufRead;
 use std::ops::Deref;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream};
@@ -13,7 +16,7 @@ use antlr_rust::tree::{ParseTreeVisitor, Tree};
 use crate::parser::rathenascriptlangvisitor::{*};
 use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
-use crate::lang::vm::{Vm};
+use crate::lang::vm::{NATIVE_FUNCTIONS, Vm};
 
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition, Label};
@@ -21,17 +24,7 @@ use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, Lo
 use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{*};
-
-const NATIVE_METHODS: &[&str] = &[
-    // Part of rathena script lang: implemented in VM.
-    "getarg",
-    // Part of rathena script lang: to be implemented in NativeMethodHandler
-    // Not part of rathena script lang
-    "print",
-    // internal vm instrumentation
-    "vm_dump_locals",
-    "vm_dump_var"
-];
+use crate::util::file::read_lines;
 
 // Labels below will be turned into functions
 const HOOK_LABEL: &[&str] = &[
@@ -40,10 +33,27 @@ const HOOK_LABEL: &[&str] = &[
     "OnInstanceDestroy",
 ];
 
+#[derive(Clone)]
+struct NativeFunction {
+    pub name: String,
+    pub return_type: Option<ValueType>,
+}
+
+impl NativeFunction {
+    fn new(name: String, return_type: Option<ValueType>) -> Self {
+        Self {
+            name,
+            return_type,
+        }
+    }
+}
+
 #[allow(dead_code)]
 #[derive(Default)]
 pub struct Compiler {
     file_name: String,
+    native_functions: Vec<NativeFunction>,
+    hook_labels: Vec<String>,
     classes: Vec<ClassFile>,
     errors: RefCell<Vec<CompilationError>>,
     state: State,
@@ -114,9 +124,12 @@ impl Display for CompilationError {
 }
 
 impl Compiler {
-    fn new(file_name: String, script: String) -> Self {
+    fn new(file_name: String, script: String, native_function_list_file_path: &str) -> Self {
+        let native_functions = Self::collect_native_functions(native_function_list_file_path);
         Self {
             file_name,
+            native_functions,
+            hook_labels: vec![],
             classes: vec![ClassFile::new("_Global".to_string(), "_globa_class_".to_string(), 0)],
             errors: RefCell::new(vec![]),
             state: Default::default(),
@@ -124,12 +137,46 @@ impl Compiler {
         }
     }
 
-    pub fn compile_script(name: String, script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str())
+    fn collect_native_functions(native_function_list_file_path: &str) -> Vec<NativeFunction> {
+        let mut native_functions: Vec<NativeFunction> = NATIVE_FUNCTIONS.to_vec().iter()
+            .map(|(name, returned_type)| NativeFunction::new(name.to_string(), returned_type.clone()))
+            .collect();
+        let result = read_lines(native_function_list_file_path);
+        if result.is_err() {
+            panic!("{}", result.err().unwrap());
+        }
+        if let Ok(lines) = result {
+            for line in lines {
+                if let Ok(l) = line {
+                    let line = l.trim();
+                    if line.starts_with("/") {
+                        continue;
+                    }
+                    let split = line.split(',');
+                    let split: Vec<&str> = split.collect();
+                    let return_type = if split.len() > 1 {
+                        match split[1] {
+                            "Number" | "number" => Some(ValueType::Number),
+                            "String" | "string" => Some(ValueType::String),
+                            _ => None
+                        }
+                    } else {
+                        None
+                    };
+                    native_functions.push(NativeFunction { name: split[0].to_string(), return_type });
+                }
+            }
+        } else {
+            panic!()
+        }
+        native_functions
+    }
+    pub fn compile_script(name: String, script: &str, native_function_list_file_path: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path)
     }
 
-    pub fn compile(name: String, script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-        let mut compiler = Compiler::new(name, script.to_string());
+    pub fn compile(name: String, script: &str, native_function_list_file_path: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+        let mut compiler = Compiler::new(name, script.to_string(), native_function_list_file_path);
         let lexer = RathenaScriptLangLexer::new(InputStream::new(script));
         let token_stream = CommonTokenStream::new(lexer);
         let mut parser = RathenaScriptLangParser::new(token_stream);
@@ -330,6 +377,12 @@ impl Compiler {
         self.state.current_assignment_types.push(value_type)
     }
 
+    fn remove_current_assigment_type(&mut self, count: usize) {
+        for i in 0..count {
+            self.state.current_assignment_types.pop();
+        }
+    }
+
     fn current_assignment_type_drop(&mut self) -> Option<ValueType> {
         let assignment_types = mem::take(&mut self.state.current_assignment_types);
         if assignment_types.is_empty() {
@@ -470,9 +523,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else {
             return;
         };
-        if NATIVE_METHODS.contains(&function_or_native_name.as_ref()) {
+        ;
+        if let Some(native)  = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
+            if native.name == "getarg" && argument_count > 1 {
+                // do not remove default value type, so we can check at compile time that default type match variable type
+                self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
+            } else {
+                self.remove_current_assigment_type(argument_count);
+            }
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
+            if let Some(returned_type) = native.return_type.as_ref() {
+                self.add_current_assigment_type(returned_type.clone());
+            }
         } else {
+            self.remove_current_assigment_type(argument_count);
             self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_error_details_from_context(ctx)));
             if let Some(returned_type) = self.function_returned_type(&function_or_native_name) {
                 self.add_current_assigment_type(returned_type);
@@ -1004,7 +1068,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.register_error(FunctionAlreadyDefined, ctx, format!("A function with name \"{}\" already exists.", function_name));
             return;
         }
-        if NATIVE_METHODS.contains(&function_name.as_str()) {
+        if self.native_functions.iter().find(|native| native.name == function_name).is_some() {
             self.register_error(NativeAlreadyDefined, ctx, format!("A native function with name \"{}\" already exists.", function_name));
             return;
         }

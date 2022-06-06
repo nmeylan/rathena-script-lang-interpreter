@@ -6,14 +6,7 @@ use std::rc::Rc;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
-use crate::common::Event;
-
-pub fn compile(script: &str) -> Vec<ClassFile> {
-    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
-        e.iter().for_each(|e| println!("\n{}", e))
-    }).unwrap()
-}
-
+use crate::common::{compile_script, Event};
 
 #[test]
 fn simple_function_call() {
@@ -21,13 +14,13 @@ fn simple_function_call() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     my_func();
     function my_func {
         .@a$ = "hello world";
         vm_dump_var("a", .@a$);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -41,13 +34,13 @@ fn function_call_with_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     my_func("hello");
     function my_func {
         .@a$ = getarg(0) + " world";
         vm_dump_var("a", .@a$);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -61,14 +54,14 @@ fn function_call_with_variable_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a$ = "hello";
     my_func(.@a$);
     function my_func {
         .@a$ = getarg(0) + " world";
         vm_dump_var("a", .@a$);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -82,13 +75,13 @@ fn function_call_with_arguments_out_of_bounds() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events;
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     my_func("hello");
     function my_func {
         .@a$ = getarg(1) + " world";
         vm_dump_var("a", .@a$);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -101,13 +94,13 @@ fn function_call_with_arguments_with_default() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     my_func("hello");
     function my_func {
         .@a$ = getarg(1, "default") + " world";
         vm_dump_var("a", .@a$);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -120,13 +113,13 @@ fn function_call_with_number_arguments() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     my_func(2);
     function my_func {
         .@a = getarg(0) + 4;
         vm_dump_var("a", .@a);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -139,13 +132,13 @@ fn function_call_with_number_arguments_with_default() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     my_func(2);
     function my_func {
         .@a = getarg(1, 3) + 4;
         vm_dump_var("a", .@a);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -158,13 +151,13 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     my_func(2);
     function my_func {
         .@a$ = getarg(1, "3") + 4;
         vm_dump_var("a", .@a$);
     }
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -178,17 +171,21 @@ fn function_with_return_type() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     function plus_four {
         .@a = getarg(0) + 4;
         .@b = 0;
         return .@a + .@b;
     }
+    function one {
+        return 1;
+    }
     .@a = plus_four(2);
     .@b = callfunc "plus_four", 4;
     .@c = callfunc("plus_four", 6);
+    .@d = callfunc("one", "one");
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -196,6 +193,7 @@ fn function_with_return_type() {
     assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
     assert_eq!(8_i32, events.borrow().get("b").unwrap().value.number_value().clone());
     assert_eq!(10_i32, events.borrow().get("c").unwrap().value.number_value().clone());
+    assert_eq!(1_i32, events.borrow().get("d").unwrap().value.number_value().clone());
 }
 
 #[test]
@@ -204,7 +202,7 @@ fn function_with_return_type_multicall() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     function plus_four {
         .@a = getarg(0) + 4;
         return .@a;
@@ -218,7 +216,7 @@ fn function_with_return_type_multicall() {
     .@a = minus_one(plus_four(2));
     print_arg(.@a);
     vm_dump_var("a", .@a);
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -232,7 +230,7 @@ fn recursive_function_call_with_return() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a = my_func(10);
     function my_func {
         .@my_local = getarg(0) - 1;
@@ -242,7 +240,7 @@ fn recursive_function_call_with_return() {
         return .@my_local;
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();

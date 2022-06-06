@@ -5,17 +5,13 @@ use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Native, ValueRef, ValueType, Variable};
-use crate::lang::vm::{Hashcode, HeapEntry, Vm};
+use crate::lang::vm::{Hashcode, HeapEntry, NATIVE_FUNCTIONS, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
 use crate::lang::class::{Class, Function, Instance};
 use crate::lang::stack::StackEntry::ConstantPoolReference;
 use crate::lang::vm::RuntimeError;
-
-const NATIVE_METHODS_INTERNAL_IMPLEMENTATION: &[&str] = &[
-    "getarg"
-];
 
 pub enum CallFrameBreak {
     Return(bool),
@@ -264,7 +260,7 @@ impl Thread {
                     }
                     arguments.reverse();
                     let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
-                    if NATIVE_METHODS_INTERNAL_IMPLEMENTATION.contains(&native_method.name.as_str()) {
+                    if NATIVE_FUNCTIONS.iter().find(|(native, _)| native == &native_method.name.as_str()).is_some() {
                         self.handle_native_method(native_method, &call_frame, arguments)?;
                     } else {
                         self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
@@ -502,7 +498,9 @@ impl Thread {
                 }
             }
             "getargcount" => {}
-            _ => {}
+            _ => {
+               return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)))
+            }
         }
         Ok(())
     }

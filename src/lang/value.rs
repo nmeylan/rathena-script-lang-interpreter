@@ -221,7 +221,13 @@ impl Hash for Variable {
     fn hash<H: Hasher>(&self, state: &mut H) {
         state.write(self.name.as_bytes());
         self.scope.hash(state);
-        self.value_ref.borrow().value_type.hash(state);
+        let value_type = self.value_ref.borrow().deref().value_type.clone();
+        match value_type {
+            ValueType::String | ValueType::Number => value_type.hash(state),
+            ValueType::Array(v) => {
+                v.hash(state);
+            }
+        }
     }
 }
 

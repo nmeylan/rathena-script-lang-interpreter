@@ -399,7 +399,6 @@ Function : 'function';
 Break : 'break';
 SetArray: 'setarray';
 Callfunc: 'callfunc';
-GetArraySize: 'getarraysize';
 Close: 'close';
 Close2: 'close2';
 Next: 'next';

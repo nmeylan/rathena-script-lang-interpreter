@@ -4,22 +4,15 @@ use std::rc::Rc;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
-use crate::common::Event;
+use crate::common::{compile_script, Event};
 
 mod common;
-
-pub fn compile(script: &str) -> Vec<ClassFile> {
-    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
-        e.iter().for_each(|e| println!("\n{}", e))
-    }).unwrap()
-}
-
 
 #[test]
 fn simple_condition() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     if(1) {
         .@a$ = "i am true";
     } else {
@@ -45,7 +38,7 @@ fn simple_condition() {
         .@j$ = "i am false";
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -67,7 +60,7 @@ fn simple_condition() {
 fn condition_with_expressions() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     if((1 == 1 || 1) && 1) {
         .@a$ = "i am true";
     }
@@ -76,7 +69,7 @@ fn condition_with_expressions() {
         .@b$ = "i am false";
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -94,7 +87,7 @@ fn condition_with_expressions() {
 fn conditional_statements() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@a = 1 == 1;
     .@b = 1 == 2;
     .@c = "1" == "1";
@@ -109,7 +102,7 @@ fn conditional_statements() {
     .@l = .@h > 999 && .@h <= 1000;
     .@m = .@h > 999 && .@h < 1000;
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When

@@ -4,28 +4,21 @@ use std::rc::Rc;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
 use ragnarok_script_interpreter::lang::compiler::Compiler;
 use ragnarok_script_interpreter::lang::vm::Vm;
-use crate::common::Event;
+use crate::common::{compile_script, Event};
 
 mod common;
-
-pub fn compile(script: &str) -> Vec<ClassFile> {
-    Compiler::compile_script("test_script".to_string(), script).map_err(|e| {
-        e.iter().for_each(|e| println!("\n{}", e))
-    }).unwrap()
-}
-
 
 #[test]
 fn simple_for_loop() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@j = 100;
     for(.@i = 0; .@i < 100; .@i += 1) {
 		.@j -= 1;
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -40,13 +33,13 @@ fn simple_for_loop() {
 fn simple_while_loop() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@j = 100;
     while (.@j >= 0) {
         .@j -= 1;
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -60,7 +53,7 @@ fn simple_while_loop() {
 fn simple_while_loop_in_a_function() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     function iterate {
         .@i = getarg(0);
         while (.@i >= 0) {
@@ -70,7 +63,7 @@ fn simple_while_loop_in_a_function() {
     }
     .@j = iterate(100);
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -84,14 +77,14 @@ fn simple_while_loop_in_a_function() {
 fn simple_for_loop_with_already_init() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@j = 100;
     .@i = 0;
     for(;.@i < 100; .@i += 1) {
 		.@j -= 1;
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -106,7 +99,7 @@ fn simple_for_loop_with_already_init() {
 fn simple_for_loop_with_increment_in_the_for_loop() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@j = 100;
     .@i = 0;
     for(;.@i < 100;) {
@@ -114,7 +107,7 @@ fn simple_for_loop_with_increment_in_the_for_loop() {
 		.@j -= 1;
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -129,7 +122,7 @@ fn simple_for_loop_with_increment_in_the_for_loop() {
 fn nested_simple_for_loop() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@k = 0;
     for(.@i = 0; .@i < 10; .@i += 1) {
         for(.@j = 10; .@j > 0; .@j -= 1) {
@@ -137,7 +130,7 @@ fn nested_simple_for_loop() {
         }
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -158,7 +151,7 @@ fn nested_simple_for_loop() {
 fn break_should_stop_for_loop() {
 // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@j = 100;
     .@i = 0;
     for(;; .@i += 1) {
@@ -168,7 +161,7 @@ fn break_should_stop_for_loop() {
         .@j -= 1;
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
@@ -183,7 +176,7 @@ fn break_should_stop_for_loop() {
 fn break_should_stop_for_loop2() {
 // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let classes = compile_script(r#"
     .@j = 100;
     .@i = 0;
     for(;; .@i += 1) {
@@ -198,7 +191,7 @@ fn break_should_stop_for_loop2() {
 
     }
     vm_dump_locals();
-    "#);
+    "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
