@@ -697,18 +697,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     _ => {} // TODO
                 }
             }
+            let is_array = variable.value_ref.borrow().is_array();
             match variable.scope {
                 Scope::Server | Scope::Account | Scope::Character => {
                     // TODO
                 }
                 Scope::Local => {
-                    let is_array = variable.value_ref.borrow().is_array();
                     let reference = self.current_chunk().add_local(variable);
                     self.current_chunk().emit_op_code(StoreLocal(reference));
-                    if is_array {
-                        let number_value = ctx.variable().as_ref().unwrap().variable_name().as_ref().unwrap().Number().as_ref().unwrap().symbol.text.clone();
-                        self.current_chunk().emit_op_code(ArrayStore(parse_number(number_value) as usize));
-                    }
                 }
                 Scope::Instance => {
                     let reference = self.current_class().add_instance_variable(variable);
@@ -718,6 +714,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     let reference = self.current_class().add_static_variable(variable);
                     self.current_chunk().emit_op_code(StoreStatic(reference));
                 }
+            }
+            if is_array {
+                let number_value = ctx.variable().as_ref().unwrap().variable_name().as_ref().unwrap().Number().as_ref().unwrap().symbol.text.clone();
+                self.current_chunk().emit_op_code(ArrayStore(parse_number(number_value) as usize));
             }
         }
     }
