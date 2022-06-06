@@ -301,3 +301,32 @@ l4	            Assign:
 	            ^^^^^^^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
 }
+
+#[test]
+fn array_type_checking() {
+    // Given
+    let script = r#"
+    .@a$[0] = "hello";
+    .@a$[1] = 2;
+    .@b[0] = 1;
+    .@b[1] = "2";
+    .@c$ = .@a$[0] + .@b[0];
+    .@d = .@a$[0] + .@b[0];
+    "#;
+    // When
+    let result = compile_script(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(r#"test_script 4:4. Variable ".@a$[]" is declared as an Array of string but index 1 is assigned with a Number.
+l4	    .@a$[1] = 2;
+	    ^^^^^^^
+"#, result.as_ref().err().unwrap()[0].message());
+    assert_eq!(r#"test_script 6:4. Variable ".@b[]" is declared as an Array of number but index 1 is assigned with a String.
+l6	    .@b[1] = "2";
+	    ^^^^^^
+"#, result.as_ref().err().unwrap()[1].message());
+    assert_eq!(r#"test_script 8:4. Variable ".@d" is declared as a Number but is assigned with a String.
+l8	    .@d = .@a$[0] + .@b[0];
+	    ^^^
+"#, result.as_ref().err().unwrap()[2].message());
+}

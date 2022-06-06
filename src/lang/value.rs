@@ -135,11 +135,19 @@ impl ValueRef {
     }
 
     pub fn is_string_array(&self) -> bool {
-        mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Array(Box::from(ValueType::String)))
+        if let ValueType::Array(value) = &self.value_type {
+            value.is_string()
+        } else {
+            false
+        }
     }
 
     pub fn is_number_array(&self) -> bool {
-        mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Array(Box::from(ValueType::Number)))
+        if let ValueType::Array(value) = &self.value_type {
+            value.is_number()
+        } else {
+            false
+        }
     }
 
     pub fn is_array(&self) -> bool {
@@ -198,7 +206,13 @@ impl Variable {
         match value_ref.deref().value_type {
             ValueType::String => String::from("$"),
             ValueType::Number => String::from(""),
-            _ => String::from("ARR") //TODO
+            ValueType::Array(_) => {
+                if value_ref.is_string_array() {
+                    String::from("$[]")
+                } else {
+                    String::from("[]")
+                }
+            }
         }
     }
 }

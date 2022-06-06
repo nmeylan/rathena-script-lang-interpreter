@@ -19,7 +19,7 @@ pub fn compile(script: &str) -> Vec<ClassFile> {
 fn simple_array_assignment() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
-    let classes = compile(r#"
+    let script = compile(r#"
     .@a$[0] = "hello";
     .@a$[1] = "world";
     .@b$ = .@a$[0] + " " + .@a$[1];
@@ -30,7 +30,7 @@ fn simple_array_assignment() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
-    Vm::bootstrap(vm.clone(), classes);
+    Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello"), events.borrow().get("a0").unwrap().value.string_value().clone());

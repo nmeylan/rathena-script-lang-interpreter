@@ -244,8 +244,10 @@ impl Vm {
             writeln!(out, "({}) {}", reference, constant).unwrap();
         }
         writeln!(out, "========= Heap =========").unwrap();
-        for (reference, constant) in self.heap.borrow().iter() {
-            writeln!(out, "({}) {:?}", reference, constant).unwrap();
+        for (owner_reference, owner_entries) in self.heap.borrow().iter() {
+            for (reference, owner_entry) in owner_entries.borrow().iter() {
+                writeln!(out, "[{}]({}) {:?}", owner_reference, reference, owner_entry).unwrap();
+            }
         }
     }
 }

@@ -316,7 +316,13 @@ impl Compiler {
         match var.value_ref.borrow().deref().value_type {
             ValueType::String => self.add_current_assigment_type(ValueType::String),
             ValueType::Number => self.add_current_assigment_type(ValueType::Number),
-            _ => {}// TODO
+            ValueType::Array(_) => {
+                if var.value_ref.borrow().is_string_array() {
+                    self.add_current_assigment_type(ValueType::String)
+                } else {
+                    self.add_current_assigment_type(ValueType::Number)
+                }
+            }
         }
     }
 
@@ -681,20 +687,30 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else if ctx.variable().is_some() {
             let (variable, index) = Self::build_variable(&ctx.variable().unwrap());
             if let Some(current_value_type) = self.current_assignment_type_drop() {
-                match variable.value_ref.borrow().deref().value_type {
-                    ValueType::String => {
-                        if current_value_type.is_number() {
-                            self.register_error(CompilationErrorType::Type, ctx,
-                                                format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
-                        }
+                if variable.value_ref.borrow().is_string() {
+                    if current_value_type.is_number() {
+                        self.register_error(CompilationErrorType::Type, ctx,
+                                            format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
                     }
-                    ValueType::Number => {
-                        if current_value_type.is_string() {
-                            self.register_error(CompilationErrorType::Type, ctx,
-                                                format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
-                        }
+                }
+                if variable.value_ref.borrow().is_string_array() {
+                    if current_value_type.is_number() {
+                        self.register_error(CompilationErrorType::Type, ctx,
+                                            format!("Variable \"{}\" is declared as an Array of string but index {} is assigned with a Number.", variable.to_script_identifier(), index.unwrap()));
                     }
-                    _ => {} // TODO
+                }
+                if variable.value_ref.borrow().is_number() {
+                    if current_value_type.is_string() {
+                        self.register_error(CompilationErrorType::Type, ctx,
+                                            format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
+                    }
+                }
+
+                if variable.value_ref.borrow().is_number_array() {
+                    if current_value_type.is_string() {
+                        self.register_error(CompilationErrorType::Type, ctx,
+                                            format!("Variable \"{}\" is declared as an Array of number but index {} is assigned with a String.", variable.to_script_identifier(), index.unwrap()));
+                    }
                 }
             }
             let is_array = variable.value_ref.borrow().is_array();

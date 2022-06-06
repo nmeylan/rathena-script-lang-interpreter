@@ -373,6 +373,8 @@ impl Thread {
         for (reference, func) in class.functions_pool.iter() {
             writeln!(out, "({}) {}", reference, func).unwrap();
         }
+        writeln!(out, "========= VM =========").unwrap();
+        self.vm.dump(out);
     }
 
     fn dump_stack(&self, out: &mut Stdout, call_frame: &CallFrame, class: &Class, instance: Option<&Instance>) {
