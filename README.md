@@ -25,6 +25,15 @@ Rathena script command related to game, almost all commands listed [here](https:
 Compiler considers those command as "native" functions. VM require to implement a native functions handler, which has to be implemented by the server.
 
 # Architecture
+## Language specificity
+Althought Rathena script lang is not an oriented object programming language, it has notion of:
+- Global script(or npc) state, which are alive while server is alive
+- Global script(or npc) state, which are alive for the duration of the script execution
+
+To ease the implementation of the VM we will call:
+- Script/NPC -> Class
+- Script/NPC instance -> Instance
+
 ## VM Memory layout
 ```mermaid
 flowchart LR
@@ -55,7 +64,6 @@ flowchart LR
         B1 --> C2
     end
 ```
-*InstancePool does not actually exist as instance are destroyed once main function has been executed*
 ## VM lifecycle
 ```mermaid
 graph TD
