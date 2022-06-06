@@ -20,9 +20,14 @@ use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable}
 
 pub const MAIN_FUNCTION: &str = "_main";
 
-pub const NATIVE_FUNCTIONS: [(&str, Option<ValueType>); 2] = [
+pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("getarraysize", Some(ValueType::Number)),
     ("getarg", None),
+];
+
+// Few functions accept reference as arguments, but some native does, especially functions related to arrays.
+pub const NATIVE_FUNCTIONS_WITH_REFERENCE_ARGUMENTS: &[&str] = &[
+    "getarraysize"
 ];
 
 #[derive(Clone, Debug, Hash)]
@@ -192,7 +197,7 @@ impl Vm {
         if let Some(value_ref) = heap_entry.value_ref() {
             Ok(value_ref)
         } else {
-            Err(RuntimeError::new("Can't retrieve value from heap entry, because heap entry is not a variable"))
+            Err(RuntimeError::new("Can't retrieve value from heap entry, because heap entry is not a variable. Probably a reference to an array is being used as function arguments."))
         }
     }
 

@@ -103,7 +103,7 @@ impl Thread {
                 OpCode::LoadLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = call_frame.hash_code();
-                    self.load_variable( variable, owner_reference, || StackEntry::LocalVariableReference(*reference))
+                    self.load_variable(variable, owner_reference, || StackEntry::LocalVariableReference(*reference))
                 }
                 OpCode::StoreInstance(reference) => {
                     if instance.is_none() {
@@ -119,7 +119,7 @@ impl Thread {
                     }
                     let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = instance.unwrap().hash_code();
-                    self.load_variable( variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
+                    self.load_variable(variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
                 }
                 OpCode::StoreStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in class scope", reference).as_str()))?;
@@ -129,7 +129,7 @@ impl Thread {
                 OpCode::LoadStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = class.hash_code();
-                    self.load_variable( variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
+                    self.load_variable(variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
                 }
                 OpCode::DefineFunction(_) => {}
                 OpCode::Equal => {
@@ -254,6 +254,7 @@ impl Thread {
                 }
                 OpCode::CallNative { argument_count, reference } => {
                     let mut arguments: Vec<Value> = vec![];
+                    //TODO allow heap reference access
                     for _ in 0..*argument_count {
                         let stack_entry = self.stack.pop()?;
                         arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?);
@@ -342,7 +343,7 @@ impl Thread {
     }
 
     fn load_variable<F>(&mut self, variable: &Variable, owner_reference: u64, apply_when_not_array: F)
-    where F: FnOnce() -> StackEntry {
+        where F: FnOnce() -> StackEntry {
         if variable.value_ref.borrow().is_array() {
             let array_ref = Vm::calculate_hash(variable);
             self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
@@ -497,9 +498,11 @@ impl Thread {
                     self.stack.push(stack_entry);
                 }
             }
-            "getargcount" => {}
+            "getarraysize" => {
+                println!("getarraysize")
+            }
             _ => {
-               return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)))
+                return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));
             }
         }
         Ok(())
