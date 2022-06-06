@@ -1,7 +1,7 @@
 
 use std::sync::Arc;
 use ragnarok_script_interpreter::lang::call_frame::CallFrame;
-use ragnarok_script_interpreter::lang::program::Program;
+use ragnarok_script_interpreter::lang::thread::Thread;
 use ragnarok_script_interpreter::lang::value::{Value};
 use ragnarok_script_interpreter::lang::vm::{NativeMethodHandler, Vm};
 
@@ -14,7 +14,7 @@ pub struct VmHook {
     hook: Box<dyn Fn(Event)>
 }
 impl NativeMethodHandler for VmHook {
-    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, program: &Program, call_frame: &CallFrame) {
+    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, program: &Thread, call_frame: &CallFrame) {
         if native.name.eq("println") {
             println!("{}", params.iter().map(|p| {
                 match p {

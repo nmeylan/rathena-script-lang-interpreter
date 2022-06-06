@@ -298,7 +298,6 @@ impl Chunk {
 #[derive(Debug, Clone, Hash)]
 pub enum OpCode {
     LoadConstant(u64),
-    Pop,
     StoreGlobal(u64),
     LoadGlobal(u64),
     StoreLocal(u64),
@@ -319,10 +318,8 @@ pub enum OpCode {
     Relational(Relational),
     Add,
     NumericOperation(NumericOperation),
-    Not,
     Jump(usize), // OpCode index to jump to
     Goto(usize), // OpCode index to jump to. Using goto instead of jump allow to break function
-    Invoke,
     Call,
     Return(bool),
     If(usize), // OpCode index to jump to when condition is evaluated to false.

@@ -14,7 +14,7 @@ use crate::lang::chunk::{Chunk, ClassFile};
 use crate::lang::class::{Array, Class, Function, Instance};
 
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::program::Program;
+use crate::lang::thread::Thread;
 
 use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable};
 
@@ -86,7 +86,7 @@ impl Display for RuntimeError {
 }
 
 pub trait NativeMethodHandler {
-    fn handle(&self, native: &Native, _params: Vec<Value>, _program: &Program, _call_frame: &CallFrame) {
+    fn handle(&self, native: &Native, _params: Vec<Value>, _program: &Thread, _call_frame: &CallFrame) {
         panic!("Native function {}", native.name);
     }
 }
@@ -120,7 +120,7 @@ impl Vm {
     }
 
     pub fn execute_main_script(vm: Arc<Vm>) -> Result<(), RuntimeError> {
-        let mut program = Program::new(vm.clone());
+        let mut program = Thread::new(vm.clone());
         program.run_main(vm.classes_pool.borrow().get("_MainScript").as_ref().unwrap().new_instance()).map_err(|e| {
             println!("{}", e);
             e
@@ -131,10 +131,10 @@ impl Vm {
         let class = vm.get_class(&instance.class_name);
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
         if let Some(init_function) = maybe_init_function {
-            let mut program = Program::new(vm.clone());
+            let mut program = Thread::new(vm.clone());
             program.run_function(class.clone(), Some(&instance), init_function);
         }
-        let mut program = Program::new(vm.clone());
+        let mut program = Thread::new(vm.clone());
         program.run_main(instance).map_err(|e| {
             println!("{}", e);
             e
@@ -144,7 +144,7 @@ impl Vm {
     pub fn init_class(vm: Arc<Vm>, class: Rc<Class>) -> Result<(), RuntimeError> {
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInit".to_string()));
         if let Some(init_function) = maybe_init_function {
-            let mut program = Program::new(vm);
+            let mut program = Thread::new(vm);
             return program.run_function(class.clone(), None, init_function).map_err(|e| {
                 println!("{}", e);
                 e

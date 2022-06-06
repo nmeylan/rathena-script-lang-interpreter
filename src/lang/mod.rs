@@ -5,5 +5,5 @@ pub mod noop_hasher;
 pub mod value;
 pub mod stack;
 pub mod call_frame;
-pub mod program;
+pub mod thread;
 pub mod chunk;

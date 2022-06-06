@@ -1,19 +1,15 @@
-use std::{io, mem};
-use std::borrow::Borrow;
-use std::env::var;
-use std::fmt::format;
-use std::hash::Hash;
+use std::{io};
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
 use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Native, ValueRef, ValueType};
+use crate::lang::value::{Native, ValueRef, ValueType, Variable};
 use crate::lang::vm::{Hashcode, HeapEntry, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
-use crate::lang::class::{Array, Class, Function, Instance};
+use crate::lang::class::{Class, Function, Instance};
 use crate::lang::stack::StackEntry::ConstantPoolReference;
 use crate::lang::vm::RuntimeError;
 
@@ -27,12 +23,12 @@ pub enum CallFrameBreak {
     End,
 }
 
-pub struct Program {
+pub struct Thread {
     pub vm: Arc<Vm>,
     stack: Stack,
 }
 
-impl Program {
+impl Thread {
     pub fn new(vm: Arc<Vm>) -> Self {
         let stack = Stack::new();
         Self {
@@ -78,7 +74,6 @@ impl Program {
                 OpCode::LoadConstant(reference) => {
                     self.stack.push(StackEntry::ConstantPoolReference(*reference));
                 }
-                OpCode::Pop => {}
                 OpCode::StoreGlobal(_) => {}
                 OpCode::LoadGlobal(_) => {}
                 OpCode::ArrayStore(arr_index) => {
@@ -106,51 +101,39 @@ impl Program {
                 }
                 OpCode::StoreLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
-                    let reference = if variable.value_ref.borrow().is_array() {
-                        let array_ref = Vm::calculate_hash(variable);
-                        let owner_reference = call_frame.hash_code();
-                        self.vm.allocate_array_if_needed(owner_reference, array_ref, variable.value_ref.borrow().value_type.clone());
-                        self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
-                        array_ref
-                    } else {
-                        let stack_entry = self.stack.pop()?;
-                        self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?
-                    };
-                    variable.set_value_ref(reference);
+                    let owner_reference = call_frame.hash_code();
+                    self.set_variable(&call_frame, class, instance, variable, owner_reference);
                 }
                 OpCode::LoadLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
-                    if variable.value_ref.borrow().is_array() {
-                        let array_ref = Vm::calculate_hash(variable);
-                        let owner_reference = call_frame.hash_code();
-                        self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
-                    } else {
-                        self.stack.push(StackEntry::LocalVariableReference(*reference));
-                    }
+                    let owner_reference = call_frame.hash_code();
+                    self.load_variable( variable, owner_reference, || StackEntry::LocalVariableReference(*reference))
                 }
                 OpCode::StoreInstance(reference) => {
                     if instance.is_none() {
                         return Err(RuntimeError::new("Can't store instance variable in a static(non-instance) context"));
                     }
-                    let stack_entry = self.stack.pop()?;
-                    let constant_reference = self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?;
                     let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in instance scope", reference).as_str()))?;
-                    variable.set_value_ref(constant_reference);
+                    let owner_reference = instance.unwrap().hash_code();
+                    self.set_variable(&call_frame, class, instance, variable, owner_reference);
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
                         return Err(RuntimeError::new("Can't load instance variable in a static(non-instance) context"));
                     }
-                    self.stack.push(StackEntry::InstanceVariableReference(*reference));
+                    let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
+                    let owner_reference = instance.unwrap().hash_code();
+                    self.load_variable( variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
                 }
                 OpCode::StoreStatic(reference) => {
-                    let stack_entry = self.stack.pop()?;
-                    let constant_reference = self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?;
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in class scope", reference).as_str()))?;
-                    variable.set_value_ref(constant_reference);
+                    let owner_reference = class.hash_code();
+                    self.set_variable(&call_frame, class, instance, variable, owner_reference);
                 }
                 OpCode::LoadStatic(reference) => {
-                    self.stack.push(StackEntry::StaticVariableReference(*reference));
+                    let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
+                    let owner_reference = class.hash_code();
+                    self.load_variable( variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
                 }
                 OpCode::DefineFunction(_) => {}
                 OpCode::Equal => {
@@ -263,7 +246,6 @@ impl Program {
                     let reference = self.vm.add_in_constant_pool(new_value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
-                OpCode::Not => {}
                 OpCode::Jump(jump_to_index) => {
                     op_index = *jump_to_index - 1;
                 }
@@ -274,7 +256,6 @@ impl Program {
                         op_index = *index - 1;
                     }
                 }
-                OpCode::Invoke => {}
                 OpCode::CallNative { argument_count, reference } => {
                     let mut arguments: Vec<Value> = vec![];
                     for _ in 0..*argument_count {
@@ -362,6 +343,29 @@ impl Program {
         call_frame.dump(&mut stdout);
         stdout.flush().unwrap();
         Ok(CallFrameBreak::Return(false))
+    }
+
+    fn load_variable<F>(&mut self, variable: &Variable, owner_reference: u64, apply_when_not_array: F)
+    where F: FnOnce() -> StackEntry {
+        if variable.value_ref.borrow().is_array() {
+            let array_ref = Vm::calculate_hash(variable);
+            self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
+        } else {
+            self.stack.push(apply_when_not_array());
+        }
+    }
+
+    fn set_variable(&mut self, call_frame: &CallFrame, class: &Class, instance: Option<&Instance>, variable: &Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+        let reference = if variable.value_ref.borrow().is_array() {
+            let array_ref = Vm::calculate_hash(variable);
+            self.vm.allocate_array_if_needed(owner_reference, array_ref, variable.value_ref.borrow().value_type.clone());
+            self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
+            array_ref
+        } else {
+            let stack_entry = self.stack.pop()?;
+            self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?
+        };
+        Ok(variable.set_value_ref(reference))
     }
 
     fn dump(&self, class: &Class, out: &mut Stdout) {

@@ -134,7 +134,7 @@ impl Array {
     pub fn assign(&self, index: usize, constant_pool_reference: u64) {
         let len = self.values.borrow().len();
         if index >= len {
-            for i in len..index + 1 {
+            for _ in len..index + 1 {
                 self.values.borrow_mut().push(None);
             }
         }

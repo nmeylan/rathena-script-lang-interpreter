@@ -22,8 +22,10 @@ fn simple_array_assignment() {
     let classes = compile(r#"
     .@a$[0] = "hello";
     .@a$[1] = "world";
+    .@b$ = .@a$[0] + " " + .@a$[1];
     vm_dump_var("a0", .@a$[0]);
     vm_dump_var("a1", .@a$[1]);
+    vm_dump_var("b", .@b$);
     "#);
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
@@ -33,4 +35,5 @@ fn simple_array_assignment() {
     // Then
     assert_eq!(String::from("hello"), events.borrow().get("a0").unwrap().value.string_value().clone());
     assert_eq!(String::from("world"), events.borrow().get("a1").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("b").unwrap().value.string_value().clone());
 }
