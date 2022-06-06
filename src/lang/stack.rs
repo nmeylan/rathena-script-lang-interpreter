@@ -8,12 +8,12 @@ use crate::lang::vm::RuntimeError;
 #[allow(dead_code)]
 pub enum StackEntry {
     ConstantPoolReference(u64),
-    HeapReference(u64),
     LocalVariableReference(u64),
     NativeReference(u64),
     FunctionReference(u64),
     InstanceVariableReference(u64),
     StaticVariableReference(u64),
+    HeadReference((u64, u64)) // owner reference, entry reference
 }
 
 #[derive(Debug)]

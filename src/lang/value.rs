@@ -68,7 +68,7 @@ pub struct ValueRef {
 pub enum ValueType {
     String,
     Number,
-    Array(Box<ValueType>)
+    Array(Box<ValueType>),
 }
 
 impl ValueType {
@@ -103,7 +103,7 @@ impl ValueRef {
     pub fn new_string(reference: u64) -> Self {
         Self {
             reference: Some(reference),
-            value_type: ValueType::String
+            value_type: ValueType::String,
         }
     }
     pub fn new_number(reference: u64) -> Self {
@@ -122,7 +122,7 @@ impl ValueRef {
     pub fn duplicate_with_reference(&self, reference: u64) -> Self {
         Self {
             reference: Some(reference),
-            value_type: self.value_type.clone()
+            value_type: self.value_type.clone(),
         }
     }
 
@@ -134,13 +134,16 @@ impl ValueRef {
         mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Number)
     }
 
-
     pub fn is_string_array(&self) -> bool {
         mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Array(Box::from(ValueType::String)))
     }
 
     pub fn is_number_array(&self) -> bool {
         mem::discriminant(&self.value_type) == mem::discriminant(&ValueType::Array(Box::from(ValueType::Number)))
+    }
+
+    pub fn is_array(&self) -> bool {
+        self.is_number_array() || self.is_string_array()
     }
 
     pub fn get_ref(&self) -> u64 {
@@ -204,7 +207,7 @@ impl Hash for Variable {
     fn hash<H: Hasher>(&self, state: &mut H) {
         state.write(self.name.as_bytes());
         self.scope.hash(state);
-        self.value_ref.borrow().hash(state);
+        self.value_ref.borrow().value_type.hash(state);
     }
 }
 

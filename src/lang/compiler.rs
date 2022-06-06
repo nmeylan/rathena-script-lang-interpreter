@@ -240,8 +240,20 @@ impl Compiler {
         self.global_class().get_function_returned_type(function_name)
     }
 
-    fn variable_value(has_dollar: bool) -> ValueRef {
-        if has_dollar { ValueRef::new_empty_string() } else { ValueRef::new_empty_number() }
+    fn variable_value(has_dollar: bool, has_bracket: bool) -> ValueRef {
+        if has_dollar {
+            if has_bracket {
+                ValueRef::new_empty_array(ValueType::String)
+            } else {
+                ValueRef::new_empty_string()
+            }
+        } else {
+            if has_bracket {
+                ValueRef::new_empty_array(ValueType::Number)
+            } else {
+                ValueRef::new_empty_number()
+            }
+        }
     }
 
     fn register_error<'input>(&self, error_type: CompilationErrorType, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), message: String) {
@@ -337,18 +349,25 @@ impl Compiler {
             || self.state.current_assignment_types.iter().all(|v| v.is_string())
     }
 
-    fn build_variable(ctx: &VariableContext) -> Variable {
+    fn build_variable(ctx: &VariableContext) -> (Variable, Option<usize>) {
         let scope = Self::get_variable_scope(ctx);
         let variable_name = ctx.variable_name().unwrap();
         let name = variable_name.Identifier().unwrap().symbol.text.deref().to_string();
-        Variable {
-            value_ref: RefCell::new(Self::variable_value(variable_name.Dollar().is_some())),
+        let variable = Variable {
+            value_ref: RefCell::new(Self::variable_value(variable_name.Dollar().is_some(), variable_name.LeftBracket().is_some())),
             name,
             scope,
-        }
+        };
+        let index = if variable.value_ref.borrow().is_array() {
+            let index_str = variable_name.Number().unwrap().symbol.text.clone();
+            Some(parse_number(index_str) as usize)
+        } else {
+            None
+        };
+        (variable, index)
     }
 
-    fn load_variable<'input>(&mut self, variable: &Variable, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
+    fn load_variable<'input>(&mut self, variable: &Variable, index: Option<usize>, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
         match variable.scope {
             Scope::Server => {}
             Scope::Account => {}
@@ -378,6 +397,10 @@ impl Compiler {
                     self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
                 }
             }
+        }
+
+        if variable.value_ref.borrow().is_array() {
+            self.current_chunk().emit_op_code(ArrayLoad(index.unwrap()));
         }
     }
 
@@ -633,14 +656,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             // Convert a += 1; into a = a + 1;
             if assignment_operator.PlusEqual().is_some() {
                 if left.variable().is_some() {
-                    let variable = Self::build_variable(&left.variable().unwrap());
-                    self.load_variable(&variable, ctx);
+                    let (variable, index) = Self::build_variable(&left.variable().unwrap());
+                    self.load_variable(&variable, index, ctx);
                 }
                 self.current_chunk().emit_op_code(Add);
             } else if assignment_operator.MinusEqual().is_some() {
                 if left.variable().is_some() {
-                    let variable = Self::build_variable(&left.variable().unwrap());
-                    self.load_variable(&variable, ctx);
+                    let (variable, index) = Self::build_variable(&left.variable().unwrap());
+                    self.load_variable(&variable, index, ctx);
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
             }
@@ -656,38 +679,43 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let name = ctx.Identifier().unwrap().symbol.text.deref().to_string();
             // TODO
         } else if ctx.variable().is_some() {
-            let variable_identifier = Self::build_variable(&ctx.variable().unwrap());
+            let (variable, index) = Self::build_variable(&ctx.variable().unwrap());
             if let Some(current_value_type) = self.current_assignment_type_drop() {
-                match variable_identifier.value_ref.borrow().deref().value_type {
+                match variable.value_ref.borrow().deref().value_type {
                     ValueType::String => {
                         if current_value_type.is_number() {
                             self.register_error(CompilationErrorType::Type, ctx,
-                                                format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable_identifier.to_script_identifier()));
+                                                format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
                         }
                     }
                     ValueType::Number => {
                         if current_value_type.is_string() {
                             self.register_error(CompilationErrorType::Type, ctx,
-                                                format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable_identifier.to_script_identifier()));
+                                                format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
                         }
                     }
                     _ => {} // TODO
                 }
             }
-            match variable_identifier.scope {
+            match variable.scope {
                 Scope::Server | Scope::Account | Scope::Character => {
                     // TODO
                 }
                 Scope::Local => {
-                    let reference = self.current_chunk().add_local(variable_identifier);
+                    let is_array = variable.value_ref.borrow().is_array();
+                    let reference = self.current_chunk().add_local(variable);
                     self.current_chunk().emit_op_code(StoreLocal(reference));
+                    if is_array {
+                        let number_value = ctx.variable().as_ref().unwrap().variable_name().as_ref().unwrap().Number().as_ref().unwrap().symbol.text.clone();
+                        self.current_chunk().emit_op_code(ArrayStore(parse_number(number_value) as usize));
+                    }
                 }
                 Scope::Instance => {
-                    let reference = self.current_class().add_instance_variable(variable_identifier);
+                    let reference = self.current_class().add_instance_variable(variable);
                     self.current_chunk().emit_op_code(StoreInstance(reference));
                 }
                 Scope::Npc => {
-                    let reference = self.current_class().add_static_variable(variable_identifier);
+                    let reference = self.current_class().add_static_variable(variable);
                     self.current_chunk().emit_op_code(StoreStatic(reference));
                 }
             }
@@ -991,9 +1019,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
-        let variable = Self::build_variable(ctx);
+        let (variable, index) = Self::build_variable(ctx);
         self.add_current_assignment_type_from_variable(&variable);
-        self.load_variable(&variable, ctx);
+        self.load_variable(&variable, index, ctx);
     }
 
     fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) {

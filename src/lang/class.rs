@@ -3,12 +3,15 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
+use std::time::SystemTime;
 use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Variable};
+use crate::lang::value::{ValueType, Variable};
+use crate::lang::vm::{Hashcode, RuntimeError, Vm};
 
 #[derive(Debug)]
 pub struct Class {
+    reference: Option<u64>,
     pub(crate) name: String,
     pub(crate) functions_pool: HashMap<u64, Function, NoopHasher>,
     pub(crate) instances_references: RefCell<u64>,
@@ -19,25 +22,34 @@ pub struct Class {
 impl Class {
     pub fn new(name: String, functions_pool: HashMap<u64, Function, NoopHasher>, static_variables: HashMap<u64, Variable, NoopHasher>,
                instance_variables: HashMap<u64, Variable, NoopHasher>) -> Self {
-        Self {
+        let mut class = Self {
+            reference: None,
             name,
             functions_pool,
             instances_references: RefCell::new(0),
             static_variables,
             instance_variables
-        }
+        };
+        class.reference = Some(Vm::calculate_hash(&class) & SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64);
+        class
     }
 
     pub fn new_instance(&self) -> Instance {
         *self.instances_references.borrow_mut() += 1;
         Instance {
-            reference: self.instances_references.borrow().clone(),
+            reference: Vm::calculate_hash(&self.instances_references.borrow().clone()) & SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64,
             class_name: self.name.clone(),
             variables: self.instance_variables.clone()
         }
     }
     pub fn get_variable(&self, reference: u64) -> Option<&Variable> {
         self.static_variables.get(&reference)
+    }
+}
+
+impl Hash for Class {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state)
     }
 }
 
@@ -100,5 +112,58 @@ impl Function {
 impl Display for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "function {}()", self.name)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Array {
+    pub(crate) reference: u64,
+    pub(crate) values: RefCell<Vec<Option<u64>>>,
+    pub(crate) value_type: ValueType,
+}
+
+impl Array {
+    pub fn new(reference: u64, value_type: ValueType) -> Self {
+        Self {
+            reference,
+            values: RefCell::new(vec![]),
+            value_type
+        }
+    }
+
+    pub fn assign(&self, index: usize, constant_pool_reference: u64) {
+        let len = self.values.borrow().len();
+        if index >= len {
+            for i in len..index + 1 {
+                self.values.borrow_mut().push(None);
+            }
+        }
+        self.values.borrow_mut()[index] = Some(constant_pool_reference);
+    }
+
+    pub fn get(&self, index: usize) -> Result<Option<u64>, RuntimeError> {
+        let len = self.values.borrow().len();
+        if index >= len {
+            return Err(RuntimeError::new_string(format!("Array index out of bounds: index {}, length {}", index, len)));
+        }
+        Ok(*self.values.borrow().get(index).unwrap())
+    }
+}
+
+
+impl Hash for Array {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.reference.hash(state);
+    }
+}
+
+impl Hashcode for Class {
+    fn hash_code(&self) -> u64 {
+        self.reference.unwrap()
+    }
+}
+impl Hashcode for Instance {
+    fn hash_code(&self) -> u64 {
+        self.reference
     }
 }

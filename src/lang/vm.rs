@@ -6,24 +6,26 @@ use std::hash::{Hash, Hasher};
 use std::cell::RefCell;
 use std::io::{Stdout, Write};
 use std::rc::Rc;
+use std::default::Default;
 
 use std::sync::Arc;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{Chunk, ClassFile};
-use crate::lang::class::{Class, Function, Instance};
+use crate::lang::class::{Array, Class, Function, Instance};
 
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::program::Program;
 
-use crate::lang::value::{Constant, Native, Value, ValueRef, Variable};
+use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable};
 
 pub const MAIN_FUNCTION: &str = "_main";
 
 
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
-    Variable(Variable),
-    Instance(Instance),
+    Variable(Rc<Variable>),
+    Instance(Rc<Instance>),
+    Array(Rc<Array>),
 }
 
 impl HeapEntry {
@@ -35,11 +37,21 @@ impl HeapEntry {
             _ => None
         }
     }
+
+    pub fn get_array(&self) -> Option<Rc<Array>> {
+        match self {
+            HeapEntry::Array(array) => Some(array.clone()),
+            _ => None
+        }
+    }
 }
 
+pub trait Hashcode {
+    fn hash_code(&self) -> u64;
+}
 
 pub struct Vm {
-    heap: RefCell<HashMap<u64, HeapEntry, NoopHasher>>,
+    heap: RefCell<HashMap<u64, RefCell<HashMap<u64, HeapEntry, NoopHasher>>, NoopHasher>>,
     constants_pool: RefCell<HashMap<u64, Constant, NoopHasher>>,
     classes_pool: RefCell<HashMap<String, Rc<Class>>>,
     native_pool: HashMap<u64, Native, NoopHasher>,
@@ -166,6 +178,31 @@ impl Vm {
         constant_pool_ref.get(&reference).cloned()
     }
 
+    pub fn get_value_ref_from_heap_entry(&self, owner_reference: u64, reference: u64) -> Result<ValueRef, RuntimeError> {
+        if self.heap.borrow().get(&owner_reference).is_none() {
+            return Err(RuntimeError::new_string(format!("Can't retrieve value from heap entry, because there is nothing on the heap for owner {}", owner_reference)));
+        }
+        let heap_ref = self.heap.borrow();
+        let owner_entries = heap_ref.get(&owner_reference).unwrap().borrow();
+        let heap_entry = owner_entries.get(&reference).ok_or_else(|| RuntimeError::new(format!("Can't find heap entry in VM HEAP pool for given reference ({}, {})", owner_reference, reference).as_str()))?;
+        if let Some(value_ref) = heap_entry.value_ref() {
+            Ok(value_ref)
+        } else {
+            Err(RuntimeError::new("Can't retrieve value from heap entry, because heap entry is not as variable"))
+        }
+    }
+
+    pub fn allocate_array_if_needed(&self, owner_reference: u64, reference: u64, value_type: ValueType) {
+        if self.heap.borrow().get(&owner_reference).is_none() {
+            self.heap.borrow_mut().insert(owner_reference, Default::default());
+        }
+        let heap_ref = self.heap.borrow();
+        let mut owner_entries = heap_ref.get(&owner_reference).unwrap().borrow_mut();
+        if owner_entries.get(&reference).is_none() {
+            owner_entries.insert(reference, HeapEntry::Array(Rc::new(Array::new(reference, value_type))));
+        }
+    }
+
     pub fn add_in_constant_pool(&self, value: Value) -> u64 {
         let constant = match value {
             Value::String(str) => Constant::String(str.unwrap()),
@@ -176,9 +213,11 @@ impl Vm {
         hash
     }
 
-    pub fn get_from_heap_pool(&self, reference: u64) -> Option<HeapEntry> {
-        let heap_ref = self.heap.borrow();
-        heap_ref.get(&reference).cloned()
+    pub(crate) fn array_from_heap_reference(&self, owner_reference: u64, reference: u64) -> Result<Rc<Array>, RuntimeError> {
+        if let Some(owner_entries) = self.heap.borrow().get(&owner_reference) {
+            return Ok(owner_entries.borrow().get(&reference).cloned().unwrap().get_array().unwrap());
+        }
+        Err(RuntimeError::new_string(format!("Array was not found from heap reference ({},{})", owner_reference, reference)))
     }
 
     pub fn get_from_native_pool(&self, reference: u64) -> Option<&Native> {

@@ -295,7 +295,7 @@ impl Chunk {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum OpCode {
     LoadConstant(u64),
     Pop,
@@ -308,6 +308,8 @@ pub enum OpCode {
     StoreStatic(u64),
     LoadStatic(u64),
     DefineFunction(u64),
+    ArrayStore(usize),
+    ArrayLoad(usize),
     CallNative { reference: u64, argument_count: usize },
     CallFunction { reference: u64, argument_count: usize },
     Equal,
@@ -330,7 +332,7 @@ pub enum OpCode {
     Command,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum Relational {
     GT,
     GTE,
@@ -338,7 +340,7 @@ pub enum Relational {
     LTE
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum NumericOperation {
     Subtract,
     Multiply,

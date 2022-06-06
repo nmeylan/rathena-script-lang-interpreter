@@ -329,7 +329,7 @@ scope_specifier
 variable
   : scope_specifier variable_name | variable_name;
 variable_name
-  : (Identifier | Menu) '$'?;
+  : (Identifier | Menu) '$'? ('[' Number ']')?;
 
 // Tokens
 LeftParen : '(';

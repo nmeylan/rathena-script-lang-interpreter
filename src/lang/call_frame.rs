@@ -1,14 +1,18 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::collections::hash_map::Iter;
+use std::hash::{Hash, Hasher};
 use crate::lang::noop_hasher::NoopHasher;
 use std::io::{Stdout, Write};
+use std::time::SystemTime;
 use crate::lang::chunk::{OpCode};
 use crate::lang::class::Function;
 use crate::lang::value::Variable;
+use crate::lang::vm::{Hashcode, Vm};
 
 #[derive(Debug)]
 pub struct CallFrame {
+    reference: Option<u64>,
     pub code: Vec<OpCode>,
     pub stack_pointer: usize,
     pub arguments_count: usize,
@@ -29,15 +33,19 @@ impl Display for CallFrame {
 
 impl CallFrame {
     pub fn new(function: &Function, stack_pointer: usize, arguments_count: usize) -> Self {
-        Self {
+        let mut call_frame = Self {
+            reference: None,
             code: function.code.clone(),
             stack_pointer,
             current_op_code: 0,
             name: function.name.clone(),
             locals: function.locals.clone(),
             arguments_count
-        }
+        };
+        call_frame.reference = Some(Vm::calculate_hash(&call_frame) & SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64);
+        call_frame
     }
+
 
     pub fn get_local(&self, reference: u64) -> Option<&Variable> {
         self.locals.get(&reference)
@@ -57,5 +65,19 @@ impl CallFrame {
         for ( reference, local) in self.locals.iter() {
             writeln!(out, "({}) {:?}", reference, local).unwrap();
         }
+    }
+}
+
+impl Hash for CallFrame {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+        self.code.hash(state);
+        self.locals.len().hash(state);
+    }
+}
+
+impl Hashcode for CallFrame {
+    fn hash_code(&self) -> u64 {
+        self.reference.unwrap()
     }
 }

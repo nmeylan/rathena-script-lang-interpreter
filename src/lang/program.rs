@@ -1,15 +1,19 @@
-use std::{io};
+use std::{io, mem};
+use std::borrow::Borrow;
+use std::env::var;
+use std::fmt::format;
+use std::hash::Hash;
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
 use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Native, ValueRef, ValueType};
-use crate::lang::vm::Vm;
+use crate::lang::vm::{Hashcode, HeapEntry, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
-use crate::lang::class::{Class, Function, Instance};
+use crate::lang::class::{Array, Class, Function, Instance};
 use crate::lang::stack::StackEntry::ConstantPoolReference;
 use crate::lang::vm::RuntimeError;
 
@@ -47,7 +51,6 @@ impl Program {
     pub fn run_function(&mut self, class: Rc<Class>, instance: Option<&Instance>, function: &Function) -> Result<(), RuntimeError> {
         let call_frame = CallFrame::new(function, 1, 0);
         self.run(call_frame, 0, class.as_ref(), instance).map(|_| ())
-
     }
 
     pub fn run(&mut self, call_frame: CallFrame, depth: usize, class: &Class, instance: Option<&Instance>) -> Result<CallFrameBreak, RuntimeError> {
@@ -78,18 +81,56 @@ impl Program {
                 OpCode::Pop => {}
                 OpCode::StoreGlobal(_) => {}
                 OpCode::LoadGlobal(_) => {}
+                OpCode::ArrayStore(arr_index) => {
+                    let array_ref_stack_entry = self.stack.pop()?;
+                    let value_ref_stack_entry = self.stack.pop()?;
+                    if let StackEntry::HeadReference((owner_reference, reference)) = array_ref_stack_entry {
+                        let array = self.vm.array_from_heap_reference(owner_reference, reference)?;
+                        array.assign(*arr_index, self.constant_ref_from_stack_entry(value_ref_stack_entry, &call_frame, class, instance)?)
+                    } else {
+                        return Err(RuntimeError::new("OpCode::ArrayStore - Expected stack entry to be a heap reference."));
+                    }
+                }
+                OpCode::ArrayLoad(arr_index) => {
+                    let array_ref_stack_entry = self.stack.pop()?;
+                    if let StackEntry::HeadReference((owner_reference, reference)) = array_ref_stack_entry {
+                        let array = self.vm.array_from_heap_reference(owner_reference, reference)?;
+                        let result = array.get(*arr_index)?;
+                        if result.is_none() {
+                            return Err(RuntimeError::new_string(format!("OpCode::ArrayLoad - Array value as not been initialized at index {}.", arr_index)));
+                        }
+                        self.stack.push(StackEntry::ConstantPoolReference(result.unwrap()));
+                    } else {
+                        return Err(RuntimeError::new("OpCode::ArrayLoad - Expected stack entry to be a heap reference."));
+                    }
+                }
                 OpCode::StoreLocal(reference) => {
-                    let stack_entry = self.stack.pop()?;
-                    let constant_reference = self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?;
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
-                    variable.set_value_ref(constant_reference);
+                    let reference = if variable.value_ref.borrow().is_array() {
+                        let array_ref = Vm::calculate_hash(variable);
+                        let owner_reference = call_frame.hash_code();
+                        self.vm.allocate_array_if_needed(owner_reference, array_ref, variable.value_ref.borrow().value_type.clone());
+                        self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
+                        array_ref
+                    } else {
+                        let stack_entry = self.stack.pop()?;
+                        self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?
+                    };
+                    variable.set_value_ref(reference);
                 }
                 OpCode::LoadLocal(reference) => {
-                    self.stack.push(StackEntry::LocalVariableReference(*reference));
+                    let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
+                    if variable.value_ref.borrow().is_array() {
+                        let array_ref = Vm::calculate_hash(variable);
+                        let owner_reference = call_frame.hash_code();
+                        self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
+                    } else {
+                        self.stack.push(StackEntry::LocalVariableReference(*reference));
+                    }
                 }
                 OpCode::StoreInstance(reference) => {
                     if instance.is_none() {
-                        return Err(RuntimeError::new("Can't store instance variable in a static(non-instance) context"))
+                        return Err(RuntimeError::new("Can't store instance variable in a static(non-instance) context"));
                     }
                     let stack_entry = self.stack.pop()?;
                     let constant_reference = self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?;
@@ -98,7 +139,7 @@ impl Program {
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
-                        return Err(RuntimeError::new("Can't load instance variable in a static(non-instance) context"))
+                        return Err(RuntimeError::new("Can't load instance variable in a static(non-instance) context"));
                     }
                     self.stack.push(StackEntry::InstanceVariableReference(*reference));
                 }
@@ -277,7 +318,7 @@ impl Program {
                             op_index = index - 1
                         }
                         CallFrameBreak::End => {
-                            return Ok(CallFrameBreak::End)
+                            return Ok(CallFrameBreak::End);
                         }
                     }
                 }
@@ -309,14 +350,14 @@ impl Program {
                     op_index += 1;
                 }
                 OpCode::End => {
-                    return Ok(CallFrameBreak::End)
+                    return Ok(CallFrameBreak::End);
                 }
             }
             op_index += 1;
         }
         writeln!(stdout, "*********   Final status ********").unwrap();
         writeln!(stdout, "=========   Thread   ========").unwrap();
-        self.dump(class,&mut stdout);
+        self.dump(class, &mut stdout);
         writeln!(stdout, "========= Call frame ========").unwrap();
         call_frame.dump(&mut stdout);
         stdout.flush().unwrap();
@@ -351,14 +392,6 @@ impl Program {
                 let constant = self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant.value())
             }
-            StackEntry::HeapReference(reference) => {
-                let heap_entry = self.vm.get_from_heap_pool(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find value in VM heap for given reference ({})", reference).as_str()))?;
-                if let Some(value_ref) = heap_entry.value_ref() {
-                    Ok(self.value_from_value_ref(&value_ref)?)
-                } else {
-                    Err(RuntimeError::new_string(format!("Heap entry {} does not contains value reference", reference)))
-                }
-            }
             StackEntry::LocalVariableReference(reference) => {
                 let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
@@ -373,7 +406,7 @@ impl Program {
             }
             StackEntry::InstanceVariableReference(reference) => {
                 if instance.is_none() {
-                    return Err(RuntimeError::new("Can't find instance variable in a static (non-instance) context."))
+                    return Err(RuntimeError::new("Can't find instance variable in a static (non-instance) context."));
                 }
                 let variable = instance.unwrap().variables.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
@@ -381,6 +414,9 @@ impl Program {
             StackEntry::StaticVariableReference(reference) => {
                 let variable = class.static_variables.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
+            }
+            StackEntry::HeadReference((owner_reference, reference)) => {
+                Ok(self.value_from_value_ref(&self.vm.get_value_ref_from_heap_entry(*owner_reference, *reference)?)?)
             }
         }
     }
@@ -425,7 +461,7 @@ impl Program {
             }
             StackEntry::InstanceVariableReference(reference) => {
                 if instance.is_none() {
-                    return Err(RuntimeError::new("constant_ref_from_stack_entry - Can't retrieve constant reference for instance variable in a static(non-instance) context"))
+                    return Err(RuntimeError::new("constant_ref_from_stack_entry - Can't retrieve constant reference for instance variable in a static(non-instance) context"));
                 }
                 let variable = instance.unwrap().get_variable(reference).ok_or_else(|| RuntimeError::new(format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
