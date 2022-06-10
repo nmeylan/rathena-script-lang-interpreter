@@ -23,7 +23,8 @@ impl NativeMethodHandler for VmHook {
                 match p {
                     Value::String(v) => v.as_ref().unwrap().clone(),
                     Value::Number(v) => format!("{}", v.as_ref().unwrap()),
-                    Value::Reference(references) => format!("{:?}", references)
+                    Value::Reference(v) => format!("{:?}", v),
+                    Value::ArrayEntry(v) => { format!("{}", "array entry: TODO")}
                 }
             }).collect::<Vec<String>>().join(" "));
             return;

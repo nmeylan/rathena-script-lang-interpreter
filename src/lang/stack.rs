@@ -13,7 +13,8 @@ pub enum StackEntry {
     FunctionReference(u64),
     InstanceVariableReference(u64),
     StaticVariableReference(u64),
-    HeadReference((u64, u64)) // owner reference, entry reference
+    HeapReference((u64, u64)), // owner reference, entry reference
+    ArrayHeapReference((u64, u64, usize)), // owner reference, entry reference
 }
 
 #[derive(Debug)]

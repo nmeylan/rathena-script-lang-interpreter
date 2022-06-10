@@ -1,6 +1,7 @@
-use std::{io};
+use std::{io, mem};
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
+use std::ops::Index;
 use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
@@ -75,7 +76,7 @@ impl Thread {
                 OpCode::ArrayStore(arr_index) => {
                     let array_ref_stack_entry = self.stack.pop()?;
                     let value_ref_stack_entry = self.stack.pop()?;
-                    if let StackEntry::HeadReference((owner_reference, reference)) = array_ref_stack_entry {
+                    if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         let array = self.vm.array_from_heap_reference(owner_reference, reference)?;
                         array.assign(*arr_index, self.constant_ref_from_stack_entry(value_ref_stack_entry, &call_frame, class, instance)?)
                     } else {
@@ -84,13 +85,8 @@ impl Thread {
                 }
                 OpCode::ArrayLoad(arr_index) => {
                     let array_ref_stack_entry = self.stack.pop()?;
-                    if let StackEntry::HeadReference((owner_reference, reference)) = array_ref_stack_entry {
-                        let array = self.vm.array_from_heap_reference(owner_reference, reference)?;
-                        let result = array.get(*arr_index)?;
-                        if result.is_none() {
-                            return Err(RuntimeError::new_string(format!("OpCode::ArrayLoad - Array value as not been initialized at index {}.", arr_index)));
-                        }
-                        self.stack.push(StackEntry::ConstantPoolReference(result.unwrap()));
+                    if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
+                        self.stack.push(StackEntry::ArrayHeapReference((owner_reference, reference, *arr_index)));
                     } else {
                         return Err(RuntimeError::new("OpCode::ArrayLoad - Expected stack entry to be a heap reference."));
                     }
@@ -346,7 +342,7 @@ impl Thread {
         where F: FnOnce() -> StackEntry {
         if variable.value_ref.borrow().is_array() {
             let array_ref = Vm::calculate_hash(variable);
-            self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
+            self.stack.push(StackEntry::HeapReference((owner_reference, array_ref)));
         } else {
             self.stack.push(apply_when_not_array());
         }
@@ -356,7 +352,7 @@ impl Thread {
         let reference = if variable.value_ref.borrow().is_array() {
             let array_ref = Vm::calculate_hash(variable);
             self.vm.allocate_array_if_needed(owner_reference, array_ref, variable.value_ref.borrow().value_type.clone());
-            self.stack.push(StackEntry::HeadReference((owner_reference, array_ref)));
+            self.stack.push(StackEntry::HeapReference((owner_reference, array_ref)));
             array_ref
         } else {
             let stack_entry = self.stack.pop()?;
@@ -380,10 +376,10 @@ impl Thread {
         } else {
             for (i, val) in self.stack.contents().iter().enumerate() {
                 write!(out, "    [{}]  {:?}", i, val).unwrap();
-                let maybe_value = self.value_from_stack_entry(val, call_frame, class, instance);
-                if maybe_value.is_ok() {
-                    write!(out, " - {}", maybe_value.unwrap()).unwrap();
-                }
+                // let maybe_value = self.value_from_stack_entry(val, call_frame, class, instance);
+                // if maybe_value.is_ok() {
+                //     write!(out, " - {}", maybe_value.unwrap()).unwrap();
+                // }
                 writeln!(out).unwrap();
             }
         }
@@ -418,8 +414,17 @@ impl Thread {
                 let variable = class.static_variables.get(reference).ok_or_else(|| RuntimeError::new(format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
-            StackEntry::HeadReference((owner_reference, reference)) => {
+            StackEntry::HeapReference((owner_reference, reference)) => {
                 Ok(Value::Reference(Some((Some(*owner_reference), *reference))))
+            }
+            StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
+                if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
+                    let array_value_ref = array.get(*index)?;
+                    let constant = self.vm.get_from_constant_pool(array_value_ref.unwrap()).unwrap();
+                    Ok(Value::ArrayEntry(Some((*owner_reference, *reference, constant, *index))))
+                } else {
+                    Err(RuntimeError::new("value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array"))
+                }
             }
         }
     }
@@ -505,6 +510,17 @@ impl Thread {
                 let len = array.len();
                 let reference = self.vm.add_in_constant_pool(Value::Number(Some(len as i32)));
                 self.stack.push(StackEntry::ConstantPoolReference(reference));
+            }
+            "cleararray" => {
+                for a in arguments.iter() {
+                    println!("{}", a);
+                }
+                let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
+                let value = arguments[1].clone();
+                let size = arguments[2].number_value();
+                let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
+                let value_reference = self.vm.add_in_constant_pool(value);
+                array.assign_multiple(*index, size as usize, value_reference);
             }
             _ => {
                 return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));

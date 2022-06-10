@@ -23,12 +23,9 @@ pub const MAIN_FUNCTION: &str = "_main";
 pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("getarraysize", Some(ValueType::Number)),
     ("getarg", None),
+    ("cleararray", None),
 ];
 
-// Few functions accept reference as arguments, but some native does, especially functions related to arrays.
-pub const NATIVE_FUNCTIONS_WITH_REFERENCE_ARGUMENTS: &[&str] = &[
-    "getarraysize"
-];
 
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
@@ -51,6 +48,13 @@ impl HeapEntry {
         match self {
             HeapEntry::Array(array) => Some(array.clone()),
             _ => None
+        }
+    }
+
+    pub fn is_array(&self) -> bool {
+        match self {
+            HeapEntry::Array(_) => true,
+            _ => false
         }
     }
 }
@@ -218,7 +222,8 @@ impl Vm {
         let constant = match value {
             Value::String(str) => Constant::String(str.unwrap()),
             Value::Number(num) => Constant::Number(num.unwrap()),
-            _ => return 0
+            Value::ArrayEntry(array_entry) => array_entry.unwrap().2,
+            _ => panic!("add_in_constant_pool not match")
         };
         let hash = Self::calculate_hash(&constant);
         self.constants_pool.borrow_mut().insert(hash, constant);
@@ -253,7 +258,11 @@ impl Vm {
     pub fn dump(&self, out: &mut Stdout) {
         writeln!(out, "========= Constants Pool =========").unwrap();
         for (reference, constant) in self.constants_pool.borrow().iter() {
-            writeln!(out, "({}) {}", reference, constant).unwrap();
+            match constant {
+                Constant::String(v) => writeln!(out, "({}) \"{}\"", reference, constant).unwrap(),
+                Constant::Number(v) => writeln!(out, "({}) {}", reference, constant).unwrap(),
+            }
+
         }
         writeln!(out, "========= Heap =========").unwrap();
         for (owner_reference, owner_entries) in self.heap.borrow().iter() {

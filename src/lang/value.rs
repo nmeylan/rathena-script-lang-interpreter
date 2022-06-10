@@ -1,9 +1,10 @@
 use std::cell::RefCell;
 
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::Deref;
+use antlr_rust::TidExt;
 
 pub type AccountId = String;
 pub type CharId = String;
@@ -23,13 +24,21 @@ impl Constant {
             Constant::Number(n) => Value::Number(Some(*n))
         }
     }
+
+    pub fn is_string(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&Constant::String(String::new()))
+    }
+    pub fn is_number(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&Constant::Number(0))
+    }
 }
 
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub enum Value {
     String(Option<String>),
     Number(Option<i32>),
-    Reference(Option<(Option<u64>, u64)>)
+    Reference(Option<(Option<u64>, u64)>),
+    ArrayEntry(Option<(u64, u64, Constant, usize)>),
 }
 
 impl Value {
@@ -43,10 +52,18 @@ impl Value {
         Value::Reference(None)
     }
     pub fn is_string(&self) -> bool {
-        mem::discriminant(self) == mem::discriminant(&Value::new_string())
+        match self {
+            Value::String(_) => true,
+            Value::ArrayEntry(v) => v.as_ref().unwrap().2.is_string(),
+            _ => false
+        }
     }
     pub fn is_number(&self) -> bool {
-        mem::discriminant(self) == mem::discriminant(&Value::new_number())
+        match self {
+            Value::Number(_) => true,
+            Value::ArrayEntry(v) => v.as_ref().unwrap().2.is_number(),
+            _ => false
+        }
     }
     pub fn is_reference(&self) -> bool {
         mem::discriminant(self) == mem::discriminant(&Value::new_reference())
@@ -55,21 +72,42 @@ impl Value {
         match self {
             Value::String(str) => str.as_ref().unwrap(),
             Value::Number(_) => { panic!("Value is a number not a string.") }
-            Value::Reference(_) => { panic!("Value is a reference not a string.")  }
+            Value::Reference(_) => { panic!("Value is a reference not a string.") }
+            Value::ArrayEntry(entry) => {
+                let (_, _, constant, _) = entry.as_ref().unwrap();
+                match constant {
+                    Constant::String(str) => str,
+                    Constant::Number(_) => panic!("Value is a number not a string.")
+                }
+            }
         }
     }
     pub fn number_value(&self) -> i32 {
         match self {
             Value::Number(num) => num.unwrap(),
             Value::String(_) => { panic!("Value is string not a number.") }
-            Value::Reference(_) => { panic!("Value is a reference not a number.")  }
+            Value::Reference(_) => { panic!("Value is a reference not a number.") }
+            Value::ArrayEntry(entry) => {
+                let (_, _, constant, _) = entry.as_ref().unwrap();
+                println!("constant {}", constant);
+                constant.value().number_value()
+            }
         }
     }
     pub fn reference_value(&self) -> (Option<u64>, u64) {
         match self {
-            Value::Number(_) => panic!("Value is number not a reference.") ,
+            Value::Number(_) => panic!("Value is number not a reference."),
             Value::String(_) => { panic!("Value is string not a reference.") }
-            Value::Reference(references) => references.unwrap()
+            Value::Reference(references) => references.unwrap(),
+            Value::ArrayEntry(_) => { panic!("Value is a array entry not a number.") }
+        }
+    }
+    pub fn array_entry_value(&self) -> &(u64, u64, Constant, usize) {
+        match self {
+            Value::Number(_) => panic!("Value is number not a array entry."),
+            Value::String(_) => { panic!("Value is string not a array entry.") }
+            Value::Reference(_) => { panic!("Value is reference not a array entry.") }
+            Value::ArrayEntry(entry) => { entry.as_ref().unwrap() }
         }
     }
 }
@@ -282,7 +320,11 @@ impl Display for Value {
         match self {
             Value::String(str) => { write!(f, "String({})", str.as_ref().map_or("<no value>".to_string(), |v| v.clone())) }
             Value::Number(num) => { write!(f, "{}", num.as_ref().map_or("<no value>".to_string(), |v| v.to_string())) }
-            Value::Reference(references) => write!(f, "{:?}", references)
+            Value::Reference(references) => write!(f, "{:?}", references),
+            Value::ArrayEntry(array_entry) => {
+                write!(f, "{}", array_entry.as_ref()
+                    .map_or("<no value>".to_string(), |(owner_reference, reference, constant, index)| format!("Array({},{})[{}] {}", owner_reference, reference, index, constant)))
+            }
         }
     }
 }

@@ -152,6 +152,12 @@ impl Array {
     pub fn len(&self) -> usize {
         self.values.borrow().len()
     }
+
+    pub fn assign_multiple(&self, start_index: usize, size: usize, value_reference: u64) {
+        for i in start_index..(start_index + size) {
+            self.assign(i, value_reference);
+        }
+    }
 }
 
 
