@@ -1,4 +1,3 @@
-
 use std::sync::Arc;
 use ragnarok_script_interpreter::lang::call_frame::CallFrame;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
@@ -12,18 +11,20 @@ pub struct Event {
     pub name: String,
     pub value: Value,
 }
+
 pub struct VmHook {
-    hook: Box<dyn Fn(Event)>
+    hook: Box<dyn Fn(Event)>,
 }
+
 impl NativeMethodHandler for VmHook {
     fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, program: &Thread, call_frame: &CallFrame) {
         if native.name.eq("println") {
             println!("{}", params.iter().map(|p| {
                 match p {
                     Value::String(v) => v.as_ref().unwrap().clone(),
-                    Value::Number(v) => format!("{}", v.as_ref().unwrap())
+                    Value::Number(v) => format!("{}", v.as_ref().unwrap()),
+                    Value::Reference(references) => format!("{:?}", references)
                 }
-
             }).collect::<Vec<String>>().join(" "));
             return;
         }
@@ -58,7 +59,7 @@ impl NativeMethodHandler for VmHook {
 }
 
 pub fn setup_vm<F>(hook: F) -> Arc<Vm> where F: 'static + Fn(Event) {
-    let vm_hook = VmHook{hook: Box::new(hook)};
+    let vm_hook = VmHook { hook: Box::new(hook) };
     let vm = Vm::new(Box::new(vm_hook));
     Arc::new(vm)
 }

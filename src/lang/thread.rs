@@ -419,7 +419,7 @@ impl Thread {
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::HeadReference((owner_reference, reference)) => {
-                Ok(self.value_from_value_ref(&self.vm.get_value_ref_from_heap_entry(*owner_reference, *reference)?)?)
+                Ok(Value::Reference(Some((Some(*owner_reference), *reference))))
             }
         }
     }
@@ -499,7 +499,12 @@ impl Thread {
                 }
             }
             "getarraysize" => {
-                println!("getarraysize")
+                let (maybe_owner_reference, reference) = arguments[0].reference_value();
+                let owner_reference = maybe_owner_reference.unwrap();
+                let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
+                let len = array.len();
+                let reference = self.vm.add_in_constant_pool(Value::Number(Some(len as i32)));
+                self.stack.push(StackEntry::ConstantPoolReference(reference));
             }
             _ => {
                 return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));

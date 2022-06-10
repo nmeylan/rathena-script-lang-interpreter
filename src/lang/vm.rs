@@ -104,15 +104,18 @@ impl Vm {
     pub fn new(native_method_handler: Box<dyn NativeMethodHandler>) -> Vm {
         let mut native_pool: HashMap<u64, Native, NoopHasher> = Default::default();
         native_pool.insert(Self::calculate_hash(&"print".to_string()), Native { name: "println".to_string() });
-        native_pool.insert(Self::calculate_hash(&"getarg".to_string()), Native { name: "getarg".to_string() });
         native_pool.insert(Self::calculate_hash(&"vm_dump_var".to_string()), Native { name: "vm_dump_var".to_string() });
         native_pool.insert(Self::calculate_hash(&"vm_dump_locals".to_string()), Native { name: "vm_dump_locals".to_string() });
+
+        for (native_name, _) in NATIVE_FUNCTIONS.iter() {
+            native_pool.insert(Self::calculate_hash(&native_name.to_string()), Native { name: native_name.to_string() });
+        }
         Self {
             heap: Default::default(),
             constants_pool: Default::default(),
             native_method_handler,
             native_pool,
-            classes_pool: RefCell::new(Default::default())
+            classes_pool: RefCell::new(Default::default()),
         }
     }
 
@@ -125,7 +128,6 @@ impl Vm {
             let class_rc = vm.register_class(class);
             Self::init_class(vm.clone(), class_rc).unwrap();
         }
-
     }
 
     pub fn execute_main_script(vm: Arc<Vm>) -> Result<(), RuntimeError> {
@@ -157,7 +159,7 @@ impl Vm {
             return program.run_function(class.clone(), None, init_function).map_err(|e| {
                 println!("{}", e);
                 e
-            })
+            });
         }
         Ok(())
     }
@@ -171,8 +173,8 @@ impl Vm {
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
         }
         let class_rc = Rc::new(Class::new(class.name.clone(), functions_pool,
-                                    class.static_variables.borrow().clone(),
-                                    class.instance_variables.borrow().clone()));
+                                          class.static_variables.borrow().clone(),
+                                          class.instance_variables.borrow().clone()));
         self.classes_pool.borrow_mut().insert(class.name.clone(), class_rc.clone());
         class_rc
     }
@@ -216,6 +218,7 @@ impl Vm {
         let constant = match value {
             Value::String(str) => Constant::String(str.unwrap()),
             Value::Number(num) => Constant::Number(num.unwrap()),
+            _ => return 0
         };
         let hash = Self::calculate_hash(&constant);
         self.constants_pool.borrow_mut().insert(hash, constant);

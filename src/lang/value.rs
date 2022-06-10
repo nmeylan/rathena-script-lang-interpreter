@@ -29,6 +29,7 @@ impl Constant {
 pub enum Value {
     String(Option<String>),
     Number(Option<i32>),
+    Reference(Option<(Option<u64>, u64)>)
 }
 
 impl Value {
@@ -38,22 +39,37 @@ impl Value {
     pub fn new_number() -> Value {
         Value::Number(None)
     }
+    pub fn new_reference() -> Value {
+        Value::Reference(None)
+    }
     pub fn is_string(&self) -> bool {
         mem::discriminant(self) == mem::discriminant(&Value::new_string())
     }
     pub fn is_number(&self) -> bool {
         mem::discriminant(self) == mem::discriminant(&Value::new_number())
     }
+    pub fn is_reference(&self) -> bool {
+        mem::discriminant(self) == mem::discriminant(&Value::new_reference())
+    }
     pub fn string_value(&self) -> &String {
         match self {
             Value::String(str) => str.as_ref().unwrap(),
             Value::Number(_) => { panic!("Value is a number not a string.") }
+            Value::Reference(_) => { panic!("Value is a reference not a string.")  }
         }
     }
     pub fn number_value(&self) -> i32 {
         match self {
             Value::Number(num) => num.unwrap(),
             Value::String(_) => { panic!("Value is string not a number.") }
+            Value::Reference(_) => { panic!("Value is a reference not a number.")  }
+        }
+    }
+    pub fn reference_value(&self) -> (Option<u64>, u64) {
+        match self {
+            Value::Number(_) => panic!("Value is number not a reference.") ,
+            Value::String(_) => { panic!("Value is string not a reference.") }
+            Value::Reference(references) => references.unwrap()
         }
     }
 }
@@ -266,6 +282,7 @@ impl Display for Value {
         match self {
             Value::String(str) => { write!(f, "String({})", str.as_ref().map_or("<no value>".to_string(), |v| v.clone())) }
             Value::Number(num) => { write!(f, "{}", num.as_ref().map_or("<no value>".to_string(), |v| v.to_string())) }
+            Value::Reference(references) => write!(f, "{:?}", references)
         }
     }
 }

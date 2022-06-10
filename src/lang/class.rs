@@ -148,6 +148,10 @@ impl Array {
         }
         Ok(*self.values.borrow().get(index).unwrap())
     }
+
+    pub fn len(&self) -> usize {
+        self.values.borrow().len()
+    }
 }
 
 

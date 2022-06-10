@@ -42,7 +42,7 @@ fn simple_array_assignment() {
 }
 
 #[test]
-fn getarraysize() {
+fn getarraysize_should_array_size() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
