@@ -102,7 +102,7 @@ fn setarray() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     setarray .@a$[0], "hello", "world";
-    setarray .@b[1], 1, 2, 3;
+    setarray(.@b[1], 1, 2, 3);
     vm_dump_var("a_len", getarraysize(.@a$));
     vm_dump_var("b_len", getarraysize(.@b));
     vm_dump_var("a0", .@a$[0]);

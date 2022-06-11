@@ -104,8 +104,8 @@ conditionalExpression
 assignmentExpression
     :   conditionalExpression
     |   assignmentLeftExpression assignmentOperator assignmentExpression
-    |   'set' assignmentLeftExpression ',' assignmentExpression
-    |   'setarray' assignmentLeftExpression ',' assignmentExpression (',' argumentExpressionList)?
+    |   'set' '('? assignmentLeftExpression ',' assignmentExpression ')'?
+    |   'setarray' '('? assignmentLeftExpression ',' assignmentExpression (',' argumentExpressionList)? ')'?
     |   Number // for
     ;
 assignmentLeftExpression

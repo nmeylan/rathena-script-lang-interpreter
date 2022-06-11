@@ -81,7 +81,7 @@ fn assignment_with_number_operation() {
     set .@c1, 4 * 2;
     set .@d1, 4 / 2;
     set .@e1, 3 % 2;
-    set .@i1, 4 * .@c;
+    set(.@i1, 4 * .@c + 2);
     set .@f1, 2 + 3 * 2;
     set .@g1, 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
     set .@h1, 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
@@ -92,6 +92,7 @@ fn assignment_with_number_operation() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
+    events.borrow().iter().for_each(|(k, v)| println!("{} = {}", k, v.value));
     assert_eq!(2, events.borrow().get("a").unwrap().value.number_value().clone());
     assert_eq!(3, events.borrow().get("b").unwrap().value.number_value().clone());
     assert_eq!(8, events.borrow().get("c").unwrap().value.number_value().clone());
@@ -106,7 +107,7 @@ fn assignment_with_number_operation() {
     assert_eq!(8, events.borrow().get("c1").unwrap().value.number_value().clone());
     assert_eq!(2, events.borrow().get("d1").unwrap().value.number_value().clone());
     assert_eq!(1, events.borrow().get("e1").unwrap().value.number_value().clone());
-    assert_eq!(32, events.borrow().get("i1").unwrap().value.number_value().clone());
+    assert_eq!(34, events.borrow().get("i1").unwrap().value.number_value().clone());
     assert_eq!(8, events.borrow().get("f1").unwrap().value.number_value().clone());
     assert_eq!(171, events.borrow().get("g1").unwrap().value.number_value().clone());
     assert_eq!(-1, events.borrow().get("h1").unwrap().value.number_value().clone());
