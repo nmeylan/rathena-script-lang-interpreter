@@ -178,3 +178,29 @@ fn deletearray() {
     assert_eq!(3, events.borrow().get("b_2_after_second_delete").unwrap().value.number_value().clone());
     assert_eq!(3, events.borrow().get("b_len_after_second_delete").unwrap().value.number_value().clone());
 }
+
+#[test]
+fn inarray() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@c$ = "toto";
+    setarray .@a$[0], "hello", "world", .@c$;
+    setarray .@b[1], 1, 2, 3, 4,5;
+    .@toto_index = inarray(.@a$[0], "toto");
+    .@four_index = inarray .@b, 4;
+    .@not_found_index = inarray .@b, 100;
+    vm_dump_var("toto_index", .@toto_index);
+    vm_dump_var("four_index", .@four_index);
+    vm_dump_var("not_found_index", .@not_found_index);
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(2, events.borrow().get("toto_index").unwrap().value.number_value().clone());
+    assert_eq!(4, events.borrow().get("four_index").unwrap().value.number_value().clone());
+    assert_eq!(-1, events.borrow().get("not_found_index").unwrap().value.number_value().clone());
+}

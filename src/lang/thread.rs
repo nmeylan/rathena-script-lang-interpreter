@@ -258,6 +258,7 @@ impl Thread {
                             .map_or(None, |reference| Some(reference)));
                     }
                     arguments.reverse();
+                    arguments_ref.reverse();
                     let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
                     if NATIVE_FUNCTIONS.iter().find(|(native, _)| native == &native_method.name.as_str()).is_some() {
                         self.handle_native_method(native_method, &call_frame, arguments, arguments_ref)?;
@@ -289,7 +290,7 @@ impl Thread {
                                 }
                             }
                             Value::ArrayEntry(array_entry) => {
-                                if let Some((owner_reference, reference, _ , index)) = array_entry {
+                                if let Some((owner_reference, reference, _, index)) = array_entry {
                                     self.stack.push(ArrayHeapReference((owner_reference, reference, index)));
                                 } else {
                                     panic!("CallFunction Value::ArrayEntry")
@@ -440,7 +441,7 @@ impl Thread {
             StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
                 if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
                     let array_value_ref = array.get(*index)?;
-                    let constant = if let Some(array_value_ref) =  array_value_ref {
+                    let constant = if let Some(array_value_ref) = array_value_ref {
                         Some(self.vm.get_from_constant_pool(array_value_ref).unwrap())
                     } else {
                         None
@@ -541,14 +542,14 @@ impl Thread {
                 let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
                 let value_reference = self.vm.add_in_constant_pool(value);
                 array.assign_multiple(*index, size as usize, value_reference);
-            },
+            }
             "setarray" => {
                 let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
                 let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
                 // first parameters of setarray is already assigned to index, and thus is not part of arguments.
                 // so we assign arguments starting at index + 1;
                 let mut index = index + 1; // setarray .@a[0], assignment, arguments.
-                for array_reference in arguments_ref.iter().rev() { // arguments are in reverse order
+                for array_reference in arguments_ref.iter() { // arguments are in reverse order
                     if array_reference.is_some() {
                         array.assign(index, array_reference.unwrap());
                         index += 1;
@@ -561,12 +562,25 @@ impl Thread {
                 let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
                 let reference = array.get(index)?;
                 self.stack.push(StackEntry::ConstantPoolReference(reference.unwrap()));
-            },
+            }
             "deletearray" => {
                 let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
                 let size = arguments[1].number_value() as usize;
                 let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
                 array.remove(*index, size);
+            }
+            "inarray" => {
+                let (owner_reference, reference) = if arguments[0].is_reference() {
+                    arguments[0].reference_value()
+                } else {
+                    let (owner_reference, reference, _, _) = arguments[0].array_entry_value();
+                    (*owner_reference, *reference)
+                };
+                let reference_to_find = arguments_ref[1].unwrap();
+                let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
+                let index = array.index_of(reference_to_find);
+                let index_constant_ref = self.vm.add_in_constant_pool(Value::Number(Some(index as i32)));
+                self.stack.push(StackEntry::ConstantPoolReference(index_constant_ref));
             }
             _ => {
                 return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));

@@ -154,6 +154,12 @@ impl Array {
         self.values.borrow_mut().drain(index..count.min(len));
     }
 
+    pub fn index_of(&self, reference: u64) -> isize {
+        self.values.borrow().iter().for_each(|v| println!("{:?}", v));
+        self.values.borrow().iter().position(|entry_ref| entry_ref.is_some() && entry_ref.unwrap() == reference)
+            .map_or(-1, |index| index as isize)
+    }
+
     pub fn len(&self) -> usize {
         self.values.borrow().len()
     }

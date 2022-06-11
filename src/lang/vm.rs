@@ -27,6 +27,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("setarray", None),
     ("getelementofarray", None),
     ("deletearray", None),
+    ("inarray", None),
 ];
 
 
