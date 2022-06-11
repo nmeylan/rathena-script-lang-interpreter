@@ -721,22 +721,25 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
         let maybe_left = ctx.assignmentLeftExpression();
         if let Some(left) = maybe_left {
-            let assignment_operator = &ctx.assignmentOperator().unwrap();
             self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
-            // Convert a += 1; into a = a + 1;
-            if assignment_operator.PlusEqual().is_some() {
-                if left.variable().is_some() {
-                    let (variable, index) = Self::build_variable(&left.variable().unwrap());
-                    self.load_variable(&variable, index, ctx);
+            if ctx.assignmentOperator().is_some() {
+                let assignment_operator = &ctx.assignmentOperator().unwrap();
+                // Convert a += 1; into a = a + 1;
+                if assignment_operator.PlusEqual().is_some() {
+                    if left.variable().is_some() {
+                        let (variable, index) = Self::build_variable(&left.variable().unwrap());
+                        self.load_variable(&variable, index, ctx);
+                    }
+                    self.current_chunk().emit_op_code(Add);
+                } else if assignment_operator.MinusEqual().is_some() {
+                    if left.variable().is_some() {
+                        let (variable, index) = Self::build_variable(&left.variable().unwrap());
+                        self.load_variable(&variable, index, ctx);
+                    }
+                    self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
                 }
-                self.current_chunk().emit_op_code(Add);
-            } else if assignment_operator.MinusEqual().is_some() {
-                if left.variable().is_some() {
-                    let (variable, index) = Self::build_variable(&left.variable().unwrap());
-                    self.load_variable(&variable, index, ctx);
-                }
-                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
             }
+
             self.visit_assignmentLeftExpression(&left);
         } else {
             self.visit_children(ctx);

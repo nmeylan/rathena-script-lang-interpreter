@@ -14,7 +14,10 @@ primaryExpression
     ;
 
 functionCallExpression
-    : Identifier '(' argumentExpressionList? ')' | 'callfunc' '('? String ( ',' argumentExpressionList)? ')' | 'callfunc' String ( ',' argumentExpressionList)?;
+    : Identifier '(' argumentExpressionList? ')'
+    | 'callfunc' '('? String ( ',' argumentExpressionList)? ')'
+    | 'callfunc' String ( ',' argumentExpressionList)?
+    ;
 
 postfixExpression
     : functionCallExpression | primaryExpression ('[' expression ']' | ('++' | '--') )*
@@ -101,6 +104,7 @@ conditionalExpression
 assignmentExpression
     :   conditionalExpression
     |   assignmentLeftExpression assignmentOperator assignmentExpression
+    |   'set' assignmentLeftExpression ',' assignmentExpression
     |   Number // for
     ;
 assignmentLeftExpression
@@ -397,7 +401,6 @@ Switch : 'switch';
 Case : 'case';
 Function : 'function';
 Break : 'break';
-SetArray: 'setarray';
 Callfunc: 'callfunc';
 Close: 'close';
 Close2: 'close2';

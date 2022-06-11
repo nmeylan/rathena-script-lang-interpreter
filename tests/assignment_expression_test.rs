@@ -76,6 +76,15 @@ fn assignment_with_number_operation() {
     .@f = 2 + 3 * 2;
     .@g = 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
     .@h = 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
+    set .@a1, 1 + 1;
+    set .@b1, 4 - 1;
+    set .@c1, 4 * 2;
+    set .@d1, 4 / 2;
+    set .@e1, 3 % 2;
+    set .@i1, 4 * .@c;
+    set .@f1, 2 + 3 * 2;
+    set .@g1, 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
+    set .@h1, 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
     vm_dump_locals();"#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
@@ -92,6 +101,15 @@ fn assignment_with_number_operation() {
     assert_eq!(8, events.borrow().get("f").unwrap().value.number_value().clone());
     assert_eq!(171, events.borrow().get("g").unwrap().value.number_value().clone());
     assert_eq!(-1, events.borrow().get("h").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("a1").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("b1").unwrap().value.number_value().clone());
+    assert_eq!(8, events.borrow().get("c1").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("d1").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("e1").unwrap().value.number_value().clone());
+    assert_eq!(32, events.borrow().get("i1").unwrap().value.number_value().clone());
+    assert_eq!(8, events.borrow().get("f1").unwrap().value.number_value().clone());
+    assert_eq!(171, events.borrow().get("g1").unwrap().value.number_value().clone());
+    assert_eq!(-1, events.borrow().get("h1").unwrap().value.number_value().clone());
 }
 
 #[test]
