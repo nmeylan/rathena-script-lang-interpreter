@@ -102,13 +102,13 @@ use std::ops::{Deref, DerefMut};
 	pub const Case:isize=71; 
 	pub const Function:isize=72; 
 	pub const Break:isize=73; 
-	pub const SetArray:isize=74; 
-	pub const Callfunc:isize=75; 
-	pub const Close:isize=76; 
-	pub const Close2:isize=77; 
-	pub const Next:isize=78; 
-	pub const Menu:isize=79; 
-	pub const Eof:isize=80; 
+	pub const Callfunc:isize=74; 
+	pub const Close:isize=75; 
+	pub const Close2:isize=76; 
+	pub const Next:isize=77; 
+	pub const Menu:isize=78; 
+	pub const Eof:isize=79; 
+	pub const Setarray:isize=80; 
 	pub const Identifier:isize=81; 
 	pub const Label:isize=82; 
 	pub const String:isize=83; 
@@ -136,8 +136,8 @@ use std::ops::{Deref, DerefMut};
 		"LeftCaret", "DoubleLeftCaret", "LeftCaretEqual", "RightCaret", "DoubleRightCaret", 
 		"RightCaretEqual", "PlusEqual", "MinusEqual", "MultiplyEqual", "DivideEqual", 
 		"PercentEqual", "If", "Else", "End", "Set", "For", "While", "Do", "Goto", 
-		"Return", "Switch", "Case", "Function", "Break", "SetArray", "Callfunc", 
-		"Close", "Close2", "Next", "Menu", "Eof", "Identifier", "Label", "String", 
+		"Return", "Switch", "Case", "Function", "Break", "Callfunc", "Close", 
+		"Close2", "Next", "Menu", "Eof", "Setarray", "Identifier", "Label", "String", 
 		"Escape", "Digit", "Letter", "Number", "Whitespace", "Newline", "BlockComment", 
 		"LineComment"
 	];
@@ -157,8 +157,8 @@ use std::ops::{Deref, DerefMut};
 		Some("'*='"), Some("'/='"), Some("'%='"), Some("'if'"), Some("'else'"), 
 		Some("'end'"), Some("'set'"), Some("'for'"), Some("'while'"), Some("'do'"), 
 		Some("'goto'"), Some("'return'"), Some("'switch'"), Some("'case'"), Some("'function'"), 
-		Some("'break'"), Some("'setarray'"), Some("'callfunc'"), Some("'close'"), 
-		Some("'close2'"), Some("'next'"), Some("'menu'"), Some("'eof'")
+		Some("'break'"), Some("'callfunc'"), Some("'close'"), Some("'close2'"), 
+		Some("'next'"), Some("'menu'"), Some("'eof'"), Some("'setarray'")
 	];
 	pub const _SYMBOLIC_NAMES: [Option<&'static str>;89]  = [
 		None, None, None, None, None, None, None, None, None, None, None, None, 
@@ -175,9 +175,9 @@ use std::ops::{Deref, DerefMut};
 		Some("RightCaretEqual"), Some("PlusEqual"), Some("MinusEqual"), Some("MultiplyEqual"), 
 		Some("DivideEqual"), Some("PercentEqual"), Some("If"), Some("Else"), Some("End"), 
 		Some("Set"), Some("For"), Some("While"), Some("Do"), Some("Goto"), Some("Return"), 
-		Some("Switch"), Some("Case"), Some("Function"), Some("Break"), Some("SetArray"), 
-		Some("Callfunc"), Some("Close"), Some("Close2"), Some("Next"), Some("Menu"), 
-		Some("Eof"), Some("Identifier"), Some("Label"), Some("String"), Some("Number"), 
+		Some("Switch"), Some("Case"), Some("Function"), Some("Break"), Some("Callfunc"), 
+		Some("Close"), Some("Close2"), Some("Next"), Some("Menu"), Some("Eof"), 
+		Some("Setarray"), Some("Identifier"), Some("Label"), Some("String"), Some("Number"), 
 		Some("Whitespace"), Some("Newline"), Some("BlockComment"), Some("LineComment")
 	];
 	lazy_static!{
@@ -369,10 +369,10 @@ impl<'input, Input:CharStream<From<'input> >> TokenSource<'input> for RathenaScr
 		\x49\x03\x49\x03\x49\x03\x49\x03\x49\x03\x49\x03\x49\x03\x49\x03\x49\x03\
 		\x4a\x03\x4a\x03\x4a\x03\x4a\x03\x4a\x03\x4a\x03\x4b\x03\x4b\x03\x4b\x03\
 		\x4b\x03\x4b\x03\x4b\x03\x4b\x03\x4b\x03\x4b\x03\x4c\x03\x4c\x03\x4c\x03\
-		\x4c\x03\x4c\x03\x4c\x03\x4c\x03\x4c\x03\x4c\x03\x4d\x03\x4d\x03\x4d\x03\
-		\x4d\x03\x4d\x03\x4d\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\
-		\x4e\x03\x4f\x03\x4f\x03\x4f\x03\x4f\x03\x4f\x03\x50\x03\x50\x03\x50\x03\
-		\x50\x03\x50\x03\x51\x03\x51\x03\x51\x03\x51\x03\x52\x03\x52\x03\x52\x07\
+		\x4c\x03\x4c\x03\x4c\x03\x4d\x03\x4d\x03\x4d\x03\x4d\x03\x4d\x03\x4d\x03\
+		\x4d\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4f\x03\x4f\x03\x4f\x03\
+		\x4f\x03\x4f\x03\x50\x03\x50\x03\x50\x03\x50\x03\x51\x03\x51\x03\x51\x03\
+		\x51\x03\x51\x03\x51\x03\x51\x03\x51\x03\x51\x03\x52\x03\x52\x03\x52\x07\
 		\x52\u{1de}\x0a\x52\x0c\x52\x0e\x52\u{1e1}\x0b\x52\x03\x53\x03\x53\x03\
 		\x53\x03\x54\x03\x54\x03\x54\x03\x54\x07\x54\u{1ea}\x0a\x54\x0c\x54\x0e\
 		\x54\u{1ed}\x0b\x54\x03\x54\x03\x54\x03\x55\x03\x55\x03\x55\x03\x56\x03\
@@ -454,8 +454,8 @@ impl<'input, Input:CharStream<From<'input> >> TokenSource<'input> for RathenaScr
 		\u{186}\x03\x02\x02\x02\u{8b}\u{18b}\x03\x02\x02\x02\u{8d}\u{192}\x03\x02\
 		\x02\x02\u{8f}\u{199}\x03\x02\x02\x02\u{91}\u{19e}\x03\x02\x02\x02\u{93}\
 		\u{1a7}\x03\x02\x02\x02\u{95}\u{1ad}\x03\x02\x02\x02\u{97}\u{1b6}\x03\x02\
-		\x02\x02\u{99}\u{1bf}\x03\x02\x02\x02\u{9b}\u{1c5}\x03\x02\x02\x02\u{9d}\
-		\u{1cc}\x03\x02\x02\x02\u{9f}\u{1d1}\x03\x02\x02\x02\u{a1}\u{1d6}\x03\x02\
+		\x02\x02\u{99}\u{1bc}\x03\x02\x02\x02\u{9b}\u{1c3}\x03\x02\x02\x02\u{9d}\
+		\u{1c8}\x03\x02\x02\x02\u{9f}\u{1cd}\x03\x02\x02\x02\u{a1}\u{1d1}\x03\x02\
 		\x02\x02\u{a3}\u{1da}\x03\x02\x02\x02\u{a5}\u{1e2}\x03\x02\x02\x02\u{a7}\
 		\u{1e5}\x03\x02\x02\x02\u{a9}\u{1f0}\x03\x02\x02\x02\u{ab}\u{1f3}\x03\x02\
 		\x02\x02\u{ad}\u{1f5}\x03\x02\x02\x02\u{af}\u{1f8}\x03\x02\x02\x02\u{b1}\
@@ -558,25 +558,25 @@ impl<'input, Input:CharStream<From<'input> >> TokenSource<'input> for RathenaScr
 		\u{92}\x03\x02\x02\x02\u{1a7}\u{1a8}\x07\x64\x02\x02\u{1a8}\u{1a9}\x07\
 		\x74\x02\x02\u{1a9}\u{1aa}\x07\x67\x02\x02\u{1aa}\u{1ab}\x07\x63\x02\x02\
 		\u{1ab}\u{1ac}\x07\x6d\x02\x02\u{1ac}\u{94}\x03\x02\x02\x02\u{1ad}\u{1ae}\
-		\x07\x75\x02\x02\u{1ae}\u{1af}\x07\x67\x02\x02\u{1af}\u{1b0}\x07\x76\x02\
-		\x02\u{1b0}\u{1b1}\x07\x63\x02\x02\u{1b1}\u{1b2}\x07\x74\x02\x02\u{1b2}\
-		\u{1b3}\x07\x74\x02\x02\u{1b3}\u{1b4}\x07\x63\x02\x02\u{1b4}\u{1b5}\x07\
-		\x7b\x02\x02\u{1b5}\u{96}\x03\x02\x02\x02\u{1b6}\u{1b7}\x07\x65\x02\x02\
-		\u{1b7}\u{1b8}\x07\x63\x02\x02\u{1b8}\u{1b9}\x07\x6e\x02\x02\u{1b9}\u{1ba}\
-		\x07\x6e\x02\x02\u{1ba}\u{1bb}\x07\x68\x02\x02\u{1bb}\u{1bc}\x07\x77\x02\
-		\x02\u{1bc}\u{1bd}\x07\x70\x02\x02\u{1bd}\u{1be}\x07\x65\x02\x02\u{1be}\
-		\u{98}\x03\x02\x02\x02\u{1bf}\u{1c0}\x07\x65\x02\x02\u{1c0}\u{1c1}\x07\
-		\x6e\x02\x02\u{1c1}\u{1c2}\x07\x71\x02\x02\u{1c2}\u{1c3}\x07\x75\x02\x02\
-		\u{1c3}\u{1c4}\x07\x67\x02\x02\u{1c4}\u{9a}\x03\x02\x02\x02\u{1c5}\u{1c6}\
-		\x07\x65\x02\x02\u{1c6}\u{1c7}\x07\x6e\x02\x02\u{1c7}\u{1c8}\x07\x71\x02\
-		\x02\u{1c8}\u{1c9}\x07\x75\x02\x02\u{1c9}\u{1ca}\x07\x67\x02\x02\u{1ca}\
-		\u{1cb}\x07\x34\x02\x02\u{1cb}\u{9c}\x03\x02\x02\x02\u{1cc}\u{1cd}\x07\
-		\x70\x02\x02\u{1cd}\u{1ce}\x07\x67\x02\x02\u{1ce}\u{1cf}\x07\x7a\x02\x02\
-		\u{1cf}\u{1d0}\x07\x76\x02\x02\u{1d0}\u{9e}\x03\x02\x02\x02\u{1d1}\u{1d2}\
-		\x07\x6f\x02\x02\u{1d2}\u{1d3}\x07\x67\x02\x02\u{1d3}\u{1d4}\x07\x70\x02\
-		\x02\u{1d4}\u{1d5}\x07\x77\x02\x02\u{1d5}\u{a0}\x03\x02\x02\x02\u{1d6}\
-		\u{1d7}\x07\x67\x02\x02\u{1d7}\u{1d8}\x07\x71\x02\x02\u{1d8}\u{1d9}\x07\
-		\x68\x02\x02\u{1d9}\u{a2}\x03\x02\x02\x02\u{1da}\u{1df}\x05\u{ad}\x57\x02\
+		\x07\x65\x02\x02\u{1ae}\u{1af}\x07\x63\x02\x02\u{1af}\u{1b0}\x07\x6e\x02\
+		\x02\u{1b0}\u{1b1}\x07\x6e\x02\x02\u{1b1}\u{1b2}\x07\x68\x02\x02\u{1b2}\
+		\u{1b3}\x07\x77\x02\x02\u{1b3}\u{1b4}\x07\x70\x02\x02\u{1b4}\u{1b5}\x07\
+		\x65\x02\x02\u{1b5}\u{96}\x03\x02\x02\x02\u{1b6}\u{1b7}\x07\x65\x02\x02\
+		\u{1b7}\u{1b8}\x07\x6e\x02\x02\u{1b8}\u{1b9}\x07\x71\x02\x02\u{1b9}\u{1ba}\
+		\x07\x75\x02\x02\u{1ba}\u{1bb}\x07\x67\x02\x02\u{1bb}\u{98}\x03\x02\x02\
+		\x02\u{1bc}\u{1bd}\x07\x65\x02\x02\u{1bd}\u{1be}\x07\x6e\x02\x02\u{1be}\
+		\u{1bf}\x07\x71\x02\x02\u{1bf}\u{1c0}\x07\x75\x02\x02\u{1c0}\u{1c1}\x07\
+		\x67\x02\x02\u{1c1}\u{1c2}\x07\x34\x02\x02\u{1c2}\u{9a}\x03\x02\x02\x02\
+		\u{1c3}\u{1c4}\x07\x70\x02\x02\u{1c4}\u{1c5}\x07\x67\x02\x02\u{1c5}\u{1c6}\
+		\x07\x7a\x02\x02\u{1c6}\u{1c7}\x07\x76\x02\x02\u{1c7}\u{9c}\x03\x02\x02\
+		\x02\u{1c8}\u{1c9}\x07\x6f\x02\x02\u{1c9}\u{1ca}\x07\x67\x02\x02\u{1ca}\
+		\u{1cb}\x07\x70\x02\x02\u{1cb}\u{1cc}\x07\x77\x02\x02\u{1cc}\u{9e}\x03\
+		\x02\x02\x02\u{1cd}\u{1ce}\x07\x67\x02\x02\u{1ce}\u{1cf}\x07\x71\x02\x02\
+		\u{1cf}\u{1d0}\x07\x68\x02\x02\u{1d0}\u{a0}\x03\x02\x02\x02\u{1d1}\u{1d2}\
+		\x07\x75\x02\x02\u{1d2}\u{1d3}\x07\x67\x02\x02\u{1d3}\u{1d4}\x07\x76\x02\
+		\x02\u{1d4}\u{1d5}\x07\x63\x02\x02\u{1d5}\u{1d6}\x07\x74\x02\x02\u{1d6}\
+		\u{1d7}\x07\x74\x02\x02\u{1d7}\u{1d8}\x07\x63\x02\x02\u{1d8}\u{1d9}\x07\
+		\x7b\x02\x02\u{1d9}\u{a2}\x03\x02\x02\x02\u{1da}\u{1df}\x05\u{ad}\x57\x02\
 		\u{1db}\u{1de}\x05\u{ad}\x57\x02\u{1dc}\u{1de}\x05\u{ab}\x56\x02\u{1dd}\
 		\u{1db}\x03\x02\x02\x02\u{1dd}\u{1dc}\x03\x02\x02\x02\u{1de}\u{1e1}\x03\
 		\x02\x02\x02\u{1df}\u{1dd}\x03\x02\x02\x02\u{1df}\u{1e0}\x03\x02\x02\x02\

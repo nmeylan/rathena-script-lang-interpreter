@@ -105,6 +105,7 @@ assignmentExpression
     :   conditionalExpression
     |   assignmentLeftExpression assignmentOperator assignmentExpression
     |   'set' assignmentLeftExpression ',' assignmentExpression
+    |   'setarray' assignmentLeftExpression ',' assignmentExpression (',' argumentExpressionList)?
     |   Number // for
     ;
 assignmentLeftExpression
@@ -407,6 +408,7 @@ Close2: 'close2';
 Next: 'next';
 Menu: 'menu';
 Eof : 'eof';
+Setarray: 'setarray';
 
 // Literal
 Identifier : Letter (Letter | Digit)*;

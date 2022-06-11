@@ -524,7 +524,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             return;
         };
         ;
-        if let Some(native)  = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
+        if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
             if native.name == "getarg" && argument_count > 1 {
                 // do not remove default value type, so we can check at compile time that default type match variable type
                 self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
@@ -721,26 +721,37 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
         let maybe_left = ctx.assignmentLeftExpression();
         if let Some(left) = maybe_left {
-            self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
-            if ctx.assignmentOperator().is_some() {
-                let assignment_operator = &ctx.assignmentOperator().unwrap();
-                // Convert a += 1; into a = a + 1;
-                if assignment_operator.PlusEqual().is_some() {
-                    if left.variable().is_some() {
-                        let (variable, index) = Self::build_variable(&left.variable().unwrap());
-                        self.load_variable(&variable, index, ctx);
-                    }
-                    self.current_chunk().emit_op_code(Add);
-                } else if assignment_operator.MinusEqual().is_some() {
-                    if left.variable().is_some() {
-                        let (variable, index) = Self::build_variable(&left.variable().unwrap());
-                        self.load_variable(&variable, index, ctx);
-                    }
-                    self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
+            if ctx.Setarray().is_some() {
+                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+                self.visit_assignmentLeftExpression(&left);
+                let argument_count = ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as usize;
+                if argument_count > 0 {
+                    self.visit_variable(left.variable().as_ref().unwrap());
+                    self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
+                    self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 });
                 }
+            } else {
+                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+                if ctx.assignmentOperator().is_some() {
+                    let assignment_operator = &ctx.assignmentOperator().unwrap();
+                    // Convert a += 1; into a = a + 1;
+                    if assignment_operator.PlusEqual().is_some() {
+                        if left.variable().is_some() {
+                            let (variable, index) = Self::build_variable(&left.variable().unwrap());
+                            self.load_variable(&variable, index, ctx);
+                        }
+                        self.current_chunk().emit_op_code(Add);
+                    } else if assignment_operator.MinusEqual().is_some() {
+                        if left.variable().is_some() {
+                            let (variable, index) = Self::build_variable(&left.variable().unwrap());
+                            self.load_variable(&variable, index, ctx);
+                        }
+                        self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
+                    }
+                }
+                self.visit_assignmentLeftExpression(&left);
             }
 
-            self.visit_assignmentLeftExpression(&left);
         } else {
             self.visit_children(ctx);
         }

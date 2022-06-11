@@ -78,7 +78,7 @@ impl Thread {
                     let value_ref_stack_entry = self.stack.pop()?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         let array = self.vm.array_from_heap_reference(owner_reference, reference)?;
-                        array.assign(*arr_index, self.constant_ref_from_stack_entry(value_ref_stack_entry, &call_frame, class, instance)?)
+                        array.assign(*arr_index, self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance)?)
                     } else {
                         return Err(RuntimeError::new("OpCode::ArrayStore - Expected stack entry to be a heap reference."));
                     }
@@ -250,15 +250,17 @@ impl Thread {
                 }
                 OpCode::CallNative { argument_count, reference } => {
                     let mut arguments: Vec<Value> = vec![];
-                    //TODO allow heap reference access
+                    let mut arguments_ref: Vec<Option<u64>> = vec![];
                     for _ in 0..*argument_count {
                         let stack_entry = self.stack.pop()?;
                         arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?);
+                        arguments_ref.push(self.constant_ref_from_stack_entry(&stack_entry, &call_frame, class, instance)
+                            .map_or(None, |reference| Some(reference)));
                     }
                     arguments.reverse();
                     let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
                     if NATIVE_FUNCTIONS.iter().find(|(native, _)| native == &native_method.name.as_str()).is_some() {
-                        self.handle_native_method(native_method, &call_frame, arguments)?;
+                        self.handle_native_method(native_method, &call_frame, arguments, arguments_ref)?;
                     } else {
                         self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
                     }
@@ -356,7 +358,7 @@ impl Thread {
             array_ref
         } else {
             let stack_entry = self.stack.pop()?;
-            self.constant_ref_from_stack_entry(stack_entry, &call_frame, class, instance)?
+            self.constant_ref_from_stack_entry(&stack_entry, &call_frame, class, instance)?
         };
         Ok(variable.set_value_ref(reference))
     }
@@ -420,7 +422,7 @@ impl Thread {
             StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
                 if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
                     let array_value_ref = array.get(*index)?;
-                    let constant = self.vm.get_from_constant_pool(array_value_ref.unwrap()).unwrap();
+                    let constant = self.vm.get_from_constant_pool(array_value_ref).unwrap();
                     Ok(Value::ArrayEntry(Some((*owner_reference, *reference, constant, *index))))
                 } else {
                     Err(RuntimeError::new("value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array"))
@@ -455,14 +457,14 @@ impl Thread {
         }
     }
 
-    fn constant_ref_from_stack_entry(&self, stack_entry: StackEntry, call_frame: &CallFrame, class: &Class, instance: Option<&Instance>) -> Result<u64, RuntimeError> {
+    fn constant_ref_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: Option<&Instance>) -> Result<u64, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
-                self.vm.get_from_constant_pool(reference).ok_or_else(|| RuntimeError::new(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
-                Ok(reference)
+                self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                Ok(*reference)
             }
             StackEntry::LocalVariableReference(reference) => {
-                let variable = call_frame.get_local(reference).ok_or_else(|| RuntimeError::new(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
+                let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)
@@ -471,13 +473,13 @@ impl Thread {
                 if instance.is_none() {
                     return Err(RuntimeError::new("constant_ref_from_stack_entry - Can't retrieve constant reference for instance variable in a static(non-instance) context"));
                 }
-                let variable = instance.unwrap().get_variable(reference).ok_or_else(|| RuntimeError::new(format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
+                let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)
             }
             StackEntry::StaticVariableReference(reference) => {
-                let variable = class.get_variable(reference).ok_or_else(|| RuntimeError::new(format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
+                let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)
@@ -486,7 +488,7 @@ impl Thread {
         }
     }
 
-    fn handle_native_method(&self, native: &Native, call_frame: &CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+    fn handle_native_method(&self, native: &Native, call_frame: &CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
         match native.name.as_str() {
             "getarg" => {
                 let index = arguments[0].number_value() as usize;
@@ -512,15 +514,26 @@ impl Thread {
                 self.stack.push(StackEntry::ConstantPoolReference(reference));
             }
             "cleararray" => {
-                for a in arguments.iter() {
-                    println!("{}", a);
-                }
                 let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
                 let value = arguments[1].clone();
                 let size = arguments[2].number_value();
                 let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
                 let value_reference = self.vm.add_in_constant_pool(value);
                 array.assign_multiple(*index, size as usize, value_reference);
+            },
+            "setarray" => {
+                let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
+                let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
+                // first parameters of setarray is already assigned to index, and thus is not part of arguments.
+                // so we assign arguments starting at index + 1;
+                let mut index = index + 1; // setarray .@a[0], assignment, arguments.
+                for array_reference in arguments_ref.iter().rev() { // arguments are in reverse order
+                    if array_reference.is_some() {
+                        array.assign(index, array_reference.unwrap());
+                        index += 1;
+                    }
+                }
+
             }
             _ => {
                 return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));

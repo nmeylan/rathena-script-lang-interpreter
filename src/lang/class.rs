@@ -141,12 +141,16 @@ impl Array {
         self.values.borrow_mut()[index] = Some(constant_pool_reference);
     }
 
-    pub fn get(&self, index: usize) -> Result<Option<u64>, RuntimeError> {
+    pub fn get(&self, index: usize) -> Result<u64, RuntimeError> {
         let len = self.values.borrow().len();
         if index >= len {
             return Err(RuntimeError::new_string(format!("Array index out of bounds: index {}, length {}", index, len)));
         }
-        Ok(*self.values.borrow().get(index).unwrap())
+        if let Some(value) = self.values.borrow().get(index) {
+            Ok(value.unwrap())
+        } else {
+            Err(RuntimeError::new_string(format!("Array index {} has not been initialized", index)))
+        }
     }
 
     pub fn len(&self) -> usize {

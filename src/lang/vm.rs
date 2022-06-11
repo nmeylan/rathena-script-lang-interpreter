@@ -24,6 +24,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("getarraysize", Some(ValueType::Number)),
     ("getarg", None),
     ("cleararray", None),
+    ("setarray", None),
 ];
 
 
