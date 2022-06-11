@@ -28,6 +28,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("getelementofarray", None),
     ("deletearray", None),
     ("inarray", None),
+    ("copyarray", None),
 ];
 
 
@@ -260,6 +261,10 @@ impl Vm {
     }
 
     pub fn dump(&self, out: &mut Stdout) {
+        writeln!(out, "========= Native functions =========").unwrap();
+        for (reference, native) in self.native_pool.borrow().iter() {
+            writeln!(out, "[{}]{}()", reference, native.name).unwrap();
+        }
         writeln!(out, "========= Constants Pool =========").unwrap();
         for (reference, constant) in self.constants_pool.borrow().iter() {
             match constant {

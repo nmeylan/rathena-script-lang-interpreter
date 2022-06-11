@@ -106,6 +106,7 @@ assignmentExpression
     |   assignmentLeftExpression assignmentOperator assignmentExpression
     |   'set' '('? assignmentLeftExpression ',' assignmentExpression ')'?
     |   'setarray' '('? assignmentLeftExpression ',' assignmentExpression (',' argumentExpressionList)? ')'?
+    |   'copyarray' '('? assignmentLeftExpression ',' assignmentExpression ',' argumentExpressionList ')'?
     |   Number // for
     ;
 assignmentLeftExpression
@@ -408,6 +409,7 @@ Next: 'next';
 Menu: 'menu';
 Eof : 'eof';
 Setarray: 'setarray';
+Copyarray: 'copyarray';
 
 // Literal
 Identifier : Letter (Letter | Digit)*;

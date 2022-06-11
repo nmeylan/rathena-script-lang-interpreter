@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
+use std::rc::Rc;
 use std::time::SystemTime;
 use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::noop_hasher::NoopHasher;
@@ -155,9 +156,22 @@ impl Array {
     }
 
     pub fn index_of(&self, reference: u64) -> isize {
-        self.values.borrow().iter().for_each(|v| println!("{:?}", v));
         self.values.borrow().iter().position(|entry_ref| entry_ref.is_some() && entry_ref.unwrap() == reference)
             .map_or(-1, |index| index as isize)
+    }
+
+    pub fn copyarray(&self, source_array: Rc<Array>, destination_array_start_index: usize, source_array_index: usize, count: usize) -> Result<(), RuntimeError> {
+        let mut destination_array_index = destination_array_start_index;
+        for index in source_array_index..(source_array_index + count) {
+            let value = source_array.get(index)?;
+            if let Some(value) = value {
+                self.assign(destination_array_index, value);
+                destination_array_index += 1;
+            } else {
+                break;
+            }
+        }
+        Ok(())
     }
 
     pub fn len(&self) -> usize {

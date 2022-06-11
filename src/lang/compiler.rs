@@ -730,6 +730,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
                     self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 });
                 }
+            } else if ctx.Copyarray().is_some() {
+                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+                self.visit_assignmentLeftExpression(&left);
+                self.visit_variable(left.variable().as_ref().unwrap());
+                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+                self.current_assignment_type_drop();
+                self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
+                self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"copyarray"), argument_count: 3 });
             } else {
                 self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
                 if ctx.assignmentOperator().is_some() {
@@ -751,7 +759,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
                 self.visit_assignmentLeftExpression(&left);
             }
-
         } else {
             self.visit_children(ctx);
         }

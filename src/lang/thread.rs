@@ -78,7 +78,10 @@ impl Thread {
                     let value_ref_stack_entry = self.stack.pop()?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         let array = self.vm.array_from_heap_reference(owner_reference, reference)?;
-                        array.assign(*arr_index, self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance)?)
+                        let result = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
+                        if let Ok(constant_ref) = result {
+                            array.assign(*arr_index, constant_ref);
+                        }
                     } else {
                         return Err(RuntimeError::new("OpCode::ArrayStore - Expected stack entry to be a heap reference."));
                     }
@@ -440,8 +443,11 @@ impl Thread {
             }
             StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
                 if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
-                    let array_value_ref = array.get(*index)?;
-                    let constant = if let Some(array_value_ref) = array_value_ref {
+                    let array_value_ref = array.get(*index);
+                    let constant = if array_value_ref.is_err() {
+                        // TODO warn error?
+                        None
+                    } else if let Some(array_value_ref) = array_value_ref.ok().unwrap() {
                         Some(self.vm.get_from_constant_pool(array_value_ref).unwrap())
                     } else {
                         None
@@ -581,6 +587,17 @@ impl Thread {
                 let index = array.index_of(reference_to_find);
                 let index_constant_ref = self.vm.add_in_constant_pool(Value::Number(Some(index as i32)));
                 self.stack.push(StackEntry::ConstantPoolReference(index_constant_ref));
+            },
+            "copyarray" => {
+                for a in arguments.iter() {
+                    println!("{}", a);
+                }
+                let (destination_owner_reference,destination_reference, _, destination_index) = arguments[0].array_entry_value();
+                let (source_array_owner_reference, source_array_reference, _, source_array_index) = arguments[1].array_entry_value();
+                let count = arguments[2].number_value();
+                let destination_array = self.vm.array_from_heap_reference(*destination_owner_reference, *destination_reference).unwrap();
+                let source_array = self.vm.array_from_heap_reference(*source_array_owner_reference, *source_array_reference).unwrap();
+                destination_array.copyarray(source_array, *destination_index, *source_array_index, count as usize)?
             }
             _ => {
                 return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));

@@ -96,12 +96,14 @@ fn cleararray() {
     assert_eq!(2, events.borrow().get("b1").unwrap().value.number_value().clone());
     assert_eq!(2, events.borrow().get("b10").unwrap().value.number_value().clone());
 }
+
 #[test]
 fn setarray() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
-    setarray .@a$[0], "hello", "world";
+    .@c$ = "toto";
+    setarray .@a$[0], "hello", "world", .@c$;
     setarray(.@b[1], 1, 2, 3);
     vm_dump_var("a_len", getarraysize(.@a$));
     vm_dump_var("b_len", getarraysize(.@b));
@@ -117,7 +119,7 @@ fn setarray() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("a_len").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().clone());
     assert_eq!(4, events.borrow().get("b_len").unwrap().value.number_value().clone());
     assert_eq!("hello", events.borrow().get("a0").unwrap().value.string_value().clone());
     assert_eq!("world", events.borrow().get("a1").unwrap().value.string_value().clone());
@@ -125,6 +127,7 @@ fn setarray() {
     assert_eq!(2, events.borrow().get("b2").unwrap().value.number_value().clone());
     assert_eq!(3, events.borrow().get("b3").unwrap().value.number_value().clone());
 }
+
 #[test]
 fn getelementofarray() {
     // Given
@@ -203,4 +206,36 @@ fn inarray() {
     assert_eq!(2, events.borrow().get("toto_index").unwrap().value.number_value().clone());
     assert_eq!(4, events.borrow().get("four_index").unwrap().value.number_value().clone());
     assert_eq!(-1, events.borrow().get("not_found_index").unwrap().value.number_value().clone());
+}
+
+
+#[test]
+fn copyarray() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@toto$ = "toto";
+    setarray .@a$[0], "hello", "world", .@toto$;
+    copyarray .@b$[0], .@a$[0], 1;
+    copyarray .@c$[1], .@a$[1], getarraysize(.@a$) - 1;
+
+    vm_dump_var("a_len", getarraysize(.@a$));
+    vm_dump_var("b_len", getarraysize(.@b$));
+    vm_dump_var("c_len", getarraysize(.@c$));
+    vm_dump_var("b0", .@b$[0]);
+    vm_dump_var("c1", .@c$[1]);
+    vm_dump_var("c2", .@c$[2]);
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("b_len").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("c_len").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hello"), events.borrow().get("b0").unwrap().value.string_value().clone());
+    assert_eq!(String::from("world"), events.borrow().get("c1").unwrap().value.string_value().clone());
+    assert_eq!(String::from("toto"), events.borrow().get("c2").unwrap().value.string_value().clone());
 }
