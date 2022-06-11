@@ -14,7 +14,7 @@ primaryExpression
     ;
 
 functionCallExpression
-    : Identifier '(' argumentExpressionList? ')'
+    : Identifier '('? argumentExpressionList? ')'?
     | 'callfunc' '('? String ( ',' argumentExpressionList)? ')'
     | 'callfunc' String ( ',' argumentExpressionList)?
     ;
@@ -224,7 +224,6 @@ statement
     |   iterationStatement
     |   jumpStatement
     |   menuStatement
-    |   commandStatement
     |   dialogStatement
     ;
 

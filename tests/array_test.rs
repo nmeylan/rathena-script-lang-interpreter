@@ -148,3 +148,33 @@ fn getelementofarray() {
     assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().clone());
     assert_eq!(3, events.borrow().get("three").unwrap().value.number_value().clone());
 }
+
+#[test]
+fn deletearray() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    setarray(.@b[1], 1, 2, 3, 4,5);
+    deletearray(.@b[0], 1);
+    vm_dump_var("b_0_after_first_delete", .@b[0]);
+    vm_dump_var("b_2_after_first_delete", .@b[2]);
+    vm_dump_var("b_len_after_first_delete", getarraysize(.@b));
+
+    deletearray .@b[3], 100;
+    vm_dump_var("b_0_after_second_delete", .@b[0]);
+    vm_dump_var("b_2_after_second_delete", .@b[2]);
+    vm_dump_var("b_len_after_second_delete", getarraysize(.@b));
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(1, events.borrow().get("b_0_after_first_delete").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("b_2_after_first_delete").unwrap().value.number_value().clone());
+    assert_eq!(5, events.borrow().get("b_len_after_first_delete").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("b_0_after_second_delete").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("b_2_after_second_delete").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("b_len_after_second_delete").unwrap().value.number_value().clone());
+}

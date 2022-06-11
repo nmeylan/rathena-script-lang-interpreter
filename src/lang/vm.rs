@@ -26,6 +26,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("cleararray", None),
     ("setarray", None),
     ("getelementofarray", None),
+    ("deletearray", None),
 ];
 
 
@@ -224,7 +225,7 @@ impl Vm {
         let constant = match value {
             Value::String(str) => Constant::String(str.unwrap()),
             Value::Number(num) => Constant::Number(num.unwrap()),
-            Value::ArrayEntry(array_entry) => array_entry.unwrap().2,
+            Value::ArrayEntry(array_entry) => array_entry.unwrap().2.unwrap(),
             x => panic!("add_in_constant_pool not match - only value of type String or Number can be added, but was {:?}", x)
         };
         let hash = Self::calculate_hash(&constant);

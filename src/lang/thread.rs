@@ -440,7 +440,11 @@ impl Thread {
             StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
                 if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
                     let array_value_ref = array.get(*index)?;
-                    let constant = self.vm.get_from_constant_pool(array_value_ref).unwrap();
+                    let constant = if let Some(array_value_ref) =  array_value_ref {
+                        Some(self.vm.get_from_constant_pool(array_value_ref).unwrap())
+                    } else {
+                        None
+                    };
                     Ok(Value::ArrayEntry(Some((*owner_reference, *reference, constant, *index))))
                 } else {
                     Err(RuntimeError::new("value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array"))
@@ -556,7 +560,13 @@ impl Thread {
                 let index = arguments[1].number_value() as usize;
                 let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
                 let reference = array.get(index)?;
-                self.stack.push(StackEntry::ConstantPoolReference(reference));
+                self.stack.push(StackEntry::ConstantPoolReference(reference.unwrap()));
+            },
+            "deletearray" => {
+                let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
+                let size = arguments[1].number_value() as usize;
+                let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
+                array.remove(*index, size);
             }
             _ => {
                 return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));

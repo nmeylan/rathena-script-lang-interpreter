@@ -38,7 +38,7 @@ pub enum Value {
     String(Option<String>),
     Number(Option<i32>),
     Reference(Option<(u64, u64)>),
-    ArrayEntry(Option<(u64, u64, Constant, usize)>),
+    ArrayEntry(Option<(u64, u64, Option<Constant>, usize)>),
 }
 
 impl Value {
@@ -54,14 +54,14 @@ impl Value {
     pub fn is_string(&self) -> bool {
         match self {
             Value::String(_) => true,
-            Value::ArrayEntry(v) => v.as_ref().unwrap().2.is_string(),
+            Value::ArrayEntry(v) => v.as_ref().unwrap().2.as_ref().unwrap().is_string(),
             _ => false
         }
     }
     pub fn is_number(&self) -> bool {
         match self {
             Value::Number(_) => true,
-            Value::ArrayEntry(v) => v.as_ref().unwrap().2.is_number(),
+            Value::ArrayEntry(v) => v.as_ref().unwrap().2.as_ref().unwrap().is_number(),
             _ => false
         }
     }
@@ -75,7 +75,7 @@ impl Value {
             Value::Reference(_) => { panic!("Value is a reference not a string.") }
             Value::ArrayEntry(entry) => {
                 let (_, _, constant, _) = entry.as_ref().unwrap();
-                match constant {
+                match constant.as_ref().unwrap() {
                     Constant::String(str) => str,
                     Constant::Number(_) => panic!("Value is a number not a string.")
                 }
@@ -89,8 +89,8 @@ impl Value {
             Value::Reference(_) => { panic!("Value is a reference not a number.") }
             Value::ArrayEntry(entry) => {
                 let (_, _, constant, _) = entry.as_ref().unwrap();
-                println!("constant {}", constant);
-                constant.value().number_value()
+                println!("constant {}", constant.as_ref().unwrap());
+                constant.as_ref().unwrap().value().number_value()
             }
         }
     }
@@ -99,10 +99,10 @@ impl Value {
             Value::Number(_) => panic!("Value is number not a reference."),
             Value::String(_) => { panic!("Value is string not a reference.") }
             Value::Reference(references) => references.unwrap(),
-            Value::ArrayEntry(_) => { panic!("Value is a array entry not a number.") }
+            Value::ArrayEntry(_) => { panic!("Value is a array entry not a reference.") }
         }
     }
-    pub fn array_entry_value(&self) -> &(u64, u64, Constant, usize) {
+    pub fn array_entry_value(&self) -> &(u64, u64, Option<Constant>, usize) {
         match self {
             Value::Number(_) => panic!("Value is number not a array entry."),
             Value::String(_) => { panic!("Value is string not a array entry.") }
@@ -323,7 +323,9 @@ impl Display for Value {
             Value::Reference(references) => write!(f, "{:?}", references),
             Value::ArrayEntry(array_entry) => {
                 write!(f, "{}", array_entry.as_ref()
-                    .map_or("<no value>".to_string(), |(owner_reference, reference, constant, index)| format!("Array({},{})[{}] {}", owner_reference, reference, index, constant)))
+                    .map_or("<no value>".to_string(),
+                            |(owner_reference, reference, constant, index)|
+                                format!("Array({},{})[{}] {:?}", owner_reference, reference, index, constant)))
             }
         }
     }
