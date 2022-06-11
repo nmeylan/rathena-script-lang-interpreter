@@ -37,7 +37,7 @@ impl Constant {
 pub enum Value {
     String(Option<String>),
     Number(Option<i32>),
-    Reference(Option<(Option<u64>, u64)>),
+    Reference(Option<(u64, u64)>),
     ArrayEntry(Option<(u64, u64, Constant, usize)>),
 }
 
@@ -94,7 +94,7 @@ impl Value {
             }
         }
     }
-    pub fn reference_value(&self) -> (Option<u64>, u64) {
+    pub fn reference_value(&self) -> (u64, u64) {
         match self {
             Value::Number(_) => panic!("Value is number not a reference."),
             Value::String(_) => { panic!("Value is string not a reference.") }

@@ -25,6 +25,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("getarg", None),
     ("cleararray", None),
     ("setarray", None),
+    ("getelementofarray", None),
 ];
 
 
@@ -224,7 +225,7 @@ impl Vm {
             Value::String(str) => Constant::String(str.unwrap()),
             Value::Number(num) => Constant::Number(num.unwrap()),
             Value::ArrayEntry(array_entry) => array_entry.unwrap().2,
-            _ => panic!("add_in_constant_pool not match")
+            x => panic!("add_in_constant_pool not match - only value of type String or Number can be added, but was {:?}", x)
         };
         let hash = Self::calculate_hash(&constant);
         self.constants_pool.borrow_mut().insert(hash, constant);

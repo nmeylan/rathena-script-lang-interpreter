@@ -11,7 +11,7 @@ use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
 use crate::lang::class::{Class, Function, Instance};
-use crate::lang::stack::StackEntry::ConstantPoolReference;
+use crate::lang::stack::StackEntry::{ArrayHeapReference, ConstantPoolReference, HeapReference};
 use crate::lang::vm::RuntimeError;
 
 pub enum CallFrameBreak {
@@ -268,16 +268,34 @@ impl Thread {
                 OpCode::CallFunction { argument_count, reference } => {
                     let function = class.functions_pool.get(reference).unwrap();
                     let stack_pointer = self.stack.len() - argument_count;
-                    // Convert function argument to heap ref. If we use current frame variable as argument, we need to retrieve value in sub callframe.
-                    // We can do that by putting retrieving constant reference and put them in the stack.
+                    // Convert function argument to constant ref. If we pass current frame's variable in function argument, we need to retrieve value in sub callframe.
+                    // We can do that by putting retrieved constant reference and put them in the stack.
                     let mut arguments: Vec<Value> = vec![];
                     for _ in 0..*argument_count {
                         let stack_entry = self.stack.pop()?;
                         arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?);
                     }
                     for value in arguments {
-                        let reference = self.vm.add_in_constant_pool(value);
-                        self.stack.push(ConstantPoolReference(reference));
+                        match value {
+                            Value::String(_) | Value::Number(_) => {
+                                let reference = self.vm.add_in_constant_pool(value);
+                                self.stack.push(ConstantPoolReference(reference));
+                            }
+                            Value::Reference(references) => {
+                                if let Some((owner_reference, reference)) = references {
+                                    self.stack.push(HeapReference((owner_reference, reference)));
+                                } else {
+                                    panic!("CallFunction Value::Reference")
+                                }
+                            }
+                            Value::ArrayEntry(array_entry) => {
+                                if let Some((owner_reference, reference, _ , index)) = array_entry {
+                                    self.stack.push(ArrayHeapReference((owner_reference, reference, index)));
+                                } else {
+                                    panic!("CallFunction Value::ArrayEntry")
+                                }
+                            }
+                        }
                     }
                     let new_function_call_frame = CallFrame::new(function, stack_pointer, *argument_count);
                     let break_type = self.run(new_function_call_frame, depth + 1, class, instance)?;
@@ -417,7 +435,7 @@ impl Thread {
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::HeapReference((owner_reference, reference)) => {
-                Ok(Value::Reference(Some((Some(*owner_reference), *reference))))
+                Ok(Value::Reference(Some((*owner_reference, *reference))))
             }
             StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
                 if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
@@ -506,8 +524,7 @@ impl Thread {
                 }
             }
             "getarraysize" => {
-                let (maybe_owner_reference, reference) = arguments[0].reference_value();
-                let owner_reference = maybe_owner_reference.unwrap();
+                let (owner_reference, reference) = arguments[0].reference_value();
                 let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
                 let len = array.len();
                 let reference = self.vm.add_in_constant_pool(Value::Number(Some(len as i32)));
@@ -533,7 +550,13 @@ impl Thread {
                         index += 1;
                     }
                 }
-
+            }
+            "getelementofarray" => {
+                let (owner_reference, reference) = arguments[0].reference_value();
+                let index = arguments[1].number_value() as usize;
+                let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
+                let reference = array.get(index)?;
+                self.stack.push(StackEntry::ConstantPoolReference(reference));
             }
             _ => {
                 return Err(RuntimeError::new_string(format!("Native function {} is not handled yet!", native.name)));

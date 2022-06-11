@@ -125,3 +125,26 @@ fn setarray() {
     assert_eq!(2, events.borrow().get("b2").unwrap().value.number_value().clone());
     assert_eq!(3, events.borrow().get("b3").unwrap().value.number_value().clone());
 }
+#[test]
+fn getelementofarray() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    function plus_one_to_array_elem_0 {
+        return getelementofarray(getarg(0), 0) + 1;
+    }
+    setarray .@b[0], 1, 2, 3;
+    .@c = plus_one_to_array_elem_0(.@b);
+    .@d = getelementofarray(.@b, 2);
+    vm_dump_var("two", .@c);
+    vm_dump_var("three", .@d);
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("three").unwrap().value.number_value().clone());
+}

@@ -14,7 +14,7 @@ pub enum StackEntry {
     InstanceVariableReference(u64),
     StaticVariableReference(u64),
     HeapReference((u64, u64)), // owner reference, entry reference
-    ArrayHeapReference((u64, u64, usize)), // owner reference, entry reference
+    ArrayHeapReference((u64, u64, usize)), // owner reference, entry reference, index
 }
 
 #[derive(Debug)]
