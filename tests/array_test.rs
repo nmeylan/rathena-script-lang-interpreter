@@ -240,7 +240,7 @@ fn copyarray() {
     assert_eq!(String::from("toto"), events.borrow().get("c2").unwrap().value.string_value().clone());
 }
 
-
+// #[test]
 fn setarray_errors() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));

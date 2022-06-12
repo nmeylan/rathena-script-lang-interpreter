@@ -12,6 +12,7 @@ use std::sync::Arc;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{Chunk, ClassFile};
 use crate::lang::class::{Array, Class, Function, Instance};
+use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::thread::Thread;
@@ -74,29 +75,72 @@ pub struct Vm {
 }
 
 #[derive(Debug)]
-pub enum RuntimeError {
-    NoMoreOperations(usize),
-    Other(String),
+pub enum RuntimeErrorType {
+    Internal,
+    Execution
+}
+
+#[derive(Debug)]
+pub struct RuntimeError {
+    pub message: String,
+    pub source: CompilationDetail,
+    pub error_type: RuntimeErrorType,
+}
+
+#[derive(Debug)]
+pub struct TemporaryRuntimeError {
+    pub message: String,
+}
+
+impl TemporaryRuntimeError {
+    pub fn new(message: &str) -> Self {
+        Self {
+            message: message.to_string()
+        }
+    }
+    pub fn new_string(message: String) -> Self {
+        Self {
+            message
+        }
+    }
 }
 
 impl RuntimeError {
-    pub fn new(message: &str) -> Self {
-        Self::Other(message.to_string())
+    pub fn new(source: CompilationDetail, message: &str) -> Self {
+        Self {
+            source, message: message.to_string(),
+            error_type: RuntimeErrorType::Execution
+        }
     }
-    pub fn new_string(message: String) -> Self {
-        Self::Other(message)
+    pub fn new_string(source: CompilationDetail, message: String) -> Self {
+        Self {
+            source, message,
+            error_type: RuntimeErrorType::Execution
+        }
+    }
+    pub fn new_internal(message: String) -> Self {
+        Self {
+            message,
+            source: CompilationDetail::new_empty(),
+            error_type: RuntimeErrorType::Internal
+        }
+    }
+    pub fn from_temporary(source: CompilationDetail, temporary: TemporaryRuntimeError) -> Self {
+        Self {
+            message: temporary.message,
+            source,
+            error_type: RuntimeErrorType::Execution
+        }
+    }
+    pub fn message(&self) -> String {
+        format!("{}", self)
     }
 }
 
 impl Display for RuntimeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            RuntimeError::NoMoreOperations(ip) => f.write_str(&format!(
-                "The VM was halted because there were no more operations at the ip {}",
-                ip
-            )),
-            RuntimeError::Other(msg) => f.write_str(msg),
-        }
+        writeln!(f, "{}", self.message).unwrap();
+        write!(f, "{}", self.source)
     }
 }
 
@@ -172,13 +216,16 @@ impl Vm {
 
     pub fn register_class(&self, class: &mut ClassFile) -> Rc<Class> {
         let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
+        let mut sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher> = Default::default();
         for function in class.functions() {
             let chunk_rc = function.chunk.clone();
             let chunk: &Chunk = chunk_rc.borrow();
-            functions_pool.insert(Vm::calculate_hash(&function.name),
+            let function_reference = Vm::calculate_hash(&function.name);
+            functions_pool.insert(function_reference,
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
+            sources.insert(function_reference, chunk.compilation_details.take());
         }
-        let class_rc = Rc::new(Class::new(class.name.clone(), functions_pool,
+        let class_rc = Rc::new(Class::new(class.name.clone(), functions_pool, sources,
                                           class.static_variables.borrow().clone(),
                                           class.instance_variables.borrow().clone()));
         self.classes_pool.borrow_mut().insert(class.name.clone(), class_rc.clone());
@@ -195,17 +242,17 @@ impl Vm {
         constant_pool_ref.get(&reference).cloned()
     }
 
-    pub fn get_value_ref_from_heap_entry(&self, owner_reference: u64, reference: u64) -> Result<ValueRef, RuntimeError> {
+    pub fn get_value_ref_from_heap_entry(&self, owner_reference: u64, reference: u64) -> Result<ValueRef, TemporaryRuntimeError> {
         if self.heap.borrow().get(&owner_reference).is_none() {
-            return Err(RuntimeError::new_string(format!("Can't retrieve value from heap entry, because there is nothing on the heap for owner {}", owner_reference)));
+            return Err(TemporaryRuntimeError::new_string(format!("Can't retrieve value from heap entry, because there is nothing on the heap for owner {}", owner_reference)));
         }
         let heap_ref = self.heap.borrow();
         let owner_entries = heap_ref.get(&owner_reference).unwrap().borrow();
-        let heap_entry = owner_entries.get(&reference).ok_or_else(|| RuntimeError::new(format!("Can't find heap entry in VM HEAP pool for given reference ({}, {})", owner_reference, reference).as_str()))?;
+        let heap_entry = owner_entries.get(&reference).ok_or_else(|| TemporaryRuntimeError::new(format!("Can't find heap entry in VM HEAP pool for given reference ({}, {})", owner_reference, reference).as_str()))?;
         if let Some(value_ref) = heap_entry.value_ref() {
             Ok(value_ref)
         } else {
-            Err(RuntimeError::new("Can't retrieve value from heap entry, because heap entry is not a variable. Probably a reference to an array is being used as function arguments."))
+            Err(TemporaryRuntimeError::new("Can't retrieve value from heap entry, because heap entry is not a variable. Probably a reference to an array is being used as function arguments."))
         }
     }
 
@@ -232,11 +279,11 @@ impl Vm {
         hash
     }
 
-    pub(crate) fn array_from_heap_reference(&self, owner_reference: u64, reference: u64) -> Result<Rc<Array>, RuntimeError> {
+    pub(crate) fn array_from_heap_reference(&self, owner_reference: u64, reference: u64) -> Result<Rc<Array>, TemporaryRuntimeError> {
         if let Some(owner_entries) = self.heap.borrow().get(&owner_reference) {
             return Ok(owner_entries.borrow().get(&reference).cloned().unwrap().get_array().unwrap());
         }
-        Err(RuntimeError::new_string(format!("Array was not found from heap reference ({},{})", owner_reference, reference)))
+        Err(TemporaryRuntimeError::new_string(format!("Array was not found from heap reference ({},{})", owner_reference, reference)))
     }
 
     pub fn get_from_native_pool(&self, reference: u64) -> Option<&Native> {

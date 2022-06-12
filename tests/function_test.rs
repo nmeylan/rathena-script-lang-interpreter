@@ -86,7 +86,10 @@ fn function_call_with_arguments_out_of_bounds() {
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
     // Then
-    assert_eq!(String::from("Can't call getarg(1) which is greater than number of arguments provided: 1. Maximum allow index is 0. Consider calling getarg with a default value: getarg(1, DEFAULT_VALUE)"), runtime_error.to_string());
+    assert_eq!(r#"Can't call getarg(1) which is greater than number of arguments provided: 1. Maximum allow index is 0. Consider calling getarg with a default value: getarg(1, DEFAULT_VALUE)
+test_script 5:15.
+l5	        .@a$ = getarg(1) + " world";
+	               ^^^^^^^^^"#, runtime_error.to_string().trim());
 }
 #[test]
 fn function_call_with_arguments_with_default() {

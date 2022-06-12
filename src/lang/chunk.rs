@@ -228,6 +228,7 @@ impl Display for FunctionDefinition {
 #[derive(Debug, Clone)]
 pub struct Chunk {
     pub op_codes: RefCell<Vec<OpCode>>,
+    pub compilation_details: RefCell<Vec<CompilationDetail>>,
     pub locals: RefCell<HashMap<u64, Variable, NoopHasher>>,
     pub constants_storage: RefCell<HashMap<u64, Constant, NoopHasher>>,
     // state
@@ -238,6 +239,7 @@ impl Default for Chunk {
     fn default() -> Self {
         Self {
             op_codes: RefCell::new(vec![]),
+            compilation_details: RefCell::new(vec![]),
             locals:  RefCell::new(HashMap::with_hasher(NoopHasher::default())),
             constants_storage:  RefCell::new(HashMap::with_hasher(NoopHasher::default())),
             label_gotos_op_code_indices: RefCell::new(Default::default())
@@ -257,9 +259,10 @@ impl Chunk {
         self.op_codes.borrow_mut()[index] = op_code;
     }
 
-    pub fn emit_op_code(&self, op_code: OpCode) -> usize {
+    pub fn emit_op_code(&self, op_code: OpCode, compilation_details: CompilationDetail) -> usize {
         println!("emit opcode {:?}", op_code);
         self.op_codes.borrow_mut().push(op_code);
+        self.compilation_details.borrow_mut().push(compilation_details);
         self.last_op_code_index()
     }
 

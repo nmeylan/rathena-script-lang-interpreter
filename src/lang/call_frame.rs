@@ -7,13 +7,14 @@ use std::io::{Stdout, Write};
 use std::time::SystemTime;
 use crate::lang::chunk::{OpCode};
 use crate::lang::class::Function;
+use crate::lang::compiler::CompilationDetail;
 use crate::lang::value::Variable;
 use crate::lang::vm::{Hashcode, Vm};
 
 #[derive(Debug)]
 pub struct CallFrame {
     reference: Option<u64>,
-    pub code: Vec<OpCode>,
+    pub op_codes: Vec<OpCode>,
     pub stack_pointer: usize,
     pub arguments_count: usize,
     pub name: String,
@@ -23,10 +24,10 @@ pub struct CallFrame {
 
 impl Display for CallFrame {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.code.len() <= self.current_op_code {
+        if self.op_codes.len() <= self.current_op_code {
             return f.write_str("<end>\n");
         }
-        write!(f, "   OpCode [{}] {:?}", self.current_op_code, self.code[self.current_op_code]).unwrap();
+        write!(f, "   OpCode [{}] {:?}", self.current_op_code, self.op_codes[self.current_op_code]).unwrap();
         f.write_str("\n")
     }
 }
@@ -35,7 +36,7 @@ impl CallFrame {
     pub fn new(function: &Function, stack_pointer: usize, arguments_count: usize) -> Self {
         let mut call_frame = Self {
             reference: None,
-            code: function.code.clone(),
+            op_codes: function.code.clone(),
             stack_pointer,
             current_op_code: 0,
             name: function.name.clone(),
@@ -57,7 +58,7 @@ impl CallFrame {
 
     pub fn dump(&self, out: &mut Stdout) {
         writeln!(out, "========= OpCode =========").unwrap();
-        for (index, op_code) in self.code.iter().enumerate() {
+        for (index, op_code) in self.op_codes.iter().enumerate() {
             writeln!(out, "[{}] {:?}", index, op_code).unwrap();
         }
         writeln!(out).unwrap();
@@ -71,7 +72,7 @@ impl CallFrame {
 impl Hash for CallFrame {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.name.hash(state);
-        self.code.hash(state);
+        self.op_codes.hash(state);
         self.locals.len().hash(state);
     }
 }

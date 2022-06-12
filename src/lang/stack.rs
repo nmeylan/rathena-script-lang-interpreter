@@ -2,7 +2,7 @@ use std::cell::{Ref, RefCell};
 use std::fmt::{Display, Formatter};
 
 
-use crate::lang::vm::RuntimeError;
+use crate::lang::vm::{RuntimeError, TemporaryRuntimeError};
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -40,13 +40,13 @@ impl Stack {
     pub fn pop(&self) -> Result<StackEntry, RuntimeError> {
         self.values.borrow_mut()
             .pop()
-            .ok_or_else(|| RuntimeError::new("Tried to pop an empty stack."))
+            .ok_or_else(|| RuntimeError::new_internal("Tried to pop an empty stack.".to_string()))
     }
 
     pub fn peek(&self, index: usize) -> Result<StackEntry, RuntimeError> {
         self.values.borrow()
             .get(index).cloned()
-            .ok_or_else(|| RuntimeError::new_string(format!("Tried to access index \"{}\" is out of bounds \"{}\"", index, self.len() - 1)))
+            .ok_or_else(|| RuntimeError::new_internal(format!("Tried to access index \"{}\" is out of bounds \"{}\"", index, self.len() - 1)))
     }
     pub fn contents(&self) -> Ref<Vec<StackEntry>> {
         self.values.borrow()

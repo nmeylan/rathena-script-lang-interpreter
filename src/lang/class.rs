@@ -6,27 +6,30 @@ use std::mem;
 use std::rc::Rc;
 use std::time::SystemTime;
 use crate::lang::chunk::{Chunk, OpCode};
+use crate::lang::compiler::CompilationDetail;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{ValueType, Variable};
-use crate::lang::vm::{Hashcode, RuntimeError, Vm};
+use crate::lang::vm::{Hashcode, RuntimeError, TemporaryRuntimeError, Vm};
 
 #[derive(Debug)]
 pub struct Class {
     reference: Option<u64>,
     pub(crate) name: String,
     pub(crate) functions_pool: HashMap<u64, Function, NoopHasher>,
+    pub(crate) sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher>, // Key is function reference
     pub(crate) instances_references: RefCell<u64>,
     pub(crate) static_variables: HashMap<u64, Variable, NoopHasher>,
     pub(crate) instance_variables: HashMap<u64, Variable, NoopHasher>, // Only instance variables definition
 }
 
 impl Class {
-    pub fn new(name: String, functions_pool: HashMap<u64, Function, NoopHasher>, static_variables: HashMap<u64, Variable, NoopHasher>,
+    pub fn new(name: String, functions_pool: HashMap<u64, Function, NoopHasher>, sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher>, static_variables: HashMap<u64, Variable, NoopHasher>,
                instance_variables: HashMap<u64, Variable, NoopHasher>) -> Self {
         let mut class = Self {
             reference: None,
             name,
             functions_pool,
+            sources,
             instances_references: RefCell::new(0),
             static_variables,
             instance_variables
@@ -142,10 +145,10 @@ impl Array {
         self.values.borrow_mut()[index] = Some(constant_pool_reference);
     }
 
-    pub fn get(&self, index: usize) -> Result<Option<u64>, RuntimeError> {
+    pub fn get(&self, index: usize) -> Result<Option<u64>, TemporaryRuntimeError> {
         let len = self.values.borrow().len();
         if index >= len {
-            return Err(RuntimeError::new_string(format!("Array index out of bounds: index {}, length {}", index, len)));
+            return Err(TemporaryRuntimeError::new_string(format!("Array index out of bounds: index {}, length {}", index, len)));
         }
         Ok(*self.values.borrow().get(index).unwrap())
     }
@@ -160,7 +163,7 @@ impl Array {
             .map_or(-1, |index| index as isize)
     }
 
-    pub fn copyarray(&self, source_array: Rc<Array>, destination_array_start_index: usize, source_array_index: usize, count: usize) -> Result<(), RuntimeError> {
+    pub fn copyarray(&self, source_array: Rc<Array>, destination_array_start_index: usize, source_array_index: usize, count: usize) -> Result<(), TemporaryRuntimeError> {
         let mut destination_array_index = destination_array_start_index;
         for index in source_array_index..(source_array_index + count) {
             let value = source_array.get(index)?;

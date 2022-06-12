@@ -81,13 +81,13 @@ pub enum VariableScope {
 pub struct CompilationError {
     error_type: CompilationErrorType,
     message: String,
-    file_name: String,
     details: CompilationDetail,
 }
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct CompilationDetail {
+    file_name: String,
     start_line: usize,
     start_column: usize,
     end_line: usize,
@@ -108,6 +108,19 @@ pub enum CompilationErrorType {
     UndefinedLabel,
 }
 
+impl CompilationDetail {
+    pub fn new_empty() -> Self {
+        Self {
+            file_name: "".to_string(),
+            start_line: 0,
+            start_column: 0,
+            end_line: 0,
+            end_column: 0,
+            text: "".to_string(),
+        }
+    }
+}
+
 impl CompilationError {
     pub fn message(&self) -> String {
         format!("{}", self)
@@ -116,9 +129,15 @@ impl CompilationError {
 
 impl Display for CompilationError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{} {}:{}. {}", self.file_name, self.details.start_line, self.details.start_column, self.message).unwrap();
-        writeln!(f, "l{}\t{}", self.details.start_line, self.details.text).unwrap();
-        writeln!(f, "\t{}{}", " ".repeat(self.details.start_column), "^".repeat(self.details.end_column - self.details.start_column + 1))
+        writeln!(f, "{}", self.message).unwrap();
+        write!(f, "{}", self.details)
+    }
+}
+impl Display for CompilationDetail {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{} {}:{}.", self.file_name, self.start_line, self.start_column).unwrap();
+        writeln!(f, "l{}\t{}", self.start_line, self.text).unwrap();
+        writeln!(f, "\t{}{}", " ".repeat(self.start_column), "^".repeat(self.end_column - self.start_column + 1))
     }
 }
 
@@ -220,12 +239,13 @@ impl Compiler {
             let mut declared_local_variable_references: HashMap<u64, Variable, NoopHasher> = Default::default();
             for index in hook_label.first_op_code_index..hook_label.last_op_code_index {
                 let op_code = main_function.chunk.op_codes.borrow()[index].clone();
+                let compilation_details = main_function.chunk.compilation_details.borrow()[index].clone();
                 if let StoreLocal(reference) = op_code {
                     if let Some(variable) = main_function.chunk.locals.borrow().get(&reference) {
                         declared_local_variable_references.insert(reference, variable.clone());
                     }
                 }
-                chunk.emit_op_code(op_code.clone());
+                chunk.emit_op_code(op_code.clone(), compilation_details);
             }
             chunk.locals = RefCell::new(declared_local_variable_references);
             function_definition.chunk = Rc::new(chunk);
@@ -302,8 +322,7 @@ impl Compiler {
         let error = CompilationError {
             error_type,
             message,
-            file_name: self.file_name.clone(),
-            details: self.compilation_error_details_from_context(node),
+            details: self.compilation_details_from_context(node),
         };
         self.errors.borrow_mut().push(error);
     }
@@ -312,14 +331,14 @@ impl Compiler {
         let error = CompilationError {
             error_type,
             message,
-            file_name: self.file_name.clone(),
             details,
         };
         self.errors.borrow_mut().push(error);
     }
 
-    fn compilation_error_details_from_context<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> CompilationDetail {
+    fn compilation_details_from_context<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> CompilationDetail {
         CompilationDetail {
+            file_name: self.file_name.clone(),
             start_line: node.start().get_line() as usize,
             start_column: node.start().get_column() as usize,
             end_line: node.stop().get_line() as usize,
@@ -428,25 +447,25 @@ impl Compiler {
             Scope::Character => {}
             Scope::Npc => {
                 if let Ok(reference) = self.current_class().load_variable(variable, Scope::Npc) {
-                    self.current_chunk().emit_op_code(LoadStatic(reference));
+                    self.current_chunk().emit_op_code(LoadStatic(reference), self.compilation_details_from_context(node));
                 } else {
                     // TODO fix
-                    self.current_chunk().emit_op_code(LoadStatic(Vm::calculate_hash(variable)));
+                    self.current_chunk().emit_op_code(LoadStatic(Vm::calculate_hash(variable)), self.compilation_details_from_context(node));
                     // self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Static variable \"{}\" is undefined.", variable.to_script_identifier()));
                 }
             }
             Scope::Instance => {
                 if let Ok(reference) = self.current_class().load_variable(variable, Scope::Instance) {
-                    self.current_chunk().emit_op_code(LoadInstance(reference));
+                    self.current_chunk().emit_op_code(LoadInstance(reference), self.compilation_details_from_context(node));
                 } else {
                     // TODO fix
-                    self.current_chunk().emit_op_code(LoadInstance(Vm::calculate_hash(variable)));
+                    self.current_chunk().emit_op_code(LoadInstance(Vm::calculate_hash(variable)), self.compilation_details_from_context(node));
                     // self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Instance variable \"{}\" is undefined.", variable.to_script_identifier()));
                 }
             }
             Scope::Local => {
                 if let Ok(reference) = self.current_chunk().load_local(variable) {
-                    self.current_chunk().emit_op_code(LoadLocal(reference));
+                    self.current_chunk().emit_op_code(LoadLocal(reference), self.compilation_details_from_context(node));
                 } else {
                     self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
                 }
@@ -454,7 +473,7 @@ impl Compiler {
         }
 
         if variable.value_ref.borrow().is_array() {
-            self.current_chunk().emit_op_code(ArrayLoad(index.unwrap()));
+            self.current_chunk().emit_op_code(ArrayLoad(index.unwrap()), self.compilation_details_from_context(node));
         }
     }
 
@@ -481,13 +500,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     remove_quote_from_string(ctx.String().as_ref().unwrap().symbol.text.as_ref()) // TODO check if it can be done by antlr skip instead.
                 ));
             self.add_current_assigment_type(ValueType::String);
-            self.current_chunk().emit_op_code(LoadConstant(reference));
+            self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
         }
         if ctx.Number().is_some() {
             let number_value = &ctx.Number().unwrap().symbol.text;
             let reference = self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
             self.add_current_assigment_type(ValueType::Number);
-            self.current_chunk().emit_op_code(LoadConstant(reference));
+            self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
         }
         if ctx.Identifier().is_some() {
             // TODO ensure it is a native, otherwise is is a function
@@ -526,17 +545,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             } else {
                 self.remove_current_assigment_type(argument_count);
             }
-            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
+            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
             if let Some(returned_type) = native.return_type.as_ref() {
                 self.add_current_assigment_type(returned_type.clone());
             }
         } else {
             self.remove_current_assigment_type(argument_count);
-            self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_error_details_from_context(ctx)));
+            self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_details_from_context(ctx)));
             if let Some(returned_type) = self.function_returned_type(&function_or_native_name) {
                 self.add_current_assigment_type(returned_type);
             }
-            self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count });
+            self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
         }
     }
 
@@ -564,17 +583,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Multiply operator \"*\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Multiply));
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Multiply), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Slash().is_some() {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Divide operator \"/\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Divide));
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Divide), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Percent().is_some() {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Modulo operator \"%\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Modulo));
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Modulo), self.compilation_details_from_context(operator.as_ref()));
             }
         }
     }
@@ -589,12 +608,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.visit_multiplicativeExpression(&ctx.multiplicativeExpression(i).unwrap());
             let operator = ctx.additiveOperator(i).unwrap();
             if operator.Plus().is_some() {
-                self.current_chunk().emit_op_code(Add);
+                self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Minus().is_some() {
                 if self.current_assignment_type().is_string() {
                     self.register_error(Type, ctx, "Subtraction operator \"-\" is not allowed for String".to_string());
                 }
-                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(operator.as_ref()));
             }
         }
     }
@@ -611,13 +630,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             let operator = ctx.relationalOperator(i).unwrap();
             if operator.RightCaret().is_some() {
-                self.current_chunk().emit_op_code(OpCode::Relational(Relational::GT));
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::GT), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.RightCaretEqual().is_some() {
-                self.current_chunk().emit_op_code(OpCode::Relational(Relational::GTE));
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::GTE), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.LeftCaret().is_some() {
-                self.current_chunk().emit_op_code(OpCode::Relational(Relational::LT));
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::LT), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.LeftCaretEqual().is_some() {
-                self.current_chunk().emit_op_code(OpCode::Relational(Relational::LTE));
+                self.current_chunk().emit_op_code(OpCode::Relational(Relational::LTE), self.compilation_details_from_context(operator.as_ref()));
             }
             self.current_assignment_type_drop();
             self.add_current_assigment_type(ValueType::Number);
@@ -636,9 +655,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             let operator = ctx.equalityOperator(i).unwrap();
             if operator.DoubleEqual().is_some() {
-                self.current_chunk().emit_op_code(OpCode::Equal);
+                self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(operator.as_ref()));
             } else if operator.BangEqual().is_some() {
-                self.current_chunk().emit_op_code(OpCode::NotEqual);
+                self.current_chunk().emit_op_code(OpCode::NotEqual, self.compilation_details_from_context(operator.as_ref()));
             }
             self.current_assignment_type_drop();
             self.add_current_assigment_type(ValueType::Number);
@@ -655,7 +674,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if !self.current_assignment_types_are_same_type() {
                 self.register_error(Type, ctx, "Can't perform logical and (&&) when left and right are not same types".to_string());
             }
-            self.current_chunk().emit_op_code(OpCode::LogicalAnd);
+            self.current_chunk().emit_op_code(OpCode::LogicalAnd, self.compilation_details_from_context(ctx));
             self.current_assignment_type_drop();
             self.add_current_assigment_type(ValueType::Number);
         }
@@ -671,7 +690,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if !self.current_assignment_types_are_same_type() {
                 self.register_error(Type, ctx, "Can't perform logical or (||) when left and right are not same types".to_string());
             }
-            self.current_chunk().emit_op_code(OpCode::LogicalOr);
+            self.current_chunk().emit_op_code(OpCode::LogicalOr, self.compilation_details_from_context(ctx));
             self.current_assignment_type_drop();
             self.add_current_assigment_type(ValueType::Number);
         }
@@ -689,7 +708,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 if argument_count > 0 {
                     self.visit_variable(left.variable().as_ref().unwrap());
                     self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
-                    self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 });
+                    self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 }, self.compilation_details_from_context(ctx));
                 }
             } else if ctx.Copyarray().is_some() {
                 // Array can be assigned using copyarray too
@@ -701,7 +720,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.current_assignment_type_drop();
                 // TODO ensure that argument list contains only 1 element.
                 self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap()); // <amount of data to copy>
-                self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"copyarray"), argument_count: 3 });
+                self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"copyarray"), argument_count: 3 }, self.compilation_details_from_context(ctx));
             } else {
                 self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
                 if ctx.assignmentOperator().is_some() {
@@ -712,13 +731,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                             let (variable, index) = Self::build_variable(&left.variable().unwrap());
                             self.load_variable(&variable, index, ctx);
                         }
-                        self.current_chunk().emit_op_code(Add);
+                        self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(ctx));
                     } else if assignment_operator.MinusEqual().is_some() {
                         if left.variable().is_some() {
                             let (variable, index) = Self::build_variable(&left.variable().unwrap());
                             self.load_variable(&variable, index, ctx);
                         }
-                        self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract));
+                        self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(ctx));
                     }
                 }
                 self.visit_assignmentLeftExpression(&left);
@@ -761,20 +780,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
                 Scope::Local => {
                     let reference = self.current_chunk().add_local(variable);
-                    self.current_chunk().emit_op_code(StoreLocal(reference));
+                    self.current_chunk().emit_op_code(StoreLocal(reference), self.compilation_details_from_context(ctx));
                 }
                 Scope::Instance => {
                     let reference = self.current_class().add_instance_variable(variable);
-                    self.current_chunk().emit_op_code(StoreInstance(reference));
+                    self.current_chunk().emit_op_code(StoreInstance(reference), self.compilation_details_from_context(ctx));
                 }
                 Scope::Npc => {
                     let reference = self.current_class().add_static_variable(variable);
-                    self.current_chunk().emit_op_code(StoreStatic(reference));
+                    self.current_chunk().emit_op_code(StoreStatic(reference), self.compilation_details_from_context(ctx));
                 }
             }
             if is_array {
                 let number_value = ctx.variable().as_ref().unwrap().variable_name().as_ref().unwrap().Number().as_ref().unwrap().symbol.text.clone();
-                self.current_chunk().emit_op_code(ArrayStore(parse_number(number_value) as usize));
+                self.current_chunk().emit_op_code(ArrayStore(parse_number(number_value) as usize), self.compilation_details_from_context(ctx));
             }
         }
     }
@@ -827,14 +846,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_selectionStatement(&mut self, ctx: &SelectionStatementContext<'input>) {
         if ctx.If().is_some() {
             self.visit_expression(ctx.expression().as_ref().unwrap());
-            let if_index = self.current_chunk().emit_op_code(OpCode::If(0));
+            let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
             self.visit_statement(ctx.statement(0).as_ref().unwrap());
             let jump_to_index = self.current_chunk().last_op_code_index() + 2;
             self.current_chunk().set_op_code_at(if_index, OpCode::If(jump_to_index));
 
             if ctx.Else().is_some() {
-                let then_jump_index = self.current_chunk().emit_op_code(OpCode::Jump(jump_to_index - 1));
-                self.current_chunk().emit_op_code(OpCode::Else);
+                let then_jump_index = self.current_chunk().emit_op_code(OpCode::Jump(jump_to_index - 1), self.compilation_details_from_context(ctx));
+                self.current_chunk().emit_op_code(OpCode::Else, self.compilation_details_from_context(ctx));
                 self.visit_statement(ctx.statement(1).as_ref().unwrap());
                 let jump_to_index = self.current_chunk().last_op_code_index() + 1;
                 self.current_chunk().set_op_code_at(then_jump_index, OpCode::Jump(jump_to_index));
@@ -855,7 +874,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let mut for_if_index = 0;
             if for_condition.forStopExpression().is_some() {
                 self.visit_forStopExpression(for_condition.forStopExpression().as_ref().unwrap());
-                for_if_index = self.current_chunk().emit_op_code(OpCode::If(0));
+                for_if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
             }
 
             if for_condition.forExpression().is_some() {
@@ -863,7 +882,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
 
             self.visit_statement(ctx.statement().as_ref().unwrap());
-            let for_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1));
+            let for_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1), self.compilation_details_from_context(ctx));
             if for_condition.forStopExpression().is_some() {
                 self.current_chunk().set_op_code_at(for_if_index, OpCode::If(for_statement_end + 1));
             }
@@ -873,9 +892,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else if ctx.While().is_some() {
             let while_start_index = self.current_chunk().last_op_code_index();
             self.visit_expression(ctx.expression().as_ref().unwrap());
-            let while_if_index = self.current_chunk().emit_op_code(OpCode::If(0));
+            let while_if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
             self.visit_statement(ctx.statement().as_ref().unwrap());
-            let while_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(while_start_index + 1));
+            let while_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(while_start_index + 1), self.compilation_details_from_context(ctx));
             self.current_chunk().set_op_code_at(while_if_index, OpCode::If(while_statement_end + 1));
         } else {
             self.visit_children(ctx)
@@ -886,17 +905,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         self.visit_children(ctx);
         if ctx.Return().is_some() {
             let not_empty_return = ctx.expression().is_some();
-            self.current_chunk().emit_op_code(OpCode::Return(not_empty_return));
+            self.current_chunk().emit_op_code(OpCode::Return(not_empty_return), self.compilation_details_from_context(ctx));
         } else if ctx.Break().is_some() {
-            let index = self.current_chunk().emit_op_code(OpCode::Jump(0));
+            let index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(ctx));
             self.push_block_break_index(index);
         } else if ctx.Goto().is_some() {
-            let index = self.current_chunk().emit_op_code(OpCode::Goto(0));
+            let index = self.current_chunk().emit_op_code(OpCode::Goto(0), self.compilation_details_from_context(ctx));
             let label = ctx.Identifier().unwrap().symbol.text.clone();
-            let detail = self.compilation_error_details_from_context(ctx);
+            let detail = self.compilation_details_from_context(ctx);
             self.current_chunk().push_goto_index(label.to_string(), index, detail);
         } else if ctx.End().is_some() {
-            self.current_chunk().emit_op_code(OpCode::End);
+            self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
         }
     }
 
@@ -931,7 +950,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if let Some(class) = self.classes.iter().find(|c| c.name == name) {
             self.register_error(CompilationErrorType::ClassAlreadyDefined, ctx, format!("Class {} is already defined in file \"{}\" at line \"l{}\"", name, class.defined_in_file_name, class.defined_at_line));
         } else {
-            let detail = self.compilation_error_details_from_context(ctx);
+            let detail = self.compilation_details_from_context(ctx);
             self.classes.push(ClassFile::new_with_main_function(name, self.file_name.clone(), detail.start_line));
         }
         self.state.current_declared_class += 1;
