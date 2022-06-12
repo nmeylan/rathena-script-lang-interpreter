@@ -120,13 +120,15 @@ impl Display for Function {
 pub struct Array {
     pub(crate) reference: u64,
     pub(crate) values: RefCell<Vec<Option<u64>>>,
+    pub(crate) value_type: ValueType,
 }
 
 impl Array {
-    pub fn new(reference: u64) -> Self {
+    pub fn new(reference: u64, value_type: ValueType) -> Self {
         Self {
             reference,
             values: RefCell::new(vec![]),
+            value_type
         }
     }
 

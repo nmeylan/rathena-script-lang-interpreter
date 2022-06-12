@@ -216,7 +216,7 @@ impl Vm {
         let heap_ref = self.heap.borrow();
         let mut owner_entries = heap_ref.get(&owner_reference).unwrap().borrow_mut();
         if owner_entries.get(&reference).is_none() {
-            owner_entries.insert(reference, HeapEntry::Array(Rc::new(Array::new(reference))));
+            owner_entries.insert(reference, HeapEntry::Array(Rc::new(Array::new(reference, value_type))));
         }
     }
 

@@ -1,4 +1,5 @@
-use std::{io};
+use std::{io, mem};
+use std::fmt::format;
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
 
@@ -551,8 +552,12 @@ impl Thread {
                 // first parameters of setarray is already assigned to index, and thus is not part of arguments.
                 // so we assign arguments starting at index + 1;
                 let mut index = index + 1; // setarray .@a[0], assignment, arguments.
-                for array_reference in arguments_ref.iter() { // arguments are in reverse order
+                for (i, array_reference) in arguments_ref.iter().enumerate() { // arguments are in reverse order
                     if array_reference.is_some() {
+                        if !array.value_type.match_value(&arguments[i]) {
+                            return Err(RuntimeError::new_string(format!("setarray - tried to assign {} to an array of {}",
+                                                                        arguments[i].display_type(), array.value_type.display_type())));
+                        }
                         array.assign(index, array_reference.unwrap());
                         index += 1;
                     }

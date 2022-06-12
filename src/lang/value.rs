@@ -147,6 +147,32 @@ impl Value {
             Value::ArrayEntry(entry) => { entry.as_ref().unwrap() }
         }
     }
+
+    pub fn match_value_type(&self, value_type: &ValueType) -> bool {
+        match self {
+            Value::String(_) => value_type.is_string(),
+            Value::Number(_) => value_type.is_number(),
+            Value::Reference(_) => false,
+            Value::ArrayEntry(entry) => {
+                match entry.as_ref().unwrap().2.as_ref().unwrap() {
+                    Constant::String(_) => value_type.is_string(),
+                    Constant::Number(_) => value_type.is_number(),
+                }
+            }
+        }
+    }
+
+    pub fn display_type(&self) -> String {
+        match self {
+            Value::String(_) => String::from("String"),
+            Value::Number(_) => String::from("Number"),
+            Value::Reference(_) => String::from("Reference"),
+            Value::ArrayEntry(entry) => match entry.as_ref().unwrap().2.as_ref().unwrap() {
+                Constant::String(_) => String::from("String"),
+                Constant::Number(_) => String::from("Number"),
+            }
+        }
+    }
 }
 
 impl ValueType {
@@ -155,6 +181,24 @@ impl ValueType {
     }
     pub fn is_number(&self) -> bool {
         mem::discriminant(self) == mem::discriminant(&ValueType::Number)
+    }
+
+    pub fn display_type(&self) -> String {
+        match self {
+            ValueType::String => String::from("String"),
+            ValueType::Number => String::from("Number"),
+            ValueType::Array(subtype) => subtype.display_type(),
+        }
+    }
+
+    pub fn match_value(&self, value: &Value) -> bool {
+        match self {
+            ValueType::String => value.is_string(),
+            ValueType::Number => value.is_number(),
+            ValueType::Array(subtype) => {
+                subtype.match_value(value)
+            }
+        }
     }
 }
 

@@ -239,3 +239,20 @@ fn copyarray() {
     assert_eq!(String::from("world"), events.borrow().get("c1").unwrap().value.string_value().clone());
     assert_eq!(String::from("toto"), events.borrow().get("c2").unwrap().value.string_value().clone());
 }
+
+
+fn setarray_errors() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@toto = 1;
+    setarray .@a$[0], "hello", "world", .@toto;
+    setarray .@a$[0], "hello", "world", "2";
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+}

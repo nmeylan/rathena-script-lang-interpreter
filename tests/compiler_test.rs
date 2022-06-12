@@ -193,11 +193,11 @@ l6	    - script My class -1, {
 fn function_call_with_number_arguments_with_default_different_type_assigned_to_number() {
     // Given
     let script = r#"
-    // my_func(2);
-    // function my_func {
+    my_func(2);
+    function my_func {
         .@a = getarg(1, "3") + 4;
-        // vm_dump_var("a", .@a);
-    // }
+        vm_dump_var("a", .@a);
+    }
     "#;
     // When
     let result = compile_script(script);
@@ -325,4 +325,23 @@ l6	    .@b[1] = "2";
 l8	    .@d = .@a$[0] + .@b[0];
 	    ^^^
 "#, result.as_ref().err().unwrap()[2].message());
+}
+
+#[test]
+fn array_type_checking_copy_array() {
+    // Given
+    let script = r#"
+    .@toto$ = "toto";
+    setarray .@a$[0], "hello", "world", .@toto$;
+    copyarray .@b[0], .@a$[0], 1;
+    "#;
+    // When
+    let result = compile_script(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(1, result.as_ref().err().unwrap().len());
+    assert_eq!(r#"test_script 5:14. Variable ".@b[]" is declared as an Array of number but index 0 is assigned with a String.
+l5	    copyarray .@b[0], .@a$[0], 1;
+	              ^^^^^^
+"#, result.as_ref().err().unwrap()[0].message());
 }
