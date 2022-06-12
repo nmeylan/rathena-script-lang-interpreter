@@ -87,12 +87,12 @@ pub struct CompilationError {
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct CompilationDetail {
-    file_name: String,
-    start_line: usize,
-    start_column: usize,
-    end_line: usize,
-    end_column: usize,
-    text: String,
+    pub file_name: String,
+    pub start_line: usize,
+    pub start_column: usize,
+    pub end_line: usize,
+    pub end_column: usize,
+    pub text: String,
 }
 
 #[derive(Debug)]

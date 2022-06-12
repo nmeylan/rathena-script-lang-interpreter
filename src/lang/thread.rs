@@ -14,6 +14,7 @@ use crate::lang::chunk::{*};
 use crate::lang::class::{Class, Function, Instance};
 use crate::lang::compiler::CompilationDetail;
 use crate::lang::stack::StackEntry::{ArrayHeapReference, ConstantPoolReference, HeapReference};
+use crate::lang::stack_trace::StackTrace;
 use crate::lang::vm::RuntimeError;
 
 pub enum CallFrameBreak {
@@ -26,6 +27,7 @@ pub struct Thread {
     pub vm: Arc<Vm>,
     stack: Stack,
     current_source_line: CompilationDetail,
+    stack_traces: Vec<StackTrace>,
 }
 
 impl Thread {
@@ -34,7 +36,8 @@ impl Thread {
         Self {
             vm,
             stack,
-            current_source_line: CompilationDetail::new_empty()
+            current_source_line: CompilationDetail::new_empty(),
+            stack_traces: vec![],
         }
     }
 
@@ -82,13 +85,13 @@ impl Thread {
                     let array_ref_stack_entry = self.stack.pop()?;
                     let value_ref_stack_entry = self.stack.pop()?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
-                        let array = self.vm.array_from_heap_reference(owner_reference, reference).map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone(), err))?;
+                        let array = self.vm.array_from_heap_reference(owner_reference, reference).map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone() , self.stack_traces.clone(), err))?;
                         let result = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
                         if let Ok(constant_ref) = result {
                             array.assign(*arr_index, constant_ref);
                         }
                     } else {
-                        return Err(RuntimeError::new(self.current_source_line.clone(),"OpCode::ArrayStore - Expected stack entry to be a heap reference."));
+                        return Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),"OpCode::ArrayStore - Expected stack entry to be a heap reference."));
                     }
                 }
                 OpCode::ArrayLoad(arr_index) => {
@@ -96,42 +99,42 @@ impl Thread {
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         self.stack.push(StackEntry::ArrayHeapReference((owner_reference, reference, *arr_index)));
                     } else {
-                        return Err(RuntimeError::new(self.current_source_line.clone(),"OpCode::ArrayLoad - Expected stack entry to be a heap reference."));
+                        return Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),"OpCode::ArrayLoad - Expected stack entry to be a heap reference."));
                     }
                 }
                 OpCode::StoreLocal(reference) => {
-                    let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
+                    let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = call_frame.hash_code();
                     self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadLocal(reference) => {
-                    let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
+                    let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = call_frame.hash_code();
                     self.load_variable(variable, owner_reference, || StackEntry::LocalVariableReference(*reference))
                 }
                 OpCode::StoreInstance(reference) => {
                     if instance.is_none() {
-                        return Err(RuntimeError::new(self.current_source_line.clone(),"Can't store instance variable in a static(non-instance) context"));
+                        return Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),"Can't store instance variable in a static(non-instance) context"));
                     }
-                    let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(),format!("Variable with reference {} is not declared in instance scope", reference).as_str()))?;
+                    let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),format!("Variable with reference {} is not declared in instance scope", reference).as_str()))?;
                     let owner_reference = instance.unwrap().hash_code();
                     self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
-                        return Err(RuntimeError::new(self.current_source_line.clone(),"Can't load instance variable in a static(non-instance) context"));
+                        return Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),"Can't load instance variable in a static(non-instance) context"));
                     }
-                    let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(),format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
+                    let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = instance.unwrap().hash_code();
                     self.load_variable(variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
                 }
                 OpCode::StoreStatic(reference) => {
-                    let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(),format!("Variable with reference {} is not declared in class scope", reference).as_str()))?;
+                    let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),format!("Variable with reference {} is not declared in class scope", reference).as_str()))?;
                     let owner_reference = class.hash_code();
                     self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadStatic(reference) => {
-                    let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(),format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
+                    let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(),format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = class.hash_code();
                     self.load_variable(variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
                 }
@@ -233,7 +236,7 @@ impl Thread {
                             NumericOperation::Divide => "divide",
                             NumericOperation::Modulo => "modulo"
                         };
-                        return Err(RuntimeError::new(self.current_source_line.clone(), format!("Attempt to {} strings: {} - {}", operation_name, v1, v2).as_str()));
+                        return Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Attempt to {} strings: {} - {}", operation_name, v1, v2).as_str()));
                     } else {
                         let res = match operation {
                             NumericOperation::Subtract => v1.number_value() - v2.number_value(),
@@ -257,6 +260,7 @@ impl Thread {
                     }
                 }
                 OpCode::CallNative { argument_count, reference } => {
+                    self.add_stack_trace(StackTrace::from_compilation_detail(&self.current_source_line, call_frame.name.clone()));
                     let mut arguments: Vec<Value> = vec![];
                     let mut arguments_ref: Vec<Option<u64>> = vec![];
                     for _ in 0..*argument_count {
@@ -272,8 +276,10 @@ impl Thread {
                     } else {
                         self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
                     }
+                    self.stack_traces.pop();
                 }
                 OpCode::CallFunction { argument_count, reference } => {
+                    self.add_stack_trace(StackTrace::from_compilation_detail(&self.current_source_line, call_frame.name.clone()));
                     let function = class.functions_pool.get(reference).unwrap();
                     let stack_pointer = self.stack.len() - argument_count;
                     // Convert function argument to constant ref. If we pass current frame's variable in function argument, we need to retrieve value in sub callframe.
@@ -307,6 +313,7 @@ impl Thread {
                     }
                     let new_function_call_frame = CallFrame::new(function, stack_pointer, *argument_count);
                     let break_type = self.run(new_function_call_frame, depth + 1, class, instance)?;
+                    self.stack_traces.pop();
                     match break_type {
                         CallFrameBreak::Return(has_returned) => {
                             if !has_returned {
@@ -417,30 +424,30 @@ impl Thread {
     fn value_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: Option<&Instance>) -> Result<Value, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
-                let constant = self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                let constant = self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant.value())
             }
             StackEntry::LocalVariableReference(reference) => {
-                let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
+                let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::NativeReference(reference) => {
-                let native = self.vm.get_from_native_pool(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
+                let native = self.vm.get_from_native_pool(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
                 Ok(Value::String(Some(native.name.clone())))
             }
             StackEntry::FunctionReference(reference) => {
-                let function = class.functions_pool.get(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find function in CLASS function pool for given reference ({})", reference).as_str()))?;
+                let function = class.functions_pool.get(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find function in CLASS function pool for given reference ({})", reference).as_str()))?;
                 Ok(Value::String(Some(function.name.clone())))
             }
             StackEntry::InstanceVariableReference(reference) => {
                 if instance.is_none() {
-                    return Err(RuntimeError::new(self.current_source_line.clone(), "Can't find instance variable in a static (non-instance) context."));
+                    return Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), "Can't find instance variable in a static (non-instance) context."));
                 }
-                let variable = instance.unwrap().variables.get(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
+                let variable = instance.unwrap().variables.get(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::StaticVariableReference(reference) => {
-                let variable = class.static_variables.get(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
+                let variable = class.static_variables.get(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::HeapReference((owner_reference, reference)) => {
@@ -455,7 +462,7 @@ impl Thread {
                     } else { array_value_ref.ok().unwrap().map(|array_value_ref| self.vm.get_from_constant_pool(array_value_ref).unwrap()) };
                     Ok(Value::ArrayEntry(Some((*owner_reference, *reference, constant, *index))))
                 } else {
-                    Err(RuntimeError::new(self.current_source_line.clone(), "value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array"))
+                    Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), "value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array"))
                 }
             }
         }
@@ -464,57 +471,57 @@ impl Thread {
     fn value_from_value_ref(&self, value_ref: &ValueRef) -> Result<Value, RuntimeError> {
         match value_ref.value_type {
             ValueType::String => {
-                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), "String ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
-                let constant = option.ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap()).as_str()))?;
+                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), "String ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
+                let constant = option.ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap()).as_str()))?;
                 Ok(constant.value())
             }
             ValueType::Number => {
-                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), "Number ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
-                let constant = option.ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap()).as_str()))?;
+                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), "Number ValueRef does not contains reference. Variable has been not initialized.".to_string().as_str()))?);
+                let constant = option.ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap()).as_str()))?;
                 Ok(constant.value())
             }
-            _ => Err(RuntimeError::new(self.current_source_line.clone(), "value_from_value_ref - Array not implemented yet"))
+            _ => Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), "value_from_value_ref - Array not implemented yet"))
         }
     }
 
     fn native_from_stack_entry(&self, stack_entry: StackEntry) -> Result<&Native, RuntimeError> {
         match stack_entry {
             StackEntry::NativeReference(reference) => {
-                let native = self.vm.get_from_native_pool(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
+                let native = self.vm.get_from_native_pool(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find native in VM native pool for given reference ({})", reference).as_str()))?;
                 Ok(native)
             }
-            x => Err(RuntimeError::new_string(self.current_source_line.clone(), format!("Expected stack entry to be a reference to Native method but was {:?}", x)))
+            x => Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(), format!("Expected stack entry to be a reference to Native method but was {:?}", x)))
         }
     }
 
     fn constant_ref_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: Option<&Instance>) -> Result<u64, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
-                self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(*reference)
             }
             StackEntry::LocalVariableReference(reference) => {
-                let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
+                let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
-                self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)
             }
             StackEntry::InstanceVariableReference(reference) => {
                 if instance.is_none() {
-                    return Err(RuntimeError::new(self.current_source_line.clone(), "constant_ref_from_stack_entry - Can't retrieve constant reference for instance variable in a static(non-instance) context"));
+                    return Err(RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), "constant_ref_from_stack_entry - Can't retrieve constant reference for instance variable in a static(non-instance) context"));
                 }
-                let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
+                let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
-                self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)
             }
             StackEntry::StaticVariableReference(reference) => {
-                let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
+                let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
-                self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone() , self.stack_traces.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)
             }
-            x => Err(RuntimeError::new_string(self.current_source_line.clone(), format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
+            x => Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(), format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
     }
 
@@ -523,13 +530,13 @@ impl Thread {
             "getarg" => {
                 let index = arguments[0].number_value() as usize;
                 if arguments.len() == 1 && index > (call_frame.arguments_count - 1) {
-                    return Err(RuntimeError::new_string(self.current_source_line.clone(), format!("Can't call getarg({}) which is greater than number of arguments provided: {}. Maximum allow index is {}. Consider calling getarg with a default value: getarg({}, DEFAULT_VALUE)", index, call_frame.arguments_count, call_frame.arguments_count - 1, index)));
+                    return Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(), format!("Can't call getarg({}) which is greater than number of arguments provided: {}. Maximum allow index is {}. Consider calling getarg with a default value: getarg({}, DEFAULT_VALUE)", index, call_frame.arguments_count, call_frame.arguments_count - 1, index)));
                 } else if arguments.len() == 2 && index > (call_frame.arguments_count - 1) {
                     let value = arguments[1].clone();
                     let reference = self.vm.add_in_constant_pool(value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 } else if arguments.len() > 2 {
-                    return Err(RuntimeError::new_string(self.current_source_line.clone(), String::from("Can't call getarg with more than 2 arguments")));
+                    return Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(), String::from("Can't call getarg with more than 2 arguments")));
                 } else {
                     let stack_entry = self.stack.peek(call_frame.stack_pointer + index)?;
                     self.stack.push(stack_entry);
@@ -559,7 +566,7 @@ impl Thread {
                 for (i, array_reference) in arguments_ref.iter().enumerate() { // arguments are in reverse order
                     if array_reference.is_some() {
                         if !array.value_type.match_value(&arguments[i]) {
-                            return Err(RuntimeError::new_string(self.current_source_line.clone(), format!("setarray - tried to assign {} to an array of {}\n",
+                            return Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(), format!("setarray - tried to assign {} to an array of {}",
                                                                         arguments[i].display_type(), array.value_type.display_type())));
                         }
                         array.assign(index, array_reference.unwrap());
@@ -571,7 +578,7 @@ impl Thread {
                 let (owner_reference, reference) = arguments[0].reference_value();
                 let index = arguments[1].number_value() as usize;
                 let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
-                let reference = array.get(index).map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone(), err))?;
+                let reference = array.get(index).map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone() , self.stack_traces.clone(), err))?;
                 self.stack.push(StackEntry::ConstantPoolReference(reference.unwrap()));
             }
             "deletearray" => {
@@ -603,12 +610,24 @@ impl Thread {
                 let destination_array = self.vm.array_from_heap_reference(*destination_owner_reference, *destination_reference).unwrap();
                 let source_array = self.vm.array_from_heap_reference(*source_array_owner_reference, *source_array_reference).unwrap();
                 destination_array.copyarray(source_array, *destination_index, *source_array_index, count as usize)
-                    .map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone(), err))?
+                    .map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone() , self.stack_traces.clone(), err))?
             }
             _ => {
-                return Err(RuntimeError::new_string(self.current_source_line.clone(), format!("Native function {} is not handled yet!", native.name)));
+                return Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));
             }
         }
         Ok(())
+    }
+
+    fn add_stack_trace(&mut self, stack_trace: StackTrace) {
+        if self.stack_traces.len() > 10 {
+            self.stack_traces.remove(0);
+        }
+        self.stack_traces.push(stack_trace);
+    }
+
+    fn set_stack_trace(&mut self, stack_trace: StackTrace) {
+        self.stack_traces.clear();
+        self.stack_traces.push(stack_trace);
     }
 }

@@ -240,7 +240,7 @@ fn copyarray() {
     assert_eq!(String::from("toto"), events.borrow().get("c2").unwrap().value.string_value().clone());
 }
 
-// #[test]
+#[test]
 fn setarray_errors() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
@@ -253,6 +253,10 @@ fn setarray_errors() {
     let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
     // Then
+    assert_eq!(r#"setarray - tried to assign Number to an array of String
+test_script 4:4.
+l4	    setarray .@a$[0], "hello", "world", .@toto;
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"#, runtime_error.to_string().trim());
 }

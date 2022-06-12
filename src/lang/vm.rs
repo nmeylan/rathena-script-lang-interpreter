@@ -15,6 +15,7 @@ use crate::lang::class::{Array, Class, Function, Instance};
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
+use crate::lang::stack_trace::StackTrace;
 use crate::lang::thread::Thread;
 
 use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable};
@@ -77,7 +78,7 @@ pub struct Vm {
 #[derive(Debug)]
 pub enum RuntimeErrorType {
     Internal,
-    Execution
+    Execution,
 }
 
 #[derive(Debug)]
@@ -85,6 +86,7 @@ pub struct RuntimeError {
     pub message: String,
     pub source: CompilationDetail,
     pub error_type: RuntimeErrorType,
+    pub stack_traces: Vec<StackTrace>,
 }
 
 #[derive(Debug)]
@@ -106,30 +108,36 @@ impl TemporaryRuntimeError {
 }
 
 impl RuntimeError {
-    pub fn new(source: CompilationDetail, message: &str) -> Self {
+    pub fn new(source: CompilationDetail, stack_traces: Vec<StackTrace>, message: &str) -> Self {
         Self {
-            source, message: message.to_string(),
-            error_type: RuntimeErrorType::Execution
+            source,
+            message: message.to_string(),
+            stack_traces,
+            error_type: RuntimeErrorType::Execution,
         }
     }
-    pub fn new_string(source: CompilationDetail, message: String) -> Self {
+    pub fn new_string(source: CompilationDetail, stack_traces: Vec<StackTrace>, message: String) -> Self {
         Self {
-            source, message,
-            error_type: RuntimeErrorType::Execution
+            source,
+            message,
+            stack_traces,
+            error_type: RuntimeErrorType::Execution,
         }
     }
     pub fn new_internal(message: String) -> Self {
         Self {
             message,
             source: CompilationDetail::new_empty(),
-            error_type: RuntimeErrorType::Internal
+            error_type: RuntimeErrorType::Internal,
+            stack_traces: vec![],
         }
     }
-    pub fn from_temporary(source: CompilationDetail, temporary: TemporaryRuntimeError) -> Self {
+    pub fn from_temporary(source: CompilationDetail, stack_traces: Vec<StackTrace>, temporary: TemporaryRuntimeError) -> Self {
         Self {
             message: temporary.message,
             source,
-            error_type: RuntimeErrorType::Execution
+            error_type: RuntimeErrorType::Execution,
+            stack_traces,
         }
     }
     pub fn message(&self) -> String {
@@ -140,7 +148,15 @@ impl RuntimeError {
 impl Display for RuntimeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}", self.message).unwrap();
-        write!(f, "{}", self.source)
+        if self.stack_traces.len() < 2 {
+            write!(f, "{}", self.source)
+        } else {
+            writeln!(f, "{}", self.source).unwrap();
+            for (i, trace) in self.stack_traces.iter().enumerate() {
+                writeln!(f, "{}: {}", i, trace);
+            }
+            write!(f, "")
+        }
     }
 }
 
@@ -315,7 +331,6 @@ impl Vm {
                 Constant::String(_v) => writeln!(out, "({}) \"{}\"", reference, constant).unwrap(),
                 Constant::Number(_v) => writeln!(out, "({}) {}", reference, constant).unwrap(),
             }
-
         }
         writeln!(out, "========= Heap =========").unwrap();
         for (owner_reference, owner_entries) in self.heap.borrow().iter() {
