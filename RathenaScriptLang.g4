@@ -296,12 +296,8 @@ menuStatement
 menuItem
     : expression ',' (Identifier | '-');
 
-commandStatement
-    : Identifier expression (',' expression)*;
-
 dialogStatement
     : (Close | Close2 | Next) ';';
-
 
 translationUnit
     : externalDeclaration+

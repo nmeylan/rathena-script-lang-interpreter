@@ -3,11 +3,10 @@ use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
-use std::{env, io, mem};
-use std::fs::File;
-use std::io::BufRead;
+use std::{mem};
+
 use std::ops::Deref;
-use std::path::{Path, PathBuf};
+
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream};
@@ -146,25 +145,23 @@ impl Compiler {
             panic!("{}", result.err().unwrap());
         }
         if let Ok(lines) = result {
-            for line in lines {
-                if let Ok(l) = line {
-                    let line = l.trim();
-                    if line.starts_with("/") {
-                        continue;
-                    }
-                    let split = line.split(',');
-                    let split: Vec<&str> = split.collect();
-                    let return_type = if split.len() > 1 {
-                        match split[1] {
-                            "Number" | "number" => Some(ValueType::Number),
-                            "String" | "string" => Some(ValueType::String),
-                            _ => None
-                        }
-                    } else {
-                        None
-                    };
-                    native_functions.push(NativeFunction { name: split[0].to_string(), return_type });
+            for line in lines.flatten() {
+                let line = line.trim();
+                if line.starts_with('/') {
+                    continue;
                 }
+                let split = line.split(',');
+                let split: Vec<&str> = split.collect();
+                let return_type = if split.len() > 1 {
+                    match split[1] {
+                        "Number" | "number" => Some(ValueType::Number),
+                        "String" | "string" => Some(ValueType::String),
+                        _ => None
+                    }
+                } else {
+                    None
+                };
+                native_functions.push(NativeFunction { name: split[0].to_string(), return_type });
             }
         } else {
             panic!()
@@ -294,12 +291,10 @@ impl Compiler {
             } else {
                 ValueRef::new_empty_string()
             }
+        } else if has_bracket {
+            ValueRef::new_empty_array(ValueType::Number)
         } else {
-            if has_bracket {
-                ValueRef::new_empty_array(ValueType::Number)
-            } else {
-                ValueRef::new_empty_number()
-            }
+            ValueRef::new_empty_number()
         }
     }
 
@@ -378,7 +373,7 @@ impl Compiler {
     }
 
     fn remove_current_assigment_type(&mut self, count: usize) {
-        for i in 0..count {
+        for _i in 0..count {
             self.state.current_assignment_types.pop();
         }
     }
@@ -523,7 +518,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else {
             return;
         };
-        ;
+
         if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
             if native.name == "getarg" && argument_count > 1 {
                 // do not remove default value type, so we can check at compile time that default type match variable type
@@ -545,10 +540,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-    fn visit_postfixExpression(&mut self, ctx: &PostfixExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_argumentExpressionList(&mut self, ctx: &ArgumentExpressionListContext<'input>) {
         for expression in ctx.assignmentExpression_all().iter() {
             if expression.Number().is_some() {
@@ -557,18 +548,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
         }
         self.visit_children(ctx);
-    }
-
-    fn visit_unaryExpression(&mut self, ctx: &UnaryExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_unaryOperator(&mut self, ctx: &UnaryOperatorContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_castExpression(&mut self, ctx: &CastExpressionContext<'input>) {
-        self.visit_children(ctx)
     }
 
     fn visit_multiplicativeExpression(&mut self, ctx: &MultiplicativeExpressionContext<'input>) {
@@ -620,10 +599,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-    fn visit_shiftExpression(&mut self, ctx: &ShiftExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_relationalExpression(&mut self, ctx: &RelationalExpressionContext<'input>) {
         self.visit_shiftExpression(&ctx.shiftExpression(ctx.shiftExpression_all().len() - 1).unwrap());
         for (i, _) in ctx.shiftExpression_all().iter().enumerate().rev() {
@@ -670,18 +645,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-    fn visit_andExpression(&mut self, ctx: &AndExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_exclusiveOrExpression(&mut self, ctx: &ExclusiveOrExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_inclusiveOrExpression(&mut self, ctx: &InclusiveOrExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_logicalAndExpression(&mut self, ctx: &LogicalAndExpressionContext<'input>) {
         self.visit_inclusiveOrExpression(&ctx.inclusiveOrExpression(ctx.inclusiveOrExpression_all().len() - 1).unwrap());
         for (i, _) in ctx.inclusiveOrExpression_all().iter().enumerate().rev() {
@@ -714,29 +677,30 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-    fn visit_conditionalExpression(&mut self, ctx: &ConditionalExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
         let maybe_left = ctx.assignmentLeftExpression();
         if let Some(left) = maybe_left {
             if ctx.Setarray().is_some() {
-                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
-                self.visit_assignmentLeftExpression(&left);
-                let argument_count = ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as usize;
+                // Array can be assigned using setarray too
+                // *setarray <array name>[<first value>],<value>{,<value>...<value>};
+                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap()); // <value>. In this language declaration require a value to assign
+                self.visit_assignmentLeftExpression(&left); // <array name>[<first value>]. Declare array variable.
+                let argument_count = ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as usize; // {,<value>...<value>}
                 if argument_count > 0 {
                     self.visit_variable(left.variable().as_ref().unwrap());
                     self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
                     self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 });
                 }
             } else if ctx.Copyarray().is_some() {
-                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
-                self.visit_assignmentLeftExpression(&left);
-                self.visit_variable(left.variable().as_ref().unwrap());
-                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+                // Array can be assigned using copyarray too
+                // *copyarray <destination array>[<first value>],<source array>[<first value>],<amount of data to copy>
+                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap()); // <source array>[<first value>]. Declare array variable.
+                self.visit_assignmentLeftExpression(&left); // <destination array>[<first value>]. Declare array variable.
+                self.visit_variable(left.variable().as_ref().unwrap()); // Retrieve declared destination array
+                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap()); // Retrieve source array
                 self.current_assignment_type_drop();
-                self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
+                // TODO ensure that argument list contains only 1 element.
+                self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap()); // <amount of data to copy>
                 self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"copyarray"), argument_count: 3 });
             } else {
                 self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
@@ -767,35 +731,27 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_assignmentLeftExpression(&mut self, ctx: &AssignmentLeftExpressionContext<'input>) {
         if ctx.Identifier().is_some() {
             // Number + char permanent variable (ie: not ending with '$', nor having any scope) match Identifier instead of variable.
-            let name = ctx.Identifier().unwrap().symbol.text.deref().to_string();
+            let _name = ctx.Identifier().unwrap().symbol.text.deref().to_string();
             // TODO
         } else if ctx.variable().is_some() {
             let (variable, index) = Self::build_variable(&ctx.variable().unwrap());
             if let Some(current_value_type) = self.current_assignment_type_drop() {
-                if variable.value_ref.borrow().is_string() {
-                    if current_value_type.is_number() {
-                        self.register_error(CompilationErrorType::Type, ctx,
-                                            format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
-                    }
+                if variable.value_ref.borrow().is_string() && current_value_type.is_number() {
+                    self.register_error(CompilationErrorType::Type, ctx,
+                                        format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
                 }
-                if variable.value_ref.borrow().is_string_array() {
-                    if current_value_type.is_number() {
-                        self.register_error(CompilationErrorType::Type, ctx,
-                                            format!("Variable \"{}\" is declared as an Array of string but index {} is assigned with a Number.", variable.to_script_identifier(), index.unwrap()));
-                    }
+                if variable.value_ref.borrow().is_string_array() && current_value_type.is_number() {
+                    self.register_error(CompilationErrorType::Type, ctx,
+                                        format!("Variable \"{}\" is declared as an Array of string but index {} is assigned with a Number.", variable.to_script_identifier(), index.unwrap()));
                 }
-                if variable.value_ref.borrow().is_number() {
-                    if current_value_type.is_string() {
-                        self.register_error(CompilationErrorType::Type, ctx,
-                                            format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
-                    }
+                if variable.value_ref.borrow().is_number() && current_value_type.is_string() {
+                    self.register_error(CompilationErrorType::Type, ctx,
+                                        format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
                 }
 
-                if variable.value_ref.borrow().is_number_array() {
-                    if current_value_type.is_string() {
-                        self.register_error(CompilationErrorType::Type, ctx,
-                                            format!("Variable \"{}\" is declared as an Array of number but index {} is assigned with a String.", variable.to_script_identifier(), index.unwrap()));
-                    }
+                if variable.value_ref.borrow().is_number_array() && current_value_type.is_string() {
+                    self.register_error(CompilationErrorType::Type, ctx,
+                                        format!("Variable \"{}\" is declared as an Array of number but index {} is assigned with a String.", variable.to_script_identifier(), index.unwrap()));
                 }
             }
             let is_array = variable.value_ref.borrow().is_array();
@@ -823,38 +779,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-
-    fn visit_assignmentOperator(&mut self, ctx: &AssignmentOperatorContext<'input>) {
-        self.visit_children(ctx);
-    }
-
-    fn visit_expression(&mut self, ctx: &ExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_constantExpression(&mut self, ctx: &ConstantExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_declaration(&mut self, ctx: &DeclarationContext<'input>) {
         self.visit_children(ctx);
         self.current_assignment_type_drop();
-    }
-
-    fn visit_declarationSpecifiers(&mut self, ctx: &DeclarationSpecifiersContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_declarationSpecifiers2(&mut self, ctx: &DeclarationSpecifiers2Context<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_declarationSpecifier(&mut self, ctx: &DeclarationSpecifierContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_initDeclaratorList(&mut self, ctx: &InitDeclaratorListContext<'input>) {
-        self.visit_children(ctx)
     }
 
     fn visit_initDeclarator(&mut self, ctx: &InitDeclaratorContext<'input>) {
@@ -866,62 +793,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_specifierQualifierList(&mut self, ctx: &SpecifierQualifierListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_declarator(&mut self, ctx: &DeclaratorContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_directDeclarator(&mut self, ctx: &DirectDeclaratorContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_nestedParenthesesBlock(&mut self, ctx: &NestedParenthesesBlockContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_parameterTypeList(&mut self, ctx: &ParameterTypeListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_parameterList(&mut self, ctx: &ParameterListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_parameterDeclaration(&mut self, ctx: &ParameterDeclarationContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_identifierList(&mut self, ctx: &IdentifierListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_directAbstractDeclarator(&mut self, ctx: &DirectAbstractDeclaratorContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_initializer(&mut self, ctx: &InitializerContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_initializerList(&mut self, ctx: &InitializerListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_designation(&mut self, ctx: &DesignationContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_designatorList(&mut self, ctx: &DesignatorListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_designator(&mut self, ctx: &DesignatorContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_statement(&mut self, ctx: &StatementContext<'input>) {
         self.visit_children(ctx)
     }
 
@@ -946,18 +817,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else {
             self.visit_children(ctx)
         }
-    }
-
-    fn visit_compoundStatement(&mut self, ctx: &CompoundStatementContext<'input>) {
-        self.visit_children(ctx);
-    }
-
-    fn visit_blockItemList(&mut self, ctx: &BlockItemListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_blockItem(&mut self, ctx: &BlockItemContext<'input>) {
-        self.visit_children(ctx)
     }
 
     fn visit_expressionStatement(&mut self, ctx: &ExpressionStatementContext<'input>) {
@@ -1023,22 +882,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-    fn visit_forCondition(&mut self, ctx: &ForConditionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_forDeclaration(&mut self, ctx: &ForDeclarationContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_forExpression(&mut self, ctx: &ForExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_forStopExpression(&mut self, ctx: &ForStopExpressionContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_jumpStatement(&mut self, ctx: &JumpStatementContext<'input>) {
         self.visit_children(ctx);
         if ctx.Return().is_some() {
@@ -1057,26 +900,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-    fn visit_menuStatement(&mut self, ctx: &MenuStatementContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_menuItem(&mut self, ctx: &MenuItemContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_dialogStatement(&mut self, ctx: &DialogStatementContext<'input>) {
-        self.visit_children(ctx)
-    }
-
-    fn visit_translationUnit(&mut self, ctx: &TranslationUnitContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_externalDeclaration(&mut self, ctx: &ExternalDeclarationContext<'input>) {
         self.visit_children(ctx);
         self.current_assignment_type_drop();
@@ -1089,7 +912,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.register_error(FunctionAlreadyDefined, ctx, format!("A function with name \"{}\" already exists.", function_name));
             return;
         }
-        if self.native_functions.iter().find(|native| native.name == function_name).is_some() {
+        if self.native_functions.iter().any(|native| native.name == function_name) {
             self.register_error(NativeAlreadyDefined, ctx, format!("A native function with name \"{}\" already exists.", function_name));
             return;
         }
@@ -1115,18 +938,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         self.visit_compoundStatement(ctx.compoundStatement().as_ref().unwrap());
     }
 
-    fn visit_scope_specifier(&mut self, ctx: &Scope_specifierContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
         let (variable, index) = Self::build_variable(ctx);
         self.add_current_assignment_type_from_variable(&variable);
         self.load_variable(&variable, index, ctx);
-    }
-
-    fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) {
-        self.visit_children(ctx)
     }
 
     fn visit_scriptName(&mut self, ctx: &ScriptNameContext<'input>) {

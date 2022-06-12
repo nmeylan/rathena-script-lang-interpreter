@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use ragnarok_script_interpreter::lang::chunk::ClassFile;
-use ragnarok_script_interpreter::lang::compiler::Compiler;
+
+
 use ragnarok_script_interpreter::lang::vm::Vm;
 use crate::common::{compile_script, Event};
 

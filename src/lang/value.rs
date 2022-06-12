@@ -4,17 +4,62 @@ use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::Deref;
-use antlr_rust::TidExt;
+
 
 pub type AccountId = String;
 pub type CharId = String;
 pub type NpcName = String;
 pub type InstanceId = String;
 
+// Variables are struct stored in variable pools (locals, static, instances)
+// They don't contains the value, but just reference of these value from constant pool.
+#[derive(Debug, Clone)]
+pub struct Variable {
+    pub name: String,
+    pub scope: Scope,
+    pub value_ref: RefCell<ValueRef>,
+}
+
+// Variables scope
+#[derive(Debug, Clone, Hash, PartialEq)]
+pub enum Scope {
+    Server,
+    Account,
+    Character,
+    Npc,
+    Instance,
+    Local,
+}
+
+// A structure containing type and reference of a value
+#[derive(Debug, Clone, Hash, PartialEq)]
+pub struct ValueRef {
+    pub reference: Option<u64>,
+    pub value_type: ValueType,
+}
+// Type of a value
+#[derive(Debug, Clone, Hash, PartialEq)]
+pub enum ValueType {
+    String,
+    Number,
+    Array(Box<ValueType>),
+}
+
+// Actual values are contains in this enum
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub enum Constant {
     String(String),
     Number(i32),
+}
+
+// Value wrap actual values stored in constant pool.
+// Values can be also value behind references.
+#[derive(Debug, Clone, Hash, PartialEq)]
+pub enum Value {
+    String(Option<String>),
+    Number(Option<i32>),
+    Reference(Option<(u64, u64)>),
+    ArrayEntry(Option<(u64, u64, Option<Constant>, usize)>),
 }
 
 impl Constant {
@@ -31,14 +76,6 @@ impl Constant {
     pub fn is_number(&self) -> bool {
         mem::discriminant(self) == mem::discriminant(&Constant::Number(0))
     }
-}
-
-#[derive(Debug, Clone, Hash, PartialEq)]
-pub enum Value {
-    String(Option<String>),
-    Number(Option<i32>),
-    Reference(Option<(u64, u64)>),
-    ArrayEntry(Option<(u64, u64, Option<Constant>, usize)>),
 }
 
 impl Value {
@@ -110,19 +147,6 @@ impl Value {
             Value::ArrayEntry(entry) => { entry.as_ref().unwrap() }
         }
     }
-}
-
-#[derive(Debug, Clone, Hash, PartialEq)]
-pub struct ValueRef {
-    pub reference: Option<u64>,
-    pub value_type: ValueType,
-}
-
-#[derive(Debug, Clone, Hash, PartialEq)]
-pub enum ValueType {
-    String,
-    Number,
-    Array(Box<ValueType>),
 }
 
 impl ValueType {
@@ -217,22 +241,7 @@ impl ValueRef {
     }
 }
 
-#[derive(Debug, Clone, Hash, PartialEq)]
-pub enum Scope {
-    Server,
-    Account,
-    Character,
-    Npc,
-    Instance,
-    Local,
-}
 
-#[derive(Debug, Clone)]
-pub struct Variable {
-    pub name: String,
-    pub scope: Scope,
-    pub value_ref: RefCell<ValueRef>,
-}
 
 impl Variable {
     pub fn set_value_ref(&self, reference: u64) {

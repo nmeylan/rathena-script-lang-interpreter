@@ -2,9 +2,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::sync::atomic::AtomicUsize;
-use ragnarok_script_interpreter::lang::chunk::ClassFile;
-use ragnarok_script_interpreter::lang::compiler::Compiler;
+
+
+
 use ragnarok_script_interpreter::lang::vm::Vm;
 use crate::common::{compile, Event};
 
@@ -60,7 +60,7 @@ fn instance_variable_test() {
     let vm = crate::common::setup_vm(move |e| {
         let i1 = *i.borrow();
         *i.borrow_mut() = i1 + 1;
-        events_clone.borrow_mut().insert(format!("{}{}", e.name.clone(), *i.borrow()), e);
+        events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
@@ -94,7 +94,7 @@ fn static_variable_test() {
     let vm = crate::common::setup_vm(move |e| {
         let i1 = *i.borrow();
         *i.borrow_mut() = i1 + 1;
-        events_clone.borrow_mut().insert(format!("{}{}", e.name.clone(), *i.borrow()), e);
+        events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
@@ -131,7 +131,7 @@ fn on_init_hook_test() {
     let vm = crate::common::setup_vm(move |e| {
         let i1 = *i.borrow();
         *i.borrow_mut() = i1 + 1;
-        events_clone.borrow_mut().insert(format!("{}{}", e.name.clone(), *i.borrow()), e);
+        events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
@@ -169,7 +169,7 @@ fn on_instance_init_hook_test() {
     let vm = crate::common::setup_vm(move |e| {
         let i1 = *i.borrow();
         *i.borrow_mut() = i1 + 1;
-        events_clone.borrow_mut().insert(format!("{}{}", e.name.clone(), *i.borrow()), e);
+        events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
     });
     // When
     Vm::bootstrap(vm.clone(), classes);

@@ -57,10 +57,7 @@ impl HeapEntry {
     }
 
     pub fn is_array(&self) -> bool {
-        match self {
-            HeapEntry::Array(_) => true,
-            _ => false
-        }
+        matches!(self, HeapEntry::Array(_))
     }
 }
 
@@ -152,9 +149,9 @@ impl Vm {
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
         if let Some(init_function) = maybe_init_function {
             let mut program = Thread::new(vm.clone());
-            program.run_function(class.clone(), Some(&instance), init_function);
+            program.run_function(class.clone(), Some(&instance), init_function)?;
         }
-        let mut program = Thread::new(vm.clone());
+        let mut program = Thread::new(vm);
         program.run_main(instance).map_err(|e| {
             println!("{}", e);
             e
@@ -219,7 +216,7 @@ impl Vm {
         let heap_ref = self.heap.borrow();
         let mut owner_entries = heap_ref.get(&owner_reference).unwrap().borrow_mut();
         if owner_entries.get(&reference).is_none() {
-            owner_entries.insert(reference, HeapEntry::Array(Rc::new(Array::new(reference, value_type))));
+            owner_entries.insert(reference, HeapEntry::Array(Rc::new(Array::new(reference))));
         }
     }
 
@@ -268,8 +265,8 @@ impl Vm {
         writeln!(out, "========= Constants Pool =========").unwrap();
         for (reference, constant) in self.constants_pool.borrow().iter() {
             match constant {
-                Constant::String(v) => writeln!(out, "({}) \"{}\"", reference, constant).unwrap(),
-                Constant::Number(v) => writeln!(out, "({}) {}", reference, constant).unwrap(),
+                Constant::String(_v) => writeln!(out, "({}) \"{}\"", reference, constant).unwrap(),
+                Constant::Number(_v) => writeln!(out, "({}) {}", reference, constant).unwrap(),
             }
 
         }

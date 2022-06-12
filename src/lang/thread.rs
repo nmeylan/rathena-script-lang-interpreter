@@ -1,12 +1,12 @@
-use std::{io, mem};
+use std::{io};
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
-use std::ops::Index;
+
 use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Native, ValueRef, ValueType, Variable};
-use crate::lang::vm::{Hashcode, HeapEntry, NATIVE_FUNCTIONS, Vm};
+use crate::lang::vm::{Hashcode, NATIVE_FUNCTIONS, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
@@ -97,7 +97,7 @@ impl Thread {
                 OpCode::StoreLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
                     let owner_reference = call_frame.hash_code();
-                    self.set_variable(&call_frame, class, instance, variable, owner_reference);
+                    self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
@@ -110,7 +110,7 @@ impl Thread {
                     }
                     let variable = instance.unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in instance scope", reference).as_str()))?;
                     let owner_reference = instance.unwrap().hash_code();
-                    self.set_variable(&call_frame, class, instance, variable, owner_reference);
+                    self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
@@ -123,7 +123,7 @@ impl Thread {
                 OpCode::StoreStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in class scope", reference).as_str()))?;
                     let owner_reference = class.hash_code();
-                    self.set_variable(&call_frame, class, instance, variable, owner_reference);
+                    self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(format!("Variable with reference {} is not declared in local scope", reference).as_str()))?;
@@ -257,13 +257,12 @@ impl Thread {
                     for _ in 0..*argument_count {
                         let stack_entry = self.stack.pop()?;
                         arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?);
-                        arguments_ref.push(self.constant_ref_from_stack_entry(&stack_entry, &call_frame, class, instance)
-                            .map_or(None, |reference| Some(reference)));
+                        arguments_ref.push(self.constant_ref_from_stack_entry(&stack_entry, &call_frame, class, instance).ok());
                     }
                     arguments.reverse();
                     arguments_ref.reverse();
                     let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
-                    if NATIVE_FUNCTIONS.iter().find(|(native, _)| native == &native_method.name.as_str()).is_some() {
+                    if NATIVE_FUNCTIONS.iter().any(|(native, _)| native == &native_method.name.as_str()) {
                         self.handle_native_method(native_method, &call_frame, arguments, arguments_ref)?;
                     } else {
                         self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
@@ -380,9 +379,10 @@ impl Thread {
             array_ref
         } else {
             let stack_entry = self.stack.pop()?;
-            self.constant_ref_from_stack_entry(&stack_entry, &call_frame, class, instance)?
+            self.constant_ref_from_stack_entry(&stack_entry, call_frame, class, instance)?
         };
-        Ok(variable.set_value_ref(reference))
+        variable.set_value_ref(reference);
+        Ok(())
     }
 
     fn dump(&self, class: &Class, out: &mut Stdout) {
@@ -394,7 +394,7 @@ impl Thread {
         self.vm.dump(out);
     }
 
-    fn dump_stack(&self, out: &mut Stdout, call_frame: &CallFrame, class: &Class, instance: Option<&Instance>) {
+    fn dump_stack(&self, out: &mut Stdout, _call_frame: &CallFrame, _class: &Class, _instance: Option<&Instance>) {
         if self.stack.contents().is_empty() {
             writeln!(out, "         <empty stack>").unwrap();
         } else {
@@ -447,11 +447,7 @@ impl Thread {
                     let constant = if array_value_ref.is_err() {
                         // TODO warn error?
                         None
-                    } else if let Some(array_value_ref) = array_value_ref.ok().unwrap() {
-                        Some(self.vm.get_from_constant_pool(array_value_ref).unwrap())
-                    } else {
-                        None
-                    };
+                    } else { array_value_ref.ok().unwrap().map(|array_value_ref| self.vm.get_from_constant_pool(array_value_ref).unwrap()) };
                     Ok(Value::ArrayEntry(Some((*owner_reference, *reference, constant, *index))))
                 } else {
                     Err(RuntimeError::new("value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array"))
