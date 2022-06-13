@@ -24,6 +24,30 @@ Rathena script command related to game, almost all commands listed [here](https:
 
 Compiler considers those command as "native" functions. VM require to implement a native functions handler, which has to be implemented by the server.
 
+# Features
+In addition of providing a compiler and vm to interpret rathena script lang, this implementation provides:
+- Nice compilation errors for easier code writing
+```
+Variable ".@c" is declared as a Number but is assigned with a String.
+test_script 12:4.
+l12	    .@c = str();
+	    ^^^
+```
+- Nice runtime errors for easier debugging
+```
+Can't call getarg(1) which is greater than number of arguments provided: 1. Maximum index is 0. Consider calling getarg with a default value: getarg(1, DEFAULT_VALUE)
+test_script 5:15.
+l5	        .@a$ = getarg(1) + " world";
+	               ^^^^^^^^^
+
+0: _main
+	at /home/ragnarok/dev/npc/warps.txt(Warper:3)
+1: my_func
+	at /home/ragnarok/dev/npc/warps.txt(Warper:5)
+```
+- Compilation for faster server startup
+
+
 # Architecture
 ## Language specificity
 Althought Rathena script lang is not an oriented object programming language, it has notion of:
