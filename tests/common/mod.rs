@@ -1,7 +1,8 @@
 use std::sync::Arc;
 use ragnarok_script_interpreter::lang::call_frame::CallFrame;
 use ragnarok_script_interpreter::lang::chunk::ClassFile;
-use ragnarok_script_interpreter::lang::compiler::{CompilationError, Compiler};
+use ragnarok_script_interpreter::lang::compiler::{Compiler};
+use ragnarok_script_interpreter::lang::error::CompilationError;
 use ragnarok_script_interpreter::lang::thread::Thread;
 use ragnarok_script_interpreter::lang::value::{Value};
 use ragnarok_script_interpreter::lang::vm::{NativeMethodHandler, Vm};

@@ -8,3 +8,4 @@ pub mod call_frame;
 pub mod thread;
 pub mod chunk;
 pub mod stack_trace;
+pub mod error;

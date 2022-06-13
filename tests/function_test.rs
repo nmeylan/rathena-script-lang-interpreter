@@ -92,9 +92,9 @@ l5	        .@a$ = getarg(1) + " world";
 	               ^^^^^^^^^
 
 0: _main
-	at test_script:3
+	at test_script(_MainScript:3)
 1: my_func
-	at test_script:5"#, runtime_error.to_string().trim());
+	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
 }
 #[test]
 fn function_call_with_arguments_with_default() {

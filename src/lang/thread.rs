@@ -1,5 +1,4 @@
-use std::{io, mem};
-use std::fmt::format;
+use std::{io};
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
 
@@ -13,9 +12,9 @@ use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
 use crate::lang::class::{Class, Function, Instance};
 use crate::lang::compiler::CompilationDetail;
+use crate::lang::error::RuntimeError;
 use crate::lang::stack::StackEntry::{ArrayHeapReference, ConstantPoolReference, HeapReference};
 use crate::lang::stack_trace::StackTrace;
-use crate::lang::vm::RuntimeError;
 
 pub enum CallFrameBreak {
     Return(bool),
@@ -260,7 +259,7 @@ impl Thread {
                     }
                 }
                 OpCode::CallNative { argument_count, reference } => {
-                    self.add_stack_trace(StackTrace::from_compilation_detail(&self.current_source_line, call_frame.name.clone()));
+                    self.add_stack_trace(StackTrace::from_compilation_detail(&self.current_source_line, call_frame.name.clone(), class.name.clone()));
                     let mut arguments: Vec<Value> = vec![];
                     let mut arguments_ref: Vec<Option<u64>> = vec![];
                     for _ in 0..*argument_count {
@@ -279,7 +278,7 @@ impl Thread {
                     self.stack_traces.pop();
                 }
                 OpCode::CallFunction { argument_count, reference } => {
-                    self.add_stack_trace(StackTrace::from_compilation_detail(&self.current_source_line, call_frame.name.clone()));
+                    self.add_stack_trace(StackTrace::from_compilation_detail(&self.current_source_line, call_frame.name.clone(), class.name.clone()));
                     let function = class.functions_pool.get(reference).unwrap();
                     let stack_pointer = self.stack.len() - argument_count;
                     // Convert function argument to constant ref. If we pass current frame's variable in function argument, we need to retrieve value in sub callframe.
@@ -623,11 +622,6 @@ impl Thread {
         if self.stack_traces.len() > 10 {
             self.stack_traces.remove(0);
         }
-        self.stack_traces.push(stack_trace);
-    }
-
-    fn set_stack_trace(&mut self, stack_trace: StackTrace) {
-        self.stack_traces.clear();
         self.stack_traces.push(stack_trace);
     }
 }

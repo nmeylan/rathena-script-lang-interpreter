@@ -7,9 +7,10 @@ use std::rc::Rc;
 use std::time::SystemTime;
 use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::compiler::CompilationDetail;
+use crate::lang::error::TemporaryRuntimeError;
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{ValueType, Variable};
-use crate::lang::vm::{Hashcode, RuntimeError, TemporaryRuntimeError, Vm};
+use crate::lang::vm::{Hashcode, Vm};
 
 #[derive(Debug)]
 pub struct Class {

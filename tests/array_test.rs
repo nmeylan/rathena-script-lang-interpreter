@@ -258,5 +258,8 @@ fn setarray_errors() {
     assert_eq!(r#"setarray - tried to assign Number to an array of String
 test_script 4:4.
 l4	    setarray .@a$[0], "hello", "world", .@toto;
-	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"#, runtime_error.to_string().trim());
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0: _main
+	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
 }

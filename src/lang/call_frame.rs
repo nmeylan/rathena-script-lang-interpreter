@@ -7,7 +7,6 @@ use std::io::{Stdout, Write};
 use std::time::SystemTime;
 use crate::lang::chunk::{OpCode};
 use crate::lang::class::Function;
-use crate::lang::compiler::CompilationDetail;
 use crate::lang::value::Variable;
 use crate::lang::vm::{Hashcode, Vm};
 

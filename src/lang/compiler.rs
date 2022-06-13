@@ -2,7 +2,7 @@ use std::borrow::{Borrow, Cow};
 use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Formatter};
 use std::{mem};
 
 use std::ops::Deref;
@@ -20,7 +20,8 @@ use crate::lang::vm::{NATIVE_FUNCTIONS, Vm};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition, Label};
 use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreInstance, StoreLocal};
-use crate::lang::compiler::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
+use crate::lang::error::{CompilationError, CompilationErrorType};
+use crate::lang::error::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{*};
 use crate::util::file::read_lines;
@@ -76,14 +77,6 @@ pub enum VariableScope {
     PermanentAccount,
 }
 
-#[derive(Debug)]
-#[allow(dead_code)]
-pub struct CompilationError {
-    error_type: CompilationErrorType,
-    message: String,
-    details: CompilationDetail,
-}
-
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct CompilationDetail {
@@ -93,19 +86,6 @@ pub struct CompilationDetail {
     pub end_line: usize,
     pub end_column: usize,
     pub text: String,
-}
-
-#[derive(Debug)]
-pub enum CompilationErrorType {
-    Generic,
-    UndefinedVariable,
-    UndefinedFunction,
-    FunctionAlreadyDefined,
-    ClassAlreadyDefined,
-    NativeAlreadyDefined,
-    Type,
-    LabelNotInMain,
-    UndefinedLabel,
 }
 
 impl CompilationDetail {
@@ -118,26 +98,6 @@ impl CompilationDetail {
             end_column: 0,
             text: "".to_string(),
         }
-    }
-}
-
-impl CompilationError {
-    pub fn message(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl Display for CompilationError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.message).unwrap();
-        write!(f, "{}", self.details)
-    }
-}
-impl Display for CompilationDetail {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{} {}:{}.", self.file_name, self.start_line, self.start_column).unwrap();
-        writeln!(f, "l{}\t{}", self.start_line, self.text).unwrap();
-        writeln!(f, "\t{}{}", " ".repeat(self.start_column), "^".repeat(self.end_column - self.start_column + 1))
     }
 }
 
