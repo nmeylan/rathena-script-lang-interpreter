@@ -241,7 +241,7 @@ fn copyarray() {
 }
 
 #[test]
-fn setarray_errors() {
+fn setarray_wrong_type_error() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
@@ -255,11 +255,82 @@ fn setarray_errors() {
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
     // Then
-    assert_eq!(r#"setarray - tried to assign Number to an array of String
+    assert_eq!(r#"setarray - tried to assign Number (4th arguments) to an array of String
 test_script 4:4.
 l4	    setarray .@a$[0], "hello", "world", .@toto;
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0: _main
 	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
+}
+
+#[test]
+fn cleararray_wrong_type_error() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@a$[0] = "hello";
+    cleararray(.@a$[0], 0, 10);
+"#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    // Then
+    assert_eq!(r#"cleararray - tried to assign Number (second argument) to an array of String
+test_script 4:4.
+l4	    cleararray(.@a$[0], 0, 10);
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0: _main
+	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
+}
+
+
+#[test]
+fn copyarray_wrong_type_error() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@toto$ = "toto";
+    setarray .@a$[0], "hello", "world", .@toto$;
+    copyarray .@b[0], .@a[0], 1;
+"#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    // Then
+    assert_eq!(r#"copyarray - tried to assign an array of String (second argument) to an array of Number
+test_script 5:4.
+l5	    copyarray .@b[0], .@a[0], 1;
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0: _main
+	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
+}
+#[test]
+fn copyarray_outofbounds_error() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@toto$ = "toto";
+    setarray .@a$[0], "hello", "world", .@toto$;
+    copyarray .@b$[0], .@a$[18], 1;
+"#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), script);
+    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    // Then
+    assert_eq!(r#"Array index out of bounds: index 18, length 3
+test_script 5:4.
+l5	    copyarray .@b$[0], .@a$[18], 1;
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0: _main
+	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
 }

@@ -553,6 +553,12 @@ impl Thread {
                 let value = arguments[1].clone();
                 let size = arguments[2].number_value();
                 let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
+                if !array.value_type.match_value(&value) {
+                    return Err(RuntimeError::new_string(self.current_source_line.clone() ,
+                                                        self.stack_traces.clone(),
+                                                        format!("cleararray - tried to assign {} (second argument) to an array of {}",
+                                                                value.display_type(), array.value_type.display_type())));
+                }
                 let value_reference = self.vm.add_in_constant_pool(value);
                 array.assign_multiple(*index, size as usize, value_reference);
             }
@@ -565,8 +571,9 @@ impl Thread {
                 for (i, array_reference) in arguments_ref.iter().enumerate() { // arguments are in reverse order
                     if array_reference.is_some() {
                         if !array.value_type.match_value(&arguments[i]) {
-                            return Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(), format!("setarray - tried to assign {} to an array of {}",
-                                                                        arguments[i].display_type(), array.value_type.display_type())));
+                            return Err(RuntimeError::new_string(self.current_source_line.clone() , self.stack_traces.clone(),
+                                                                format!("setarray - tried to assign {} ({}th arguments) to an array of {}",
+                                                                        arguments[i].display_type(), i + 2, array.value_type.display_type())));
                         }
                         array.assign(index, array_reference.unwrap());
                         index += 1;
@@ -600,14 +607,17 @@ impl Thread {
                 self.stack.push(StackEntry::ConstantPoolReference(index_constant_ref));
             },
             "copyarray" => {
-                for a in arguments.iter() {
-                    println!("{}", a);
-                }
                 let (destination_owner_reference,destination_reference, _, destination_index) = arguments[0].array_entry_value();
                 let (source_array_owner_reference, source_array_reference, _, source_array_index) = arguments[1].array_entry_value();
                 let count = arguments[2].number_value();
                 let destination_array = self.vm.array_from_heap_reference(*destination_owner_reference, *destination_reference).unwrap();
                 let source_array = self.vm.array_from_heap_reference(*source_array_owner_reference, *source_array_reference).unwrap();
+                if destination_array.value_type != source_array.value_type {
+                    return Err(RuntimeError::new_string(self.current_source_line.clone() ,
+                                                        self.stack_traces.clone(),
+                                                        format!("copyarray - tried to assign an array of {} (second argument) to an array of {}",
+                                                                source_array.value_type.display_type(), destination_array.value_type.display_type())));
+                }
                 destination_array.copyarray(source_array, *destination_index, *source_array_index, count as usize)
                     .map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone() , self.stack_traces.clone(), err))?
             }

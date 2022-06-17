@@ -114,24 +114,27 @@ fn on_init_hook_test() {
         inc();
         function inc {
             .counter = .counter + 1;
+            .array[0] += 1;
             .hello$ = .hello$ + .hello$;
             vm_dump_var("counter", .counter);
             vm_dump_var("hello_str", .hello$);
+            vm_dump_var("array_index0_", .array[0]);
         }
         end;
         OnInit:
             .@zero = 0;
+            setarray(.array[0], 1, 2, 3, 4);
             .@hello$ = "hello";
             .counter = .@zero;
             .hello$ = .@hello$;
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let i = Arc::new(RefCell::new(0));
+    let i: Arc<RefCell<HashMap<String, usize>>> = Arc::new(RefCell::new(HashMap::new()));
     let vm = crate::common::setup_vm(move |e| {
-        let i1 = *i.borrow();
-        *i.borrow_mut() = i1 + 1;
-        events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
+        let i1 = i.borrow_mut().get(&e.name).unwrap_or(&(0 as usize)).clone();
+        i.borrow_mut().insert(e.name.clone(), i1 + 1);
+        events_clone.borrow_mut().insert(format!("{}{}", e.name, i1 + 1), e);
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
@@ -139,9 +142,11 @@ fn on_init_hook_test() {
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("counter3").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
-    assert_eq!(String::from("hellohellohellohello"), events.borrow().get("hello_str4").unwrap().value.string_value().clone());
+    assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("array_index0_1").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("array_index0_2").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hellohellohellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
 }
 #[test]
 fn on_instance_init_hook_test() {
@@ -154,22 +159,26 @@ fn on_instance_init_hook_test() {
         function inc {
             'counter = 'counter + 1;
             'hello$ = 'hello$ + 'hello$;
+            'array_counter = 'array[0] + 1;
             vm_dump_var("counter", 'counter);
             vm_dump_var("hello_str", 'hello$);
+            vm_dump_var("array_counter", 'array_counter);
+            vm_dump_var("array_index3_", 'array[3]);
         }
         OnInstanceInit:
             .@zero = 0;
+            setarray('array[0], 1, 2, 3, 4);
             .@hello$ = "hello";
             'counter = .@zero;
             'hello$ = .@hello$;
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let i = Arc::new(RefCell::new(0));
+    let i: Arc<RefCell<HashMap<String, usize>>> = Arc::new(RefCell::new(HashMap::new()));
     let vm = crate::common::setup_vm(move |e| {
-        let i1 = *i.borrow();
-        *i.borrow_mut() = i1 + 1;
-        events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
+        let i1 = i.borrow_mut().get(&e.name).unwrap_or(&(0 as usize)).clone();
+        i.borrow_mut().insert(e.name.clone(), i1 + 1);
+        events_clone.borrow_mut().insert(format!("{}{}", e.name, i1 + 1), e);
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
@@ -177,7 +186,11 @@ fn on_instance_init_hook_test() {
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("counter3").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("array_counter1").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("array_counter2").unwrap().value.number_value().clone());
+    assert_eq!(4, events.borrow().get("array_index3_1").unwrap().value.number_value().clone());
+    assert_eq!(4, events.borrow().get("array_index3_2").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().clone());
     assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
-    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str4").unwrap().value.string_value().clone());
 }
