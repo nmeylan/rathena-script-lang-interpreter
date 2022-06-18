@@ -201,3 +201,35 @@ fn break_should_stop_for_loop2() {
     assert_eq!(51, events.borrow().get("i").unwrap().value.number_value());
     assert_eq!(49, events.borrow().get("j").unwrap().value.number_value());
 }
+
+#[test]
+fn break_should_stop_nested_for_loop2() {
+// Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@i = 0;
+    .@c = 0;
+    for(;; .@i += 1) {
+        .@j = 0;
+        if (.@i > 10) {
+         break;
+        }
+        for(;;) {
+            .@c += 1;
+            .@j += 1;
+            if (.@j > 10) {
+             break;
+            }
+        }
+
+    }
+    vm_dump_locals();
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(110, events.borrow().get("c").unwrap().value.number_value());
+}

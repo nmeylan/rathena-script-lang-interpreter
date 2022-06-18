@@ -645,16 +645,6 @@ fn enter_menuItem(&mut self, _ctx: &MenuItemContext<'input>) { }
  */
 fn exit_menuItem(&mut self, _ctx: &MenuItemContext<'input>) { }
 /**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
- * @param ctx the parse tree
- */
-fn enter_commandStatement(&mut self, _ctx: &CommandStatementContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
- * @param ctx the parse tree
- */
-fn exit_commandStatement(&mut self, _ctx: &CommandStatementContext<'input>) { }
-/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#dialogStatement}.
  * @param ctx the parse tree
  */

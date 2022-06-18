@@ -2,7 +2,7 @@
 // Generated from RathenaScriptLang.g4 by ANTLR 4.9.3
 use antlr_rust::tree::{ParseTreeVisitor,ParseTreeVisitorCompat};
 use super::rathenascriptlangparser::*;
-
+use std::mem;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced
@@ -392,12 +392,6 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	 * @param ctx the parse tree
 	 */
 	fn visit_menuItem(&mut self, ctx: &MenuItemContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) { self.visit_children(ctx) }
 
 	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#dialogStatement}.
@@ -975,14 +969,6 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#dialogStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -1385,11 +1371,6 @@ where
 
 	fn visit_menuItem(&mut self, ctx: &MenuItemContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_menuItem(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_commandStatement(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

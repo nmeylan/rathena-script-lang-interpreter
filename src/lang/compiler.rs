@@ -436,14 +436,6 @@ impl Compiler {
             self.current_chunk().emit_op_code(ArrayLoad(index.unwrap()), self.compilation_details_from_context(node));
         }
     }
-
-    fn block_breaks(&self) -> Vec<usize> {
-        self.current_declared_function().drop_block_breaks_index()
-    }
-
-    fn push_block_break_index(&self, index: usize) {
-        self.current_declared_function().push_block_break_index(index);
-    }
 }
 
 impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
@@ -793,7 +785,15 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 first_op_code_index: label_start_index,
                 last_op_code_index: label_end_index,
             });
-        } else {
+        } else if ctx.Case().is_some() {
+            self.current_chunk().emit_op_code(CompilerPlaceholder, self.compilation_details_from_context(ctx));
+            self.visit_constantExpression(ctx.constantExpression().as_ref().unwrap());
+            self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(ctx));
+            let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
+            self.current_chunk().push_case_index(if_index);
+            self.visit_children(ctx)
+        } else if ctx.Default().is_some() {
+            self.current_chunk().add_default_index(self.current_chunk().last_op_code_index() + 1);
             self.visit_children(ctx)
         }
     }
@@ -820,6 +820,38 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             } else {
                 self.current_chunk().set_op_code_at(if_index, OpCode::If(jump_to_index - 1));
             }
+        } else if ctx.Switch().is_some() {
+            self.current_chunk().add_new_block_state();
+            self.visit_expression(ctx.expression().as_ref().unwrap());
+            let switch_expression_index = self.current_chunk().last_op_code_index();
+            println!("switch_expression_index {}", switch_expression_index);
+            self.visit_statement(ctx.statement(0).as_ref().unwrap());
+            let block_state = self.current_chunk().drop_block_state();
+            // Update all cases "if" op_code to jump to the next case/default statement
+            let mut case_indices = mem::take(&mut *block_state.case_op_code_indices.borrow_mut());
+            let mut i = 0;
+            loop {
+                let (switch_expression_op_code, _) = self.current_chunk().clone_op_code_at(switch_expression_index);
+                println!("switch expression op code {:?}", switch_expression_op_code);
+                self.current_chunk().set_op_code_at(case_indices[i] - 3, switch_expression_op_code);
+                if i >= case_indices.len() - 1 { // last case statement
+                    let jump_index = if block_state.default_index.borrow().is_some() { // if there is a "default:" statement, jump to it.
+                        block_state.default_index.borrow().unwrap()
+                    } else {
+                        self.current_chunk().last_op_code_index() + 1 // jump after the switch
+                    };
+                    self.current_chunk().set_op_code_at(case_indices[i], OpCode::If(jump_index));
+                    break;
+                }
+                // -3 because we want to evaluate Equal and Constant expression of case.
+                self.current_chunk().set_op_code_at(case_indices[i], OpCode::If(case_indices[i + 1] - 3));
+                i += 1;
+            }
+            // Update all "break" op_code to jump after the switch statement
+            block_state.break_op_code_indices.borrow().iter().for_each(|index| {
+                self.current_chunk().set_op_code_at(*index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
+            });
+
         } else {
             self.visit_children(ctx);
         }
@@ -840,15 +872,16 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if for_condition.forExpression().is_some() {
                 self.visit_forExpression(for_condition.forExpression().as_ref().unwrap());
             }
-
+            self.current_chunk().add_new_block_state();
             self.visit_statement(ctx.statement().as_ref().unwrap());
+            let block_state = self.current_chunk().drop_block_state();
             let for_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1), self.compilation_details_from_context(ctx));
             if for_condition.forStopExpression().is_some() {
                 self.current_chunk().set_op_code_at(for_if_index, OpCode::If(for_statement_end + 1));
             }
-            self.block_breaks().iter().for_each(|index| {
+            block_state.break_op_code_indices.borrow().iter().for_each(|index| {
                 self.current_chunk().set_op_code_at(*index, OpCode::Jump(for_statement_end + 1));
-            })
+            });
         } else if ctx.While().is_some() {
             let while_start_index = self.current_chunk().last_op_code_index();
             self.visit_expression(ctx.expression().as_ref().unwrap());
@@ -868,7 +901,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(OpCode::Return(not_empty_return), self.compilation_details_from_context(ctx));
         } else if ctx.Break().is_some() {
             let index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(ctx));
-            self.push_block_break_index(index);
+            self.current_chunk().push_block_break_index(index);
         } else if ctx.Goto().is_some() {
             let index = self.current_chunk().emit_op_code(OpCode::Goto(0), self.compilation_details_from_context(ctx));
             let label = ctx.Identifier().unwrap().symbol.text.clone();

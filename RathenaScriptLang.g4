@@ -224,14 +224,12 @@ statement
     |   selectionStatement
     |   iterationStatement
     |   jumpStatement
-    |   menuStatement
-    |   dialogStatement
     ;
 
 labeledStatement
-    :   Label statement*
-    |   'case' constantExpression ':' statement
-    |   'default' ':' statement
+    :  Case constantExpression ':' statement
+    |  Default statement
+    | Label statement*
     ;
 
 compoundStatement
@@ -289,15 +287,6 @@ jumpStatement
     )
     ';'
     ;
-
-menuStatement
-    : Menu menuItem (',' menuItem)*;
-
-menuItem
-    : expression ',' (Identifier | '-');
-
-dialogStatement
-    : (Close | Close2 | Next) ';';
 
 translationUnit
     : externalDeclaration+
@@ -396,6 +385,7 @@ Goto : 'goto';
 Return : 'return';
 Switch : 'switch';
 Case : 'case';
+Default : 'default:';
 Function : 'function';
 Break : 'break';
 Callfunc: 'callfunc';

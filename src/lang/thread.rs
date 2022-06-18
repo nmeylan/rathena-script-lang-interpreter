@@ -360,6 +360,9 @@ impl Thread {
                 OpCode::End => {
                     return Ok(CallFrameBreak::End);
                 }
+                OpCode::CompilerPlaceholder => {
+                    panic!("This is not an opcode, it should have been replaced by compiler");
+                }
             }
             op_index += 1;
         }
