@@ -15,7 +15,7 @@ impl StackTrace {
             file_name: compilation_detail.file_name.clone(),
             callframe_name,
             class_name,
-            line_number: compilation_detail.start_line.clone(),
+            line_number: compilation_detail.start_line,
         }
     }
 }

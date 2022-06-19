@@ -178,7 +178,7 @@ impl FunctionDefinition {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FunctionDefinitionState {
     declared_labels: RefCell<HashMap<String, Rc<Label>>>,
 }
@@ -189,14 +189,6 @@ pub struct Label {
     pub(crate) name: String,
     pub(crate) first_op_code_index: usize,
     pub(crate) last_op_code_index: usize,
-}
-
-impl Default for FunctionDefinitionState {
-    fn default() -> Self {
-        Self {
-            declared_labels: Default::default(),
-        }
-    }
 }
 
 impl PartialEq for FunctionDefinition {
@@ -327,7 +319,7 @@ impl Chunk {
 
     pub fn push_block_break_index(&self, index: usize) {
         let block_state_ref_mut = self.block_states.borrow_mut();
-        let mut block_state = block_state_ref_mut.last().unwrap();
+        let block_state = block_state_ref_mut.last().unwrap();
         block_state.break_op_code_indices.borrow_mut().push(index);
     }
 }
@@ -355,8 +347,9 @@ pub enum OpCode {
     Relational(Relational),
     Add,
     NumericOperation(NumericOperation),
+    // OpCode index to jump to. Use it to jump to any opcode
     Jump(usize),
-    // OpCode index to jump to
+    // OpCode index to jump to. Use it to jump to a given label defined in main function.
     Goto(usize),
     // OpCode index to jump to. Using goto instead of jump allow to break function
     Call,
@@ -364,10 +357,8 @@ pub enum OpCode {
     If(usize),
     // OpCode index to jump to when condition is evaluated to false.
     Else,
-    SkipOp,
     End,
     Command,
-    CompilerPlaceholder,
 }
 
 #[derive(Debug, Clone, Hash)]

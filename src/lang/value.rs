@@ -37,6 +37,7 @@ pub struct ValueRef {
     pub reference: Option<u64>,
     pub value_type: ValueType,
 }
+
 // Type of a value
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub enum ValueType {
@@ -173,6 +174,18 @@ impl Value {
             }
         }
     }
+
+    pub fn display_value(&self) -> String {
+        match self {
+            Value::String(v) => format!("\"{}\"", if let Some(v) = v { v.to_string() } else { "<unitialized>".to_string() }),
+            Value::Number(v) => format!("{}", if let Some(v) = v { format!("{}", v) } else { "<unitialized>".to_string() }),
+            Value::Reference(v) => format!("#{}", if let Some((owner_ref, reference)) = v { format!("{},{}", owner_ref, reference) } else { "<unitialized>".to_string() }),
+            Value::ArrayEntry(entry) => match entry.as_ref().unwrap().2.as_ref().unwrap() {
+                Constant::String(constant) => format!("\"{}\"", constant),
+                Constant::Number(constant) => format!("{}", constant),
+            }
+        }
+    }
 }
 
 impl ValueType {
@@ -284,7 +297,6 @@ impl ValueRef {
         self.reference.is_some()
     }
 }
-
 
 
 impl Variable {

@@ -9,7 +9,7 @@ use std::ops::Deref;
 
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream, TidExt};
+use antlr_rust::{InputStream};
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTreeVisitor, Tree};
 use crate::parser::rathenascriptlangvisitor::{*};
@@ -831,13 +831,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         let switch_expression_index = self.current_chunk().last_op_code_index();
         let switch_block = ctx.switchBlock();
         let switch_block = switch_block.as_ref().unwrap();
-        /**
+        /*
          * 1. we collect all case statement and generate an if/else if/else block, with goto in their body.
          *   goto index will be case statement block.
          */
         let mut if_op_code_indices_to_update: Vec<usize> = vec![];
         let mut default_index: Option<usize> = None;
-        let mut goto_op_code_indices_to_update: HashMap<usize, Vec<(usize)>> = HashMap::new();
+        let mut goto_op_code_indices_to_update: HashMap<usize, Vec<usize>> = HashMap::new();
         for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
             goto_op_code_indices_to_update.insert(i, vec![]);
             for switch_labels in switch_block_group.switchLabels().iter() {
@@ -862,9 +862,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
             }
         }
-        /**
+        /*
          * 2. we iterate over all case statement block, collect their first code op index
-         **/
+         */
         for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
             self.current_assignment_type_drop();
             for goto_index in goto_op_code_indices_to_update.get(&i).unwrap().iter() {
@@ -874,9 +874,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let block_item_list = block_item_list.as_ref().unwrap();
             self.visit_blockItemList(block_item_list);
         }
-        /**
+        /*
          * 3.Update all case "if" op_code to jump after to next case when not match
-        **/
+        */
         let end_of_switch_op_code = self.current_chunk().last_op_code_index() + 1;
         let mut i = 0;
         loop {
@@ -896,9 +896,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
         let block_state = self.current_chunk().drop_block_state();
 
-        /**
+        /*
          * 4.Update all "break" op_code to jump after the switch statement
-        **/
+        */
         block_state.break_op_code_indices.borrow().iter().for_each(|index| {
             self.current_chunk().set_op_code_at(*index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
         });
@@ -979,6 +979,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         let function = FunctionDefinition::new(function_name);
         self.add_function_to_current_class(function);
         self.visit_children(ctx);
+        // TODO: it won't work for all cases, to refactor
         self.current_declared_function().set_returned_type(self.current_assignment_type_drop());
         self.current_class().set_current_declared_function_index(0);
     }

@@ -1,7 +1,6 @@
 use std::borrow::Borrow;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
-use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::cell::RefCell;
 use std::io::{Stdout, Write};
@@ -16,7 +15,6 @@ use crate::lang::compiler::CompilationDetail;
 use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
 
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::stack_trace::StackTrace;
 use crate::lang::thread::Thread;
 
 use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable};
@@ -34,6 +32,41 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("copyarray", None),
 ];
 
+
+pub enum DebugFlag {
+    All,
+    // VM
+    Native,
+    Function,
+    Class,
+    Instance,
+    Heap,
+    Constant,
+    // Thread
+    Execution,
+    Stack,
+    // CallFrame
+    OpCode,
+    LocalsVariable,
+}
+
+impl DebugFlag {
+    pub fn value(&self) -> u16 {
+        match self {
+            DebugFlag::All => 0xF,
+            DebugFlag::Native => 2,
+            DebugFlag::Function => 4,
+            DebugFlag::Class => 8,
+            DebugFlag::Instance => 16,
+            DebugFlag::Heap => 32,
+            DebugFlag::Execution => 64,
+            DebugFlag::Stack => 128,
+            DebugFlag::OpCode => 256,
+            DebugFlag::LocalsVariable => 512,
+            DebugFlag::Constant => 1024,
+        }
+    }
+}
 
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
@@ -69,6 +102,7 @@ pub trait Hashcode {
 }
 
 pub struct Vm {
+    debug_flag: u16,
     heap: RefCell<HashMap<u64, RefCell<HashMap<u64, HeapEntry, NoopHasher>>, NoopHasher>>,
     constants_pool: RefCell<HashMap<u64, Constant, NoopHasher>>,
     classes_pool: RefCell<HashMap<String, Rc<Class>>>,
@@ -83,7 +117,7 @@ pub trait NativeMethodHandler {
 }
 
 impl Vm {
-    pub fn new(native_method_handler: Box<dyn NativeMethodHandler>) -> Vm {
+    pub fn new(native_method_handler: Box<dyn NativeMethodHandler>, debug_flag: u16) -> Vm {
         let mut native_pool: HashMap<u64, Native, NoopHasher> = Default::default();
         native_pool.insert(Self::calculate_hash(&"print".to_string()), Native { name: "println".to_string() });
         native_pool.insert(Self::calculate_hash(&"vm_dump_var".to_string()), Native { name: "vm_dump_var".to_string() });
@@ -93,6 +127,7 @@ impl Vm {
             native_pool.insert(Self::calculate_hash(&native_name.to_string()), Native { name: native_name.to_string() });
         }
         Self {
+            debug_flag,
             heap: Default::default(),
             constants_pool: Default::default(),
             native_method_handler,
@@ -113,7 +148,7 @@ impl Vm {
     }
 
     pub fn execute_main_script(vm: Arc<Vm>) -> Result<(), RuntimeError> {
-        let mut program = Thread::new(vm.clone());
+        let mut program = Thread::new(vm.clone(), vm.debug_flag);
         program.run_main(vm.classes_pool.borrow().get("_MainScript").as_ref().unwrap().new_instance()).map_err(|e| {
             println!("{}", e);
             e
@@ -124,10 +159,11 @@ impl Vm {
         let class = vm.get_class(&instance.class_name);
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
         if let Some(init_function) = maybe_init_function {
-            let mut program = Thread::new(vm.clone());
+            let mut program = Thread::new(vm.clone(), vm.debug_flag);
             program.run_function(class.clone(), Some(&instance), init_function)?;
         }
-        let mut program = Thread::new(vm);
+        let debug_flag = vm.debug_flag;
+        let mut program = Thread::new(vm, debug_flag);
         program.run_main(instance).map_err(|e| {
             println!("{}", e);
             e
@@ -137,7 +173,8 @@ impl Vm {
     pub fn init_class(vm: Arc<Vm>, class: Rc<Class>) -> Result<(), RuntimeError> {
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInit".to_string()));
         if let Some(init_function) = maybe_init_function {
-            let mut program = Thread::new(vm);
+            let debug_flag = vm.debug_flag;
+            let mut program = Thread::new(vm, debug_flag);
             return program.run_function(class.clone(), None, init_function).map_err(|e| {
                 println!("{}", e);
                 e
@@ -237,21 +274,27 @@ impl Vm {
     }
 
     pub fn dump(&self, out: &mut Stdout) {
-        writeln!(out, "========= Native functions =========").unwrap();
-        for (reference, native) in self.native_pool.borrow().iter() {
-            writeln!(out, "[{}]{}()", reference, native.name).unwrap();
-        }
-        writeln!(out, "========= Constants Pool =========").unwrap();
-        for (reference, constant) in self.constants_pool.borrow().iter() {
-            match constant {
-                Constant::String(_v) => writeln!(out, "({}) \"{}\"", reference, constant).unwrap(),
-                Constant::Number(_v) => writeln!(out, "({}) {}", reference, constant).unwrap(),
+        if self.debug_flag & DebugFlag::Native.value() == DebugFlag::Native.value() {
+            writeln!(out, "========= VM Native functions =========").unwrap();
+            for (reference, native) in self.native_pool.borrow().iter() {
+                writeln!(out, "[{}]{}()", reference, native.name).unwrap();
             }
         }
-        writeln!(out, "========= Heap =========").unwrap();
-        for (owner_reference, owner_entries) in self.heap.borrow().iter() {
-            for (reference, owner_entry) in owner_entries.borrow().iter() {
-                writeln!(out, "[{}]({}) {:?}", owner_reference, reference, owner_entry).unwrap();
+        if self.debug_flag & DebugFlag::Constant.value() == DebugFlag::Constant.value() {
+            writeln!(out, "========= VM Constants Pool =========").unwrap();
+            for (reference, constant) in self.constants_pool.borrow().iter() {
+                match constant {
+                    Constant::String(_v) => writeln!(out, "({}) \"{}\"", reference, constant).unwrap(),
+                    Constant::Number(_v) => writeln!(out, "({}) {}", reference, constant).unwrap(),
+                }
+            }
+        }
+        if self.debug_flag & DebugFlag::Heap.value() == DebugFlag::Heap.value() {
+            writeln!(out, "========= VM Heap =========").unwrap();
+            for (owner_reference, owner_entries) in self.heap.borrow().iter() {
+                for (reference, owner_entry) in owner_entries.borrow().iter() {
+                    writeln!(out, "[{}]({}) {:?}", owner_reference, reference, owner_entry).unwrap();
+                }
             }
         }
     }
