@@ -70,9 +70,10 @@ impl Thread {
             self.current_source_line = self.vm.get_class(&class.name).sources.get(&Vm::calculate_hash(&call_frame.name)).as_ref().unwrap().get(op_index).unwrap().clone(); // TODO remove clone here
             let next_op_code = call_frame.op_codes.get(op_index).unwrap();
             writeln!(stdout, "=========   Executing    ========").unwrap();
-            writeln!(stdout, "[{}] {:?}", op_index, next_op_code).unwrap();
+            writeln!(stdout, "[{}] {:?} - {}", op_index, next_op_code, self.current_source_line.single_line()).unwrap();
             writeln!(stdout, "=========   Stack    ========").unwrap();
             self.dump_stack(&mut stdout, &call_frame, class, instance);
+            call_frame.dump_locals(&mut stdout);
             stdout.flush().unwrap();
             match next_op_code {
                 OpCode::LoadConstant(reference) => {
@@ -288,6 +289,7 @@ impl Thread {
                         let stack_entry = self.stack.pop()?;
                         arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?);
                     }
+                    arguments.reverse();
                     for value in arguments {
                         match value {
                             Value::String(_) | Value::Number(_) => {

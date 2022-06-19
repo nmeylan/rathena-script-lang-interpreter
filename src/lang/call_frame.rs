@@ -61,8 +61,12 @@ impl CallFrame {
             writeln!(out, "[{}] {:?}", index, op_code).unwrap();
         }
         writeln!(out).unwrap();
+        self.dump_locals(out);
+    }
+
+    pub fn dump_locals(&self, out: &mut Stdout) {
         writeln!(out, "======== Locals =========").unwrap();
-        for ( reference, local) in self.locals.iter() {
+        for (reference, local) in self.locals.iter() {
             writeln!(out, "({}) {:?}", reference, local).unwrap();
         }
     }

@@ -2,7 +2,7 @@ use std::borrow::{Borrow, Cow};
 use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::{mem};
 
 use std::ops::Deref;
@@ -98,6 +98,16 @@ impl CompilationDetail {
             end_column: 0,
             text: "".to_string(),
         }
+    }
+    pub fn single_line(&self) -> String {
+        format!("{} {}:{}.  {}", self.file_name, self.start_line, self.start_column, self.text.trim())
+    }
+}
+impl Display for CompilationDetail {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{} {}:{}.", self.file_name, self.start_line, self.start_column).unwrap();
+        writeln!(f, "l{}\t{}", self.start_line, self.text).unwrap();
+        writeln!(f, "\t{}{}", " ".repeat(self.start_column), "^".repeat(self.end_column - self.start_column + 1))
     }
 }
 
@@ -819,7 +829,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         self.current_chunk().add_new_block_state();
         self.visit_expression(ctx.expression().as_ref().unwrap());
         let switch_expression_index = self.current_chunk().last_op_code_index();
-        println!("switch_expression_index {}", switch_expression_index);
         let switch_block = ctx.switchBlock();
         let switch_block = switch_block.as_ref().unwrap();
         /**
@@ -837,6 +846,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     if label.Case().is_some() {
                         self.current_chunk().emit_op_code(switch_expression_op_code, self.compilation_details_from_context(ctx));
                         self.visit_constantExpression(label.constantExpression().as_ref().unwrap());
+                        self.current_assignment_type_drop();
                         self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(label.as_ref()));
                         let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(label.as_ref()));
                         let goto_case_statement_index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(label.as_ref()));
@@ -856,6 +866,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
          * 2. we iterate over all case statement block, collect their first code op index
          **/
         for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
+            self.current_assignment_type_drop();
             for goto_index in goto_op_code_indices_to_update.get(&i).unwrap().iter() {
                 self.current_chunk().set_op_code_at(*goto_index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
             }
@@ -863,6 +874,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let block_item_list = block_item_list.as_ref().unwrap();
             self.visit_blockItemList(block_item_list);
         }
+        /**
+         * 3.Update all case "if" op_code to jump after to next case when not match
+        **/
         let end_of_switch_op_code = self.current_chunk().last_op_code_index() + 1;
         let mut i = 0;
         loop {
@@ -883,7 +897,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         let block_state = self.current_chunk().drop_block_state();
 
         /**
-         * 3.Update all "break" op_code to jump after the switch statement
+         * 4.Update all "break" op_code to jump after the switch statement
         **/
         block_state.break_op_code_indices.borrow().iter().for_each(|index| {
             self.current_chunk().set_op_code_at(*index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));

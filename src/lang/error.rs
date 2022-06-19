@@ -37,13 +37,7 @@ impl Display for CompilationError {
         write!(f, "{}", self.details)
     }
 }
-impl Display for CompilationDetail {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{} {}:{}.", self.file_name, self.start_line, self.start_column).unwrap();
-        writeln!(f, "l{}\t{}", self.start_line, self.text).unwrap();
-        writeln!(f, "\t{}{}", " ".repeat(self.start_column), "^".repeat(self.end_column - self.start_column + 1))
-    }
-}
+
 
 #[derive(Debug)]
 pub enum RuntimeErrorType {

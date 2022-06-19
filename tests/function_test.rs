@@ -68,6 +68,26 @@ fn function_call_with_variable_arguments() {
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
 }
+#[test]
+fn function_call_with_two_arguments() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let classes = compile_script(r#"
+    .@a$ = "hello";
+    my_func(.@a$, "world");
+    function my_func {
+        .@a$ = getarg(0) + " " + getarg(1);
+        vm_dump_var("a", .@a$);
+    }
+    "#).unwrap();
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+}
 
 #[test]
 fn function_call_with_arguments_out_of_bounds() {

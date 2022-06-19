@@ -176,7 +176,7 @@ fn switch_statement() {
     assert_eq!("greater than 4", events.borrow().get("e").unwrap().value.string_value().clone());
 }
 
-// #[test]
+#[test]
 fn nested_switch_statement() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
