@@ -931,9 +931,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.current_chunk().set_op_code_at(*index, OpCode::Jump(for_statement_end + 1));
             });
         } else if ctx.While().is_some() {
+            let do_jump_index = if ctx.Do().is_some() {
+                Some(self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(ctx)))
+            } else {
+                None
+            };
             let while_start_index = self.current_chunk().last_op_code_index();
             self.visit_expression(ctx.expression().as_ref().unwrap());
             let while_if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
+            if let Some(do_jump_index) = do_jump_index {
+                self.current_chunk().set_op_code_at(do_jump_index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
+            }
             self.visit_statement(ctx.statement().as_ref().unwrap());
             let while_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(while_start_index + 1), self.compilation_details_from_context(ctx));
             self.current_chunk().set_op_code_at(while_if_index, OpCode::If(while_statement_end + 1));

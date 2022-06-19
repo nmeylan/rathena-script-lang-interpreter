@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 
-use ragnarok_script_interpreter::lang::vm::Vm;
+use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
 use crate::common::{compile_script, Event};
 
 mod common;
@@ -232,4 +232,50 @@ fn break_should_stop_nested_for_loop2() {
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(110, events.borrow().get("c").unwrap().value.number_value());
+}
+
+#[test]
+fn simple_do_while_loop() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@j = 100;
+    .@i = 0;
+    do {
+		.@i += 1;
+		.@j -= 1;
+    } while(.@j > 0);
+    vm_dump_locals();
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::OpCode.value());
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
+}
+
+#[test]
+fn simple_do_while_loop_2() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@j = 0;
+    .@i = 0;
+    do {
+		.@i += 1;
+		.@j -= 1;
+    } while(.@j > 0);
+    vm_dump_locals();
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::OpCode.value());
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(1, events.borrow().get("i").unwrap().value.number_value());
+    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value());
 }
