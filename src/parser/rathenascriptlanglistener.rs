@@ -565,6 +565,56 @@ fn enter_selectionStatement(&mut self, _ctx: &SelectionStatementContext<'input>)
  */
 fn exit_selectionStatement(&mut self, _ctx: &SelectionStatementContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#switchStatement}.
+ * @param ctx the parse tree
+ */
+fn enter_switchStatement(&mut self, _ctx: &SwitchStatementContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#switchStatement}.
+ * @param ctx the parse tree
+ */
+fn exit_switchStatement(&mut self, _ctx: &SwitchStatementContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#switchBlock}.
+ * @param ctx the parse tree
+ */
+fn enter_switchBlock(&mut self, _ctx: &SwitchBlockContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#switchBlock}.
+ * @param ctx the parse tree
+ */
+fn exit_switchBlock(&mut self, _ctx: &SwitchBlockContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#switchBlockStatementGroup}.
+ * @param ctx the parse tree
+ */
+fn enter_switchBlockStatementGroup(&mut self, _ctx: &SwitchBlockStatementGroupContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#switchBlockStatementGroup}.
+ * @param ctx the parse tree
+ */
+fn exit_switchBlockStatementGroup(&mut self, _ctx: &SwitchBlockStatementGroupContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#switchLabels}.
+ * @param ctx the parse tree
+ */
+fn enter_switchLabels(&mut self, _ctx: &SwitchLabelsContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#switchLabels}.
+ * @param ctx the parse tree
+ */
+fn exit_switchLabels(&mut self, _ctx: &SwitchLabelsContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#switchLabel}.
+ * @param ctx the parse tree
+ */
+fn enter_switchLabel(&mut self, _ctx: &SwitchLabelContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#switchLabel}.
+ * @param ctx the parse tree
+ */
+fn exit_switchLabel(&mut self, _ctx: &SwitchLabelContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#iterationStatement}.
  * @param ctx the parse tree
  */
@@ -624,36 +674,6 @@ fn enter_jumpStatement(&mut self, _ctx: &JumpStatementContext<'input>) { }
  * @param ctx the parse tree
  */
 fn exit_jumpStatement(&mut self, _ctx: &JumpStatementContext<'input>) { }
-/**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#menuStatement}.
- * @param ctx the parse tree
- */
-fn enter_menuStatement(&mut self, _ctx: &MenuStatementContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#menuStatement}.
- * @param ctx the parse tree
- */
-fn exit_menuStatement(&mut self, _ctx: &MenuStatementContext<'input>) { }
-/**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#menuItem}.
- * @param ctx the parse tree
- */
-fn enter_menuItem(&mut self, _ctx: &MenuItemContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#menuItem}.
- * @param ctx the parse tree
- */
-fn exit_menuItem(&mut self, _ctx: &MenuItemContext<'input>) { }
-/**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#dialogStatement}.
- * @param ctx the parse tree
- */
-fn enter_dialogStatement(&mut self, _ctx: &DialogStatementContext<'input>) { }
-/**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#dialogStatement}.
- * @param ctx the parse tree
- */
-fn exit_dialogStatement(&mut self, _ctx: &DialogStatementContext<'input>) { }
 /**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#translationUnit}.
  * @param ctx the parse tree

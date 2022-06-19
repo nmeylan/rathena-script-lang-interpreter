@@ -346,6 +346,36 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_selectionStatement(&mut self, ctx: &SelectionStatementContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchStatement}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_switchStatement(&mut self, ctx: &SwitchStatementContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchBlock}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_switchBlock(&mut self, ctx: &SwitchBlockContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchBlockStatementGroup}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_switchBlockStatementGroup(&mut self, ctx: &SwitchBlockStatementGroupContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchLabels}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_switchLabels(&mut self, ctx: &SwitchLabelsContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchLabel}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_switchLabel(&mut self, ctx: &SwitchLabelContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#iterationStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -380,24 +410,6 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	 * @param ctx the parse tree
 	 */
 	fn visit_jumpStatement(&mut self, ctx: &JumpStatementContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#menuStatement}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_menuStatement(&mut self, ctx: &MenuStatementContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#menuItem}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_menuItem(&mut self, ctx: &MenuItemContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#dialogStatement}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_dialogStatement(&mut self, ctx: &DialogStatementContext<'input>) { self.visit_children(ctx) }
 
 	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#translationUnit}.
@@ -905,6 +917,46 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchStatement}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_switchStatement(&mut self, ctx: &SwitchStatementContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchBlock}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_switchBlock(&mut self, ctx: &SwitchBlockContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchBlockStatementGroup}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_switchBlockStatementGroup(&mut self, ctx: &SwitchBlockStatementGroupContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchLabels}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_switchLabels(&mut self, ctx: &SwitchLabelsContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#switchLabel}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_switchLabel(&mut self, ctx: &SwitchLabelContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#iterationStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -949,30 +1001,6 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 	 * @param ctx the parse tree
 	 */
 		fn visit_jumpStatement(&mut self, ctx: &JumpStatementContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#menuStatement}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_menuStatement(&mut self, ctx: &MenuStatementContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#menuItem}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_menuItem(&mut self, ctx: &MenuItemContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#dialogStatement}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_dialogStatement(&mut self, ctx: &DialogStatementContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -1334,6 +1362,31 @@ where
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
+	fn visit_switchStatement(&mut self, ctx: &SwitchStatementContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_switchStatement(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_switchBlock(&mut self, ctx: &SwitchBlockContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_switchBlock(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_switchBlockStatementGroup(&mut self, ctx: &SwitchBlockStatementGroupContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_switchBlockStatementGroup(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_switchLabels(&mut self, ctx: &SwitchLabelsContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_switchLabels(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_switchLabel(&mut self, ctx: &SwitchLabelContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_switchLabel(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
 	fn visit_iterationStatement(&mut self, ctx: &IterationStatementContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_iterationStatement(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
@@ -1361,21 +1414,6 @@ where
 
 	fn visit_jumpStatement(&mut self, ctx: &JumpStatementContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_jumpStatement(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_menuStatement(&mut self, ctx: &MenuStatementContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_menuStatement(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_menuItem(&mut self, ctx: &MenuItemContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_menuItem(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_dialogStatement(&mut self, ctx: &DialogStatementContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_dialogStatement(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

@@ -133,7 +133,7 @@ fn conditional_statements() {
 }
 
 
-// #[test]
+#[test]
 fn switch_statement() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"

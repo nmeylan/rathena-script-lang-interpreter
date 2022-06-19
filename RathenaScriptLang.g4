@@ -227,9 +227,7 @@ statement
     ;
 
 labeledStatement
-    :  Case constantExpression ':' statement
-    |  Default statement
-    | Label statement*
+    : Label statement*
     ;
 
 compoundStatement
@@ -253,8 +251,30 @@ expressionStatement
 
 selectionStatement
     :   'if' '(' expression ')' statement ('else' statement)?
-    |   'switch' '(' expression ')' statement
+    |   switchStatement
+//    |   'switch' '(' expression ')' statement
     ;
+
+switchStatement
+	:	'switch' '(' expression ')' switchBlock
+	;
+
+switchBlock
+	:	'{' switchBlockStatementGroup* '}'
+	;
+
+switchBlockStatementGroup
+	:	switchLabels blockItemList
+	;
+
+switchLabels
+	:	switchLabel switchLabel*
+	;
+
+switchLabel
+	:	'case' constantExpression ':'
+	|	'default:'
+	;
 
 iterationStatement
     :   While '(' expression ')' statement

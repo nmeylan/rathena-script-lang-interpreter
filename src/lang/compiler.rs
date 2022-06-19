@@ -9,7 +9,7 @@ use std::ops::Deref;
 
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream};
+use antlr_rust::{InputStream, TidExt};
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTreeVisitor, Tree};
 use crate::parser::rathenascriptlangvisitor::{*};
@@ -785,16 +785,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 first_op_code_index: label_start_index,
                 last_op_code_index: label_end_index,
             });
-        } else if ctx.Case().is_some() {
-            self.current_chunk().emit_op_code(CompilerPlaceholder, self.compilation_details_from_context(ctx));
-            self.visit_constantExpression(ctx.constantExpression().as_ref().unwrap());
-            self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(ctx));
-            let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
-            self.current_chunk().push_case_index(if_index);
-            self.visit_children(ctx)
-        } else if ctx.Default().is_some() {
-            self.current_chunk().add_default_index(self.current_chunk().last_op_code_index() + 1);
-            self.visit_children(ctx)
         }
     }
 
@@ -820,42 +810,86 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             } else {
                 self.current_chunk().set_op_code_at(if_index, OpCode::If(jump_to_index - 1));
             }
-        } else if ctx.Switch().is_some() {
-            self.current_chunk().add_new_block_state();
-            self.visit_expression(ctx.expression().as_ref().unwrap());
-            let switch_expression_index = self.current_chunk().last_op_code_index();
-            println!("switch_expression_index {}", switch_expression_index);
-            self.visit_statement(ctx.statement(0).as_ref().unwrap());
-            let block_state = self.current_chunk().drop_block_state();
-            // Update all cases "if" op_code to jump to the next case/default statement
-            let mut case_indices = mem::take(&mut *block_state.case_op_code_indices.borrow_mut());
-            let mut i = 0;
-            loop {
-                let (switch_expression_op_code, _) = self.current_chunk().clone_op_code_at(switch_expression_index);
-                println!("switch expression op code {:?}", switch_expression_op_code);
-                self.current_chunk().set_op_code_at(case_indices[i] - 3, switch_expression_op_code);
-                if i >= case_indices.len() - 1 { // last case statement
-                    let jump_index = if block_state.default_index.borrow().is_some() { // if there is a "default:" statement, jump to it.
-                        block_state.default_index.borrow().unwrap()
-                    } else {
-                        self.current_chunk().last_op_code_index() + 1 // jump after the switch
-                    };
-                    self.current_chunk().set_op_code_at(case_indices[i], OpCode::If(jump_index));
-                    break;
-                }
-                // -3 because we want to evaluate Equal and Constant expression of case.
-                self.current_chunk().set_op_code_at(case_indices[i], OpCode::If(case_indices[i + 1] - 3));
-                i += 1;
-            }
-            // Update all "break" op_code to jump after the switch statement
-            block_state.break_op_code_indices.borrow().iter().for_each(|index| {
-                self.current_chunk().set_op_code_at(*index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
-            });
-
         } else {
             self.visit_children(ctx);
         }
     }
+
+    fn visit_switchStatement(&mut self, ctx: &SwitchStatementContext<'input>) {
+        self.current_chunk().add_new_block_state();
+        self.visit_expression(ctx.expression().as_ref().unwrap());
+        let switch_expression_index = self.current_chunk().last_op_code_index();
+        println!("switch_expression_index {}", switch_expression_index);
+        let switch_block = ctx.switchBlock();
+        let switch_block = switch_block.as_ref().unwrap();
+        /**
+         * 1. we collect all case statement and generate an if/else if/else block, with goto in their body.
+         *   goto index will be case statement block.
+         */
+        let mut if_op_code_indices_to_update: Vec<usize> = vec![];
+        let mut default_index: Option<usize> = None;
+        let mut goto_op_code_indices_to_update: HashMap<usize, Vec<(usize)>> = HashMap::new();
+        for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
+            goto_op_code_indices_to_update.insert(i, vec![]);
+            for switch_labels in switch_block_group.switchLabels().iter() {
+                for label in switch_labels.switchLabel_all().iter() {
+                    let (switch_expression_op_code, _) = self.current_chunk().clone_op_code_at(switch_expression_index);
+                    if label.Case().is_some() {
+                        self.current_chunk().emit_op_code(switch_expression_op_code, self.compilation_details_from_context(ctx));
+                        self.visit_constantExpression(label.constantExpression().as_ref().unwrap());
+                        self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(label.as_ref()));
+                        let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(label.as_ref()));
+                        let goto_case_statement_index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(label.as_ref()));
+                        if_op_code_indices_to_update.push(if_index);
+                        goto_op_code_indices_to_update.get_mut(&i).unwrap().push(goto_case_statement_index);
+                    } else if label.Default().is_some() {
+                        default_index = Some(
+                            self.current_chunk().emit_op_code(OpCode::Else, self.compilation_details_from_context(ctx))
+                        );
+                        let goto_case_statement_index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(label.as_ref()));
+                        goto_op_code_indices_to_update.get_mut(&i).unwrap().push(goto_case_statement_index);
+                    }
+                }
+            }
+        }
+        /**
+         * 2. we iterate over all case statement block, collect their first code op index
+         **/
+        for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
+            for goto_index in goto_op_code_indices_to_update.get(&i).unwrap().iter() {
+                self.current_chunk().set_op_code_at(*goto_index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
+            }
+            let block_item_list = switch_block_group.blockItemList();
+            let block_item_list = block_item_list.as_ref().unwrap();
+            self.visit_blockItemList(block_item_list);
+        }
+        let end_of_switch_op_code = self.current_chunk().last_op_code_index() + 1;
+        let mut i = 0;
+        loop {
+            if i >= if_op_code_indices_to_update.len() - 1 {
+                if let Some(default_index) = default_index {
+                    // Last if to be updated to jump to default label
+                    self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(default_index));
+                } else{
+                    // Last if to be updated to jump to end of switch
+                    self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(end_of_switch_op_code));
+                }
+                break;
+            }
+            // If is updated to jump to next if, when not match
+            self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(if_op_code_indices_to_update[i + 1] - 3));
+            i += 1;
+        }
+        let block_state = self.current_chunk().drop_block_state();
+
+        /**
+         * 3.Update all "break" op_code to jump after the switch statement
+        **/
+        block_state.break_op_code_indices.borrow().iter().for_each(|index| {
+            self.current_chunk().set_op_code_at(*index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
+        });
+    }
+
 
     fn visit_iterationStatement(&mut self, ctx: &IterationStatementContext<'input>) {
         if ctx.For().is_some() {

@@ -246,20 +246,14 @@ impl Default for Chunk {
 
 #[derive(Clone, Debug)]
 pub struct BlockState {
-    // Switch: store all case "if" op_code indices, in order to update jump index to complete switch statement
-    pub case_op_code_indices: RefCell<Vec<usize>>,
     // Switch/Loop: store all "break" op_code indices, in order to update jump index to complete switch/for/while/do-while statements
     pub break_op_code_indices: RefCell<Vec<usize>>,
-    // Switch: store default first op_code index, in order to update last case "if" jump index
-    pub default_index: RefCell<Option<usize>>,
 }
 
 impl Default for BlockState {
     fn default() -> Self {
         Self {
-            case_op_code_indices: RefCell::new(vec![]),
             break_op_code_indices: RefCell::new(vec![]),
-            default_index: RefCell::new(None)
         }
     }
 }
@@ -331,22 +325,10 @@ impl Chunk {
         state
     }
 
-    pub fn push_case_index(&self, index: usize) {
-        let block_state_ref_mut = self.block_states.borrow_mut();
-        let mut block_state = block_state_ref_mut.last().unwrap();
-        block_state.case_op_code_indices.borrow_mut().push(index);
-    }
-
     pub fn push_block_break_index(&self, index: usize) {
         let block_state_ref_mut = self.block_states.borrow_mut();
         let mut block_state = block_state_ref_mut.last().unwrap();
         block_state.break_op_code_indices.borrow_mut().push(index);
-    }
-
-    pub fn add_default_index(&self, index: usize) {
-        let block_state_ref_mut = self.block_states.borrow_mut();
-        let mut block_state = block_state_ref_mut.last().unwrap();
-        *block_state.default_index.borrow_mut() = Some(index);
     }
 }
 
