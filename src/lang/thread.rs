@@ -13,6 +13,7 @@ use crate::lang::chunk::{*};
 use crate::lang::class::{Class, Function, Instance};
 use crate::lang::compiler::CompilationDetail;
 use crate::lang::error::RuntimeError;
+use crate::lang::native::handle_native_method;
 use crate::lang::stack::StackEntry::{ArrayHeapReference, ConstantPoolReference, HeapReference};
 use crate::lang::stack_trace::StackTrace;
 
@@ -23,11 +24,11 @@ pub enum CallFrameBreak {
 }
 
 pub struct Thread {
-    debug_flag: u16,
+    pub(crate) debug_flag: u16,
     pub vm: Arc<Vm>,
-    stack: Stack,
-    current_source_line: CompilationDetail,
-    stack_traces: Vec<StackTrace>,
+    pub(crate) stack: Stack,
+    pub(crate) current_source_line: CompilationDetail,
+    pub(crate) stack_traces: Vec<StackTrace>,
 }
 
 impl Thread {
@@ -262,7 +263,7 @@ impl Thread {
                     arguments_ref.reverse();
                     let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
                     if NATIVE_FUNCTIONS.iter().any(|(native, _)| native == &native_method.name.as_str()) {
-                        self.handle_native_method(native_method, &call_frame, arguments, arguments_ref)?;
+                        handle_native_method(&self, native_method, &call_frame, arguments, arguments_ref)?;
                     } else {
                         self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
                     }
@@ -482,110 +483,6 @@ impl Thread {
             }
             x => Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
-    }
-
-    fn handle_native_method(&self, native: &Native, call_frame: &CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
-        match native.name.as_str() {
-            "getarg" => {
-                let index = arguments[0].number_value() as usize;
-                if arguments.len() == 1 && index > (call_frame.arguments_count - 1) {
-                    return Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't call getarg({}) which is greater than number of arguments provided: {}. Maximum allow index is {}. Consider calling getarg with a default value: getarg({}, DEFAULT_VALUE)", index, call_frame.arguments_count, call_frame.arguments_count - 1, index)));
-                } else if arguments.len() == 2 && index > (call_frame.arguments_count - 1) {
-                    let value = arguments[1].clone();
-                    let reference = self.vm.add_in_constant_pool(value);
-                    self.stack.push(StackEntry::ConstantPoolReference(reference));
-                } else if arguments.len() > 2 {
-                    return Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), String::from("Can't call getarg with more than 2 arguments")));
-                } else {
-                    let stack_entry = self.stack.peek(call_frame.stack_pointer + index)?;
-                    self.stack.push(stack_entry);
-                }
-            }
-            "getarraysize" => {
-                let (owner_reference, reference) = arguments[0].reference_value();
-                let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
-                let len = array.len();
-                let reference = self.vm.add_in_constant_pool(Value::Number(Some(len as i32)));
-                self.stack.push(StackEntry::ConstantPoolReference(reference));
-            }
-            "cleararray" => {
-                let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
-                let value = arguments[1].clone();
-                let size = arguments[2].number_value();
-                let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
-                if !array.value_type.match_value(&value) {
-                    return Err(RuntimeError::new_string(self.current_source_line.clone(),
-                                                        self.stack_traces.clone(),
-                                                        format!("cleararray - tried to assign {} (second argument) to an array of {}",
-                                                                value.display_type(), array.value_type.display_type())));
-                }
-                let value_reference = self.vm.add_in_constant_pool(value);
-                array.assign_multiple(*index, size as usize, value_reference);
-            }
-            "setarray" => {
-                let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
-                let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
-                // first parameters of setarray is already assigned to index, and thus is not part of arguments.
-                // so we assign arguments starting at index + 1;
-                let mut index = index + 1; // setarray .@a[0], assignment, arguments.
-                for (i, array_reference) in arguments_ref.iter().enumerate() { // arguments are in reverse order
-                    if array_reference.is_some() {
-                        if !array.value_type.match_value(&arguments[i]) {
-                            return Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(),
-                                                                format!("setarray - tried to assign {} ({}th arguments) to an array of {}",
-                                                                        arguments[i].display_type(), i + 2, array.value_type.display_type())));
-                        }
-                        array.assign(index, array_reference.unwrap());
-                        index += 1;
-                    }
-                }
-            }
-            "getelementofarray" => {
-                let (owner_reference, reference) = arguments[0].reference_value();
-                let index = arguments[1].number_value() as usize;
-                let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
-                let reference = array.get(index).map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone(), self.stack_traces.clone(), err))?;
-                self.stack.push(StackEntry::ConstantPoolReference(reference.unwrap()));
-            }
-            "deletearray" => {
-                let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
-                let size = arguments[1].number_value() as usize;
-                let array = self.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
-                array.remove(*index, size);
-            }
-            "inarray" => {
-                let (owner_reference, reference) = if arguments[0].is_reference() {
-                    arguments[0].reference_value()
-                } else {
-                    let (owner_reference, reference, _, _) = arguments[0].array_entry_value();
-                    (*owner_reference, *reference)
-                };
-                let reference_to_find = arguments_ref[1].unwrap();
-                let array = self.vm.array_from_heap_reference(owner_reference, reference).unwrap();
-                let index = array.index_of(reference_to_find);
-                let index_constant_ref = self.vm.add_in_constant_pool(Value::Number(Some(index as i32)));
-                self.stack.push(StackEntry::ConstantPoolReference(index_constant_ref));
-            }
-            "copyarray" => {
-                let (destination_owner_reference, destination_reference, _, destination_index) = arguments[0].array_entry_value();
-                let (source_array_owner_reference, source_array_reference, _, source_array_index) = arguments[1].array_entry_value();
-                let count = arguments[2].number_value();
-                let destination_array = self.vm.array_from_heap_reference(*destination_owner_reference, *destination_reference).unwrap();
-                let source_array = self.vm.array_from_heap_reference(*source_array_owner_reference, *source_array_reference).unwrap();
-                if destination_array.value_type != source_array.value_type {
-                    return Err(RuntimeError::new_string(self.current_source_line.clone(),
-                                                        self.stack_traces.clone(),
-                                                        format!("copyarray - tried to assign an array of {} (second argument) to an array of {}",
-                                                                source_array.value_type.display_type(), destination_array.value_type.display_type())));
-                }
-                destination_array.copyarray(source_array, *destination_index, *source_array_index, count as usize)
-                    .map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone(), self.stack_traces.clone(), err))?
-            }
-            _ => {
-                return Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));
-            }
-        }
-        Ok(())
     }
 
     fn add_stack_trace(&mut self, stack_trace: StackTrace) {
