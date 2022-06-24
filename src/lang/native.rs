@@ -56,10 +56,10 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             thread.set_variable(call_frame, class, instance, &variable, owner_reference)?;
             if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
                 // instance.unwrap().variables.insert(variable_reference, variable);
-                let mut x = instance.as_mut().unwrap();
-                x.variables.insert(variable_reference, variable);
+                let mut mutable_instance = instance.as_mut().unwrap();
+                mutable_instance.variables.insert(variable_reference, variable);
             } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
-                panic!("TODO")
+                class.insert_variable(variable_reference, variable);
             } else {
                 call_frame.locals.insert(variable_reference, variable);
             };

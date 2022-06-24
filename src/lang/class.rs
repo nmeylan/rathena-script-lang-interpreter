@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::env::var;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -19,7 +20,7 @@ pub struct Class {
     pub(crate) functions_pool: HashMap<u64, Function, NoopHasher>,
     pub(crate) sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher>, // Key is function reference
     pub(crate) instances_references: RefCell<u64>,
-    pub(crate) static_variables: HashMap<u64, Variable, NoopHasher>,
+    pub(crate) static_variables: RefCell<HashMap<u64, Variable, NoopHasher>>,
     pub(crate) instance_variables: HashMap<u64, Variable, NoopHasher>, // Only instance variables definition
 }
 
@@ -32,7 +33,7 @@ impl Class {
             functions_pool,
             sources,
             instances_references: RefCell::new(0),
-            static_variables,
+            static_variables: RefCell::new(static_variables),
             instance_variables
         };
         class.reference = Some(Vm::calculate_hash(&class) & SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64);
@@ -47,8 +48,11 @@ impl Class {
             variables: self.instance_variables.clone()
         }
     }
-    pub fn get_variable(&self, reference: u64) -> Option<&Variable> {
-        self.static_variables.get(&reference)
+    pub fn get_variable(&self, reference: u64) -> Option<Variable> {
+        self.static_variables.borrow().get(&reference).cloned()
+    }
+    pub fn insert_variable(&self, reference: u64, variable: Variable) {
+        self.static_variables.borrow_mut().insert(reference, variable);
     }
 }
 

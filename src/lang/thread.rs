@@ -124,12 +124,13 @@ impl Thread {
                 OpCode::StoreStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in class scope"))?;
                     let owner_reference = class.hash_code();
-                    self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
+                    self.set_variable(&call_frame, class, instance, &variable, owner_reference)?;
+                    class.insert_variable(*reference, variable);
                 }
                 OpCode::LoadStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
                     let owner_reference = class.hash_code();
-                    self.load_variable(variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
+                    self.load_variable(&variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
                 }
                 OpCode::DefineFunction(_) => {}
                 OpCode::Equal => {
@@ -409,8 +410,9 @@ impl Thread {
                 Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
             }
             StackEntry::StaticVariableReference(reference) => {
-                let variable = class.static_variables.get(reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
-                Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
+                let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
+                let x = Ok(self.value_from_value_ref(&variable.value_ref.borrow())?);
+                x
             }
             StackEntry::HeapReference((owner_reference, reference)) => {
                 Ok(Value::Reference(Some((*owner_reference, *reference))))
@@ -478,7 +480,7 @@ impl Thread {
                 Ok(constant_ref)
             }
             StackEntry::StaticVariableReference(reference) => {
-                let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
+                let variable =class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)

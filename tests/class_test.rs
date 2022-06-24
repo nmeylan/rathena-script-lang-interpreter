@@ -225,7 +225,7 @@ fn setd_instance_variable() {
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
     assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
 }
-// #[test]
+#[test]
 fn setd_static_variable() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
@@ -254,5 +254,5 @@ fn setd_static_variable() {
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().clone());
 }
