@@ -194,7 +194,7 @@ fn on_instance_init_hook_test() {
     assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().clone());
     assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
 }
-// #[test]
+#[test]
 fn setd_instance_variable() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
@@ -224,5 +224,35 @@ fn setd_instance_variable() {
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
     assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
+}
+// #[test]
+fn setd_static_variable() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    - script My class -1, {
+        inc();
+        end;
+        function inc {
+            setd ".counter", .counter + 1;
+            vm_dump_var("counter", .counter);
+        }
+        OnInit:
+            setd ".counter", 0;
+    }
+    "#).unwrap();
+    let events_clone = events.clone();
+    let i: Arc<RefCell<HashMap<String, usize>>> = Arc::new(RefCell::new(HashMap::new()));
+    let vm = crate::common::setup_vm(move |e| {
+        let i1 = i.borrow_mut().get(&e.name).unwrap_or(&(0 as usize)).clone();
+        i.borrow_mut().insert(e.name.clone(), i1 + 1);
+        events_clone.borrow_mut().insert(format!("{}{}", e.name, i1 + 1), e);
+    });
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    // Then
+    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
 }

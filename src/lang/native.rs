@@ -9,7 +9,7 @@ use crate::lang::thread::Thread;
 use crate::lang::value::{Native, Scope, Value, Variable};
 use crate::lang::vm::{Hashcode, Vm};
 
-pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: Option<&Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
+pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
     match native.name.as_str() {
         "getarg" => {
             getarg(thread, call_frame, &arguments)?
@@ -46,7 +46,7 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             }
             let variable_reference = Vm::calculate_hash(&variable);
             let owner_reference = if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
-                instance.unwrap().hash_code()
+                instance.as_ref().unwrap().hash_code()
             } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
                 class.hash_code()
             } else {
@@ -56,7 +56,8 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             thread.set_variable(call_frame, class, instance, &variable, owner_reference)?;
             if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
                 // instance.unwrap().variables.insert(variable_reference, variable);
-                panic!("TODO")
+                let mut x = instance.as_mut().unwrap();
+                x.variables.insert(variable_reference, variable);
             } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
                 panic!("TODO")
             } else {
