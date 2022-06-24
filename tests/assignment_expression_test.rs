@@ -4,8 +4,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use ragnarok_script_interpreter::lang::vm::Vm;
+use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
 use common::Event;
+use ragnarok_script_interpreter::lang::vm::DebugFlag::{Execution, OpCode};
 
 use crate::common::compile_script;
 
@@ -160,4 +161,72 @@ fn plus_equal_num_addition() {
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(3_i32, events.borrow().get("a").unwrap().value.number_value());
+}
+
+#[test]
+fn setd_function() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@var_name$ = "var";
+    setd ".@my_" + .@var_name$ + "$", "hello_world";
+    setd(".@my_" + .@var_name$ + 2 + "$", "hello_world2");
+    for(.@i=0;.@i<10;.@i+=1) {
+        setd ".@v" + .@i, .@i;
+    }
+    vm_dump_locals();
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::LocalsVariable.value());
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(String::from("hello_world"), events.borrow().get("my_var").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello_world2"), events.borrow().get("my_var2").unwrap().value.string_value().clone());
+    assert_eq!(0, events.borrow().get("v0").unwrap().value.number_value().clone());
+    assert_eq!(9, events.borrow().get("v9").unwrap().value.number_value().clone());
+}
+#[test]
+fn setd_function_error_wrong_type() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@var_name$ = "var";
+    setd ".@my_" + .@var_name$, "hello_world";
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, Execution.value());
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    // Then
+    assert_eq!(r#"setd - tried to assign a String to a variable declared as Number
+test_script 4:4.
+l4	    setd ".@my_" + .@var_name$, "hello_world";
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0: _main
+	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
+}
+
+#[test]
+fn setd_function_error_undefined_variable() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@var_name$ = "var";
+    setd ".@my_" + .@var_name$, 1;
+    print(.@a);
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, Execution.value());
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    // Then
+    assert_eq!(r#"Variable is not declared in local scope
+test_script 5:10.
+l5	    print(.@a);
+	          ^^^"#, runtime_error.to_string().trim());
 }

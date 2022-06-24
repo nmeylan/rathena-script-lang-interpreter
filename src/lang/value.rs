@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::env::var;
 
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
@@ -61,6 +62,19 @@ pub enum Value {
     Number(Option<i32>),
     Reference(Option<(u64, u64)>),
     ArrayEntry(Option<(u64, u64, Option<Constant>, usize)>),
+}
+
+impl Scope {
+    pub fn prefix(&self) -> String {
+        match self {
+            Scope::Server => String::from("$"),
+            Scope::Account => String::from(""),
+            Scope::Character => String::from("@"),
+            Scope::Npc => String::from("."),
+            Scope::Instance => String::from("'"),
+            Scope::Local => String::from(".@"),
+        }
+    }
 }
 
 impl Constant {
@@ -310,14 +324,7 @@ impl Variable {
     }
 
     pub fn prefix(&self) -> String {
-        match self.scope {
-            Scope::Server => String::from("$"),
-            Scope::Account => String::from(""),
-            Scope::Character => String::from("@"),
-            Scope::Npc => String::from("."),
-            Scope::Instance => String::from("'"),
-            Scope::Local => String::from(".@"),
-        }
+        self.scope.prefix()
     }
 
     pub fn suffix(&self) -> String {
@@ -332,6 +339,52 @@ impl Variable {
                     String::from("[]")
                 }
             }
+        }
+    }
+
+    pub fn from_string(string: &String) -> Self {
+        let (scope, scope_len) =  if string.starts_with(&Scope::Local.prefix()){
+            (Scope::Local, Scope::Local.prefix().len())
+        } else if string.starts_with(&Scope::Character.prefix()) {
+            (Scope::Character, Scope::Character.prefix().len())
+        } else if string.starts_with(&Scope::Server.prefix()){
+            (Scope::Server, Scope::Server.prefix().len())
+        } else if string.starts_with(&Scope::Npc.prefix()) {
+            (Scope::Npc, Scope::Npc.prefix().len())
+        } else if string.starts_with(&Scope::Instance.prefix()) {
+            (Scope::Instance, Scope::Instance.prefix().len())
+        } else if string.starts_with(&Scope::Account.prefix()) {
+            (Scope::Account, Scope::Account.prefix().len())
+        } else {
+            panic!("Can't find variable scope from string {}", string)
+        };
+        let mut variable_name = string[scope_len..string.len()].to_string();
+        let has_dollar = variable_name.ends_with("$");
+        let has_bracket = variable_name.ends_with("]");
+        if has_dollar {
+            variable_name = variable_name[0..variable_name.len() - 1].to_string();
+        }
+        if has_bracket {
+            variable_name = variable_name[0..variable_name.len() - 3].to_string();
+        }
+        Self {
+            scope,
+            value_ref: RefCell::new(Self::variable_value(has_dollar, has_bracket)),
+            name: variable_name,
+        }
+    }
+
+    pub(crate) fn variable_value(has_dollar: bool, has_bracket: bool) -> ValueRef {
+        if has_dollar {
+            if has_bracket {
+                ValueRef::new_empty_array(ValueType::String)
+            } else {
+                ValueRef::new_empty_string()
+            }
+        } else if has_bracket {
+            ValueRef::new_empty_array(ValueType::Number)
+        } else {
+            ValueRef::new_empty_number()
         }
     }
 }

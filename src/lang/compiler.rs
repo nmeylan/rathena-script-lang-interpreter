@@ -10,8 +10,9 @@ use std::ops::Deref;
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream};
+use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::token::Token;
-use antlr_rust::tree::{ParseTreeVisitor, Tree};
+use antlr_rust::tree::{NodeText, ParseTree, ParseTreeVisitor, Tree};
 use crate::parser::rathenascriptlangvisitor::{*};
 use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
@@ -274,20 +275,6 @@ impl Compiler {
         self.global_class().get_function_returned_type(function_name)
     }
 
-    fn variable_value(has_dollar: bool, has_bracket: bool) -> ValueRef {
-        if has_dollar {
-            if has_bracket {
-                ValueRef::new_empty_array(ValueType::String)
-            } else {
-                ValueRef::new_empty_string()
-            }
-        } else if has_bracket {
-            ValueRef::new_empty_array(ValueType::Number)
-        } else {
-            ValueRef::new_empty_number()
-        }
-    }
-
     fn register_error<'input>(&self, error_type: CompilationErrorType, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), message: String) {
         let error = CompilationError {
             error_type,
@@ -397,7 +384,7 @@ impl Compiler {
         let variable_name = ctx.variable_name().unwrap();
         let name = variable_name.Identifier().unwrap().symbol.text.deref().to_string();
         let variable = Variable {
-            value_ref: RefCell::new(Self::variable_value(variable_name.Dollar().is_some(), variable_name.LeftBracket().is_some())),
+            value_ref: RefCell::new(Variable::variable_value(variable_name.Dollar().is_some(), variable_name.LeftBracket().is_some())),
             name,
             scope,
         };
@@ -437,7 +424,15 @@ impl Compiler {
                 if let Ok(reference) = self.current_chunk().load_local(variable) {
                     self.current_chunk().emit_op_code(LoadLocal(reference), self.compilation_details_from_context(node));
                 } else {
-                    self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
+                    let variable_ref = Vm::calculate_hash(variable);
+                    self.current_chunk().add_undefined_variable(variable_ref);
+                    // When using setd for local scope we have no way to know if variable is defined or not without evaluating the setd expression, which is done at runtime.
+                    // So we disable variable existence check in this case
+                    if self.current_chunk().local_setd_len() > 0 {
+                        self.current_chunk().emit_op_code(LoadLocal(variable_ref), self.compilation_details_from_context(node));
+                    } else {
+                        self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
+                    }
                 }
             }
         }
@@ -504,6 +499,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if native.name == "getarg" && argument_count > 1 {
                 // do not remove default value type, so we can check at compile time that default type match variable type
                 self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
+            } else if native.name == "setd" {
+                let setd_variable_expression = ctx.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
+                if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
+                    self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
+                }
             } else {
                 self.remove_current_assigment_type(argument_count);
             }
@@ -917,11 +917,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 for_if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
             }
 
+            self.current_chunk().add_new_block_state();
+            self.visit_statement(ctx.statement().as_ref().unwrap());
+
             if for_condition.forExpression().is_some() {
                 self.visit_forExpression(for_condition.forExpression().as_ref().unwrap());
             }
-            self.current_chunk().add_new_block_state();
-            self.visit_statement(ctx.statement().as_ref().unwrap());
             let block_state = self.current_chunk().drop_block_state();
             let for_statement_end = self.current_chunk().emit_op_code(OpCode::Jump(for_expression_index + 1), self.compilation_details_from_context(ctx));
             if for_condition.forStopExpression().is_some() {

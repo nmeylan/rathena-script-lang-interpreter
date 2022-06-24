@@ -169,7 +169,7 @@ fn break_should_stop_for_loop() {
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(1, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
 }
 
 #[test]
@@ -198,7 +198,7 @@ fn break_should_stop_for_loop2() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(51, events.borrow().get("i").unwrap().value.number_value());
+    assert_eq!(50, events.borrow().get("i").unwrap().value.number_value());
     assert_eq!(49, events.borrow().get("j").unwrap().value.number_value());
 }
 
@@ -217,7 +217,7 @@ fn break_should_stop_nested_for_loop2() {
         for(;;) {
             .@c += 1;
             .@j += 1;
-            if (.@j > 10) {
+            if (.@j > 9) {
              break;
             }
         }

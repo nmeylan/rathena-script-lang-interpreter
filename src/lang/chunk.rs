@@ -1,5 +1,5 @@
 use std::cell::{RefCell};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -220,6 +220,7 @@ pub struct Chunk {
     // key are label name, values are goto op code that goto this label
     current_block_state: RefCell<usize>,
     block_states: RefCell<Vec<BlockState>>,
+    chunk_state: RefCell<ChunkState>,
 }
 
 impl Default for Chunk {
@@ -232,6 +233,7 @@ impl Default for Chunk {
             label_gotos_op_code_indices: RefCell::new(Default::default()),
             current_block_state: RefCell::new(0),
             block_states: RefCell::new(vec![]),
+            chunk_state: RefCell::new(Default::default())
         }
     }
 }
@@ -240,6 +242,12 @@ impl Default for Chunk {
 pub struct BlockState {
     // Switch/Loop: store all "break" op_code indices, in order to update jump index to complete switch/for/while/do-while statements
     pub break_op_code_indices: RefCell<Vec<usize>>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ChunkState {
+    pub local_setd: HashSet<u64>,
+    pub undefined_variables: HashSet<u64>,
 }
 
 impl Default for BlockState {
@@ -321,6 +329,21 @@ impl Chunk {
         let block_state_ref_mut = self.block_states.borrow_mut();
         let block_state = block_state_ref_mut.last().unwrap();
         block_state.break_op_code_indices.borrow_mut().push(index);
+    }
+
+    pub fn local_setd_len(&self) -> usize {
+        self.chunk_state.borrow().local_setd.len()
+    }
+    pub fn add_local_setd(&self, reference: u64) {
+        self.chunk_state.borrow_mut().local_setd.insert(reference);
+    }
+
+    pub fn add_undefined_variable(&self, reference: u64) {
+        self.chunk_state.borrow_mut().undefined_variables.insert(reference);
+    }
+
+    pub fn undefined_variables_len(&self) -> usize {
+        self.chunk_state.borrow().undefined_variables.len()
     }
 }
 

@@ -30,6 +30,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("deletearray", None),
     ("inarray", None),
     ("copyarray", None),
+    ("setd", None),
 ];
 
 
