@@ -101,9 +101,7 @@ impl Thread {
                     self.variable_assign_reference(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadLocal(reference) => {
-                    let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
-                    let owner_reference = call_frame.hash_code();
-                    self.load_variable(variable, owner_reference, || StackEntry::LocalVariableReference(*reference))
+                    self.load_local_variable(&call_frame, reference)?;
                 }
                 OpCode::StoreInstance(reference) => {
                     if instance.is_none() {
@@ -118,9 +116,7 @@ impl Thread {
                     if instance.is_none() {
                         return Err(RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Can't load instance variable in a static(non-instance) context"));
                     }
-                    let variable = instance.as_ref().unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
-                    let owner_reference = instance.as_ref().unwrap().hash_code();
-                    self.load_variable(variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
+                    self.load_instance_variable(instance, reference)?;
                 }
                 OpCode::StoreStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in class scope"))?;
@@ -129,9 +125,7 @@ impl Thread {
                     class.insert_variable(*reference, variable);
                 }
                 OpCode::LoadStatic(reference) => {
-                    let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
-                    let owner_reference = class.hash_code();
-                    self.load_variable(&variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
+                    self.load_static_variable(class, reference)?;
                 }
                 OpCode::DefineFunction(_) => {}
                 OpCode::Equal => {
@@ -361,7 +355,28 @@ impl Thread {
         Ok(CallFrameBreak::Return(false))
     }
 
-    fn load_variable<F>(&mut self, variable: &Variable, owner_reference: u64, apply_when_not_array: F)
+    pub fn load_local_variable(&self, call_frame: &CallFrame, reference: &u64) -> Result<(), RuntimeError>{
+        let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
+        let owner_reference = call_frame.hash_code();
+        self.load_variable(variable, owner_reference, || StackEntry::LocalVariableReference(*reference));
+        Ok(())
+    }
+
+    pub fn load_static_variable(&self, class: &Class, reference: &u64) -> Result<(), RuntimeError> {
+        let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in NPC scope"))?;
+        let owner_reference = class.hash_code();
+        self.load_variable(&variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
+        Ok(())
+    }
+
+    pub fn load_instance_variable(&self, instance: &mut Option<&mut Instance>, reference: &u64)-> Result<(), RuntimeError> {
+        let variable = instance.as_ref().unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in instance scope"))?;
+        let owner_reference = instance.as_ref().unwrap().hash_code();
+        self.load_variable(variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
+        Ok(())
+    }
+
+    fn load_variable<F>(&self, variable: &Variable, owner_reference: u64, apply_when_not_array: F)
         where F: FnOnce() -> StackEntry {
         if variable.value_ref.borrow().is_array() {
             let array_ref = Vm::calculate_hash(variable);

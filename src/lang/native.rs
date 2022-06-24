@@ -38,6 +38,33 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
         "setd" => {
             setd(thread, class, instance, call_frame, &arguments, arguments_ref)?
         }
+        "getd" => {
+            let variable_identifier = arguments[0].string_value();
+            let variable_from_string = Variable::from_string(variable_identifier);
+            let variable_reference = Vm::calculate_hash(&variable_from_string);
+            if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
+                thread.load_instance_variable(instance, &variable_reference)?;
+            } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
+                thread.load_static_variable(class, &variable_reference)?;
+            } else {
+                thread.load_local_variable(call_frame, &variable_reference)?;
+            };
+            if variable_from_string.value_ref.borrow().is_array() {
+                thread.stack.pop()?; // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.
+                let owner_reference = if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
+                    instance.as_ref().unwrap().hash_code()
+                } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
+                    class.hash_code()
+                } else {
+                    call_frame.hash_code()
+                };
+                let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference).unwrap();
+                let array_index = array_index_from_string(variable_identifier);
+
+                thread.stack.push(ConstantPoolReference(array.get(array_index)
+                    .map_err(|err| RuntimeError::from_temporary(thread.current_source_line.clone(), thread.stack_traces.clone(), err))?.unwrap()));
+            }
+        }
         _ => {
             return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));
         }
@@ -68,13 +95,10 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
     // When it is an array, we simulate ArrayStore OpCode. ArrayStore OpCode contains index for assignment, here we need to retrieve from first argument of "setd"
     if variable.value_ref.borrow().is_array() {
         let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference);
-        let opening_bracket_index = variable_identifier.chars().position(|c| c == '[').unwrap();
-        let closing_bracket_index = variable_identifier.chars().position(|c| c == ']').unwrap();
-        let array_index = variable_identifier[opening_bracket_index + 1..closing_bracket_index].parse::<usize>().unwrap();
+        let array_index = array_index_from_string(variable_identifier);
         array.unwrap().assign(array_index, variable_value.unwrap());
     }
     if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
-        // instance.unwrap().variables.insert(variable_reference, variable);
         let mut mutable_instance = instance.as_mut().unwrap();
         mutable_instance.variables.insert(variable_reference, variable);
     } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
@@ -83,6 +107,13 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
         call_frame.locals.insert(variable_reference, variable);
     };
     Ok(())
+}
+
+fn array_index_from_string(variable_identifier: &String) -> usize {
+    let opening_bracket_index = variable_identifier.chars().position(|c| c == '[').unwrap();
+    let closing_bracket_index = variable_identifier.chars().position(|c| c == ']').unwrap();
+    let array_index = variable_identifier[opening_bracket_index + 1..closing_bracket_index].parse::<usize>().unwrap();
+    array_index
 }
 
 fn copyarray(thread: &Thread, arguments: Vec<Value>) -> Result<(), RuntimeError> {

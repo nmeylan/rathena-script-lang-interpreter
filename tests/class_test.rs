@@ -205,9 +205,12 @@ fn setd_instance_variable() {
         function inc {
             setd "'counter", 'counter + 1;
             vm_dump_var("counter", 'counter);
+            vm_dump_var("counter_getd", getd("'cou"+"nter");
+            vm_dump_var("my_array", getd("'my_array[" + 1 + "]$");
         }
         OnInstanceInit:
             setd "'counter", 0;
+            setd("'my_array[" + 1 + "]$", "hello_world array");
     }
     "#).unwrap();
     let events_clone = events.clone();
@@ -224,6 +227,9 @@ fn setd_instance_variable() {
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
     assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("counter_getd1").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("counter_getd2").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().clone());
 }
 #[test]
 fn setd_static_variable() {
@@ -236,9 +242,12 @@ fn setd_static_variable() {
         function inc {
             setd ".counter", .counter + 1;
             vm_dump_var("counter", .counter);
+            vm_dump_var("counter_getd", getd(".co"+"unter");
+            vm_dump_var("my_array", getd(".my_array[" + 1 + "]$");
         }
         OnInit:
             setd ".counter", 0;
+            setd(".my_array[" + 1 + "]$", "hello_world array");
     }
     "#).unwrap();
     let events_clone = events.clone();
@@ -255,4 +264,7 @@ fn setd_static_variable() {
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
     assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("counter_getd1").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("counter_getd2").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().clone());
 }

@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
 use common::Event;
-use ragnarok_script_interpreter::lang::vm::DebugFlag::{Execution, OpCode};
+use ragnarok_script_interpreter::lang::vm::DebugFlag::{Execution, OpCode, Stack};
 
 use crate::common::compile_script;
 
@@ -178,18 +178,22 @@ fn setd_function() {
     vm_dump_locals();
     vm_dump_var("arraysize", getarraysize(.@my_array$));
     vm_dump_var("a", .@my_array$[1]);
+    vm_dump_var("my_var_via_getd", getd(".@my_" + .@var_name$ + "$"));
+    vm_dump_var("array_via_getd", getd(".@my_array[" + 1 + "]$"));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); },  DebugFlag::LocalsVariable.value());
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello_world"), events.borrow().get("my_var").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello_world"), events.borrow().get("my_var_via_getd").unwrap().value.string_value().clone());
     assert_eq!(String::from("hello_world2"), events.borrow().get("my_var2").unwrap().value.string_value().clone());
     assert_eq!(0, events.borrow().get("v0").unwrap().value.number_value().clone());
     assert_eq!(9, events.borrow().get("v9").unwrap().value.number_value().clone());
     assert_eq!(String::from("hello_world array"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello_world array"), events.borrow().get("array_via_getd").unwrap().value.string_value().clone());
     assert_eq!(2, events.borrow().get("arraysize").unwrap().value.number_value().clone());
 }
 #[test]
@@ -225,7 +229,7 @@ fn setd_function_error_undefined_variable() {
     print(.@a);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, Execution.value());
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, Stack.value() | Execution.value());
     // When
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
