@@ -1,5 +1,6 @@
 use std::{io};
 use std::cell::RefCell;
+use std::env::var;
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
 
@@ -78,8 +79,8 @@ impl Thread {
                     let value_ref_stack_entry = self.stack.pop()?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         let array = self.vm.array_from_heap_reference(owner_reference, reference).map_err(|err| RuntimeError::from_temporary(self.current_source_line.clone(), self.stack_traces.clone(), err))?;
-                        let result = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
-                        if let Ok(constant_ref) = result {
+                        let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
+                        if let Ok(constant_ref) = value_constant_ref {
                             array.assign(*arr_index, constant_ref);
                         }
                     } else {
@@ -97,7 +98,7 @@ impl Thread {
                 OpCode::StoreLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
                     let owner_reference = call_frame.hash_code();
-                    self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
+                    self.variable_assign_reference(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
@@ -111,7 +112,7 @@ impl Thread {
                     let variable = instance.as_ref().unwrap().get_variable(*reference)
                         .ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in instance scope"))?;
                     let owner_reference = instance.as_ref().unwrap().hash_code();
-                    self.set_variable(&call_frame, class, instance, variable, owner_reference)?;
+                    self.variable_assign_reference(&call_frame, class, instance, variable, owner_reference)?;
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
@@ -124,7 +125,7 @@ impl Thread {
                 OpCode::StoreStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in class scope"))?;
                     let owner_reference = class.hash_code();
-                    self.set_variable(&call_frame, class, instance, &variable, owner_reference)?;
+                    self.variable_assign_reference(&call_frame, class, instance, &variable, owner_reference)?;
                     class.insert_variable(*reference, variable);
                 }
                 OpCode::LoadStatic(reference) => {
@@ -370,7 +371,7 @@ impl Thread {
         }
     }
 
-    pub(crate) fn set_variable(&self, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>, variable: &Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+    pub(crate) fn variable_assign_reference(&self, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>, variable: &Variable, owner_reference: u64) -> Result<(), RuntimeError> {
         let reference = if variable.value_ref.borrow().is_array() {
             let array_ref = Vm::calculate_hash(variable);
             self.vm.allocate_array_if_needed(owner_reference, array_ref, variable.value_ref.borrow().value_type.clone());

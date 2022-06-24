@@ -171,13 +171,16 @@ fn setd_function() {
     .@var_name$ = "var";
     setd ".@my_" + .@var_name$ + "$", "hello_world";
     setd(".@my_" + .@var_name$ + 2 + "$", "hello_world2");
+    setd(".@my_array[" + 1 + "]$", "hello_world array");
     for(.@i=0;.@i<10;.@i+=1) {
         setd ".@v" + .@i, .@i;
     }
     vm_dump_locals();
+    vm_dump_var("arraysize", getarraysize(.@my_array$));
+    vm_dump_var("a", .@my_array$[1]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::LocalsVariable.value());
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); },  DebugFlag::LocalsVariable.value());
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -186,6 +189,8 @@ fn setd_function() {
     assert_eq!(String::from("hello_world2"), events.borrow().get("my_var2").unwrap().value.string_value().clone());
     assert_eq!(0, events.borrow().get("v0").unwrap().value.number_value().clone());
     assert_eq!(9, events.borrow().get("v9").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hello_world array"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(2, events.borrow().get("arraysize").unwrap().value.number_value().clone());
 }
 #[test]
 fn setd_function_error_wrong_type() {

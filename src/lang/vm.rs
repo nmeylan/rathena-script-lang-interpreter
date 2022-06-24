@@ -31,6 +31,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("inarray", None),
     ("copyarray", None),
     ("setd", None),
+    ("getd", None),
 ];
 
 

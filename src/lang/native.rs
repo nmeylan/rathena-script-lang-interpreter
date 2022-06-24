@@ -36,38 +36,52 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             copyarray(thread, arguments)?
         }
         "setd" => {
-            let variable_identifier = arguments[0].string_value();
-            let variable_value = arguments_ref[1].clone();
-            let variable = Variable::from_string(variable_identifier);
-            if !variable.value_ref.borrow().value_type.match_value(&arguments[1]) {
-                return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(),
-                                                    format!("setd - tried to assign a {} to a variable declared as {}",
-                                                            arguments[1].display_type(), variable.value_ref.borrow().value_type.display_type())));
-            }
-            let variable_reference = Vm::calculate_hash(&variable);
-            let owner_reference = if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
-                instance.as_ref().unwrap().hash_code()
-            } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
-                class.hash_code()
-            } else {
-                call_frame.hash_code()
-            };
-            thread.stack.push(ConstantPoolReference(variable_value.unwrap()));
-            thread.set_variable(call_frame, class, instance, &variable, owner_reference)?;
-            if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
-                // instance.unwrap().variables.insert(variable_reference, variable);
-                let mut mutable_instance = instance.as_mut().unwrap();
-                mutable_instance.variables.insert(variable_reference, variable);
-            } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
-                class.insert_variable(variable_reference, variable);
-            } else {
-                call_frame.locals.insert(variable_reference, variable);
-            };
+            setd(thread, class, instance, call_frame, &arguments, arguments_ref)?
         }
         _ => {
             return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));
         }
     }
+    Ok(())
+}
+
+fn setd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
+    let variable_identifier = arguments[0].string_value();
+    let variable_value = arguments_ref[1].clone();
+    let variable = Variable::from_string(variable_identifier);
+    if !variable.value_ref.borrow().value_type.match_value(&arguments[1]) {
+        return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(),
+                                            format!("setd - tried to assign a {} to a variable declared as {}",
+                                                    arguments[1].display_type(), variable.value_ref.borrow().value_type.display_type())));
+    }
+    let variable_reference = Vm::calculate_hash(&variable);
+    let owner_reference = if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
+        instance.as_ref().unwrap().hash_code()
+    } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
+        class.hash_code()
+    } else {
+        call_frame.hash_code()
+    };
+    // to simulate the behavior when we assign via "set" and "=", where right expression of assigment is a constant reference, just before assigning the variable.
+    thread.stack.push(ConstantPoolReference(variable_value.unwrap()));
+    thread.variable_assign_reference(call_frame, class, instance, &variable, owner_reference)?;
+    // When it is an array, we simulate ArrayStore OpCode. ArrayStore OpCode contains index for assignment, here we need to retrieve from first argument of "setd"
+    if variable.value_ref.borrow().is_array() {
+        let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference);
+        let opening_bracket_index = variable_identifier.chars().position(|c| c == '[').unwrap();
+        let closing_bracket_index = variable_identifier.chars().position(|c| c == ']').unwrap();
+        let array_index = variable_identifier[opening_bracket_index + 1..closing_bracket_index].parse::<usize>().unwrap();
+        array.unwrap().assign(array_index, variable_value.unwrap());
+    }
+    if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
+        // instance.unwrap().variables.insert(variable_reference, variable);
+        let mut mutable_instance = instance.as_mut().unwrap();
+        mutable_instance.variables.insert(variable_reference, variable);
+    } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
+        class.insert_variable(variable_reference, variable);
+    } else {
+        call_frame.locals.insert(variable_reference, variable);
+    };
     Ok(())
 }
 

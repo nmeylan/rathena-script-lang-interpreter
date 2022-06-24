@@ -360,12 +360,12 @@ impl Variable {
         };
         let mut variable_name = string[scope_len..string.len()].to_string();
         let has_dollar = variable_name.ends_with("$");
-        let has_bracket = variable_name.ends_with("]");
+        let has_bracket = variable_name.ends_with("]") || variable_name.ends_with("]$");
         if has_dollar {
             variable_name = variable_name[0..variable_name.len() - 1].to_string();
         }
         if has_bracket {
-            variable_name = variable_name[0..variable_name.len() - 3].to_string();
+            variable_name = variable_name[0..variable_name.chars().position(|c| c == '[').unwrap()].to_string();
         }
         Self {
             scope,

@@ -76,7 +76,11 @@ impl CallFrame {
                 let value_ref = local.value_ref.borrow();
                 writeln!(out, "({}) name: {}, scope: {:?}, type: {}, value: {}", reference,
                          local.name, local.scope, value_ref.value_type.display_type(),
-                         if let Some(value_reference) = value_ref.reference {vm.get_from_constant_pool(value_reference).unwrap().value().display_value()} else {"<uninitialized>".to_string()}
+                         if let Some(value_reference) = value_ref.reference {
+                             if vm.get_from_constant_pool(value_reference).is_some() {
+                                 vm.get_from_constant_pool(value_reference).unwrap().value().display_value()
+                             } else { "<not a constant>".to_string() }
+                         } else {"<uninitialized>".to_string()}
                 ).unwrap();
             }
         }
