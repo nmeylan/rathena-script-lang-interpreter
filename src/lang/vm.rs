@@ -32,6 +32,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
     ("copyarray", None),
     ("setd", None),
     ("getd", None),
+    ("getvariableofnpc", None),
 ];
 
 

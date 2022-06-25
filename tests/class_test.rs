@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 
 
-use ragnarok_script_interpreter::lang::vm::Vm;
+use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
 use crate::common::{compile, Event};
 
 mod common;
@@ -267,4 +267,33 @@ fn setd_static_variable() {
     assert_eq!(1, events.borrow().get("counter_getd1").unwrap().value.number_value().clone());
     assert_eq!(2, events.borrow().get("counter_getd2").unwrap().value.number_value().clone());
     assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().clone());
+}
+
+
+#[test]
+fn getvariableofnpc_when_npc_exist() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    - script My NPC1 -1, {
+        OnInit:
+            .value = 1;
+            setarray .array$[0], "hello", "world";
+    }
+
+    - script My NPC2 -1, {
+        vm_dump_var("npc_1_value", getvariableofnpc(.value, "MyNPC1");
+        // vm_dump_var("array1", getvariableofnpc(.array$[0], "MyNPC1");
+        // vm_dump_var("array2", getvariableofnpc(.array$[1], "MyNPC1");
+    }
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::Constant.value() | DebugFlag::Execution.value());
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_class(vm.clone(), "MyNPC2".to_string()).unwrap();
+    // Then
+    assert_eq!(1, events.borrow().get("npc_1_value").unwrap().value.number_value().clone());
+    // assert_eq!(String::from("Hello"), events.borrow().get("array1").unwrap().value.string_value().clone());
+    // assert_eq!(String::from("World"), events.borrow().get("array2").unwrap().value.string_value().clone());
 }

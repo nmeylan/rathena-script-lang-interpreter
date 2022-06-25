@@ -245,7 +245,11 @@ impl Thread {
                     if depth > 0 {
                         return Ok(CallFrameBreak::Goto(*index));
                     } else {
-                        op_index = *index - 1;
+                        op_index = if *index > 0 {
+                            *index - 1
+                        } else {
+                            *index
+                        }
                     }
                 }
                 OpCode::CallNative { argument_count, reference } => {

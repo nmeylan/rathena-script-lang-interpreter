@@ -205,7 +205,7 @@ fn setd_function_error_wrong_type() {
     setd ".@my_" + .@var_name$, "hello_world";
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, Execution.value());
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -229,7 +229,7 @@ fn setd_function_error_undefined_variable() {
     print(.@a);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, Stack.value() | Execution.value());
+    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();

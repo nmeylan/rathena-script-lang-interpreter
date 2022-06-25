@@ -104,6 +104,7 @@ impl CompilationDetail {
         format!("{} {}:{}.  {}", self.file_name, self.start_line, self.start_column, self.text.trim())
     }
 }
+
 impl Display for CompilationDetail {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{} {}:{}.", self.file_name, self.start_line, self.start_column).unwrap();
@@ -481,6 +482,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) {
+        let first_argument_op_code_index = self.current_chunk().last_op_code_index() + 1;
         let argument_count = if ctx.argumentExpressionList().is_some() {
             self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
             ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as usize
@@ -504,6 +506,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                     self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
                 }
+            } else if native.name == "getvariableofnpc" {
+                // Replacing first argument LoadStatic with a LoadConstant instead.
+                let static_identifier = ctx.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
+                let constant_reference = self.current_chunk().add_constant(Constant::String(static_identifier));
+                self.current_chunk().set_op_code_at(first_argument_op_code_index, OpCode::LoadConstant(constant_reference));
             } else {
                 self.remove_current_assigment_type(argument_count);
             }
@@ -787,7 +794,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                                             label_name, self.current_declared_function().name));
                 return;
             }
-            let label_start_index = self.current_chunk().last_op_code_index() + 1;
+            let label_start_index = if self.current_chunk().last_op_code_index() > 0 { self.current_chunk().last_op_code_index() + 1 } else { 0 };
             self.visit_children(ctx);
             let label_end_index = self.current_chunk().last_op_code_index() + 1;
             self.current_declared_function().insert_label(Label {
@@ -884,7 +891,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 if let Some(default_index) = default_index {
                     // Last if to be updated to jump to default label
                     self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(default_index));
-                } else{
+                } else {
                     // Last if to be updated to jump to end of switch
                     self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(end_of_switch_op_code));
                 }

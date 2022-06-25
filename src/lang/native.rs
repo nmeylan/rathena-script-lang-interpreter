@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::env::var;
 use std::mem;
 use crate::lang::call_frame::CallFrame;
@@ -39,36 +40,68 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             setd(thread, class, instance, call_frame, &arguments, arguments_ref)?
         }
         "getd" => {
+            getd(thread, class, instance, call_frame, arguments)?
+        }
+        "getvariableofnpc" => {
             let variable_identifier = arguments[0].string_value();
             let variable_from_string = Variable::from_string(variable_identifier);
             let variable_reference = Vm::calculate_hash(&variable_from_string);
-            if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
-                thread.load_instance_variable(instance, &variable_reference)?;
-            } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
-                thread.load_static_variable(class, &variable_reference)?;
-            } else {
-                thread.load_local_variable(call_frame, &variable_reference)?;
-            };
-            if variable_from_string.value_ref.borrow().is_array() {
-                thread.stack.pop()?; // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.
-                let owner_reference = if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
-                    instance.as_ref().unwrap().hash_code()
-                } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
-                    class.hash_code()
-                } else {
-                    call_frame.hash_code()
-                };
-                let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference).unwrap();
-                let array_index = array_index_from_string(variable_identifier);
+            let class_name = arguments[1].string_value();
+            let class = thread.vm.get_class(&class_name).clone();
+            let static_variables = class.static_variables.borrow();
+            let variable = static_variables.get(&variable_reference)
+                .ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
+                                                 format!("Variable {} is not declared in NPC {}", variable_identifier, class_name).as_str()))?;
 
-                thread.stack.push(ConstantPoolReference(array.get(array_index)
-                    .map_err(|err| RuntimeError::from_temporary(thread.current_source_line.clone(), thread.stack_traces.clone(), err))?.unwrap()));
+            if variable_from_string.value_ref.borrow().is_array() {
+                load_array_index_value(thread, class.as_ref(), instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
+            } else {
+                let reference = variable.value_ref.borrow().reference.ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
+                                                                                              format!("Variable {} in NPC {} is not initialized", variable_identifier, class_name).as_str()))?;
+                thread.stack.push(ConstantPoolReference(reference));
             }
         }
         _ => {
             return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));
         }
     }
+    Ok(())
+}
+
+fn getd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+    let variable_identifier = arguments[0].string_value();
+    let variable_from_string = Variable::from_string(variable_identifier);
+    let variable_reference = Vm::calculate_hash(&variable_from_string);
+    if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
+        thread.load_instance_variable(instance, &variable_reference)?;
+    } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
+        thread.load_static_variable(class, &variable_reference)?;
+    } else {
+        thread.load_local_variable(call_frame, &variable_reference)?;
+    };
+    if variable_from_string.value_ref.borrow().is_array() {
+        // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.
+        // When variable is an array, stack has been pushed with a HeapReference when calling load_xxxxx_variable functions
+        thread.stack.pop()?;
+        load_array_index_value(thread, class, instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
+    }
+    Ok(())
+}
+
+fn load_array_index_value(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, variable_identifier: &String, variable_from_string: &Variable, variable_reference: u64) -> Result<(), RuntimeError> {
+    let owner_reference = if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
+        instance.as_ref().unwrap().hash_code()
+    } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
+        class.hash_code()
+    } else {
+        call_frame.hash_code()
+    };
+    let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference).unwrap();
+    let array_index = array_index_from_string(variable_identifier);
+
+    thread.stack.push(ConstantPoolReference(array.get(array_index)
+        .map_err(|err| RuntimeError::from_temporary(thread.current_source_line.clone(), thread.stack_traces.clone(), err))?.unwrap()));
+
     Ok(())
 }
 
