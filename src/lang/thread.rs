@@ -366,6 +366,8 @@ impl Thread {
                 OpCode::End => {
                     return Ok(CallFrameBreak::End);
                 }
+                OpCode::Noop => {// Does nothing
+                }
             }
             op_index += 1;
         }

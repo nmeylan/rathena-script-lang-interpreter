@@ -384,6 +384,7 @@ pub enum OpCode {
     Else,
     End,
     Command,
+    Noop, // Use by compiler in case it need to remove already generated op code. WE can't remove them as we may break jump index, so we replace with noop
 }
 
 #[derive(Debug, Clone, Hash)]

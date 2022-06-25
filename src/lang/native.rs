@@ -52,7 +52,6 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             let variable = static_variables.get(&variable_reference)
                 .ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
                                                  format!("Variable {} is not declared in NPC {}", variable_identifier, class_name).as_str()))?;
-
             if variable_from_string.value_ref.borrow().is_array() {
                 load_array_index_value(thread, class.as_ref(), instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
             } else {
@@ -73,14 +72,14 @@ fn getd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
     if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
-        let variable = thread.get_instance_variable(instance, &variable_reference)?;
-        thread.stack.push(StackEntry::VariableReference((variable.scope.clone(), instance.as_ref().unwrap().hash_code(), variable_reference)));
+        // let variable = thread.get_instance_variable(instance, &variable_reference)?;
+        thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), instance.as_ref().unwrap().hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
-        let variable = thread.get_static_variable(class, &variable_reference)?;
-        thread.stack.push(StackEntry::VariableReference((variable.scope.clone(), class.hash_code(), variable_reference)));
+        // let variable = thread.get_static_variable(class, &variable_reference)?;
+        thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), class.hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local){
-        let variable = thread.get_local_variable(call_frame, &variable_reference)?;
-        thread.stack.push(StackEntry::VariableReference((variable.scope.clone(), call_frame.hash_code(), variable_reference)));
+        // let variable = thread.get_local_variable(call_frame, &variable_reference)?;
+        thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), call_frame.hash_code(), variable_reference)));
     } else {
         panic!("getd - Not supported yet, only static, instance and local variable scope are supported");
     };

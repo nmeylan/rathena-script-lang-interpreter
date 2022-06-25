@@ -283,8 +283,9 @@ fn getvariableofnpc_when_npc_exist() {
 
     - script My NPC2 -1, {
         vm_dump_var("npc_1_value", getvariableofnpc(.value, "MyNPC1");
-        // vm_dump_var("array1", getvariableofnpc(.array$[0], "MyNPC1");
-        // vm_dump_var("array2", getvariableofnpc(.array$[1], "MyNPC1");
+        // vm_dump_var("npc_1_value_getd", getvariableofnpc(getd(".value"), "MyNPC1");
+        vm_dump_var("array1", getvariableofnpc(.array$[0], "MyNPC1");
+        vm_dump_var("array2", getvariableofnpc(.array$[1], "MyNPC1");
     }
     "#).unwrap();
     let events_clone = events.clone();
@@ -294,6 +295,7 @@ fn getvariableofnpc_when_npc_exist() {
     Vm::execute_class(vm.clone(), "MyNPC2".to_string()).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("npc_1_value").unwrap().value.number_value().clone());
-    // assert_eq!(String::from("Hello"), events.borrow().get("array1").unwrap().value.string_value().clone());
-    // assert_eq!(String::from("World"), events.borrow().get("array2").unwrap().value.string_value().clone());
+    // assert_eq!(1, events.borrow().get("npc_1_value_getd").unwrap().value.number_value().clone());
+    assert_eq!(String::from("hello"), events.borrow().get("array1").unwrap().value.string_value().clone());
+    assert_eq!(String::from("world"), events.borrow().get("array2").unwrap().value.string_value().clone());
 }

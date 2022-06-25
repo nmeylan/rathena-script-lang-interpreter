@@ -508,9 +508,15 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
             } else if native.name == "getvariableofnpc" {
                 // Replacing first argument LoadStatic with a LoadConstant instead.
-                let static_identifier = ctx.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
-                let constant_reference = self.current_chunk().add_constant(Constant::String(static_identifier));
-                self.current_chunk().set_op_code_at(first_argument_op_code_index, OpCode::LoadConstant(constant_reference));
+                let static_variable_identifier = ctx.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
+                if !static_variable_identifier.starts_with("getd(") { // we can use getd to use reference of another variable containing the variable identifier
+                    let constant_reference = self.current_chunk().add_constant(Constant::String(static_variable_identifier));
+                    let npc_name_load_constant_op_code_index = self.current_chunk().last_op_code_index();
+                    self.current_chunk().set_op_code_at(first_argument_op_code_index, OpCode::LoadConstant(constant_reference));
+                    for i in (first_argument_op_code_index + 1)..npc_name_load_constant_op_code_index {
+                        self.current_chunk().set_op_code_at(i, OpCode::Noop);
+                    }
+                }
             } else {
                 self.remove_current_assigment_type(argument_count);
             }

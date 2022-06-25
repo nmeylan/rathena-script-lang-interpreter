@@ -169,9 +169,10 @@ fn setd_function() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     .@var_name$ = "var";
+    .@full_variable_name$ = ".@my_" + .@var_name$ + "$";
     setd ".@my_" + .@var_name$ + "$", "hello_world";
     setd(".@my_" + .@var_name$ + 2 + "$", "hello_world2");
-    setd(".@my_array[" + 1 + "]$", "hello_world array");
+    setd(".@my_array$[" + 1 + "]", "hello_world array");
     for(.@i=0;.@i<10;.@i+=1) {
         setd ".@v" + .@i, .@i;
     }
@@ -180,7 +181,8 @@ fn setd_function() {
     vm_dump_var("arraysize", getarraysize(.@my_array$));
     vm_dump_var("a", .@my_array$[1]);
     vm_dump_var("my_var_via_getd", getd(".@my_" + .@var_name$ + "$"));
-    vm_dump_var("array_via_getd", getd(".@my_array[" + 1 + "]$"));
+    vm_dump_var("my_var_via_getd_with_variable", getd(.@full_variable_name$));
+    vm_dump_var("array_via_getd", getd(".@my_array$[" + 1 + "]"));
     vm_dump_var("set_with_getd_value$", .@set_with_getd_value$);
     "#).unwrap();
     let events_clone = events.clone();
@@ -190,6 +192,8 @@ fn setd_function() {
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello_world"), events.borrow().get("my_var").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello_world"), events.borrow().get("my_var_via_getd").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello_world"), events.borrow().get("my_var_via_getd_with_variable").unwrap().value.string_value().clone());
     assert_eq!(String::from("hello_world"), events.borrow().get("set_with_getd_value").unwrap().value.string_value().clone());
     assert_eq!(String::from("hello_world2"), events.borrow().get("my_var2").unwrap().value.string_value().clone());
     assert_eq!(0, events.borrow().get("v0").unwrap().value.number_value().clone());
@@ -206,6 +210,7 @@ fn set_with_getd_function() {
     .@one = 1;
     set getd(".@"+"one"), 2;
     vm_dump_var("two", .@one);
+    vm_dump_var("two_getd", getd(".@one"));
     "#).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
@@ -214,6 +219,7 @@ fn set_with_getd_function() {
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("two_getd").unwrap().value.number_value().clone());
 }
 #[test]
 fn setd_function_error_wrong_type() {
