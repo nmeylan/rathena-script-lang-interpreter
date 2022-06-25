@@ -19,7 +19,7 @@ fn simple_assigment() {
     .@a$ = "hello world";
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -38,7 +38,7 @@ fn assigment_to_local_variable() {
     vm_dump_var("b", .@b$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -55,7 +55,7 @@ fn assignment_with_string_concat() {
     .@a$ = "hello" + " world " + 1;
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -88,7 +88,7 @@ fn assignment_with_number_operation() {
     set .@h1, 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
     vm_dump_locals();"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -123,7 +123,7 @@ fn simple_re_assigment() {
     .@a$ = "hello wrld";
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -139,7 +139,7 @@ fn plus_equal_string_concat() {
     .@a$ += " world";
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -155,7 +155,7 @@ fn plus_equal_num_addition() {
     .@a += 2;
     vm_dump_var("a", .@a);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -184,7 +184,7 @@ fn setd_function() {
     vm_dump_var("set_with_getd_value$", .@set_with_getd_value$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -208,7 +208,7 @@ fn set_with_getd_function() {
     vm_dump_var("two", .@one);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -224,7 +224,7 @@ fn setd_function_error_wrong_type() {
     setd ".@my_" + .@var_name$, "hello_world";
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -248,7 +248,7 @@ fn setd_function_error_undefined_variable() {
     print(.@a);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();

@@ -37,6 +37,7 @@ pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
 
 
 pub enum DebugFlag {
+    None,
     All,
     // VM
     Native,
@@ -56,6 +57,7 @@ pub enum DebugFlag {
 impl DebugFlag {
     pub fn value(&self) -> u16 {
         match self {
+            DebugFlag::None => 0,
             DebugFlag::All => 0xFFFF,
             DebugFlag::Native => 2,
             DebugFlag::Function => 4,

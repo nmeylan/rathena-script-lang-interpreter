@@ -29,7 +29,7 @@ fn simple_class_test() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
@@ -57,7 +57,7 @@ fn instance_variable_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(RefCell::new(0));
-    let vm = crate::common::setup_vm(move |e| {
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
         let i1 = *i.borrow();
         *i.borrow_mut() = i1 + 1;
         events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
@@ -91,7 +91,7 @@ fn static_variable_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(RefCell::new(0));
-    let vm = crate::common::setup_vm(move |e| {
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
         let i1 = *i.borrow();
         *i.borrow_mut() = i1 + 1;
         events_clone.borrow_mut().insert(format!("{}{}", e.name, *i.borrow()), e);
@@ -131,7 +131,7 @@ fn on_init_hook_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<RefCell<HashMap<String, usize>>> = Arc::new(RefCell::new(HashMap::new()));
-    let vm = crate::common::setup_vm(move |e| {
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
         let i1 = i.borrow_mut().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.borrow_mut().insert(e.name.clone(), i1 + 1);
         events_clone.borrow_mut().insert(format!("{}{}", e.name, i1 + 1), e);
@@ -175,7 +175,7 @@ fn on_instance_init_hook_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<RefCell<HashMap<String, usize>>> = Arc::new(RefCell::new(HashMap::new()));
-    let vm = crate::common::setup_vm(move |e| {
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
         let i1 = i.borrow_mut().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.borrow_mut().insert(e.name.clone(), i1 + 1);
         events_clone.borrow_mut().insert(format!("{}{}", e.name, i1 + 1), e);
@@ -215,7 +215,7 @@ fn setd_instance_variable() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<RefCell<HashMap<String, usize>>> = Arc::new(RefCell::new(HashMap::new()));
-    let vm = crate::common::setup_vm(move |e| {
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
         let i1 = i.borrow_mut().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.borrow_mut().insert(e.name.clone(), i1 + 1);
         events_clone.borrow_mut().insert(format!("{}{}", e.name, i1 + 1), e);
@@ -252,7 +252,7 @@ fn setd_static_variable() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<RefCell<HashMap<String, usize>>> = Arc::new(RefCell::new(HashMap::new()));
-    let vm = crate::common::setup_vm(move |e| {
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
         let i1 = i.borrow_mut().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.borrow_mut().insert(e.name.clone(), i1 + 1);
         events_clone.borrow_mut().insert(format!("{}{}", e.name, i1 + 1), e);
@@ -288,7 +288,7 @@ fn getvariableofnpc_when_npc_exist() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::Constant.value() | DebugFlag::Execution.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_class(vm.clone(), "MyNPC2".to_string()).unwrap();

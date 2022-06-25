@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 
-use ragnarok_script_interpreter::lang::vm::Vm;
+use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
 use crate::common::{compile_script, Event};
 
 mod common;
@@ -30,7 +30,7 @@ fn simple_array_assignment() {
     vm_dump_var("c", .@c$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -55,7 +55,7 @@ fn getarraysize_should_array_size() {
     vm_dump_var("b_len", .@b_len);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -83,7 +83,7 @@ fn cleararray() {
     vm_dump_var("b10", .@b[10]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -114,7 +114,7 @@ fn setarray() {
     vm_dump_var("b3", .@b[3]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -143,7 +143,7 @@ fn getelementofarray() {
     vm_dump_var("three", .@d);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -169,7 +169,7 @@ fn deletearray() {
     vm_dump_var("b_len_after_second_delete", getarraysize(.@b));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -198,7 +198,7 @@ fn inarray() {
     vm_dump_var("not_found_index", .@not_found_index);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -227,7 +227,7 @@ fn copyarray() {
     vm_dump_var("c2", .@c$[2]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
@@ -250,7 +250,7 @@ fn setarray_wrong_type_error() {
     setarray .@a$[0], "hello", "world", "2";
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -273,7 +273,7 @@ fn cleararray_wrong_type_error() {
     cleararray(.@a$[0], 0, 10);
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -298,7 +298,7 @@ fn copyarray_wrong_type_error() {
     copyarray .@b[0], .@a[0], 1;
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -321,7 +321,7 @@ fn copyarray_outofbounds_error() {
     copyarray .@b$[0], .@a$[18], 1;
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();

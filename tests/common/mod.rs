@@ -60,11 +60,7 @@ impl NativeMethodHandler for VmHook {
     }
 }
 
-pub fn setup_vm<F>(hook: F) -> Arc<Vm> where F: 'static + Fn(Event) {
-    setup_vm_with_debug(hook, 0)
-}
-
-pub fn setup_vm_with_debug<F>(hook: F, debug_flag: u16) -> Arc<Vm> where F: 'static + Fn(Event) {
+pub fn setup_vm<F>(debug_flag: u16, hook: F) -> Arc<Vm> where F: 'static + Fn(Event) {
     let vm_hook = VmHook { hook: Box::new(hook) };
     let vm = Vm::new(Box::new(vm_hook), debug_flag);
     Arc::new(vm)
