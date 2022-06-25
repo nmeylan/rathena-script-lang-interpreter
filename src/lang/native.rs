@@ -73,11 +73,16 @@ fn getd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
     if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
-        thread.load_instance_variable(instance, &variable_reference)?;
+        let variable = thread.get_instance_variable(instance, &variable_reference)?;
+        thread.stack.push(StackEntry::VariableReference((variable.scope.clone(), instance.as_ref().unwrap().hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
-        thread.load_static_variable(class, &variable_reference)?;
+        let variable = thread.get_static_variable(class, &variable_reference)?;
+        thread.stack.push(StackEntry::VariableReference((variable.scope.clone(), class.hash_code(), variable_reference)));
+    } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local){
+        let variable = thread.get_local_variable(call_frame, &variable_reference)?;
+        thread.stack.push(StackEntry::VariableReference((variable.scope.clone(), call_frame.hash_code(), variable_reference)));
     } else {
-        thread.load_local_variable(call_frame, &variable_reference)?;
+        panic!("getd - Not supported yet, only static, instance and local variable scope are supported");
     };
     if variable_from_string.value_ref.borrow().is_array() {
         // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.
@@ -109,11 +114,6 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
     let variable_identifier = arguments[0].string_value();
     let variable_value = arguments_ref[1].clone();
     let variable = Variable::from_string(variable_identifier);
-    if !variable.value_ref.borrow().value_type.match_value(&arguments[1]) {
-        return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(),
-                                            format!("setd - tried to assign a {} to a variable declared as {}",
-                                                    arguments[1].display_type(), variable.value_ref.borrow().value_type.display_type())));
-    }
     let variable_reference = Vm::calculate_hash(&variable);
     let owner_reference = if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
         instance.as_ref().unwrap().hash_code()
@@ -124,21 +124,13 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
     };
     // to simulate the behavior when we assign via "set" and "=", where right expression of assigment is a constant reference, just before assigning the variable.
     thread.stack.push(ConstantPoolReference(variable_value.unwrap()));
-    thread.variable_assign_reference(call_frame, class, instance, &variable, owner_reference)?;
+    thread.variable_assign_reference(class, instance, call_frame, variable.clone(), owner_reference)?;
     // When it is an array, we simulate ArrayStore OpCode. ArrayStore OpCode contains index for assignment, here we need to retrieve from first argument of "setd"
     if variable.value_ref.borrow().is_array() {
         let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference);
         let array_index = array_index_from_string(variable_identifier);
         array.unwrap().assign(array_index, variable_value.unwrap());
     }
-    if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
-        let mut mutable_instance = instance.as_mut().unwrap();
-        mutable_instance.variables.insert(variable_reference, variable);
-    } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
-        class.insert_variable(variable_reference, variable);
-    } else {
-        call_frame.locals.insert(variable_reference, variable);
-    };
     Ok(())
 }
 

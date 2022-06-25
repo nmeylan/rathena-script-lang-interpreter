@@ -352,6 +352,8 @@ pub enum OpCode {
     LoadConstant(u64),
     StoreGlobal(u64),
     LoadGlobal(u64),
+    StoreReference,
+    LoadReference,
     StoreLocal(u64),
     LoadLocal(u64),
     StoreInstance(u64),

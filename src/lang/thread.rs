@@ -1,4 +1,4 @@
-use std::{io};
+use std::{io, mem};
 use std::cell::RefCell;
 use std::env::var;
 use std::sync::{Arc};
@@ -7,7 +7,7 @@ use std::io::{Stdout, Write};
 use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Native, ValueRef, ValueType, Variable};
+use crate::lang::value::{Native, Scope, ValueRef, ValueType, Variable};
 use crate::lang::vm::{DebugFlag, Hashcode, NATIVE_FUNCTIONS, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
@@ -15,6 +15,7 @@ use crate::lang::chunk::{*};
 use crate::lang::class::{Class, Function, Instance};
 use crate::lang::compiler::CompilationDetail;
 use crate::lang::error::RuntimeError;
+use crate::lang::error::RuntimeErrorType::Internal;
 use crate::lang::native::handle_native_method;
 use crate::lang::stack::StackEntry::{ArrayHeapReference, ConstantPoolReference, HeapReference};
 use crate::lang::stack_trace::StackTrace;
@@ -74,6 +75,19 @@ impl Thread {
                 }
                 OpCode::StoreGlobal(_) => {}
                 OpCode::LoadGlobal(_) => {}
+                OpCode::StoreReference => {
+                    let stack_entry = self.stack.pop()?;
+                    if let StackEntry::VariableReference((scope, owner_reference, reference)) = stack_entry {
+                        let variable = self.get_variable_from_scope_and_reference(&call_frame, class, instance, &scope, reference)?;
+                        self.variable_assign_reference(class, instance, &mut call_frame, variable, owner_reference);
+                    } else {
+                        return Err(RuntimeError::new_with_type(self.current_source_line.clone(), self.stack_traces.clone(),
+                                                     Internal, format!("Expected stack to contain variable reference but got {:?}", stack_entry).as_str()))
+                    }
+                }
+                OpCode::LoadReference => {
+
+                }
                 OpCode::ArrayStore(arr_index) => {
                     let array_ref_stack_entry = self.stack.pop()?;
                     let value_ref_stack_entry = self.stack.pop()?;
@@ -98,7 +112,8 @@ impl Thread {
                 OpCode::StoreLocal(reference) => {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
                     let owner_reference = call_frame.hash_code();
-                    self.variable_assign_reference(&call_frame, class, instance, variable, owner_reference)?;
+                    let variable_cloned = variable.clone();
+                    self.variable_assign_reference(class, instance, &mut call_frame, variable_cloned, owner_reference)?;
                 }
                 OpCode::LoadLocal(reference) => {
                     self.load_local_variable(&call_frame, reference)?;
@@ -110,7 +125,7 @@ impl Thread {
                     let variable = instance.as_ref().unwrap().get_variable(*reference)
                         .ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in instance scope"))?;
                     let owner_reference = instance.as_ref().unwrap().hash_code();
-                    self.variable_assign_reference(&call_frame, class, instance, variable, owner_reference)?;
+                    self.variable_assign_reference(class, instance, &mut call_frame, variable.clone(), owner_reference)?;
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
@@ -121,8 +136,7 @@ impl Thread {
                 OpCode::StoreStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in class scope"))?;
                     let owner_reference = class.hash_code();
-                    self.variable_assign_reference(&call_frame, class, instance, &variable, owner_reference)?;
-                    class.insert_variable(*reference, variable);
+                    self.variable_assign_reference(class, instance, &mut call_frame, variable.clone(), owner_reference)?;
                 }
                 OpCode::LoadStatic(reference) => {
                     self.load_static_variable(class, reference)?;
@@ -359,25 +373,40 @@ impl Thread {
         Ok(CallFrameBreak::Return(false))
     }
 
-    pub fn load_local_variable(&self, call_frame: &CallFrame, reference: &u64) -> Result<(), RuntimeError>{
-        let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
+    pub fn load_local_variable(&self, call_frame: &CallFrame, reference: &u64) -> Result<(), RuntimeError> {
+        let variable = self.get_local_variable(call_frame, reference)?;
         let owner_reference = call_frame.hash_code();
-        self.load_variable(variable, owner_reference, || StackEntry::LocalVariableReference(*reference));
+        self.load_variable(&variable, owner_reference, || StackEntry::LocalVariableReference(*reference));
         Ok(())
     }
 
+    pub fn get_local_variable(&self, call_frame: &CallFrame, reference: &u64) -> Result<Variable, RuntimeError> {
+        let variable = call_frame.get_local(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in local scope"))?;
+        Ok(variable.clone())
+    }
+
     pub fn load_static_variable(&self, class: &Class, reference: &u64) -> Result<(), RuntimeError> {
-        let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in NPC scope"))?;
+        let variable = self.get_static_variable(class, reference)?;
         let owner_reference = class.hash_code();
         self.load_variable(&variable, owner_reference, || StackEntry::StaticVariableReference(*reference));
         Ok(())
     }
 
-    pub fn load_instance_variable(&self, instance: &mut Option<&mut Instance>, reference: &u64)-> Result<(), RuntimeError> {
-        let variable = instance.as_ref().unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in instance scope"))?;
+    pub fn get_static_variable(&self, class: &Class, reference: &u64) -> Result<Variable, RuntimeError> {
+        let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in NPC scope"))?;
+       Ok(variable)
+    }
+
+    pub fn load_instance_variable(&self, instance: &mut Option<&mut Instance>, reference: &u64) -> Result<(), RuntimeError> {
+        let variable = self.get_instance_variable(instance, reference)?;
         let owner_reference = instance.as_ref().unwrap().hash_code();
-        self.load_variable(variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
+        self.load_variable(&variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
         Ok(())
+    }
+
+    pub fn get_instance_variable(&self, instance: &Option<&mut Instance>, reference: &u64) -> Result<Variable, RuntimeError> {
+        let variable = instance.as_ref().unwrap().get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Variable is not declared in instance scope"))?;
+        Ok(variable.clone())
     }
 
     fn load_variable<F>(&self, variable: &Variable, owner_reference: u64, apply_when_not_array: F)
@@ -390,21 +419,38 @@ impl Thread {
         }
     }
 
-    pub(crate) fn variable_assign_reference(&self, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>, variable: &Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+    pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+        let variable_ref = Vm::calculate_hash(&variable);
         let reference = if variable.value_ref.borrow().is_array() {
-            let array_ref = Vm::calculate_hash(variable);
-            self.vm.allocate_array_if_needed(owner_reference, array_ref, variable.value_ref.borrow().value_type.clone());
-            self.stack.push(StackEntry::HeapReference((owner_reference, array_ref)));
-            array_ref
+            self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.borrow().value_type.clone());
+            self.stack.push(StackEntry::HeapReference((owner_reference, variable_ref)));
+            variable_ref
         } else {
             let stack_entry = self.stack.pop()?;
+            let value = self.value_from_stack_entry(&stack_entry, call_frame, class, instance)?;
+            if !variable.value_ref.borrow().value_type.match_value(&value) {
+                return Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(),
+                                                    format!("tried to assign a {} to a variable declared as {}",
+                                                            value.display_type(), variable.value_ref.borrow().value_type.display_type())));
+            }
             self.constant_ref_from_stack_entry(&stack_entry, call_frame, class, instance)?
         };
         variable.set_value_ref(reference);
+        if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
+            if instance.is_none() {
+                return Err(RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "Can't store instance variable in a static(non-instance) context"));
+            }
+            let mut mutable_instance = instance.as_mut().unwrap();
+            mutable_instance.variables.insert(variable_ref, variable);
+        } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
+            class.insert_variable(variable_ref, variable);
+        } else {
+            call_frame.locals.insert(variable_ref, variable);
+        };
         Ok(())
     }
 
-    fn value_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: &mut Option<&mut Instance>) -> Result<Value, RuntimeError> {
+    fn value_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>) -> Result<Value, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
                 let constant = self.vm.get_from_constant_pool(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
@@ -449,7 +495,29 @@ impl Thread {
                     Err(RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), "value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array"))
                 }
             }
+            StackEntry::VariableReference((scope, owner_reference, reference)) => {
+                let variable = self.get_variable_from_scope_and_reference(call_frame, class, instance, scope, *reference)?;
+                let value = self.value_from_value_ref(&variable.value_ref.borrow())?;
+                Ok(value)
+            }
         }
+    }
+
+    fn get_variable_from_scope_and_reference(&self, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>, scope: &Scope, reference: u64) -> Result<Variable, RuntimeError> {
+        let variable = if mem::discriminant(scope) == mem::discriminant(&Scope::Instance) {
+            if instance.is_none() {
+                return Err(RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(),
+                                             "Can't find instance variable in a static (non-instance) context."));
+            }
+            self.get_instance_variable(instance, &reference)?
+        } else if mem::discriminant(scope) == mem::discriminant(&Scope::Npc) {
+            self.get_static_variable(class, &reference)?
+        } else if mem::discriminant(scope) == mem::discriminant(&Scope::Local) {
+            self.get_local_variable(call_frame, &reference)?
+        } else {
+            panic!("Get variable value from reference - Not supported yet, only static, instance and local variable scope are supported");
+        };
+        Ok(variable)
     }
 
     fn value_from_value_ref(&self, value_ref: &ValueRef) -> Result<Value, RuntimeError> {
@@ -500,7 +568,13 @@ impl Thread {
                 Ok(constant_ref)
             }
             StackEntry::StaticVariableReference(reference) => {
-                let variable =class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
+                let variable = class.get_variable(*reference).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference).as_str()))?;
+                let constant_ref = variable.value_ref.borrow().get_ref();
+                self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
+                Ok(constant_ref)
+            }
+            StackEntry::VariableReference((scope, owner_reference, reference)) => {
+                let variable = self.get_variable_from_scope_and_reference(call_frame, class, instance, scope, *reference)?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(), format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference).as_str()))?;
                 Ok(constant_ref)

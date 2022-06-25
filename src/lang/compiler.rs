@@ -711,6 +711,15 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
                 self.visit_assignmentLeftExpression(&left);
             }
+        } else if ctx.Set().is_some() && ctx.functionCallExpression().is_some() {
+            let function_call = ctx.functionCallExpression().unwrap();
+            if function_call.Identifier().unwrap().get_text() != "getd" {
+                self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "Only \"getd\" function allowed here".to_string());
+                return;
+            }
+            self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+            self.visit_functionCallExpression(&function_call);
+            self.current_chunk().emit_op_code(OpCode::StoreReference, self.compilation_details_from_context(ctx));
         } else {
             self.visit_children(ctx);
         }

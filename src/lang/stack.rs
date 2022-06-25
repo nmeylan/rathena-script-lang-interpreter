@@ -1,6 +1,7 @@
 use std::cell::{Ref, RefCell};
 use std::fmt::{Display, Formatter};
 use crate::lang::error::RuntimeError;
+use crate::lang::value::Scope;
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -11,6 +12,7 @@ pub enum StackEntry {
     FunctionReference(u64),
     InstanceVariableReference(u64),
     StaticVariableReference(u64),
+    VariableReference((Scope, u64, u64)), // Scope, owner reference, entry reference
     HeapReference((u64, u64)), // owner reference, entry reference
     ArrayHeapReference((u64, u64, usize)), // owner reference, entry reference, index
 }

@@ -80,6 +80,14 @@ impl RuntimeError {
             error_type: RuntimeErrorType::Execution,
         }
     }
+    pub fn new_with_type(source: CompilationDetail, stack_traces: Vec<StackTrace>, error_type: RuntimeErrorType, message: &str) -> Self {
+        Self {
+            source,
+            message: message.to_string(),
+            stack_traces,
+            error_type,
+        }
+    }
     pub fn new_string(source: CompilationDetail, stack_traces: Vec<StackTrace>, message: String) -> Self {
         Self {
             source,

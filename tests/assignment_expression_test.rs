@@ -19,7 +19,7 @@ fn simple_assigment() {
     .@a$ = "hello world";
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::All.value());
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
@@ -175,26 +175,45 @@ fn setd_function() {
     for(.@i=0;.@i<10;.@i+=1) {
         setd ".@v" + .@i, .@i;
     }
+    set .@set_with_getd_value$, getd(".@my_" + .@var_name$ + "$");
     vm_dump_locals();
     vm_dump_var("arraysize", getarraysize(.@my_array$));
     vm_dump_var("a", .@my_array$[1]);
     vm_dump_var("my_var_via_getd", getd(".@my_" + .@var_name$ + "$"));
     vm_dump_var("array_via_getd", getd(".@my_array[" + 1 + "]$"));
+    vm_dump_var("set_with_getd_value$", .@set_with_getd_value$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::All.value());
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
     assert_eq!(String::from("hello_world"), events.borrow().get("my_var").unwrap().value.string_value().clone());
-    assert_eq!(String::from("hello_world"), events.borrow().get("my_var_via_getd").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello_world"), events.borrow().get("set_with_getd_value").unwrap().value.string_value().clone());
     assert_eq!(String::from("hello_world2"), events.borrow().get("my_var2").unwrap().value.string_value().clone());
     assert_eq!(0, events.borrow().get("v0").unwrap().value.number_value().clone());
     assert_eq!(9, events.borrow().get("v9").unwrap().value.number_value().clone());
     assert_eq!(String::from("hello_world array"), events.borrow().get("a").unwrap().value.string_value().clone());
     assert_eq!(String::from("hello_world array"), events.borrow().get("array_via_getd").unwrap().value.string_value().clone());
     assert_eq!(2, events.borrow().get("arraysize").unwrap().value.number_value().clone());
+}
+#[test]
+fn set_with_getd_function() {
+    // Given
+    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@one = 1;
+    set getd(".@"+"one"), 2;
+    vm_dump_var("two", .@one);
+    "#).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm_with_debug(move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); }, DebugFlag::All.value());
+    // When
+    Vm::bootstrap(vm.clone(), classes);
+    Vm::execute_main_script(vm).unwrap();
+    // Then
+    assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().clone());
 }
 #[test]
 fn setd_function_error_wrong_type() {
@@ -210,7 +229,7 @@ fn setd_function_error_wrong_type() {
     Vm::bootstrap(vm.clone(), classes);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
     // Then
-    assert_eq!(r#"setd - tried to assign a String to a variable declared as Number
+    assert_eq!(r#"tried to assign a String to a variable declared as Number
 test_script 4:4.
 l4	    setd ".@my_" + .@var_name$, "hello_world";
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -104,6 +104,7 @@ conditionalExpression
 assignmentExpression
     :   conditionalExpression
     |   assignmentLeftExpression assignmentOperator assignmentExpression
+    |   'set' '('? functionCallExpression ',' assignmentExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
     |   'set' '('? assignmentLeftExpression ',' assignmentExpression ')'?
     |   'setarray' '('? assignmentLeftExpression ',' assignmentExpression (',' argumentExpressionList)? ')'?
     |   'copyarray' '('? assignmentLeftExpression ',' assignmentExpression ',' argumentExpressionList ')'?
