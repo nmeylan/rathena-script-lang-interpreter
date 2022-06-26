@@ -46,7 +46,8 @@ l5	        .@a$ = getarg(1) + " world";
 	at /home/ragnarok/dev/npc/warps.txt(Warper:5)
 ```
 - Compilation for faster server startup
-
+- Compilation type checking for variable assignment
+- Compilation argument count checking for native functions
 
 # Architecture
 ## Language specificity
