@@ -21,18 +21,26 @@ use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable}
 
 pub const MAIN_FUNCTION: &str = "_main";
 
-pub const NATIVE_FUNCTIONS: &[(&str, Option<ValueType>)] = &[
-    ("getarraysize", Some(ValueType::Number)),
-    ("getarg", None),
-    ("cleararray", None),
-    ("setarray", None),
-    ("getelementofarray", None),
-    ("deletearray", None),
-    ("inarray", None),
-    ("copyarray", None),
-    ("setd", None),
-    ("getd", None),
-    ("getvariableofnpc", None),
+#[derive(Clone)]
+pub struct NativeFunction<'vm> {
+    pub(crate) name: &'vm str,
+    pub(crate) return_type: Option<ValueType>,
+    pub(crate) min_arguments: usize,
+    pub(crate) max_arguments: usize,
+}
+
+pub const NATIVE_FUNCTIONS: &[NativeFunction] = &[
+    NativeFunction { name: "getarraysize", return_type: Some(ValueType::Number), min_arguments: 1, max_arguments: 1 },
+    NativeFunction { name: "getarg", return_type: None, min_arguments: 1, max_arguments: 2 },
+    NativeFunction { name: "cleararray", return_type: None, min_arguments: 3, max_arguments: 3 },
+    NativeFunction { name: "setarray", return_type: None, min_arguments: 2, max_arguments: 255 },
+    NativeFunction { name: "getelementofarray", return_type: None, min_arguments: 2, max_arguments: 2 },
+    NativeFunction { name: "deletearray", return_type: None, min_arguments: 2, max_arguments: 2 },
+    NativeFunction { name: "inarray", return_type: None, min_arguments: 2, max_arguments: 2 },
+    NativeFunction { name: "copyarray", return_type: None, min_arguments: 3, max_arguments: 3 },
+    NativeFunction { name: "setd", return_type: None, min_arguments: 2, max_arguments: 2 },
+    NativeFunction { name: "getd", return_type: None, min_arguments: 1, max_arguments: 1 },
+    NativeFunction { name: "getvariableofnpc", return_type: None, min_arguments: 2, max_arguments: 2 },
 ];
 
 
@@ -128,8 +136,8 @@ impl Vm {
         native_pool.insert(Self::calculate_hash(&"vm_dump_var".to_string()), Native { name: "vm_dump_var".to_string() });
         native_pool.insert(Self::calculate_hash(&"vm_dump_locals".to_string()), Native { name: "vm_dump_locals".to_string() });
 
-        for (native_name, _) in NATIVE_FUNCTIONS.iter() {
-            native_pool.insert(Self::calculate_hash(&native_name.to_string()), Native { name: native_name.to_string() });
+        for native in NATIVE_FUNCTIONS.iter() {
+            native_pool.insert(Self::calculate_hash(&native.name.to_string()), Native { name: native.name.to_string() });
         }
         Self {
             debug_flag,

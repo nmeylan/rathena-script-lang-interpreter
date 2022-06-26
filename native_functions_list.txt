@@ -1,5 +1,5 @@
 // list native function like this:
-// native_function_name <, know return type>
-print
-vm_dump_var
-vm_dump_locals
+// native_function_name, min arguments, max arguments, <, know return type>
+print, 1, 1
+vm_dump_var, 2, 2
+vm_dump_locals, 0, 0

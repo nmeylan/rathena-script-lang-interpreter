@@ -361,3 +361,24 @@ l5	    copyarray .@b[0], .@a$[0], 1;
 	              ^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
 }
+
+
+#[test]
+fn native_wrong_argument_count() {
+    // Given
+    let script = r#"
+    .@b[0] = 1;
+    .@a$[0] = "1";
+    getarraysize(.@b[0], .@a$[0]);
+    "#;
+    // When
+    let result = compile_script(script);
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(1, result.as_ref().err().unwrap().len());
+    assert_eq!(r#"Wrong arguments: getarraysize accept at least 1 argument(s) and at most 1 argument(s) but received 2 argument(s)
+test_script 5:4.
+l5	    getarraysize(.@b[0], .@a$[0]);
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"#, result.as_ref().err().unwrap()[0].message());
+}

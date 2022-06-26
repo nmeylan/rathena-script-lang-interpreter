@@ -22,7 +22,7 @@ use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition, Label};
 use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreInstance, StoreLocal};
 use crate::lang::error::{CompilationError, CompilationErrorType};
-use crate::lang::error::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, Type, UndefinedFunction, UndefinedLabel};
+use crate::lang::error::CompilationErrorType::{FunctionAlreadyDefined, Generic, LabelNotInMain, NativeAlreadyDefined, NativeArgumentCount, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{*};
 use crate::util::file::read_lines;
@@ -38,13 +38,26 @@ const HOOK_LABEL: &[&str] = &[
 struct NativeFunction {
     pub name: String,
     pub return_type: Option<ValueType>,
+    pub min_arguments: usize,
+    pub max_arguments: usize,
 }
 
 impl NativeFunction {
-    fn new(name: String, return_type: Option<ValueType>) -> Self {
+    fn from_vm_native(vm_native: &crate::lang::vm::NativeFunction) -> Self {
+        NativeFunction::new(
+            vm_native.name.to_string(),
+            vm_native.return_type.clone(),
+            vm_native.min_arguments,
+            vm_native.max_arguments,
+        )
+    }
+
+    fn new(name: String, return_type: Option<ValueType>, min_arguments: usize, max_arguments: usize) -> Self {
         Self {
             name,
             return_type,
+            min_arguments,
+            max_arguments,
         }
     }
 }
@@ -129,7 +142,7 @@ impl Compiler {
 
     fn collect_native_functions(native_function_list_file_path: &str) -> Vec<NativeFunction> {
         let mut native_functions: Vec<NativeFunction> = NATIVE_FUNCTIONS.to_vec().iter()
-            .map(|(name, returned_type)| NativeFunction::new(name.to_string(), returned_type.clone()))
+            .map(|native_function| NativeFunction::from_vm_native(&native_function))
             .collect();
         let result = read_lines(native_function_list_file_path);
         if result.is_err() {
@@ -142,9 +155,11 @@ impl Compiler {
                     continue;
                 }
                 let split = line.split(',');
-                let split: Vec<&str> = split.collect();
-                let return_type = if split.len() > 1 {
-                    match split[1] {
+                let split: Vec<&str> = split.map(|item| item.trim()).collect();
+                let min_arguments = split[1].parse::<usize>().unwrap();
+                let max_arguments = split[2].parse::<usize>().unwrap();
+                let return_type = if split.len() > 3 {
+                    match split[3] {
                         "Number" | "number" => Some(ValueType::Number),
                         "String" | "string" => Some(ValueType::String),
                         _ => None
@@ -152,7 +167,7 @@ impl Compiler {
                 } else {
                     None
                 };
-                native_functions.push(NativeFunction { name: split[0].to_string(), return_type });
+                native_functions.push(NativeFunction { name: split[0].to_string(), return_type, min_arguments, max_arguments});
             }
         } else {
             panic!()
@@ -498,6 +513,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         };
 
         if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
+            if argument_count < native.min_arguments || argument_count > native.max_arguments {
+                self.register_error(NativeArgumentCount, ctx,
+                                    format!("Wrong arguments: {} accept at least {} argument(s) and at most {} argument(s) but received {} argument(s)",
+                                            native.name, native.min_arguments, native.max_arguments, argument_count
+                                    ));
+                return;
+            }
             if native.name == "getarg" && argument_count > 1 {
                 // do not remove default value type, so we can check at compile time that default type match variable type
                 self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
@@ -726,7 +748,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "Only \"getd\" function allowed here".to_string());
                 return;
             }
-            if  function_call.argumentExpressionList().unwrap().assignmentExpression_all().len() != 1 {
+            if function_call.argumentExpressionList().unwrap().assignmentExpression_all().len() != 1 {
                 self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "\"getd\" accept only 1 argument".to_string());
                 return;
             }
@@ -738,7 +760,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             let native_name = "setd";
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
-
         } else {
             self.visit_children(ctx);
         }

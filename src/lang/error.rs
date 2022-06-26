@@ -23,6 +23,7 @@ pub enum CompilationErrorType {
     Type,
     LabelNotInMain,
     UndefinedLabel,
+    NativeArgumentCount,
 }
 
 impl CompilationError {

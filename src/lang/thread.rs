@@ -76,6 +76,7 @@ impl Thread {
                 OpCode::StoreGlobal(_) => {}
                 OpCode::LoadGlobal(_) => {}
                 OpCode::StoreReference => {
+                    // TODO no longer used: check to keep
                     let stack_entry = self.stack.pop()?;
                     if let StackEntry::VariableReference((scope, owner_reference, reference)) = stack_entry {
                         let variable = self.get_variable_from_scope_and_reference(&call_frame, class, instance, &scope, reference)?;
@@ -278,7 +279,7 @@ impl Thread {
                     arguments.reverse();
                     arguments_ref.reverse();
                     let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
-                    if NATIVE_FUNCTIONS.iter().any(|(native, _)| native == &native_method.name.as_str()) {
+                    if NATIVE_FUNCTIONS.iter().any(|native| native.name == native_method.name.as_str()) {
                         handle_native_method(&self, native_method, class, instance, &mut call_frame, arguments, arguments_ref)?;
                     } else {
                         self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
