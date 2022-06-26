@@ -41,6 +41,8 @@ pub const NATIVE_FUNCTIONS: &[NativeFunction] = &[
     NativeFunction { name: "setd", return_type: None, min_arguments: 2, max_arguments: 2 },
     NativeFunction { name: "getd", return_type: None, min_arguments: 1, max_arguments: 1 },
     NativeFunction { name: "getvariableofnpc", return_type: None, min_arguments: 2, max_arguments: 2 },
+    // stdlib
+    NativeFunction { name: "pow", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
 ];
 
 

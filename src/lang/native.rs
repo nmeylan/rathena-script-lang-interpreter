@@ -45,6 +45,16 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
         "getvariableofnpc" => {
             getvariableofnpc(thread, instance, call_frame, arguments)?
         }
+        // stdlib
+        "pow" =>  {
+            let value = arguments[0].number_value().map_err(|err|
+                thread.new_runtime_from_temporary_and_message(err, String::from("Pow first argument should be a number")))?;
+            let exponent = arguments[1].number_value().map_err(|err|
+                thread.new_runtime_from_temporary_and_message(err, String::from("Pow second argument should be a number")))?;
+            let res = value.pow(exponent as u32);
+            let constant_ref = thread.vm.add_in_constant_pool(Value::Number(Some(res)));
+            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+        }
         _ => {
             return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));
         }
@@ -53,10 +63,10 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
 }
 
 fn getvariableofnpc(thread: &Thread, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
-    let variable_identifier = arguments[0].string_value();
+    let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err))?;
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
-    let class_name = arguments[1].string_value();
+    let class_name = arguments[1].string_value().map_err(|err| thread.new_runtime_from_temporary(err))?;
     let class = thread.vm.get_class(&class_name).clone();
     let static_variables = class.static_variables.borrow();
     let variable = static_variables.get(&variable_reference)
@@ -73,7 +83,7 @@ fn getvariableofnpc(thread: &Thread, instance: &mut Option<&mut Instance>, call_
 }
 
 fn getd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
-    let variable_identifier = arguments[0].string_value();
+    let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err))?;
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
     if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
@@ -112,7 +122,7 @@ fn load_array_index_value(thread: &Thread, class: &Class, instance: &mut Option<
 }
 
 fn setd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
-    let variable_identifier = arguments[0].string_value();
+    let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err))?;
     let variable_value = arguments_ref[1].clone();
     let variable = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable);
@@ -145,7 +155,7 @@ fn array_index_from_string(variable_identifier: &String) -> usize {
 fn copyarray(thread: &Thread, arguments: Vec<Value>) -> Result<(), RuntimeError> {
     let (destination_owner_reference, destination_reference, _, destination_index) = arguments[0].array_entry_value();
     let (source_array_owner_reference, source_array_reference, _, source_array_index) = arguments[1].array_entry_value();
-    let count = arguments[2].number_value();
+    let count = arguments[2].number_value().map_err(|err| thread.new_runtime_from_temporary(err))?;
     let destination_array = thread.vm.array_from_heap_reference(*destination_owner_reference, *destination_reference).unwrap();
     let source_array = thread.vm.array_from_heap_reference(*source_array_owner_reference, *source_array_reference).unwrap();
     if destination_array.value_type != source_array.value_type {
@@ -175,7 +185,7 @@ fn inarray(thread: &Thread, arguments: &Vec<Value>, arguments_ref: Vec<Option<u6
 
 fn deletearray(thread: &Thread, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
-    let size = arguments[1].number_value() as usize;
+    let size = arguments[1].number_value().map_err(|err| thread.new_runtime_from_temporary(err))? as usize;
     let array = thread.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
     array.remove(*index, size);
     Ok(())
@@ -183,7 +193,7 @@ fn deletearray(thread: &Thread, arguments: &Vec<Value>) -> Result<(), RuntimeErr
 
 fn getelementofarray(thread: &Thread, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
     let (owner_reference, reference) = arguments[0].reference_value();
-    let index = arguments[1].number_value() as usize;
+    let index = arguments[1].number_value().map_err(|err| thread.new_runtime_from_temporary(err))? as usize;
     let array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();
     let reference = array.get(index).map_err(|err| RuntimeError::from_temporary(thread.current_source_line.clone(), thread.stack_traces.clone(), err))?;
     thread.stack.push(StackEntry::ConstantPoolReference(reference.unwrap()));
@@ -213,7 +223,7 @@ fn setarray(thread: &Thread, arguments: &Vec<Value>, arguments_ref: &Vec<Option<
 fn cleararray(thread: &Thread, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value();
     let value = arguments[1].clone();
-    let size = arguments[2].number_value();
+    let size = arguments[2].number_value().map_err(|err| thread.new_runtime_from_temporary(err))?;
     let array = thread.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
     if !array.value_type.match_value(&value) {
         return Err(RuntimeError::new_string(thread.current_source_line.clone(),
@@ -236,7 +246,7 @@ fn getarraysize(thread: &Thread, arguments: &Vec<Value>) -> Result<(), RuntimeEr
 }
 
 fn getarg(thread: &Thread, call_frame: &CallFrame, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
-    let index = arguments[0].number_value() as usize;
+    let index = arguments[0].number_value().map_err(|err| thread.new_runtime_from_temporary(err))? as usize;
     if arguments.len() == 1 && index > (call_frame.arguments_count - 1) {
         return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), format!("Can't call getarg({}) which is greater than number of arguments provided: {}. Maximum allow index is {}. Consider calling getarg with a default value: getarg({}, DEFAULT_VALUE)", index, call_frame.arguments_count, call_frame.arguments_count - 1, index)));
     } else if arguments.len() == 2 && index > (call_frame.arguments_count - 1) {

@@ -25,8 +25,8 @@ fn simple_for_loop() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn simple_while_loop() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -70,7 +70,7 @@ fn simple_while_loop_in_a_function() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -91,8 +91,8 @@ fn simple_for_loop_with_already_init() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -114,8 +114,8 @@ fn simple_for_loop_with_increment_in_the_for_loop() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -137,9 +137,9 @@ fn nested_simple_for_loop() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(10, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
-    assert_eq!(100, events.borrow().get("k").unwrap().value.number_value());
+    assert_eq!(10, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap());
+    assert_eq!(100, events.borrow().get("k").unwrap().value.number_value().unwrap());
 }
 
 // #[test]
@@ -168,8 +168,8 @@ fn break_should_stop_for_loop() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -198,8 +198,8 @@ fn break_should_stop_for_loop2() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(50, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(49, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(50, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(49, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -231,7 +231,7 @@ fn break_should_stop_nested_for_loop2() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(110, events.borrow().get("c").unwrap().value.number_value());
+    assert_eq!(110, events.borrow().get("c").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -253,8 +253,8 @@ fn simple_do_while_loop() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(100, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }
 
 #[test]
@@ -276,6 +276,6 @@ fn simple_do_while_loop_2() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("i").unwrap().value.number_value());
-    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value());
+    assert_eq!(1, events.borrow().get("i").unwrap().value.number_value().unwrap());
+    assert_eq!(-1, events.borrow().get("j").unwrap().value.number_value().unwrap());
 }

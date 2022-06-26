@@ -25,7 +25,7 @@ fn simple_function_call() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -45,7 +45,7 @@ fn function_call_with_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -66,7 +66,7 @@ fn function_call_with_variable_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_two_arguments() {
@@ -86,7 +86,7 @@ fn function_call_with_two_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -133,7 +133,7 @@ fn function_call_with_arguments_with_default() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("default world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("default world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_number_arguments() {
@@ -152,7 +152,7 @@ fn function_call_with_number_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
+    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_number_arguments_with_default() {
@@ -171,7 +171,7 @@ fn function_call_with_number_arguments_with_default() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(7_i32, events.borrow().get("a").unwrap().value.number_value().clone());
+    assert_eq!(7_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_number_arguments_with_default_different_type_assigned_to_string() {
@@ -190,7 +190,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("34"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("34"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -218,10 +218,10 @@ fn function_with_return_type() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().clone());
-    assert_eq!(8_i32, events.borrow().get("b").unwrap().value.number_value().clone());
-    assert_eq!(10_i32, events.borrow().get("c").unwrap().value.number_value().clone());
-    assert_eq!(1_i32, events.borrow().get("d").unwrap().value.number_value().clone());
+    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(8_i32, events.borrow().get("b").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(10_i32, events.borrow().get("c").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1_i32, events.borrow().get("d").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -249,7 +249,7 @@ fn function_with_return_type_multicall() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(5_i32, events.borrow().get("a").unwrap().value.number_value().clone());
+    assert_eq!(5_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -273,5 +273,5 @@ fn recursive_function_call_with_return() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(0, events.borrow().get("a").unwrap().value.number_value().clone());
+    assert_eq!(0, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
 }

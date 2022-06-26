@@ -52,15 +52,15 @@ fn simple_condition() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("i am true"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("i am true"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.borrow().get("b").is_some());
-    assert_eq!(String::from("i am not part of condition"), events.borrow().get("c").unwrap().value.string_value().clone());
+    assert_eq!(String::from("i am not part of condition"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.borrow().get("d").is_some());
-    assert_eq!(String::from("i am true"), events.borrow().get("e").unwrap().value.string_value().clone());
+    assert_eq!(String::from("i am true"), events.borrow().get("e").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.borrow().get("f").is_some());
     assert_eq!(false, events.borrow().get("g").is_some());
-    assert_eq!(String::from("i am true"), events.borrow().get("h").unwrap().value.string_value().clone());
-    assert_eq!(String::from("i am true"), events.borrow().get("i").unwrap().value.string_value().clone());
+    assert_eq!(String::from("i am true"), events.borrow().get("h").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("i am true"), events.borrow().get("i").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.borrow().get("k").is_some());
     assert_eq!(true, events.borrow().get("l").is_some());
     assert_eq!(false, events.borrow().get("m").is_some());
@@ -86,9 +86,9 @@ fn condition_with_expressions() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("i am true"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("i am true"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.borrow().get("b").is_some());
-    assert_eq!(String::from("i am not part of condition"), events.borrow().get("c").unwrap().value.string_value().clone());
+    assert_eq!(String::from("i am not part of condition"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
 
@@ -119,17 +119,17 @@ fn conditional_statements() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("a").unwrap().value.number_value().clone());
-    assert_eq!(0, events.borrow().get("b").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("c").unwrap().value.number_value().clone());
-    assert_eq!(0, events.borrow().get("d").unwrap().value.number_value().clone());
-    assert_eq!(0, events.borrow().get("e").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("f").unwrap().value.number_value().clone());
-    assert_eq!(0, events.borrow().get("g").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("i").unwrap().value.number_value().clone());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("k").unwrap().value.number_value().clone());
-    assert_eq!(0, events.borrow().get("m").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.borrow().get("b").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("c").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.borrow().get("d").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.borrow().get("e").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("f").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.borrow().get("g").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("i").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("k").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.borrow().get("m").unwrap().value.number_value().unwrap().clone());
 }
 
 
@@ -169,11 +169,11 @@ fn switch_statement() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!("one", events.borrow().get("a").unwrap().value.string_value().clone());
-    assert_eq!("two", events.borrow().get("b").unwrap().value.string_value().clone());
-    assert_eq!("four", events.borrow().get("c").unwrap().value.string_value().clone()); // no break in case 3:
-    assert_eq!("four", events.borrow().get("d").unwrap().value.string_value().clone());
-    assert_eq!("greater than 4", events.borrow().get("e").unwrap().value.string_value().clone());
+    assert_eq!("one", events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("two", events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("four", events.borrow().get("c").unwrap().value.string_value().unwrap().clone()); // no break in case 3:
+    assert_eq!("four", events.borrow().get("d").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("greater than 4", events.borrow().get("e").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -226,10 +226,10 @@ fn nested_switch_statement() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!("one", events.borrow().get("a").unwrap().value.string_value().clone());
-    assert_eq!("return", events.borrow().get("b1").unwrap().value.string_value().clone());
-    assert_eq!("break", events.borrow().get("b2").unwrap().value.string_value().clone());
-    assert_eq!("four", events.borrow().get("c").unwrap().value.string_value().clone());
-    assert_eq!("four", events.borrow().get("d").unwrap().value.string_value().clone());
-    assert_eq!("greater than 4", events.borrow().get("e").unwrap().value.string_value().clone());
+    assert_eq!("one", events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("return", events.borrow().get("b1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("break", events.borrow().get("b2").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("four", events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("four", events.borrow().get("d").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("greater than 4", events.borrow().get("e").unwrap().value.string_value().unwrap().clone());
 }

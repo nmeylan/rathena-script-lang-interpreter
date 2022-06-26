@@ -36,7 +36,7 @@ impl NativeMethodHandler for VmHook {
                 return;
             }
             (self.hook)(Event {
-                name: params[0].string_value().clone(),
+                name: params[0].string_value().unwrap().clone(),
                 value: params[1].clone(),
             });
         }

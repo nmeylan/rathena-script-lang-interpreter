@@ -34,7 +34,7 @@ fn simple_class_test() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -67,8 +67,8 @@ fn instance_variable_test() {
     Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
-    assert_eq!(3, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -101,8 +101,8 @@ fn static_variable_test() {
     Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
-    assert_eq!(3, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("counter2").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -141,12 +141,12 @@ fn on_init_hook_test() {
     Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("array_index0_1").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("array_index0_2").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().clone());
-    assert_eq!(String::from("hellohellohellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
+    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("array_index0_1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("array_index0_2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hellohellohellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn on_instance_init_hook_test() {
@@ -185,14 +185,14 @@ fn on_instance_init_hook_test() {
     Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("array_counter1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("array_counter2").unwrap().value.number_value().clone());
-    assert_eq!(4, events.borrow().get("array_index3_1").unwrap().value.number_value().clone());
-    assert_eq!(4, events.borrow().get("array_index3_2").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().clone());
-    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().clone());
+    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("array_counter1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("array_counter2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.borrow().get("array_index3_1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.borrow().get("array_index3_2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn setd_instance_variable() {
@@ -225,11 +225,11 @@ fn setd_instance_variable() {
     Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("counter_getd1").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("counter_getd2").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().clone());
+    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("counter_getd1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("counter_getd2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn setd_static_variable() {
@@ -262,11 +262,11 @@ fn setd_static_variable() {
     Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
     Vm::execute_class(vm, "Myclass".to_string()).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("counter_getd1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("counter_getd2").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().clone());
+    assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("counter_getd1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("counter_getd2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().unwrap().clone());
 }
 
 
@@ -294,8 +294,8 @@ fn getvariableofnpc_when_npc_exist() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_class(vm.clone(), "MyNPC2".to_string()).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("npc_1_value").unwrap().value.number_value().clone());
-    // assert_eq!(1, events.borrow().get("npc_1_value_getd").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hello"), events.borrow().get("array1").unwrap().value.string_value().clone());
-    assert_eq!(String::from("world"), events.borrow().get("array2").unwrap().value.string_value().clone());
+    assert_eq!(1, events.borrow().get("npc_1_value").unwrap().value.number_value().unwrap().clone());
+    // assert_eq!(1, events.borrow().get("npc_1_value_getd").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hello"), events.borrow().get("array1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("world"), events.borrow().get("array2").unwrap().value.string_value().unwrap().clone());
 }

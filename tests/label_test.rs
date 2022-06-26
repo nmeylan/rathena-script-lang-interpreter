@@ -26,9 +26,9 @@ fn simple_label() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
 
@@ -54,10 +54,10 @@ fn simple_label_with_goto() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(true, events.borrow().get("b").is_none());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().clone());
-    assert_eq!(String::from("variable in label 3"), events.borrow().get("d").unwrap().value.string_value().clone());
+    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 3"), events.borrow().get("d").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -84,8 +84,8 @@ fn label_with_goto_inside() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().clone());
+    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
     assert_eq!(true, events.borrow().get("d").is_none());
 }
 
@@ -119,10 +119,10 @@ fn label_with_goto_in_a_function() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().clone());
+    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
     assert_eq!(true, events.borrow().get("d").is_none());
-    assert_eq!(String::from("the end"), events.borrow().get("endd").unwrap().value.string_value().clone());
+    assert_eq!(String::from("the end"), events.borrow().get("endd").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -157,8 +157,8 @@ fn label_with_goto_in_a_nested_function() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().clone());
+    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
     assert_eq!(true, events.borrow().get("d").is_none());
-    assert_eq!(String::from("the end"), events.borrow().get("endd").unwrap().value.string_value().clone());
+    assert_eq!(String::from("the end"), events.borrow().get("endd").unwrap().value.string_value().unwrap().clone());
 }

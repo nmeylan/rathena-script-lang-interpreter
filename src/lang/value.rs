@@ -5,6 +5,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::Deref;
+use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
 
 
 pub type AccountId = String;
@@ -120,28 +121,27 @@ impl Value {
     pub fn is_reference(&self) -> bool {
         mem::discriminant(self) == mem::discriminant(&Value::new_reference())
     }
-    pub fn string_value(&self) -> &String {
+    pub fn string_value(&self) -> Result<&String, TemporaryRuntimeError> {
         match self {
-            Value::String(str) => str.as_ref().unwrap(),
-            Value::Number(_) => { panic!("Value is a number not a string.") }
-            Value::Reference(_) => { panic!("Value is a reference not a string.") }
+            Value::String(str) => Ok(str.as_ref().unwrap()),
+            Value::Number(_) => { Err(TemporaryRuntimeError::new("Value is a number not a string.")) }
+            Value::Reference(_) => { Err(TemporaryRuntimeError::new("Value is a reference not a string.")) }
             Value::ArrayEntry(entry) => {
                 let (_, _, constant, _) = entry.as_ref().unwrap();
                 match constant.as_ref().unwrap() {
-                    Constant::String(str) => str,
-                    Constant::Number(_) => panic!("Value is a number not a string.")
+                    Constant::String(str) => Ok(str),
+                    Constant::Number(_) => Err(TemporaryRuntimeError::new("Value is a number not a string."))
                 }
             }
         }
     }
-    pub fn number_value(&self) -> i32 {
+    pub fn number_value(&self) -> Result<i32, TemporaryRuntimeError> {
         match self {
-            Value::Number(num) => num.unwrap(),
-            Value::String(_) => { panic!("Value is string not a number.") }
-            Value::Reference(_) => { panic!("Value is a reference not a number.") }
+            Value::Number(num) => Ok(num.unwrap()),
+            Value::String(_) => { Err(TemporaryRuntimeError::new("Value is string not a number.")) }
+            Value::Reference(_) => { Err(TemporaryRuntimeError::new("Value is a reference not a number.")) }
             Value::ArrayEntry(entry) => {
                 let (_, _, constant, _) = entry.as_ref().unwrap();
-                println!("constant {}", constant.as_ref().unwrap());
                 constant.as_ref().unwrap().value().number_value()
             }
         }

@@ -35,10 +35,10 @@ fn simple_array_assignment() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello"), events.borrow().get("a0").unwrap().value.string_value().clone());
-    assert_eq!(String::from("world"), events.borrow().get("a1").unwrap().value.string_value().clone());
-    assert_eq!(String::from("hello world"), events.borrow().get("b").unwrap().value.string_value().clone());
-    assert_eq!(String::from("hellos"), events.borrow().get("c").unwrap().value.string_value().clone());
+    assert_eq!(String::from("hello"), events.borrow().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("world"), events.borrow().get("a1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hellos"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -60,8 +60,8 @@ fn getarraysize_should_array_size() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("a_len").unwrap().value.number_value().clone());
-    assert_eq!(4, events.borrow().get("b_len").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -88,13 +88,13 @@ fn cleararray() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(10, events.borrow().get("a_len").unwrap().value.number_value().clone());
-    assert_eq!(11, events.borrow().get("b_len").unwrap().value.number_value().clone());
-    assert_eq!("world", events.borrow().get("a0").unwrap().value.string_value().clone());
-    assert_eq!("world", events.borrow().get("a9").unwrap().value.string_value().clone());
-    assert_eq!(1, events.borrow().get("b0").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("b1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("b10").unwrap().value.number_value().clone());
+    assert_eq!(10, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(11, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!("world", events.borrow().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("world", events.borrow().get("a9").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("b0").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("b1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("b10").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -119,13 +119,13 @@ fn setarray() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().clone());
-    assert_eq!(4, events.borrow().get("b_len").unwrap().value.number_value().clone());
-    assert_eq!("hello", events.borrow().get("a0").unwrap().value.string_value().clone());
-    assert_eq!("world", events.borrow().get("a1").unwrap().value.string_value().clone());
-    assert_eq!(1, events.borrow().get("b1").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("b2").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("b3").unwrap().value.number_value().clone());
+    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!("hello", events.borrow().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("world", events.borrow().get("a1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("b1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.borrow().get("b2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("b3").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -148,8 +148,8 @@ fn getelementofarray() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("three").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("three").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -174,12 +174,12 @@ fn deletearray() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("b_0_after_first_delete").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("b_2_after_first_delete").unwrap().value.number_value().clone());
-    assert_eq!(5, events.borrow().get("b_len_after_first_delete").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("b_0_after_second_delete").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("b_2_after_second_delete").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("b_len_after_second_delete").unwrap().value.number_value().clone());
+    assert_eq!(1, events.borrow().get("b_0_after_first_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("b_2_after_first_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(5, events.borrow().get("b_len_after_first_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("b_0_after_second_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("b_2_after_second_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("b_len_after_second_delete").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
@@ -203,9 +203,9 @@ fn inarray() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("toto_index").unwrap().value.number_value().clone());
-    assert_eq!(4, events.borrow().get("four_index").unwrap().value.number_value().clone());
-    assert_eq!(-1, events.borrow().get("not_found_index").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("toto_index").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.borrow().get("four_index").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(-1, events.borrow().get("not_found_index").unwrap().value.number_value().unwrap().clone());
 }
 
 
@@ -232,12 +232,12 @@ fn copyarray() {
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().clone());
-    assert_eq!(1, events.borrow().get("b_len").unwrap().value.number_value().clone());
-    assert_eq!(3, events.borrow().get("c_len").unwrap().value.number_value().clone());
-    assert_eq!(String::from("hello"), events.borrow().get("b0").unwrap().value.string_value().clone());
-    assert_eq!(String::from("world"), events.borrow().get("c1").unwrap().value.string_value().clone());
-    assert_eq!(String::from("toto"), events.borrow().get("c2").unwrap().value.string_value().clone());
+    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.borrow().get("c_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hello"), events.borrow().get("b0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("world"), events.borrow().get("c1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("toto"), events.borrow().get("c2").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
