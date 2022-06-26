@@ -43,26 +43,31 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             getd(thread, class, instance, call_frame, arguments)?
         }
         "getvariableofnpc" => {
-            let variable_identifier = arguments[0].string_value();
-            let variable_from_string = Variable::from_string(variable_identifier);
-            let variable_reference = Vm::calculate_hash(&variable_from_string);
-            let class_name = arguments[1].string_value();
-            let class = thread.vm.get_class(&class_name).clone();
-            let static_variables = class.static_variables.borrow();
-            let variable = static_variables.get(&variable_reference)
-                .ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
-                                                 format!("Variable {} is not declared in NPC {}", variable_identifier, class_name).as_str()))?;
-            if variable_from_string.value_ref.borrow().is_array() {
-                load_array_index_value(thread, class.as_ref(), instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
-            } else {
-                let reference = variable.value_ref.borrow().reference.ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
-                                                                                              format!("Variable {} in NPC {} is not initialized", variable_identifier, class_name).as_str()))?;
-                thread.stack.push(ConstantPoolReference(reference));
-            }
+            getvariableofnpc(thread, instance, call_frame, arguments)?
         }
         _ => {
             return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));
         }
+    }
+    Ok(())
+}
+
+fn getvariableofnpc(thread: &Thread, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+    let variable_identifier = arguments[0].string_value();
+    let variable_from_string = Variable::from_string(variable_identifier);
+    let variable_reference = Vm::calculate_hash(&variable_from_string);
+    let class_name = arguments[1].string_value();
+    let class = thread.vm.get_class(&class_name).clone();
+    let static_variables = class.static_variables.borrow();
+    let variable = static_variables.get(&variable_reference)
+        .ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
+                                         format!("Variable {} is not declared in NPC {}", variable_identifier, class_name).as_str()))?;
+    if variable_from_string.value_ref.borrow().is_array() {
+        load_array_index_value(thread, class.as_ref(), instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
+    } else {
+        let reference = variable.value_ref.borrow().reference.ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
+                                                                                              format!("Variable {} in NPC {} is not initialized", variable_identifier, class_name).as_str()))?;
+        thread.stack.push(ConstantPoolReference(reference));
     }
     Ok(())
 }
