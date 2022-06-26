@@ -208,18 +208,23 @@ fn set_with_getd_function() {
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     .@one = 1;
-    set getd(".@"+"one"), 2;
-    vm_dump_var("two", .@one);
-    vm_dump_var("two_getd", getd(".@one"));
+    set getd(".@"+"set_with_getd"), 2;
+    setd(".@"+"setd", 2);
+    vm_dump_var("set_with_getd", .@set_with_getd);
+    vm_dump_var("set_with_getd_1", getd(".@set_with_getd"));
+    vm_dump_var("setd", .@setd);
+    vm_dump_var("setd_1", getd(".@setd"));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::All.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().clone());
-    assert_eq!(2, events.borrow().get("two_getd").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("set_with_getd").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("set_with_getd_1").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("setd").unwrap().value.number_value().clone());
+    assert_eq!(2, events.borrow().get("setd_1").unwrap().value.number_value().clone());
 }
 #[test]
 fn setd_function_error_wrong_type() {

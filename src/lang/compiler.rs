@@ -508,6 +508,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
             } else if native.name == "getvariableofnpc" {
                 // Replacing first argument LoadStatic with a LoadConstant instead.
+                // Syntax want first argument to be the variable, instead of a string with the variable name.
+                // In this implementation variable will be interpreted and its value will be pushed in the stack instead of its name..
                 let static_variable_identifier = ctx.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
                 if !static_variable_identifier.starts_with("getd(") { // we can use getd to use reference of another variable containing the variable identifier
                     let constant_reference = self.current_chunk().add_constant(Constant::String(static_variable_identifier));
@@ -717,15 +719,26 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
                 self.visit_assignmentLeftExpression(&left);
             }
-        } else if ctx.Set().is_some() && ctx.functionCallExpression().is_some() {
+        } else if ctx.Set().is_some() && ctx.functionCallExpression().is_some() { // edge case handling
+            // handle set(getd(expr), assignement_expr); -> transform into setd(expr, assigment_expr);
             let function_call = ctx.functionCallExpression().unwrap();
             if function_call.Identifier().unwrap().get_text() != "getd" {
                 self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "Only \"getd\" function allowed here".to_string());
                 return;
             }
+            if  function_call.argumentExpressionList().unwrap().assignmentExpression_all().len() != 1 {
+                self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "\"getd\" accept only 1 argument".to_string());
+                return;
+            }
+            self.visit_argumentExpressionList(function_call.argumentExpressionList().as_ref().unwrap());
             self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
-            self.visit_functionCallExpression(&function_call);
-            self.current_chunk().emit_op_code(OpCode::StoreReference, self.compilation_details_from_context(ctx));
+            let setd_variable_expression = function_call.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
+            if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
+                self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
+            }
+            let native_name = "setd";
+            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
+
         } else {
             self.visit_children(ctx);
         }

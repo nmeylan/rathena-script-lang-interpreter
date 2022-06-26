@@ -72,13 +72,10 @@ fn getd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
     if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
-        // let variable = thread.get_instance_variable(instance, &variable_reference)?;
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), instance.as_ref().unwrap().hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
-        // let variable = thread.get_static_variable(class, &variable_reference)?;
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), class.hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local){
-        // let variable = thread.get_local_variable(call_frame, &variable_reference)?;
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), call_frame.hash_code(), variable_reference)));
     } else {
         panic!("getd - Not supported yet, only static, instance and local variable scope are supported");
