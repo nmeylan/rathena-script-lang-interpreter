@@ -113,7 +113,7 @@ impl RuntimeError {
             stack_traces,
         }
     }
-    pub fn from_temporary_and_message(source: CompilationDetail, stack_traces: Vec<StackTrace>, temporary: TemporaryRuntimeError, message: String) -> Self {
+    pub fn from_temporary_and_message(source: CompilationDetail, stack_traces: Vec<StackTrace>, temporary: TemporaryRuntimeError, message: &str) -> Self {
         Self {
             message: format!("{}. {}", message, temporary.message),
             source,

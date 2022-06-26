@@ -146,20 +146,20 @@ impl Value {
             }
         }
     }
-    pub fn reference_value(&self) -> (u64, u64) {
+    pub fn reference_value(&self) -> Result<(u64, u64), TemporaryRuntimeError> {
         match self {
-            Value::Number(_) => panic!("Value is number not a reference."),
-            Value::String(_) => { panic!("Value is string not a reference.") }
-            Value::Reference(references) => references.unwrap(),
-            Value::ArrayEntry(_) => { panic!("Value is a array entry not a reference.") }
+            Value::Number(_) => Err(TemporaryRuntimeError::new("Value is number not a reference.")),
+            Value::String(_) => { Err(TemporaryRuntimeError::new("Value is string not a reference.")) }
+            Value::Reference(references) => Ok(references.unwrap()),
+            Value::ArrayEntry(_) => { Err(TemporaryRuntimeError::new("Value is a array entry not a reference.")) }
         }
     }
-    pub fn array_entry_value(&self) -> &(u64, u64, Option<Constant>, usize) {
+    pub fn array_entry_value(&self) -> Result<&(u64, u64, Option<Constant>, usize), TemporaryRuntimeError> {
         match self {
-            Value::Number(_) => panic!("Value is number not a array entry."),
-            Value::String(_) => { panic!("Value is string not a array entry.") }
-            Value::Reference(_) => { panic!("Value is reference not a array entry.") }
-            Value::ArrayEntry(entry) => { entry.as_ref().unwrap() }
+            Value::Number(_) => Err(TemporaryRuntimeError::new("Value is number not a array entry.")),
+            Value::String(_) => { Err(TemporaryRuntimeError::new("Value is string not a array entry.")) }
+            Value::Reference(_) => { Err(TemporaryRuntimeError::new("Value is reference not a array entry.")) }
+            Value::ArrayEntry(entry) => { Ok(entry.as_ref().unwrap()) }
         }
     }
 
