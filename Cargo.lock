@@ -167,7 +167,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ragnarok-script-lang-interpreter"
+name = "rathena-script-lang-interpreter"
 version = "0.1.0"
 dependencies = [
  "antlr-rust",
