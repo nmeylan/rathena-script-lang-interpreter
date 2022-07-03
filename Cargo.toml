@@ -1,5 +1,5 @@
 [package]
-name = "ragnarok-script-interpreter"
+name = "ragnarok-script-lang-interpreter"
 version = "0.1.0"
 edition = "2021"
 
