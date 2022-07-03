@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "antlr-rust"
 version = "0.2.2"
-source = "git+https://github.com/nmeylan/antlr4rust?rev=1ec095ec251cae01dd7b7a04181c331670ef7df2#1ec095ec251cae01dd7b7a04181c331670ef7df2"
+source = "git+https://github.com/nmeylan/antlr4rust?rev=cc084c0#cc084c04453cc9491218821cf015489f61e15a62"
 dependencies = [
  "better_any",
  "bit-set",
@@ -167,7 +167,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rathena-script-lang-interpreter"
+name = "rathena_script_lang_interpreter"
 version = "0.1.0"
 dependencies = [
  "antlr-rust",

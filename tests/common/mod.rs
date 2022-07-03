@@ -1,11 +1,11 @@
 use std::sync::Arc;
-use ragnarok_script_interpreter::lang::call_frame::CallFrame;
-use ragnarok_script_interpreter::lang::chunk::ClassFile;
-use ragnarok_script_interpreter::lang::compiler::{Compiler};
-use ragnarok_script_interpreter::lang::error::CompilationError;
-use ragnarok_script_interpreter::lang::thread::Thread;
-use ragnarok_script_interpreter::lang::value::{Value};
-use ragnarok_script_interpreter::lang::vm::{NativeMethodHandler, Vm};
+use rathena_script_lang_interpreter::lang::call_frame::CallFrame;
+use rathena_script_lang_interpreter::lang::chunk::ClassFile;
+use rathena_script_lang_interpreter::lang::compiler::{Compiler};
+use rathena_script_lang_interpreter::lang::error::CompilationError;
+use rathena_script_lang_interpreter::lang::thread::Thread;
+use rathena_script_lang_interpreter::lang::value::{Value};
+use rathena_script_lang_interpreter::lang::vm::{NativeMethodHandler, Vm};
 
 #[derive(Debug)]
 pub struct Event {
@@ -18,7 +18,7 @@ pub struct VmHook {
 }
 
 impl NativeMethodHandler for VmHook {
-    fn handle(&self, native: &ragnarok_script_interpreter::lang::value::Native, params: Vec<Value>, program: &Thread, call_frame: &CallFrame) {
+    fn handle(&self, native: &rathena_script_lang_interpreter::lang::value::Native, params: Vec<Value>, program: &Thread, call_frame: &CallFrame) {
         if native.name.eq("println") {
             println!("{}", params.iter().map(|p| {
                 match p {

@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 
 
-use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
+use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 use crate::common::{compile, Event};
 
 mod common;

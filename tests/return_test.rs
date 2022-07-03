@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 
-use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
+use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 use crate::common::{compile_script, Event};
 
 mod common;

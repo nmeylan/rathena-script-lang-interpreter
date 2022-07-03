@@ -1,13 +1,15 @@
 [package]
-name = "rathena-script-lang-interpreter"
+name = "rathena_script_lang_interpreter"
 version = "0.1.0"
 edition = "2021"
 
+
+[lib]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 #antlr-rust = "0.2.2"
-antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "1ec095ec251cae01dd7b7a04181c331670ef7df2"}
-
+antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "cc084c0"}
+#
 #[patch."https://github.com/nmeylan/antlr4rust"]
 #antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"}

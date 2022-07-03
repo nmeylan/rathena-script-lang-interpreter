@@ -4,9 +4,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use ragnarok_script_interpreter::lang::vm::{DebugFlag, Vm};
+use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 use common::Event;
-use ragnarok_script_interpreter::lang::vm::DebugFlag::{Execution, OpCode, Stack};
+use rathena_script_lang_interpreter::lang::vm::DebugFlag::{Execution, OpCode, Stack};
 
 use crate::common::compile_script;
 
