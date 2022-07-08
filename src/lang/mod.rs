@@ -10,3 +10,4 @@ pub mod chunk;
 pub mod stack_trace;
 pub mod error;
 mod native;
+pub mod script_visitor;

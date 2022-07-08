@@ -325,8 +325,14 @@ functionDefinition
     ;
 scriptInitialization
     : '-' 'script' scriptName (Minus? Number) (',' (Minus? Number))* ',' compoundStatement
-    | Identifier (',' Number?)+  'script'  scriptName  (Minus? Number) (',' (Minus? Number))* ',' compoundStatement
+    | scriptLocation ',' scriptXPos ',' scriptYPos ',' scriptDir  'script'  scriptName  (scriptSprite) (',' (scriptSprite))* ',' compoundStatement
     ;
+scriptLocation : Identifier;
+scriptXPos : Number;
+scriptYPos : Number;
+scriptDir : Number;
+scriptSprite : (Minus? Number);
+
 npcInitialization
     : Identifier (',' Number?)+  Identifier  scriptName (Number | Identifier) (',' (Number | Identifier))*
     | Identifier (',' Number?)+  'duplicate' '(' Identifier ')' scriptName (Number | Identifier) (',' (Number | Identifier))*

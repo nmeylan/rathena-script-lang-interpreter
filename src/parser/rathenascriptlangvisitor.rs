@@ -436,6 +436,36 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptLocation}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_scriptLocation(&mut self, ctx: &ScriptLocationContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptXPos}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_scriptXPos(&mut self, ctx: &ScriptXPosContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptYPos}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_scriptYPos(&mut self, ctx: &ScriptYPosContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptDir}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_scriptDir(&mut self, ctx: &ScriptDirContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptSprite}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_scriptSprite(&mut self, ctx: &ScriptSpriteContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcInitialization}.
 	 * @param ctx the parse tree
 	 */
@@ -1037,6 +1067,46 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptLocation}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_scriptLocation(&mut self, ctx: &ScriptLocationContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptXPos}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_scriptXPos(&mut self, ctx: &ScriptXPosContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptYPos}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_scriptYPos(&mut self, ctx: &ScriptYPosContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptDir}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_scriptDir(&mut self, ctx: &ScriptDirContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scriptSprite}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_scriptSprite(&mut self, ctx: &ScriptSpriteContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcInitialization}.
 	 * @param ctx the parse tree
 	 */
@@ -1434,6 +1504,31 @@ where
 
 	fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_scriptInitialization(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_scriptLocation(&mut self, ctx: &ScriptLocationContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_scriptLocation(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_scriptXPos(&mut self, ctx: &ScriptXPosContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_scriptXPos(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_scriptYPos(&mut self, ctx: &ScriptYPosContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_scriptYPos(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_scriptDir(&mut self, ctx: &ScriptDirContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_scriptDir(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_scriptSprite(&mut self, ctx: &ScriptSpriteContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_scriptSprite(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

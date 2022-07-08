@@ -715,6 +715,56 @@ fn enter_scriptInitialization(&mut self, _ctx: &ScriptInitializationContext<'inp
  */
 fn exit_scriptInitialization(&mut self, _ctx: &ScriptInitializationContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#scriptLocation}.
+ * @param ctx the parse tree
+ */
+fn enter_scriptLocation(&mut self, _ctx: &ScriptLocationContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#scriptLocation}.
+ * @param ctx the parse tree
+ */
+fn exit_scriptLocation(&mut self, _ctx: &ScriptLocationContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#scriptXPos}.
+ * @param ctx the parse tree
+ */
+fn enter_scriptXPos(&mut self, _ctx: &ScriptXPosContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#scriptXPos}.
+ * @param ctx the parse tree
+ */
+fn exit_scriptXPos(&mut self, _ctx: &ScriptXPosContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#scriptYPos}.
+ * @param ctx the parse tree
+ */
+fn enter_scriptYPos(&mut self, _ctx: &ScriptYPosContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#scriptYPos}.
+ * @param ctx the parse tree
+ */
+fn exit_scriptYPos(&mut self, _ctx: &ScriptYPosContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#scriptDir}.
+ * @param ctx the parse tree
+ */
+fn enter_scriptDir(&mut self, _ctx: &ScriptDirContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#scriptDir}.
+ * @param ctx the parse tree
+ */
+fn exit_scriptDir(&mut self, _ctx: &ScriptDirContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#scriptSprite}.
+ * @param ctx the parse tree
+ */
+fn enter_scriptSprite(&mut self, _ctx: &ScriptSpriteContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#scriptSprite}.
+ * @param ctx the parse tree
+ */
+fn exit_scriptSprite(&mut self, _ctx: &ScriptSpriteContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#npcInitialization}.
  * @param ctx the parse tree
  */

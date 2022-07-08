@@ -1078,7 +1078,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 }
 
-fn parse_number(num: Cow<str>) -> i32 {
+pub fn parse_number(num: Cow<str>) -> i32 {
     let maybe_i32 = num.parse::<i32>();
     if maybe_i32.is_err() {
         panic!("Expected number to be u32, but was {}", num);
