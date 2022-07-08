@@ -6,8 +6,10 @@ use std::cell::RefCell;
 use std::io::{Stdout, Write};
 use std::rc::Rc;
 use std::default::Default;
+use std::fmt::format;
+use std::os::linux::raw::stat;
 
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{Chunk, ClassFile};
 use crate::lang::class::{Array, Class, Function, Instance};
@@ -86,7 +88,7 @@ impl DebugFlag {
 #[derive(Clone, Debug, Hash)]
 pub enum HeapEntry {
     Variable(Rc<Variable>),
-    Instance(Rc<Instance>),
+    Instance(Arc<Instance>),
     Array(Rc<Array>),
 }
 
@@ -158,39 +160,47 @@ impl Vm {
                 vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage.borrow_mut()));
             }
             let class_rc = vm.register_class(class);
-            Self::init_class(vm.clone(), class_rc).unwrap();
+            Self::bootstrap_class(vm.clone(), class_rc).unwrap();
         }
     }
 
     pub fn execute_main_script(vm: Arc<Vm>) -> Result<(), RuntimeError> {
         let mut program = Thread::new(vm.clone(), vm.debug_flag);
-        program.run_main(vm.classes_pool.borrow().get("_MainScript").as_ref().unwrap().new_instance()).map_err(|e| {
-            println!("{}", e);
-            e
-        })
-    }
-    pub fn execute_class(vm: Arc<Vm>, class_name: String) -> Result<(), RuntimeError> {
-        let mut instance = vm.classes_pool.borrow().get(&class_name).as_ref().unwrap().new_instance();
-        let class = vm.get_class(&instance.class_name);
-        let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
-        if let Some(init_function) = maybe_init_function {
-            let mut program = Thread::new(vm.clone(), vm.debug_flag);
-            program.run_function(class.clone(), &mut Some(&mut instance), init_function)?;
-        }
-        let debug_flag = vm.debug_flag;
-        let mut program = Thread::new(vm, debug_flag);
-        program.run_main(instance).map_err(|e| {
+        let instance = vm.classes_pool.borrow().get("_MainScript").as_ref().unwrap().new_instance();
+        program.run_main(Arc::new(instance)).map_err(|e| {
             println!("{}", e);
             e
         })
     }
 
-    pub fn init_class(vm: Arc<Vm>, class: Rc<Class>) -> Result<(), RuntimeError> {
+    pub fn run_main_function(vm: Arc<Vm>, class_reference: u64, instance_reference: u64) -> Result<(), RuntimeError> {
+        let instance = vm.get_instance_from_heap(class_reference, instance_reference)?;
+        let debug_flag = vm.debug_flag;
+        let mut thread = Thread::new(vm, debug_flag);
+        thread.run_main(instance).map_err(|e| {
+            println!("{}", e);
+            e
+        })
+    }
+
+    pub fn create_instance(vm: Arc<Vm>, class_name: String) -> Result<(u64, u64), RuntimeError> {
+        let mut instance = Arc::new(vm.classes_pool.borrow().get(&class_name).as_ref().unwrap().new_instance());
+        let class = vm.get_class(&instance.class_name);
+        vm.store_instance_on_heap(class.hash_code(), instance.hash_code(), instance.clone());
+        let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
+        if let Some(init_function) = maybe_init_function {
+            let mut thread = Thread::new(vm.clone(), vm.debug_flag);
+            thread.run_function(class.clone(), &mut Some(instance.clone()), init_function)?;
+        }
+        Ok((class.hash_code(), instance.hash_code()))
+    }
+
+    pub fn bootstrap_class(vm: Arc<Vm>, class: Rc<Class>) -> Result<(), RuntimeError> {
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInit".to_string()));
         if let Some(init_function) = maybe_init_function {
             let debug_flag = vm.debug_flag;
-            let mut program = Thread::new(vm, debug_flag);
-            return program.run_function(class.clone(), &mut None, init_function).map_err(|e| {
+            let mut thread = Thread::new(vm, debug_flag);
+            return thread.run_function(class.clone(), &mut None, init_function).map_err(|e| {
                 println!("{}", e);
                 e
             });
@@ -248,6 +258,28 @@ impl Vm {
         let mut owner_entries = heap_ref.get(&owner_reference).unwrap().borrow_mut();
         if owner_entries.get(&reference).is_none() {
             owner_entries.insert(reference, HeapEntry::Array(Rc::new(Array::new(reference, value_type))));
+        }
+    }
+
+    pub fn store_instance_on_heap(&self, owner_reference: u64, reference: u64, instance: Arc<Instance>) {
+        if self.heap.borrow().get(&owner_reference).is_none() {
+            self.heap.borrow_mut().insert(owner_reference, Default::default());
+        }
+        let heap_ref = self.heap.borrow();
+        let mut owner_entries = heap_ref.get(&owner_reference).unwrap().borrow_mut();
+        owner_entries.insert(reference, HeapEntry::Instance(instance));
+    }
+
+    pub fn get_instance_from_heap(&self, owner_reference: u64, reference: u64) -> Result<Arc<Instance>, RuntimeError> {
+        if self.heap.borrow().get(&owner_reference).is_none() {
+            self.heap.borrow_mut().insert(owner_reference, Default::default());
+        }
+        let heap_ref = self.heap.borrow();
+        let mut owner_entries = heap_ref.get(&owner_reference).unwrap().borrow_mut();
+        let entry = owner_entries.get(&reference).ok_or(RuntimeError::new_internal(format!("Heap entry is not an instance for owner reference {} and reference {}", owner_reference, reference)))?;
+        match entry {
+            HeapEntry::Instance(entry) => Ok(entry.clone()),
+            x => Err(RuntimeError::new_internal(format!("Heap entry does not contain an instance for owner reference {} and reference {}", owner_reference, reference))),
         }
     }
 

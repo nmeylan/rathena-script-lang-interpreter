@@ -4,13 +4,12 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 
-
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 use crate::common::{compile, Event};
 
 mod common;
 
-# [test]
+#[test]
 fn simple_class_test() {
     // Given
     let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
@@ -32,7 +31,8 @@ fn simple_class_test() {
     let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm, class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -64,8 +64,10 @@ fn instance_variable_test() {
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(3, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -98,8 +100,10 @@ fn static_variable_test() {
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(3, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -138,8 +142,10 @@ fn on_init_hook_test() {
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -148,6 +154,7 @@ fn on_init_hook_test() {
     assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hellohellohellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().unwrap().clone());
 }
+
 #[test]
 fn on_instance_init_hook_test() {
     // Given
@@ -182,8 +189,10 @@ fn on_instance_init_hook_test() {
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -194,6 +203,7 @@ fn on_instance_init_hook_test() {
     assert_eq!(String::from("hellohello"), events.borrow().get("hello_str1").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hellohello"), events.borrow().get("hello_str2").unwrap().value.string_value().unwrap().clone());
 }
+
 #[test]
 fn setd_instance_variable() {
     // Given
@@ -222,8 +232,10 @@ fn setd_instance_variable() {
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -231,6 +243,7 @@ fn setd_instance_variable() {
     assert_eq!(1, events.borrow().get("counter_getd2").unwrap().value.number_value().unwrap().clone());
     assert_eq!(String::from("hello_world array"), events.borrow().get("my_array1").unwrap().value.string_value().unwrap().clone());
 }
+
 #[test]
 fn setd_static_variable() {
     // Given
@@ -259,8 +272,10 @@ fn setd_static_variable() {
     });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::execute_class(vm, "Myclass".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.borrow().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -292,7 +307,8 @@ fn getvariableofnpc_when_npc_exist() {
     let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_class(vm.clone(), "MyNPC2".to_string()).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "MyNPC2".to_string()).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
     // Then
     assert_eq!(1, events.borrow().get("npc_1_value").unwrap().value.number_value().unwrap().clone());
     // assert_eq!(1, events.borrow().get("npc_1_value_getd").unwrap().value.number_value().unwrap().clone());

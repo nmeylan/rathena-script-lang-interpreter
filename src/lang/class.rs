@@ -5,6 +5,7 @@ use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::rc::Rc;
+use std::sync::RwLock;
 use std::time::SystemTime;
 use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::compiler::CompilationDetail;
@@ -45,7 +46,7 @@ impl Class {
         Instance {
             reference: Vm::calculate_hash(&self.instances_references.borrow().clone()) & SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64,
             class_name: self.name.clone(),
-            variables: self.instance_variables.clone()
+            variables: RwLock::new(self.instance_variables.clone())
         }
     }
     pub fn get_variable(&self, reference: u64) -> Option<Variable> {
@@ -62,11 +63,11 @@ impl Hash for Class {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Instance {
     pub reference: u64,
     pub class_name: String,
-    pub variables: HashMap<u64, Variable, NoopHasher>,
+    pub variables: RwLock<HashMap<u64, Variable, NoopHasher>>,
 }
 
 impl Hash for Instance {
@@ -76,8 +77,9 @@ impl Hash for Instance {
 }
 
 impl Instance {
-    pub fn get_variable(&self, reference: u64) -> Option<&Variable> {
-        self.variables.get(&reference)
+    pub fn insert_variable(&self, reference: u64, variable: Variable) {
+        let mut variable_guard = self.variables.write().unwrap();
+        variable_guard.insert(reference, variable);
     }
 }
 

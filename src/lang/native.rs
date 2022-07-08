@@ -1,6 +1,7 @@
 use std::borrow::Borrow;
 use std::env::var;
 use std::mem;
+use std::sync::{Arc, RwLock};
 use crate::lang::call_frame::CallFrame;
 use crate::lang::class::{Class, Instance};
 use crate::lang::error::RuntimeError;
@@ -10,7 +11,7 @@ use crate::lang::thread::Thread;
 use crate::lang::value::{Native, Scope, Value, Variable};
 use crate::lang::vm::{Hashcode, Vm};
 
-pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
+pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
     match native.name.as_str() {
         "getarg" => {
             getarg(thread, call_frame, &arguments)?
@@ -62,7 +63,7 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
     Ok(())
 }
 
-fn getvariableofnpc(thread: &Thread, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+fn getvariableofnpc(thread: &Thread, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "getvariableofnpc first argument should be a variable"))?;
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
@@ -82,12 +83,13 @@ fn getvariableofnpc(thread: &Thread, instance: &mut Option<&mut Instance>, call_
     Ok(())
 }
 
-fn getd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "getd first argument should be an expression producing a variable name"))?;
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
     if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
-        thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), instance.as_ref().unwrap().hash_code(), variable_reference)));
+        let instance = instance.as_ref().unwrap();
+        thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), instance.hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), class.hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local){
@@ -104,7 +106,7 @@ fn getd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, ca
     Ok(())
 }
 
-fn load_array_index_value(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, variable_identifier: &String, variable_from_string: &Variable, variable_reference: u64) -> Result<(), RuntimeError> {
+fn load_array_index_value(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, variable_identifier: &String, variable_from_string: &Variable, variable_reference: u64) -> Result<(), RuntimeError> {
     let owner_reference = if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
         instance.as_ref().unwrap().hash_code()
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
@@ -121,7 +123,7 @@ fn load_array_index_value(thread: &Thread, class: &Class, instance: &mut Option<
     Ok(())
 }
 
-fn setd(thread: &Thread, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
+fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "setd first argument should be an expression producing a variable name"))?;
     let variable_value = arguments_ref[1].clone();
     let variable = Variable::from_string(variable_identifier);

@@ -1,7 +1,7 @@
 use std::{io, mem};
 use std::cell::RefCell;
 use std::env::var;
-use std::sync::{Arc};
+use std::sync::{Arc, RwLock};
 use std::io::{Stdout, Write};
 
 use std::rc::Rc;
@@ -46,19 +46,19 @@ impl Thread {
         }
     }
 
-    pub fn run_main(&mut self, mut instance: Instance) -> Result<(), RuntimeError> {
+    pub fn run_main(&mut self, instance: Arc<Instance>) -> Result<(), RuntimeError> {
         let class = self.vm.get_class(&instance.class_name);
         let function = class.functions_pool.get(&Vm::calculate_hash(&String::from("_main"))).unwrap();
         let call_frame = CallFrame::new(function, 1, 0, self.debug_flag);
-        self.run(call_frame, 0, class.as_ref(), &mut Some(&mut instance)).map(|_| ())
+        self.run(call_frame, 0, class.as_ref(), &mut Some(instance)).map(|_| ())
     }
 
-    pub fn run_function(&mut self, mut class: Rc<Class>, instance: &mut Option<&mut Instance>, function: &Function) -> Result<(), RuntimeError> {
+    pub fn run_function(&mut self, mut class: Rc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function) -> Result<(), RuntimeError> {
         let call_frame = CallFrame::new(function, 1, 0, self.debug_flag);
         self.run(call_frame, 0, class.as_ref(), instance).map(|_| ())
     }
 
-    pub fn run(&mut self, mut call_frame: CallFrame, depth: usize, class: &Class, instance: &mut Option<&mut Instance>) -> Result<CallFrameBreak, RuntimeError> {
+    pub fn run(&mut self, mut call_frame: CallFrame, depth: usize, class: &Class, instance: &mut Option<Arc<Instance>>) -> Result<CallFrameBreak, RuntimeError> {
         let mut stdout = io::stdout();
         self.print_before_current_run(&call_frame, class, &mut stdout);
         let mut op_index = 0;
@@ -124,10 +124,12 @@ impl Thread {
                     if instance.is_none() {
                         return Err(self.new_runtime_error("Can't store instance variable in a static(non-instance) context".to_string()));
                     }
-                    let variable = instance.as_ref().unwrap().get_variable(*reference)
-                        .ok_or_else(|| self.new_runtime_error("Variable is not declared in instance scope".to_string()))?;
+                    let instance_variables_guard = instance.as_ref().unwrap().variables.read().unwrap();
+                    let variable = instance_variables_guard.get(reference)
+                        .ok_or_else(|| self.new_runtime_error("Variable is not declared in instance scope".to_string()))?.clone();
                     let owner_reference = instance.as_ref().unwrap().hash_code();
-                    self.variable_assign_reference(class, instance, &mut call_frame, variable.clone(), owner_reference)?;
+                    drop(instance_variables_guard);
+                    self.variable_assign_reference(class, instance, &mut call_frame, variable, owner_reference)?;
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
@@ -409,15 +411,18 @@ impl Thread {
        Ok(variable)
     }
 
-    pub fn load_instance_variable(&self, instance: &mut Option<&mut Instance>, reference: &u64) -> Result<(), RuntimeError> {
+    pub fn load_instance_variable(&self, instance: &mut Option<Arc<Instance>>, reference: &u64) -> Result<(), RuntimeError> {
         let variable = self.get_instance_variable(instance, reference)?;
-        let owner_reference = instance.as_ref().unwrap().hash_code();
+        let instance = instance.as_ref().unwrap();
+        let owner_reference = instance.hash_code();
         self.load_variable(&variable, owner_reference, || StackEntry::InstanceVariableReference(*reference));
         Ok(())
     }
 
-    pub fn get_instance_variable(&self, instance: &Option<&mut Instance>, reference: &u64) -> Result<Variable, RuntimeError> {
-        let variable = instance.as_ref().unwrap().get_variable(*reference).ok_or_else(|| self.new_runtime_error("Variable is not declared in instance scope".to_string()))?;
+    pub fn get_instance_variable(&self, instance: &Option<Arc<Instance>>, reference: &u64) -> Result<Variable, RuntimeError> {
+        let instance = instance.as_ref().unwrap();
+        let instance_variables_guard = instance.variables.read().unwrap();
+        let variable = instance_variables_guard.get(reference).ok_or_else(|| self.new_runtime_error("Variable is not declared in instance scope".to_string()))?;
         Ok(variable.clone())
     }
 
@@ -431,7 +436,7 @@ impl Thread {
         }
     }
 
-    pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<&mut Instance>, call_frame: &mut CallFrame, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+    pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
         let variable_ref = Vm::calculate_hash(&variable);
         let reference = if variable.value_ref.borrow().is_array() {
             self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.borrow().value_type.clone());
@@ -452,8 +457,8 @@ impl Thread {
             if instance.is_none() {
                 return Err(self.new_runtime_error("Can't store instance variable in a static(non-instance) context".to_string()));
             }
-            let mut mutable_instance = instance.as_mut().unwrap();
-            mutable_instance.variables.insert(variable_ref, variable);
+            let instance = instance.as_ref().unwrap();
+            instance.insert_variable(variable_ref, variable);
         } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
             class.insert_variable(variable_ref, variable);
         } else {
@@ -462,7 +467,7 @@ impl Thread {
         Ok(())
     }
 
-    fn value_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>) -> Result<Value, RuntimeError> {
+    fn value_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: &Option<Arc<Instance>>) -> Result<Value, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
                 let constant = self.vm.get_from_constant_pool(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find constant in VM constant pool for given reference ({})", reference)))?;
@@ -484,8 +489,11 @@ impl Thread {
                 if instance.is_none() {
                     return Err(self.new_runtime_error("Can't find instance variable in a static (non-instance) context.".to_string()));
                 }
-                let variable = instance.as_ref().unwrap().variables.get(reference).ok_or_else(|| self.new_runtime_error(format!("Can't find instance variable in INSTANCE variable pool for given reference ({})", reference)))?;
-                Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
+                let instance = instance.as_ref().unwrap();
+                let instance_variables_guard = instance.variables.read().unwrap();
+                let variable = instance_variables_guard.get(reference).ok_or_else(|| self.new_runtime_error(format!("Can't find instance variable in INSTANCE variable pool for given reference ({})", reference)))?;
+                let value = self.value_from_value_ref(&variable.value_ref.borrow())?;
+                Ok(value)
             }
             StackEntry::StaticVariableReference(reference) => {
                 let variable = class.get_variable(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference)))?;
@@ -515,7 +523,7 @@ impl Thread {
         }
     }
 
-    fn get_variable_from_scope_and_reference(&self, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>, scope: &Scope, reference: u64) -> Result<Variable, RuntimeError> {
+    fn get_variable_from_scope_and_reference(&self, call_frame: &CallFrame, class: &Class, instance: &Option<Arc<Instance>>, scope: &Scope, reference: u64) -> Result<Variable, RuntimeError> {
         let variable = if mem::discriminant(scope) == mem::discriminant(&Scope::Instance) {
             if instance.is_none() {
                 return Err(RuntimeError::new(self.current_source_line.clone(), self.stack_traces.clone(),
@@ -558,7 +566,7 @@ impl Thread {
         }
     }
 
-    fn constant_ref_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: &Option<&mut Instance>) -> Result<u64, RuntimeError> {
+    fn constant_ref_from_stack_entry(&self, stack_entry: &StackEntry, call_frame: &CallFrame, class: &Class, instance: &Option<Arc<Instance>>) -> Result<u64, RuntimeError> {
         match stack_entry {
             StackEntry::ConstantPoolReference(reference) => {
                 self.vm.get_from_constant_pool(*reference).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
@@ -574,7 +582,9 @@ impl Thread {
                 if instance.is_none() {
                     return Err(self.new_runtime_error("constant_ref_from_stack_entry - Can't retrieve constant reference for instance variable in a static(non-instance) context".to_string()));
                 }
-                let variable = instance.as_ref().unwrap().get_variable(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference)))?;
+                let instance = instance.as_ref().unwrap();
+                let instance_variables_guard = instance.variables.read().unwrap();
+                let variable = instance_variables_guard.get(reference).ok_or_else(|| self.new_runtime_error(format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference)))?;
                 let constant_ref = variable.value_ref.borrow().get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
                 Ok(constant_ref)
@@ -612,7 +622,7 @@ impl Thread {
         }
     }
 
-    fn dump_stack(&self, out: &mut Stdout, _call_frame: &CallFrame, _class: &Class, _instance: &mut Option<&mut Instance>) {
+    fn dump_stack(&self, out: &mut Stdout, _call_frame: &CallFrame, _class: &Class, _instance: &mut Option<Arc<Instance>>) {
         if self.stack.contents().is_empty() {
             writeln!(out, "         <empty stack>").unwrap();
         } else {
@@ -628,7 +638,7 @@ impl Thread {
     }
 
 
-    fn print_dump_current_op_code(&mut self, call_frame: &CallFrame, class: &Class, instance: &mut Option<&mut Instance>, stdout: &mut Stdout, op_index: &mut usize, next_op_code: &OpCode) {
+    fn print_dump_current_op_code(&mut self, call_frame: &CallFrame, class: &Class, instance: &mut Option<Arc<Instance>>, stdout: &mut Stdout, op_index: &mut usize, next_op_code: &OpCode) {
         if self.debug_flag & DebugFlag::Execution.value() == DebugFlag::Execution.value() {
             writeln!(stdout, "=========  Thread Executing    ========").unwrap();
             writeln!(stdout, "[{}] {:?} - {}", op_index, next_op_code, self.current_source_line.single_line()).unwrap();
