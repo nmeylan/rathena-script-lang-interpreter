@@ -1,11 +1,16 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::mem;
+use std::path::Path;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::input_stream::ByteStream;
 use antlr_rust::InputStream;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor};
-use crate::lang::compiler::parse_number;
+use crate::lang::chunk::ClassFile;
+use crate::lang::compiler::{Compiler, parse_number};
+use std::default::Default;
+use crate::lang::error::CompilationError;
 use crate::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
 use crate::parser::rathenascriptlangparser::{RathenaScriptLangParser, RathenaScriptLangParserContextType, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptSpriteContextAttrs, ScriptXPosContextAttrs, ScriptYPosContextAttrs};
 use crate::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
@@ -19,12 +24,30 @@ pub struct Script {
     pub sprite: isize,
     pub x_size: usize,
     pub y_size: usize,
+    pub class_reference: u64,
 }
 pub struct ScriptVisitor {
     scripts: Vec<Script>,
 }
 
-pub fn visit(file: &File) -> Vec<Script> {
+pub fn compile(paths: Vec<String>, native_function_list_file_path: &str) -> Result<(Vec<Script>, Vec<ClassFile>), Vec<CompilationError>> {
+    let mut compiler = Compiler::new(Default::default(), Default::default(), native_function_list_file_path);
+    let mut scripts = Vec::<Script>::new();
+    for path in paths.iter() {
+        let path = Path::new(path);
+        scripts.extend(visit(path));
+        compiler.compile_file_and_keep_state(path);
+    }
+    let mut class_files = compiler.end_compilation()?;
+    class_files.iter_mut().for_each(|class_file| class_file.set_reference());
+    let mut class_references = HashMap::<String, u64>::new();
+    class_files.iter().for_each(|class| {class_references.insert(class.name.clone(), class.reference);} );
+    scripts.iter_mut().for_each(|script| {script.class_reference = *class_references.get(&script.name).unwrap();});
+    Ok((scripts, class_files))
+}
+
+pub fn visit(path: &Path) -> Vec<Script> {
+    let file = File::open(path).unwrap();
     let mut reader = BufReader::new(file);
     let mut file_content = String::new();
     reader.read_to_string(&mut file_content).unwrap();
@@ -51,7 +74,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                 map: ctx.scriptLocation().unwrap().get_text(),
                 sprite: sprite as isize,
                 x_size: 0,
-                y_size: 0
+                y_size: 0,
+                class_reference: 0
             });
         }
     }

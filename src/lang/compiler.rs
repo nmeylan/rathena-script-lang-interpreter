@@ -4,8 +4,11 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
 use std::{mem};
+use std::fs::File;
+use std::io::{BufReader, Read};
 
 use std::ops::Deref;
+use std::path::Path;
 
 use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
@@ -127,7 +130,7 @@ impl Display for CompilationDetail {
 }
 
 impl Compiler {
-    fn new(file_name: String, script: String, native_function_list_file_path: &str) -> Self {
+    pub(crate) fn new(file_name: String, script: String, native_function_list_file_path: &str) -> Self {
         let native_functions = Self::collect_native_functions(native_function_list_file_path);
         Self {
             file_name,
@@ -176,6 +179,37 @@ impl Compiler {
     }
     pub fn compile_script(name: String, script: &str, native_function_list_file_path: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
         Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path)
+    }
+
+    pub fn compile_file_and_keep_state(&mut self, script_path: &Path) {
+        let file = File::open(script_path).unwrap();
+        let mut reader = BufReader::new(file);
+        let mut file_content = String::new();
+        reader.read_to_string(&mut file_content).unwrap();
+        self.file_name = script_path.to_str().unwrap().to_string();
+        self.script_lines = file_content.split('\n').map(|l| l.to_string()).collect::<Vec<String>>();
+        let lexer = RathenaScriptLangLexer::new(InputStream::new(file_content.as_str()));
+        let token_stream = CommonTokenStream::new(lexer);
+        let mut parser = RathenaScriptLangParser::new(token_stream);
+        let tree = parser.compilationUnit();
+        self.visit_compilationUnit(tree.as_ref().unwrap());
+    }
+
+    pub fn end_compilation(&mut self) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+        for class in self.classes.iter() {
+            Self::check_called_function_are_defined(&self, class);
+            Self::add_hook_functions(class);
+            for function in class.functions().iter() {
+                Self::update_goto_jump_index(&self, class, function.as_ref());
+            }
+        }
+
+        if self.errors.borrow().is_empty() {
+            Ok(mem::take(&mut self.classes))
+        } else {
+            let errors_ref_cell = mem::replace(&mut self.errors, RefCell::new(vec![]));
+            Err(errors_ref_cell.take())
+        }
     }
 
     pub fn compile(name: String, script: &str, native_function_list_file_path: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {

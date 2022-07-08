@@ -208,10 +208,10 @@ impl Vm {
         Ok(())
     }
 
-    pub fn register_class(&self, class: &mut ClassFile) -> Rc<Class> {
+    pub fn register_class(&self, class_file: &mut ClassFile) -> Rc<Class> {
         let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
         let mut sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher> = Default::default();
-        for function in class.functions() {
+        for function in class_file.functions() {
             let chunk_rc = function.chunk.clone();
             let chunk: &Chunk = chunk_rc.borrow();
             let function_reference = Vm::calculate_hash(&function.name);
@@ -219,10 +219,10 @@ impl Vm {
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
             sources.insert(function_reference, chunk.compilation_details.take());
         }
-        let class_rc = Rc::new(Class::new(class.name.clone(), functions_pool, sources,
-                                          class.static_variables.borrow().clone(),
-                                          class.instance_variables.borrow().clone()));
-        self.classes_pool.borrow_mut().insert(class.name.clone(), class_rc.clone());
+        let class_rc = Rc::new(Class::new(class_file.name.clone(), class_file.reference, functions_pool, sources,
+                                          class_file.static_variables.borrow().clone(),
+                                          class_file.instance_variables.borrow().clone()));
+        self.classes_pool.borrow_mut().insert(class_file.name.clone(), class_rc.clone());
         class_rc
     }
 

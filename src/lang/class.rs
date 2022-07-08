@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::env::var;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -16,7 +15,7 @@ use crate::lang::vm::{Hashcode, Vm};
 
 #[derive(Debug)]
 pub struct Class {
-    reference: Option<u64>,
+    pub(crate) reference: u64,
     pub(crate) name: String,
     pub(crate) functions_pool: HashMap<u64, Function, NoopHasher>,
     pub(crate) sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher>, // Key is function reference
@@ -26,10 +25,10 @@ pub struct Class {
 }
 
 impl Class {
-    pub fn new(name: String, functions_pool: HashMap<u64, Function, NoopHasher>, sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher>, static_variables: HashMap<u64, Variable, NoopHasher>,
+    pub fn new(name: String, reference: u64, functions_pool: HashMap<u64, Function, NoopHasher>, sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher>, static_variables: HashMap<u64, Variable, NoopHasher>,
                instance_variables: HashMap<u64, Variable, NoopHasher>) -> Self {
         let mut class = Self {
-            reference: None,
+            reference,
             name,
             functions_pool,
             sources,
@@ -37,7 +36,6 @@ impl Class {
             static_variables: RefCell::new(static_variables),
             instance_variables
         };
-        class.reference = Some(Vm::calculate_hash(&class) & SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64);
         class
     }
 
@@ -59,7 +57,9 @@ impl Class {
 
 impl Hash for Class {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.name.hash(state)
+        self.name.hash(state);
+        self.sources.len().hash(state);
+        self.functions_pool.len().hash(state);
     }
 }
 
@@ -208,7 +208,7 @@ impl Hash for Array {
 
 impl Hashcode for Class {
     fn hash_code(&self) -> u64 {
-        self.reference.unwrap()
+        self.reference
     }
 }
 impl Hashcode for Instance {

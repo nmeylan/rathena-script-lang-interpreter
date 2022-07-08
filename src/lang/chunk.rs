@@ -13,6 +13,7 @@ use crate::lang::vm::{MAIN_FUNCTION, Vm};
 #[derive(Debug)]
 pub struct ClassFile {
     pub name: String,
+    pub reference: u64,
     pub defined_in_file_name: String,
     pub defined_at_line: usize,
     pub functions: RefCell<Vec<Rc<FunctionDefinition>>>,
@@ -41,6 +42,7 @@ impl ClassFile {
     pub fn new(name: String, file_name: String, line: usize) -> Self {
         Self {
             name,
+            reference: 0,
             defined_in_file_name: file_name,
             defined_at_line: line,
             functions: RefCell::new(vec![]),
@@ -52,6 +54,7 @@ impl ClassFile {
     pub fn new_with_main_function(name: String, file_name: String, line: usize) -> Self {
         Self {
             name,
+            reference: 0,
             defined_in_file_name: file_name,
             defined_at_line: line,
             functions: RefCell::new(vec![Rc::new(FunctionDefinition::new(MAIN_FUNCTION.to_string()))]),
@@ -126,6 +129,21 @@ impl ClassFile {
         } else {
             Err(String::from("Undefined variable"))
         }
+    }
+
+    pub fn set_reference(&mut self) {
+        self.reference = Vm::calculate_hash(self);
+    }
+}
+
+impl Hash for ClassFile {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+        self.functions.borrow().len().hash(state);
+        if self.functions.borrow().len() > 0 {
+            self.functions.borrow()[0].hash(state);
+        }
+        self.static_variables.borrow().len().hash(state);
     }
 }
 
