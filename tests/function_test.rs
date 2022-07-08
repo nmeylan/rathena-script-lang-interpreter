@@ -3,6 +3,7 @@ mod common;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -11,9 +12,9 @@ use crate::common::{compile_script, Event};
 #[test]
 fn simple_function_call() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     my_func();
     function my_func {
@@ -25,15 +26,15 @@ fn simple_function_call() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn function_call_with_arguments() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     my_func("hello");
     function my_func {
@@ -45,15 +46,15 @@ fn function_call_with_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn function_call_with_variable_arguments() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     .@a$ = "hello";
     my_func(.@a$);
@@ -66,14 +67,14 @@ fn function_call_with_variable_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_two_arguments() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     .@a$ = "hello";
     my_func(.@a$, "world");
@@ -86,15 +87,15 @@ fn function_call_with_two_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn function_call_with_arguments_out_of_bounds() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events;
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     my_func("hello");
     function my_func {
@@ -119,9 +120,9 @@ l5	        .@a$ = getarg(1) + " world";
 #[test]
 fn function_call_with_arguments_with_default() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     my_func("hello");
     function my_func {
@@ -133,14 +134,14 @@ fn function_call_with_arguments_with_default() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("default world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("default world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_number_arguments() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     my_func(2);
     function my_func {
@@ -152,14 +153,14 @@ fn function_call_with_number_arguments() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(6_i32, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_number_arguments_with_default() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     my_func(2);
     function my_func {
@@ -171,14 +172,14 @@ fn function_call_with_number_arguments_with_default() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(7_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(7_i32, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
 }
 #[test]
 fn function_call_with_number_arguments_with_default_different_type_assigned_to_string() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     my_func(2);
     function my_func {
@@ -190,15 +191,15 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("34"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("34"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn function_with_return_type() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     function plus_four {
         .@a = getarg(0) + 4;
@@ -218,18 +219,18 @@ fn function_with_return_type() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(6_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(8_i32, events.borrow().get("b").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(10_i32, events.borrow().get("c").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(1_i32, events.borrow().get("d").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(6_i32, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(8_i32, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(10_i32, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1_i32, events.lock().unwrap().get("d").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
 fn function_with_return_type_multicall() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     function plus_four {
         .@a = getarg(0) + 4;
@@ -249,15 +250,15 @@ fn function_with_return_type_multicall() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(5_i32, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(5_i32, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
 fn recursive_function_call_with_return() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     let classes = compile_script(r#"
     .@a = my_func(10);
     function my_func {
@@ -273,5 +274,5 @@ fn recursive_function_call_with_return() {
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(0, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
 }

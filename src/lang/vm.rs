@@ -127,7 +127,7 @@ pub struct Vm {
     native_method_handler: Box<dyn NativeMethodHandler>,
 }
 
-pub trait NativeMethodHandler {
+pub trait NativeMethodHandler: Send + Sync {
     fn handle(&self, native: &Native, _params: Vec<Value>, _program: &Thread, _call_frame: &CallFrame) {
         panic!("Native function {}", native.name);
     }

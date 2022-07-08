@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -11,7 +12,7 @@ mod common;
 #[test]
 fn simple_condition() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     if(1) {
         .@a$ = "i am true";
@@ -47,29 +48,29 @@ fn simple_condition() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("i am true"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(false, events.borrow().get("b").is_some());
-    assert_eq!(String::from("i am not part of condition"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(false, events.borrow().get("d").is_some());
-    assert_eq!(String::from("i am true"), events.borrow().get("e").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(false, events.borrow().get("f").is_some());
-    assert_eq!(false, events.borrow().get("g").is_some());
-    assert_eq!(String::from("i am true"), events.borrow().get("h").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("i am true"), events.borrow().get("i").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(false, events.borrow().get("k").is_some());
-    assert_eq!(true, events.borrow().get("l").is_some());
-    assert_eq!(false, events.borrow().get("m").is_some());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(false, events.lock().unwrap().get("b").is_some());
+    assert_eq!(String::from("i am not part of condition"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(false, events.lock().unwrap().get("d").is_some());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("e").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(false, events.lock().unwrap().get("f").is_some());
+    assert_eq!(false, events.lock().unwrap().get("g").is_some());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("h").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("i").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(false, events.lock().unwrap().get("k").is_some());
+    assert_eq!(true, events.lock().unwrap().get("l").is_some());
+    assert_eq!(false, events.lock().unwrap().get("m").is_some());
 }
 
 #[test]
 fn condition_with_expressions() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     if((1 == 1 || 1) && 1) {
         .@a$ = "i am true";
@@ -81,14 +82,14 @@ fn condition_with_expressions() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("i am true"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(false, events.borrow().get("b").is_some());
-    assert_eq!(String::from("i am not part of condition"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(false, events.lock().unwrap().get("b").is_some());
+    assert_eq!(String::from("i am not part of condition"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
 
@@ -96,7 +97,7 @@ fn condition_with_expressions() {
 #[test]
 fn conditional_statements() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     .@a = 1 == 1;
     .@b = 1 == 2;
@@ -114,28 +115,28 @@ fn conditional_statements() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("a").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(0, events.borrow().get("b").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("c").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(0, events.borrow().get("d").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(0, events.borrow().get("e").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("f").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(0, events.borrow().get("g").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("i").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(0, events.borrow().get("j").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("k").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(0, events.borrow().get("m").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("d").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("e").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("f").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("g").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("k").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("m").unwrap().value.number_value().unwrap().clone());
 }
 
 
 #[test]
 fn switch_statement() {
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     function num_to_str {
         .@a = getarg(0);
@@ -164,21 +165,21 @@ fn switch_statement() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!("one", events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("two", events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("four", events.borrow().get("c").unwrap().value.string_value().unwrap().clone()); // no break in case 3:
-    assert_eq!("four", events.borrow().get("d").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("greater than 4", events.borrow().get("e").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("two", events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("four", events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone()); // no break in case 3:
+    assert_eq!("four", events.lock().unwrap().get("d").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("greater than 4", events.lock().unwrap().get("e").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn nested_switch_statement() {
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     function num_to_str {
         .@a = getarg(0);
@@ -221,15 +222,15 @@ fn nested_switch_statement() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!("one", events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("return", events.borrow().get("b1").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("break", events.borrow().get("b2").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("four", events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("four", events.borrow().get("d").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("greater than 4", events.borrow().get("e").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("return", events.lock().unwrap().get("b1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("break", events.lock().unwrap().get("b2").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("four", events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("four", events.lock().unwrap().get("d").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("greater than 4", events.lock().unwrap().get("e").unwrap().value.string_value().unwrap().clone());
 }

@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -11,7 +12,7 @@ mod common;
 #[test]
 fn simple_label() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     .@a$ = "hello world";
     ItDoesNothing:
@@ -21,21 +22,21 @@ fn simple_label() {
         vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
 
 #[test]
 fn simple_label_with_goto() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     .@a$ = "hello world";
     goto AssignC;
@@ -49,21 +50,21 @@ fn simple_label_with_goto() {
 
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello world"), events.borrow().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(true, events.borrow().get("b").is_none());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("variable in label 3"), events.borrow().get("d").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(true, events.lock().unwrap().get("b").is_none());
+    assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 3"), events.lock().unwrap().get("d").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn label_with_goto_inside() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     .@a$ = "hello world";
     goto Second;
@@ -79,21 +80,21 @@ fn label_with_goto_inside() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(true, events.borrow().get("d").is_none());
+    assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(true, events.lock().unwrap().get("d").is_none());
 }
 
 
 #[test]
 fn label_with_goto_in_a_function() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     goto Second;
     First:
@@ -114,21 +115,21 @@ fn label_with_goto_in_a_function() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(true, events.borrow().get("d").is_none());
-    assert_eq!(String::from("the end"), events.borrow().get("endd").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(true, events.lock().unwrap().get("d").is_none());
+    assert_eq!(String::from("the end"), events.lock().unwrap().get("endd").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn label_with_goto_in_a_nested_function() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     goto Second;
     First:
@@ -152,13 +153,13 @@ fn label_with_goto_in_a_nested_function() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), classes);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("variable in label 1"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("variable in label 2"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(true, events.borrow().get("d").is_none());
-    assert_eq!(String::from("the end"), events.borrow().get("endd").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(true, events.lock().unwrap().get("d").is_none());
+    assert_eq!(String::from("the end"), events.lock().unwrap().get("endd").unwrap().value.string_value().unwrap().clone());
 }

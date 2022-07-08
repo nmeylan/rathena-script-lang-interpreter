@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -12,7 +13,7 @@ mod common;
 #[test]
 fn simple_array_assignment() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@a$[0] = "hello";
     .@a$[1] = "world";
@@ -30,21 +31,21 @@ fn simple_array_assignment() {
     vm_dump_var("c", .@c$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(String::from("hello"), events.borrow().get("a0").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("world"), events.borrow().get("a1").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("hello world"), events.borrow().get("b").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("hellos"), events.borrow().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello"), events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("world"), events.lock().unwrap().get("a1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hellos"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn getarraysize_should_array_size() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@a$[0] = "hello";
     .@a$[1] = "world";
@@ -55,19 +56,19 @@ fn getarraysize_should_array_size() {
     vm_dump_var("b_len", .@b_len);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(4, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
 fn cleararray() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@a$[0] = "hello";
     .@b[0] = 1;
@@ -83,24 +84,24 @@ fn cleararray() {
     vm_dump_var("b10", .@b[10]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(10, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(11, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!("world", events.borrow().get("a0").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("world", events.borrow().get("a9").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("b0").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(2, events.borrow().get("b1").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(2, events.borrow().get("b10").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(10, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(11, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!("world", events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("world", events.lock().unwrap().get("a9").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("b0").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("b1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("b10").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
 fn setarray() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@c$ = "toto";
     setarray .@a$[0], "hello", "world", .@c$;
@@ -114,24 +115,24 @@ fn setarray() {
     vm_dump_var("b3", .@b[3]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(4, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!("hello", events.borrow().get("a0").unwrap().value.string_value().unwrap().clone());
-    assert_eq!("world", events.borrow().get("a1").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("b1").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(2, events.borrow().get("b2").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(3, events.borrow().get("b3").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!("hello", events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("world", events.lock().unwrap().get("a1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("b1").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("b2").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("b3").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
 fn getelementofarray() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     function plus_one_to_array_elem_0 {
         return getelementofarray(getarg(0), 0) + 1;
@@ -143,19 +144,19 @@ fn getelementofarray() {
     vm_dump_var("three", .@d);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("two").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(3, events.borrow().get("three").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("two").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("three").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
 fn deletearray() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     setarray(.@b[1], 1, 2, 3, 4,5);
     deletearray(.@b[0], 1);
@@ -169,23 +170,23 @@ fn deletearray() {
     vm_dump_var("b_len_after_second_delete", getarraysize(.@b));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(1, events.borrow().get("b_0_after_first_delete").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(3, events.borrow().get("b_2_after_first_delete").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(5, events.borrow().get("b_len_after_first_delete").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("b_0_after_second_delete").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(3, events.borrow().get("b_2_after_second_delete").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(3, events.borrow().get("b_len_after_second_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("b_0_after_first_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("b_2_after_first_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(5, events.lock().unwrap().get("b_len_after_first_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("b_0_after_second_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("b_2_after_second_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("b_len_after_second_delete").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
 fn inarray() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@c$ = "toto";
     setarray .@a$[0], "hello", "world", .@c$;
@@ -198,21 +199,21 @@ fn inarray() {
     vm_dump_var("not_found_index", .@not_found_index);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(2, events.borrow().get("toto_index").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(4, events.borrow().get("four_index").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(-1, events.borrow().get("not_found_index").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("toto_index").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(4, events.lock().unwrap().get("four_index").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(-1, events.lock().unwrap().get("not_found_index").unwrap().value.number_value().unwrap().clone());
 }
 
 
 #[test]
 fn copyarray() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@toto$ = "toto";
     setarray .@a$[0], "hello", "world", .@toto$;
@@ -227,30 +228,30 @@ fn copyarray() {
     vm_dump_var("c2", .@c$[2]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     Vm::execute_main_script(vm).unwrap();
     // Then
-    assert_eq!(3, events.borrow().get("a_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(1, events.borrow().get("b_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(3, events.borrow().get("c_len").unwrap().value.number_value().unwrap().clone());
-    assert_eq!(String::from("hello"), events.borrow().get("b0").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("world"), events.borrow().get("c1").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("toto"), events.borrow().get("c2").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(3, events.lock().unwrap().get("c_len").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hello"), events.lock().unwrap().get("b0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("world"), events.lock().unwrap().get("c1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("toto"), events.lock().unwrap().get("c2").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
 fn setarray_wrong_type_error() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@toto = 1;
     setarray .@a$[0], "hello", "world", .@toto;
     setarray .@a$[0], "hello", "world", "2";
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -267,13 +268,13 @@ l4	    setarray .@a$[0], "hello", "world", .@toto;
 #[test]
 fn cleararray_wrong_type_error() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@a$[0] = "hello";
     cleararray(.@a$[0], 0, 10);
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -291,14 +292,14 @@ l4	    cleararray(.@a$[0], 0, 10);
 #[test]
 fn copyarray_wrong_type_error() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@toto$ = "toto";
     setarray .@a$[0], "hello", "world", .@toto$;
     copyarray .@b[0], .@a[0], 1;
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
@@ -314,14 +315,14 @@ l5	    copyarray .@b[0], .@a[0], 1;
 #[test]
 fn copyarray_outofbounds_error() {
     // Given
-    let events = Rc::new(RefCell::new(HashMap::<String, Event>::new()));
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@toto$ = "toto";
     setarray .@a$[0], "hello", "world", .@toto$;
     copyarray .@b$[0], .@a$[18], 1;
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.borrow_mut().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
     // When
     Vm::bootstrap(vm.clone(), script);
     let runtime_error = Vm::execute_main_script(vm).err().unwrap();
