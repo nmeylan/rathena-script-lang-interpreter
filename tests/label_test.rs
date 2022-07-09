@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile_script, Event};
+use crate::common::{compile_script, Event, VmHook};
 
 mod common;
 
@@ -22,10 +22,11 @@ fn simple_label() {
         vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -50,10 +51,11 @@ fn simple_label_with_goto() {
 
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(true, events.lock().unwrap().get("b").is_none());
@@ -80,10 +82,11 @@ fn label_with_goto_inside() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
@@ -115,10 +118,11 @@ fn label_with_goto_in_a_function() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
@@ -153,10 +157,11 @@ fn label_with_goto_in_a_nested_function() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());

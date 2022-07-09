@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile, Event};
+use crate::common::{compile, Event, VmHook};
 
 mod common;
 
@@ -28,11 +28,12 @@ fn simple_class_test() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm, class_reference, instance_reference).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -57,17 +58,18 @@ fn instance_variable_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(Mutex::new(0));
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
+    let vm_hook = VmHook { hook: Box::new(move |e| {
         let i1 = *i.lock().unwrap();
         *i.lock().unwrap() = i1 + 1;
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, *i.lock().unwrap()), e);
-    });
+    }) };
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -93,17 +95,18 @@ fn static_variable_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(Mutex::new(0));
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
+    let vm_hook = VmHook { hook: Box::new(move |e| {
         let i1 = *i.lock().unwrap();
         *i.lock().unwrap() = i1 + 1;
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, *i.lock().unwrap()), e);
-    });
+    }) };
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -135,17 +138,18 @@ fn on_init_hook_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
+    let vm_hook = VmHook { hook: Box::new(move |e| {
         let i1 = i.lock().unwrap().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.lock().unwrap().insert(e.name.clone(), i1 + 1);
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, i1 + 1), e);
-    });
+    }) };
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -182,17 +186,18 @@ fn on_instance_init_hook_test() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
+    let vm_hook = VmHook { hook: Box::new(move |e| {
         let i1 = i.lock().unwrap().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.lock().unwrap().insert(e.name.clone(), i1 + 1);
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, i1 + 1), e);
-    });
+    }) };
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -225,17 +230,18 @@ fn setd_instance_variable() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
+    let vm_hook = VmHook { hook: Box::new(move |e| {
         let i1 = i.lock().unwrap().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.lock().unwrap().insert(e.name.clone(), i1 + 1);
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, i1 + 1), e);
-    });
+    }) };
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -265,17 +271,18 @@ fn setd_static_variable() {
     "#).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| {
+    let vm_hook = VmHook { hook: Box::new(move |e| {
         let i1 = i.lock().unwrap().get(&e.name).unwrap_or(&(0 as usize)).clone();
         i.lock().unwrap().insert(e.name.clone(), i1 + 1);
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, i1 + 1), e);
-    });
+    }) };
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("counter2").unwrap().value.number_value().unwrap().clone());
@@ -304,11 +311,12 @@ fn getvariableofnpc_when_npc_exist() {
     }
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "MyNPC2".to_string()).unwrap();
-    Vm::run_main_function(vm.clone(), class_reference, instance_reference).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "MyNPC2".to_string(), Box::new(&vm_hook)).unwrap();
+    Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("npc_1_value").unwrap().value.number_value().unwrap().clone());
     // assert_eq!(1, events.lock().unwrap().get("npc_1_value_getd").unwrap().value.number_value().unwrap().clone());

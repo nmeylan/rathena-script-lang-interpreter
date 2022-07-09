@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Native, Scope, ValueRef, ValueType, Variable};
-use crate::lang::vm::{DebugFlag, Hashcode, NATIVE_FUNCTIONS, Vm};
+use crate::lang::vm::{DebugFlag, Hashcode, NATIVE_FUNCTIONS, NativeMethodHandler, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
@@ -46,19 +46,19 @@ impl Thread {
         }
     }
 
-    pub fn run_main(&mut self, instance: Arc<Instance>) -> Result<(), RuntimeError> {
+    pub fn run_main(&mut self, instance: Arc<Instance>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let class = self.vm.get_class(&instance.class_name);
         let function = class.functions_pool.get(&Vm::calculate_hash(&String::from("_main"))).unwrap();
         let call_frame = CallFrame::new(function, 1, 0, self.debug_flag);
-        self.run(call_frame, 0, class.as_ref(), &mut Some(instance)).map(|_| ())
+        self.run(call_frame, 0, class.as_ref(), &mut Some(instance), native_method_handler).map(|_| ())
     }
 
-    pub fn run_function(&mut self, mut class: Arc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function) -> Result<(), RuntimeError> {
+    pub fn run_function(&mut self, mut class: Arc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let call_frame = CallFrame::new(function, 1, 0, self.debug_flag);
-        self.run(call_frame, 0, class.as_ref(), instance).map(|_| ())
+        self.run(call_frame, 0, class.as_ref(), instance, native_method_handler).map(|_| ())
     }
 
-    pub fn run(&mut self, mut call_frame: CallFrame, depth: usize, class: &Class, instance: &mut Option<Arc<Instance>>) -> Result<CallFrameBreak, RuntimeError> {
+    pub fn run(&mut self, mut call_frame: CallFrame, depth: usize, class: &Class, instance: &mut Option<Arc<Instance>>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<CallFrameBreak, RuntimeError> {
         let mut stdout = io::stdout();
         self.print_before_current_run(&call_frame, class, &mut stdout);
         let mut op_index = 0;
@@ -285,7 +285,7 @@ impl Thread {
                     if NATIVE_FUNCTIONS.iter().any(|native| native.name == native_method.name.as_str()) {
                         handle_native_method(&self, native_method, class, instance, &mut call_frame, arguments, arguments_ref)?;
                     } else {
-                        self.vm.native_method_handler().handle(native_method, arguments, self, &call_frame);
+                        native_method_handler.handle(native_method, arguments, self, &call_frame);
                     }
                     self.stack_traces.pop();
                 }
@@ -324,7 +324,7 @@ impl Thread {
                         }
                     }
                     let new_function_call_frame = CallFrame::new(function, stack_pointer, *argument_count, self.debug_flag);
-                    let break_type = self.run(new_function_call_frame, depth + 1, class, instance)?;
+                    let break_type = self.run(new_function_call_frame, depth + 1, class, instance, native_method_handler.clone())?;
                     self.stack_traces.pop();
                     match break_type {
                         CallFrameBreak::Return(has_returned) => {

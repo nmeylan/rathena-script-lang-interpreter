@@ -14,7 +14,7 @@ pub struct Event {
 }
 
 pub struct VmHook {
-    hook: Box<dyn Fn(Event) + Send + Sync>,
+    pub hook: Box<dyn Fn(Event) + Send + Sync>,
 }
 
 impl NativeMethodHandler for VmHook {
@@ -60,9 +60,8 @@ impl NativeMethodHandler for VmHook {
     }
 }
 
-pub fn setup_vm<F>(debug_flag: u16, hook: F) -> Arc<Vm> where F: 'static + Fn(Event) + Send + Sync {
-    let vm_hook = VmHook { hook: Box::new(hook) };
-    let vm = Vm::new("native_functions_list.txt", Box::new(vm_hook), debug_flag);
+pub fn setup_vm(debug_flag: u16) -> Arc<Vm> {
+    let vm = Vm::new("native_functions_list.txt", debug_flag);
     Arc::new(vm)
 }
 

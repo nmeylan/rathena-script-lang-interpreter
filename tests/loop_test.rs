@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile_script, Event};
+use crate::common::{compile_script, Event, VmHook};
 
 mod common;
 
@@ -21,10 +21,11 @@ fn simple_for_loop() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -42,10 +43,11 @@ fn simple_while_loop() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(-1, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
 }
@@ -66,10 +68,11 @@ fn simple_while_loop_in_a_function() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(-1, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
 }
@@ -87,10 +90,11 @@ fn simple_for_loop_with_already_init() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -110,10 +114,11 @@ fn simple_for_loop_with_increment_in_the_for_loop() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -133,10 +138,11 @@ fn nested_simple_for_loop() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(10, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -164,10 +170,11 @@ fn break_should_stop_for_loop() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -194,10 +201,11 @@ fn break_should_stop_for_loop2() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(50, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(49, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -227,10 +235,11 @@ fn break_should_stop_nested_for_loop2() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(110, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap());
 }
@@ -249,10 +258,11 @@ fn simple_do_while_loop() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -272,10 +282,11 @@ fn simple_do_while_loop_2() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(-1, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());

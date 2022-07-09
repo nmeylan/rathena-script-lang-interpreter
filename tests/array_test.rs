@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
-
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile_script, Event};
+
+use crate::common::{compile_script, Event, VmHook};
 
 mod common;
 
@@ -31,10 +31,11 @@ fn simple_array_assignment() {
     vm_dump_var("c", .@c$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello"), events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("world"), events.lock().unwrap().get("a1").unwrap().value.string_value().unwrap().clone());
@@ -56,10 +57,11 @@ fn getarraysize_should_array_size() {
     vm_dump_var("b_len", .@b_len);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(4, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -84,10 +86,11 @@ fn cleararray() {
     vm_dump_var("b10", .@b[10]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(10, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(11, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -115,10 +118,11 @@ fn setarray() {
     vm_dump_var("b3", .@b[3]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(4, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -144,10 +148,11 @@ fn getelementofarray() {
     vm_dump_var("three", .@d);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("two").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("three").unwrap().value.number_value().unwrap().clone());
@@ -170,10 +175,11 @@ fn deletearray() {
     vm_dump_var("b_len_after_second_delete", getarraysize(.@b));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("b_0_after_first_delete").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("b_2_after_first_delete").unwrap().value.number_value().unwrap().clone());
@@ -199,10 +205,11 @@ fn inarray() {
     vm_dump_var("not_found_index", .@not_found_index);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("toto_index").unwrap().value.number_value().unwrap().clone());
     assert_eq!(4, events.lock().unwrap().get("four_index").unwrap().value.number_value().unwrap().clone());
@@ -228,10 +235,11 @@ fn copyarray() {
     vm_dump_var("c2", .@c$[2]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -251,10 +259,11 @@ fn setarray_wrong_type_error() {
     setarray .@a$[0], "hello", "world", "2";
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"setarray - tried to assign Number (4th arguments) to an array of String
 test_script 4:4.
@@ -274,10 +283,11 @@ fn cleararray_wrong_type_error() {
     cleararray(.@a$[0], 0, 10);
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"cleararray - tried to assign Number (second argument) to an array of String
 test_script 4:4.
@@ -299,10 +309,11 @@ fn copyarray_wrong_type_error() {
     copyarray .@b[0], .@a[0], 1;
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"copyarray - tried to assign an array of String (second argument) to an array of Number
 test_script 5:4.
@@ -312,6 +323,7 @@ l5	    copyarray .@b[0], .@a[0], 1;
 0: _main
 	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
 }
+
 #[test]
 fn copyarray_outofbounds_error() {
     // Given
@@ -322,10 +334,11 @@ fn copyarray_outofbounds_error() {
     copyarray .@b$[0], .@a$[18], 1;
 "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"Array index out of bounds: index 18, length 3
 test_script 5:4.

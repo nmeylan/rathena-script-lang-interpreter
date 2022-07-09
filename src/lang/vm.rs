@@ -151,7 +151,6 @@ pub struct Vm {
     constants_pool: RwLock<HashMap<u64, Constant, NoopHasher>>,
     classes_pool: RwLock<HashMap<String, Arc<Class>>>,
     native_pool: HashMap<u64, Native, NoopHasher>,
-    native_method_handler: Box<dyn NativeMethodHandler>,
 }
 
 pub trait NativeMethodHandler: Send + Sync {
@@ -161,7 +160,7 @@ pub trait NativeMethodHandler: Send + Sync {
 }
 
 impl Vm {
-    pub fn new(native_function_list_file_path: &str, native_method_handler: Box<dyn NativeMethodHandler>, debug_flag: u16) -> Vm {
+    pub fn new(native_function_list_file_path: &str, debug_flag: u16) -> Vm {
         let mut native_pool: HashMap<u64, Native, NoopHasher> = Default::default();
         for native in Vm::collect_native_functions(native_function_list_file_path).iter() {
             native_pool.insert(Self::calculate_hash(&native.name), Native { name: native.name.clone() });
@@ -174,60 +173,59 @@ impl Vm {
             debug_flag,
             heap: Default::default(),
             constants_pool: Default::default(),
-            native_method_handler,
             native_pool,
             classes_pool: RwLock::new(Default::default()),
         }
     }
 
-    pub fn bootstrap(vm: Arc<Vm>, mut classes: Vec<ClassFile>) {
+    pub fn bootstrap(vm: Arc<Vm>, mut classes: Vec<ClassFile>, native_method_handler: Box<&dyn NativeMethodHandler>) {
         for class in classes.iter_mut() {
             for function in class.functions() {
                 let chunk = &mut function.chunk.clone();
                 vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage.borrow_mut()));
             }
             let class_rc = vm.register_class(class);
-            Self::bootstrap_class(vm.clone(), class_rc).unwrap();
+            Self::bootstrap_class(vm.clone(), class_rc, native_method_handler.clone()).unwrap();
         }
     }
 
-    pub fn execute_main_script(vm: Arc<Vm>) -> Result<(), RuntimeError> {
+    pub fn execute_main_script(vm: Arc<Vm>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let mut program = Thread::new(vm.clone(), vm.debug_flag);
         let instance = vm.classes_pool.read().unwrap().get("_MainScript").as_ref().unwrap().new_instance();
-        program.run_main(Arc::new(instance)).map_err(|e| {
+        program.run_main(Arc::new(instance), native_method_handler).map_err(|e| {
             println!("{}", e);
             e
         })
     }
 
-    pub fn run_main_function(vm: Arc<Vm>, class_reference: u64, instance_reference: u64) -> Result<(), RuntimeError> {
+    pub fn run_main_function(vm: Arc<Vm>, class_reference: u64, instance_reference: u64, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let instance = vm.get_instance_from_heap(class_reference, instance_reference)?;
         let debug_flag = vm.debug_flag;
         let mut thread = Thread::new(vm, debug_flag);
-        thread.run_main(instance).map_err(|e| {
+        thread.run_main(instance, native_method_handler).map_err(|e| {
             println!("{}", e);
             e
         })
     }
 
-    pub fn create_instance(vm: Arc<Vm>, class_name: String) -> Result<(u64, u64), RuntimeError> {
+    pub fn create_instance(vm: Arc<Vm>, class_name: String, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(u64, u64), RuntimeError> {
         let mut instance = Arc::new(vm.classes_pool.read().unwrap().get(&class_name).as_ref().unwrap().new_instance());
         let class = vm.get_class(&instance.class_name);
         vm.store_instance_on_heap(class.hash_code(), instance.hash_code(), instance.clone());
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
         if let Some(init_function) = maybe_init_function {
             let mut thread = Thread::new(vm.clone(), vm.debug_flag);
-            thread.run_function(class.clone(), &mut Some(instance.clone()), init_function)?;
+            thread.run_function(class.clone(), &mut Some(instance.clone()), init_function, native_method_handler)?;
         }
         Ok((class.hash_code(), instance.hash_code()))
     }
 
-    pub fn bootstrap_class(vm: Arc<Vm>, class: Arc<Class>) -> Result<(), RuntimeError> {
+    pub fn bootstrap_class(vm: Arc<Vm>, class: Arc<Class>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInit".to_string()));
         if let Some(init_function) = maybe_init_function {
             let debug_flag = vm.debug_flag;
             let mut thread = Thread::new(vm, debug_flag);
-            return thread.run_function(class.clone(), &mut None, init_function).map_err(|e| {
+            return thread.run_function(class.clone(), &mut None, init_function, native_method_handler).map_err(|e| {
                 println!("{}", e);
                 e
             });
@@ -335,10 +333,6 @@ impl Vm {
 
     pub fn get_class(&self, name: &String) -> Arc<Class> {
         self.classes_pool.read().unwrap().get(name).unwrap().clone()
-    }
-
-    pub fn native_method_handler(&self) -> &Box<dyn NativeMethodHandler> {
-        &self.native_method_handler
     }
 
     pub fn calculate_hash<T: Hash>(t: &T) -> u64 {

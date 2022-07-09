@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile_script, Event};
+use crate::common::{compile_script, Event, VmHook};
 
 mod common;
 
@@ -48,10 +48,11 @@ fn simple_condition() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.lock().unwrap().get("b").is_some());
@@ -82,10 +83,11 @@ fn condition_with_expressions() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.lock().unwrap().get("b").is_some());
@@ -115,10 +117,11 @@ fn conditional_statements() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(0, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
@@ -165,10 +168,11 @@ fn switch_statement() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!("two", events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -222,10 +226,11 @@ fn nested_switch_statement() {
     vm_dump_locals();
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), script);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!("return", events.lock().unwrap().get("b1").unwrap().value.string_value().unwrap().clone());

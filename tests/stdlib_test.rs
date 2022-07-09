@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile_script, Event};
+use crate::common::{compile_script, Event, VmHook};
 
 mod common;
 
@@ -18,10 +18,11 @@ fn pow() {
     vm_dump_var("nine", pow(3, .@two));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(9, events.lock().unwrap().get("nine").unwrap().value.number_value().unwrap());
 }
@@ -34,10 +35,11 @@ fn pow_with_wrong_type() {
     vm_dump_var("nine", pow("3", .@two));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"Pow first argument should be a number. Value is string not a number.
 test_script 4:24.

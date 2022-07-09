@@ -9,21 +9,22 @@ use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 use common::Event;
 use rathena_script_lang_interpreter::lang::vm::DebugFlag::{Execution, OpCode, Stack};
 
-use crate::common::compile_script;
+use crate::common::{compile_script, VmHook};
 
 
 #[test]
 fn simple_assigment() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@a$ = "hello world";
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -32,17 +33,18 @@ fn simple_assigment() {
 fn assigment_to_local_variable() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@a$ = "hello world";
     .@b$ = .@a$;
     vm_dump_var("a", .@a$);
     vm_dump_var("b", .@b$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -52,14 +54,15 @@ fn assigment_to_local_variable() {
 fn assignment_with_string_concat() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@a$ = "hello" + " world " + 1;
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world 1"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -68,7 +71,7 @@ fn assignment_with_string_concat() {
 fn assignment_with_number_operation() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@a = 1 + 1;
     .@b = 4 - 1;
     .@c = 4 * 2;
@@ -89,10 +92,11 @@ fn assignment_with_number_operation() {
     set .@h1, 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
     vm_dump_locals();"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     events.lock().unwrap().iter().for_each(|(k, v)| println!("{} = {}", k, v.value));
     assert_eq!(2, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
@@ -119,15 +123,16 @@ fn assignment_with_number_operation() {
 fn simple_re_assigment() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@a$ = "hello world";
     .@a$ = "hello wrld";
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello wrld"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -135,15 +140,16 @@ fn simple_re_assigment() {
 fn plus_equal_string_concat() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@a$ = "hello";
     .@a$ += " world";
     vm_dump_var("a", .@a$);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -151,15 +157,16 @@ fn plus_equal_string_concat() {
 fn plus_equal_num_addition() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@a = 1;
     .@a += 2;
     vm_dump_var("a", .@a);"#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(3_i32, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap());
 }
@@ -168,7 +175,7 @@ fn plus_equal_num_addition() {
 fn setd_function() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@var_name$ = "var";
     .@full_variable_name$ = ".@my_" + .@var_name$ + "$";
     setd ".@my_" + .@var_name$ + "$", "hello_world";
@@ -187,10 +194,11 @@ fn setd_function() {
     vm_dump_var("set_with_getd_value$", .@set_with_getd_value$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello_world"), events.lock().unwrap().get("my_var").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hello_world"), events.lock().unwrap().get("my_var_via_getd").unwrap().value.string_value().unwrap().clone());
@@ -207,7 +215,7 @@ fn setd_function() {
 fn set_with_getd_function() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@one = 1;
     set getd(".@"+"set_with_getd"), 2;
     setd(".@"+"setd", 2);
@@ -217,10 +225,11 @@ fn set_with_getd_function() {
     vm_dump_var("setd_1", getd(".@setd"));
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    Vm::execute_main_script(vm).unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("set_with_getd").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("set_with_getd_1").unwrap().value.number_value().unwrap().clone());
@@ -231,15 +240,16 @@ fn set_with_getd_function() {
 fn setd_function_error_wrong_type() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@var_name$ = "var";
     setd ".@my_" + .@var_name$, "hello_world";
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"tried to assign a String to a variable declared as Number
 test_script 4:4.
@@ -254,16 +264,17 @@ l4	    setd ".@my_" + .@var_name$, "hello_world";
 fn setd_function_error_undefined_variable() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
-    let classes = compile_script(r#"
+    let script = compile_script(r#"
     .@var_name$ = "var";
     setd ".@my_" + .@var_name$, 1;
     print(.@a);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
-    let runtime_error = Vm::execute_main_script(vm).err().unwrap();
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"Variable is not declared in local scope
 test_script 5:10.

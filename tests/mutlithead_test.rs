@@ -6,7 +6,7 @@ use std::thread;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile_script, Event};
+use crate::common::{compile_script, Event, VmHook};
 
 mod common;
 
@@ -19,11 +19,12 @@ fn multithread_support_test() {
     vm_dump_var("a", .@a$);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value(), move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); });
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    Vm::bootstrap(vm.clone(), classes);
+    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     thread::spawn(move || {
-        Vm::execute_main_script(vm).unwrap();
+        Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     }).join().unwrap();
 
     // Then
