@@ -69,14 +69,13 @@ fn getvariableofnpc(thread: &Thread, instance: &Option<Arc<Instance>>, call_fram
     let variable_reference = Vm::calculate_hash(&variable_from_string);
     let class_name = arguments[1].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "getvariableofnpc second argument should be NPC name"))?;
     let class = thread.vm.get_class(&class_name).clone();
-    let static_variables = class.static_variables.borrow();
-    let variable = static_variables.get(&variable_reference)
+    let variable = class.get_variable(variable_reference)
         .ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
                                          format!("Variable {} is not declared in NPC {}", variable_identifier, class_name).as_str()))?;
     if variable_from_string.value_ref.borrow().is_array() {
         load_array_index_value(thread, class.as_ref(), instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
     } else {
-        let reference = variable.value_ref.borrow().reference.ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
+        let reference = variable.value_ref.borrow().reference().ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
                                                                                               format!("Variable {} in NPC {} is not initialized", variable_identifier, class_name).as_str()))?;
         thread.stack.push(ConstantPoolReference(reference));
     }

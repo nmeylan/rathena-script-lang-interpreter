@@ -5,6 +5,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::Deref;
+use std::sync::RwLock;
 use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
 
 
@@ -19,7 +20,7 @@ pub type InstanceId = String;
 pub struct Variable {
     pub name: String,
     pub scope: Scope,
-    pub value_ref: RefCell<ValueRef>,
+    pub value_ref: ValueRef,
 }
 
 // Variables scope
@@ -34,9 +35,9 @@ pub enum Scope {
 }
 
 // A structure containing type and reference of a value
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug)]
 pub struct ValueRef {
-    pub reference: Option<u64>,
+    pub reference: RwLock<Option<u64>>,
     pub value_type: ValueType,
 }
 
@@ -230,49 +231,50 @@ impl ValueType {
 }
 
 impl ValueRef {
+    pub fn reference(&self) -> Option<u64> {
+        let value_ref_reference_guard = self.reference.read().unwrap();
+        value_ref_reference_guard.clone()
+    }
     pub fn new_empty_string() -> Self {
         Self {
-            reference: None,
+            reference: RwLock::new(None),
             value_type: ValueType::String,
         }
     }
     pub fn new_empty_number() -> Self {
         Self {
-            reference: None,
+            reference: RwLock::new(None),
             value_type: ValueType::Number,
         }
     }
     pub fn new_empty_array(value_type: ValueType) -> Self {
         Self {
-            reference: None,
+            reference: RwLock::new(None),
             value_type: ValueType::Array(Box::new(value_type)),
         }
     }
 
     pub fn new_string(reference: u64) -> Self {
         Self {
-            reference: Some(reference),
+            reference: RwLock::new(Some(reference)),
             value_type: ValueType::String,
         }
     }
     pub fn new_number(reference: u64) -> Self {
         Self {
-            reference: Some(reference),
+            reference: RwLock::new(Some(reference)),
             value_type: ValueType::Number,
         }
     }
     pub fn new_array(value_type: ValueType, reference: u64) -> Self {
         Self {
-            reference: Some(reference),
+            reference: RwLock::new(Some(reference)),
             value_type: ValueType::Array(Box::new(value_type)),
         }
     }
 
-    pub fn duplicate_with_reference(&self, reference: u64) -> Self {
-        Self {
-            reference: Some(reference),
-            value_type: self.value_type.clone(),
-        }
+    pub fn set_reference(&self, reference: u64) {
+        *self.reference.write().unwrap() = Some(reference);
     }
 
     pub fn is_string(&self) -> bool {
@@ -304,19 +306,41 @@ impl ValueRef {
     }
 
     pub fn get_ref(&self) -> u64 {
-        self.reference.unwrap()
+        self.reference.read().unwrap().unwrap()
     }
 
     pub fn is_set(&self) -> bool {
-        self.reference.is_some()
+        self.reference.read().unwrap().is_some()
+    }
+}
+
+impl Clone for ValueRef {
+    fn clone(&self) -> Self {
+        Self {
+            reference: RwLock::new(self.reference.read().unwrap().clone()),
+            value_type: self.value_type.clone()
+        }
+    }
+}
+
+impl Hash for ValueRef {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.reference.read().unwrap().hash(state);
+        self.value_type.hash(state);
+    }
+}
+
+impl PartialEq for ValueRef {
+    fn eq(&self, other: &Self) -> bool {
+        self.reference.read().unwrap().clone() == other.reference.read().unwrap().clone()
+        && self.value_type == other.value_type
     }
 }
 
 
 impl Variable {
     pub fn set_value_ref(&self, reference: u64) {
-        let mut ref_mut = self.value_ref.borrow_mut();
-        *ref_mut = ref_mut.duplicate_with_reference(reference);
+        self.value_ref.set_reference(reference);
     }
 
     pub fn to_script_identifier(&self) -> String {
@@ -328,8 +352,8 @@ impl Variable {
     }
 
     pub fn suffix(&self) -> String {
-        let value_ref = self.value_ref.borrow();
-        match value_ref.deref().value_type {
+        let value_ref = &self.value_ref;
+        match value_ref.value_type {
             ValueType::String => String::from("$"),
             ValueType::Number => String::from(""),
             ValueType::Array(_) => {
@@ -369,7 +393,7 @@ impl Variable {
         }
         Self {
             scope,
-            value_ref: RefCell::new(Self::variable_value(has_dollar, has_bracket)),
+            value_ref: Self::variable_value(has_dollar, has_bracket),
             name: variable_name,
         }
     }
@@ -393,7 +417,7 @@ impl Hash for Variable {
     fn hash<H: Hasher>(&self, state: &mut H) {
         state.write(self.name.as_bytes());
         self.scope.hash(state);
-        let value_type = self.value_ref.borrow().deref().value_type.clone();
+        let value_type = &self.value_ref.value_type;
         match value_type {
             ValueType::String | ValueType::Number => value_type.hash(state),
             ValueType::Array(v) => {

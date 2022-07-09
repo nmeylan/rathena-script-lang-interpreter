@@ -434,7 +434,7 @@ impl Compiler {
         let variable_name = ctx.variable_name().unwrap();
         let name = variable_name.Identifier().unwrap().symbol.text.deref().to_string();
         let variable = Variable {
-            value_ref: RefCell::new(Variable::variable_value(variable_name.Dollar().is_some(), variable_name.LeftBracket().is_some())),
+            value_ref: Variable::variable_value(variable_name.Dollar().is_some(), variable_name.LeftBracket().is_some()),
             name,
             scope,
         };

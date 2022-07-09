@@ -53,7 +53,7 @@ impl Thread {
         self.run(call_frame, 0, class.as_ref(), &mut Some(instance)).map(|_| ())
     }
 
-    pub fn run_function(&mut self, mut class: Rc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function) -> Result<(), RuntimeError> {
+    pub fn run_function(&mut self, mut class: Arc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function) -> Result<(), RuntimeError> {
         let call_frame = CallFrame::new(function, 1, 0, self.debug_flag);
         self.run(call_frame, 0, class.as_ref(), instance).map(|_| ())
     }
@@ -428,7 +428,7 @@ impl Thread {
 
     fn load_variable<F>(&self, variable: &Variable, owner_reference: u64, apply_when_not_array: F)
         where F: FnOnce() -> StackEntry {
-        if variable.value_ref.borrow().is_array() {
+        if variable.value_ref.is_array() {
             let array_ref = Vm::calculate_hash(variable);
             self.stack.push(StackEntry::HeapReference((owner_reference, array_ref)));
         } else {
@@ -438,17 +438,17 @@ impl Thread {
 
     pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
         let variable_ref = Vm::calculate_hash(&variable);
-        let reference = if variable.value_ref.borrow().is_array() {
-            self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.borrow().value_type.clone());
+        let reference = if variable.value_ref.is_array() {
+            self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone());
             self.stack.push(StackEntry::HeapReference((owner_reference, variable_ref)));
             variable_ref
         } else {
             let stack_entry = self.stack.pop()?;
             let value = self.value_from_stack_entry(&stack_entry, call_frame, class, instance)?;
-            if !variable.value_ref.borrow().value_type.match_value(&value) {
+            if !variable.value_ref.value_type.match_value(&value) {
                 return Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(),
                                                     format!("tried to assign a {} to a variable declared as {}",
-                                                            value.display_type(), variable.value_ref.borrow().value_type.display_type())));
+                                                            value.display_type(), variable.value_ref.value_type.display_type())));
             }
             self.constant_ref_from_stack_entry(&stack_entry, call_frame, class, instance)?
         };
@@ -475,7 +475,7 @@ impl Thread {
             }
             StackEntry::LocalVariableReference(reference) => {
                 let variable = call_frame.get_local(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference)))?;
-                Ok(self.value_from_value_ref(&variable.value_ref.borrow())?)
+                Ok(self.value_from_value_ref(&variable.value_ref)?)
             }
             StackEntry::NativeReference(reference) => {
                 let native = self.vm.get_from_native_pool(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find native in VM native pool for given reference ({})", reference)))?;
@@ -492,12 +492,12 @@ impl Thread {
                 let instance = instance.as_ref().unwrap();
                 let instance_variables_guard = instance.variables.read().unwrap();
                 let variable = instance_variables_guard.get(reference).ok_or_else(|| self.new_runtime_error(format!("Can't find instance variable in INSTANCE variable pool for given reference ({})", reference)))?;
-                let value = self.value_from_value_ref(&variable.value_ref.borrow())?;
+                let value = self.value_from_value_ref(&variable.value_ref)?;
                 Ok(value)
             }
             StackEntry::StaticVariableReference(reference) => {
                 let variable = class.get_variable(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference)))?;
-                let x = Ok(self.value_from_value_ref(&variable.value_ref.borrow())?);
+                let x = Ok(self.value_from_value_ref(&variable.value_ref)?);
                 x
             }
             StackEntry::HeapReference((owner_reference, reference)) => {
@@ -517,7 +517,7 @@ impl Thread {
             }
             StackEntry::VariableReference((scope, owner_reference, reference)) => {
                 let variable = self.get_variable_from_scope_and_reference(call_frame, class, instance, scope, *reference)?;
-                let value = self.value_from_value_ref(&variable.value_ref.borrow())?;
+                let value = self.value_from_value_ref(&variable.value_ref)?;
                 Ok(value)
             }
         }
@@ -543,13 +543,13 @@ impl Thread {
     fn value_from_value_ref(&self, value_ref: &ValueRef) -> Result<Value, RuntimeError> {
         match value_ref.value_type {
             ValueType::String => {
-                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| self.new_runtime_error("String ValueRef does not contains reference. Variable has been not initialized.".to_string()))?);
-                let constant = option.ok_or_else(|| self.new_runtime_error(format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap())))?;
+                let option = self.vm.get_from_constant_pool(value_ref.reference().ok_or_else(|| self.new_runtime_error("String ValueRef does not contains reference. Variable has been not initialized.".to_string()))?);
+                let constant = option.ok_or_else(|| self.new_runtime_error(format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference().unwrap())))?;
                 Ok(constant.value())
             }
             ValueType::Number => {
-                let option = self.vm.get_from_constant_pool(value_ref.reference.ok_or_else(|| self.new_runtime_error("Number ValueRef does not contains reference. Variable has been not initialized.".to_string()))?);
-                let constant = option.ok_or_else(|| self.new_runtime_error(format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference.unwrap())))?;
+                let option = self.vm.get_from_constant_pool(value_ref.reference().ok_or_else(|| self.new_runtime_error("Number ValueRef does not contains reference. Variable has been not initialized.".to_string()))?);
+                let constant = option.ok_or_else(|| self.new_runtime_error(format!("Can't find constant in VM constant pool for given reference ({})", value_ref.reference().unwrap())))?;
                 Ok(constant.value())
             }
             _ => Err(self.new_runtime_error("value_from_value_ref - Array not implemented yet".to_string()))
@@ -574,7 +574,7 @@ impl Thread {
             }
             StackEntry::LocalVariableReference(reference) => {
                 let variable = call_frame.get_local(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find local variable in CAllFRAME local variable pool for given reference ({})", reference)))?;
-                let constant_ref = variable.value_ref.borrow().get_ref();
+                let constant_ref = variable.value_ref.get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
                 Ok(constant_ref)
             }
@@ -585,19 +585,19 @@ impl Thread {
                 let instance = instance.as_ref().unwrap();
                 let instance_variables_guard = instance.variables.read().unwrap();
                 let variable = instance_variables_guard.get(reference).ok_or_else(|| self.new_runtime_error(format!("Can't instance variable in INSTANCE variable pool for given reference ({})", reference)))?;
-                let constant_ref = variable.value_ref.borrow().get_ref();
+                let constant_ref = variable.value_ref.get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
                 Ok(constant_ref)
             }
             StackEntry::StaticVariableReference(reference) => {
                 let variable = class.get_variable(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find static variable in CLASS static variable pool for given reference ({})", reference)))?;
-                let constant_ref = variable.value_ref.borrow().get_ref();
+                let constant_ref = variable.value_ref.get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
                 Ok(constant_ref)
             }
             StackEntry::VariableReference((scope, owner_reference, reference)) => {
                 let variable = self.get_variable_from_scope_and_reference(call_frame, class, instance, scope, *reference)?;
-                let constant_ref = variable.value_ref.borrow().get_ref();
+                let constant_ref = variable.value_ref.get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
                 Ok(constant_ref)
             }
