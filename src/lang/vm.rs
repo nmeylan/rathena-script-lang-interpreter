@@ -19,33 +19,61 @@ use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::thread::Thread;
 
 use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable};
+use crate::util::file::read_lines;
 
 pub const MAIN_FUNCTION: &str = "_main";
 
 #[derive(Clone)]
-pub struct NativeFunction<'vm> {
+pub struct StaticNativeFunction<'vm> {
     pub(crate) name: &'vm str,
     pub(crate) return_type: Option<ValueType>,
     pub(crate) min_arguments: usize,
     pub(crate) max_arguments: usize,
 }
 
-pub const NATIVE_FUNCTIONS: &[NativeFunction] = &[
-    NativeFunction { name: "getarraysize", return_type: Some(ValueType::Number), min_arguments: 1, max_arguments: 1 },
-    NativeFunction { name: "getarg", return_type: None, min_arguments: 1, max_arguments: 2 },
-    NativeFunction { name: "cleararray", return_type: None, min_arguments: 3, max_arguments: 3 },
-    NativeFunction { name: "setarray", return_type: None, min_arguments: 2, max_arguments: 255 },
-    NativeFunction { name: "getelementofarray", return_type: None, min_arguments: 2, max_arguments: 2 },
-    NativeFunction { name: "deletearray", return_type: None, min_arguments: 2, max_arguments: 2 },
-    NativeFunction { name: "inarray", return_type: None, min_arguments: 2, max_arguments: 2 },
-    NativeFunction { name: "copyarray", return_type: None, min_arguments: 3, max_arguments: 3 },
-    NativeFunction { name: "setd", return_type: None, min_arguments: 2, max_arguments: 2 },
-    NativeFunction { name: "getd", return_type: None, min_arguments: 1, max_arguments: 1 },
-    NativeFunction { name: "getvariableofnpc", return_type: None, min_arguments: 2, max_arguments: 2 },
+#[derive(Clone)]
+pub struct NativeFunction {
+    pub(crate) name: String,
+    pub(crate) return_type: Option<ValueType>,
+    pub(crate) min_arguments: usize,
+    pub(crate) max_arguments: usize,
+}
+
+pub const NATIVE_FUNCTIONS: &[StaticNativeFunction] = &[
+    StaticNativeFunction { name: "getarraysize", return_type: Some(ValueType::Number), min_arguments: 1, max_arguments: 1 },
+    StaticNativeFunction { name: "getarg", return_type: None, min_arguments: 1, max_arguments: 2 },
+    StaticNativeFunction { name: "cleararray", return_type: None, min_arguments: 3, max_arguments: 3 },
+    StaticNativeFunction { name: "setarray", return_type: None, min_arguments: 2, max_arguments: 255 },
+    StaticNativeFunction { name: "getelementofarray", return_type: None, min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "deletearray", return_type: None, min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "inarray", return_type: None, min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "copyarray", return_type: None, min_arguments: 3, max_arguments: 3 },
+    StaticNativeFunction { name: "setd", return_type: None, min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "getd", return_type: None, min_arguments: 1, max_arguments: 1 },
+    StaticNativeFunction { name: "getvariableofnpc", return_type: None, min_arguments: 2, max_arguments: 2 },
     // stdlib
-    NativeFunction { name: "pow", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "pow", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
 ];
 
+impl NativeFunction {
+    pub(crate) fn from_vm_native(vm_native: &crate::lang::vm::StaticNativeFunction) -> Self {
+        NativeFunction::new(
+            vm_native.name.to_string(),
+            vm_native.return_type.clone(),
+            vm_native.min_arguments,
+            vm_native.max_arguments,
+        )
+    }
+
+    fn new(name: String, return_type: Option<ValueType>, min_arguments: usize, max_arguments: usize) -> Self {
+        Self {
+            name,
+            return_type,
+            min_arguments,
+            max_arguments,
+        }
+    }
+}
 
 pub enum DebugFlag {
     None,
@@ -133,11 +161,11 @@ pub trait NativeMethodHandler: Send + Sync {
 }
 
 impl Vm {
-    pub fn new(native_method_handler: Box<dyn NativeMethodHandler>, debug_flag: u16) -> Vm {
+    pub fn new(native_function_list_file_path: &str, native_method_handler: Box<dyn NativeMethodHandler>, debug_flag: u16) -> Vm {
         let mut native_pool: HashMap<u64, Native, NoopHasher> = Default::default();
-        native_pool.insert(Self::calculate_hash(&"print".to_string()), Native { name: "println".to_string() });
-        native_pool.insert(Self::calculate_hash(&"vm_dump_var".to_string()), Native { name: "vm_dump_var".to_string() });
-        native_pool.insert(Self::calculate_hash(&"vm_dump_locals".to_string()), Native { name: "vm_dump_locals".to_string() });
+        for native in Vm::collect_native_functions(native_function_list_file_path).iter() {
+            native_pool.insert(Self::calculate_hash(&native.name), Native { name: native.name.clone() });
+        }
 
         for native in NATIVE_FUNCTIONS.iter() {
             native_pool.insert(Self::calculate_hash(&native.name.to_string()), Native { name: native.name.to_string() });
@@ -317,6 +345,38 @@ impl Vm {
         let mut s = DefaultHasher::new();
         t.hash(&mut s);
         s.finish()
+    }
+    pub fn collect_native_functions(native_function_list_file_path: &str) -> Vec<NativeFunction> {
+        let mut native_functions: Vec<NativeFunction> = vec![];
+        let result = read_lines(native_function_list_file_path);
+        if result.is_err() {
+            panic!("{}", result.err().unwrap());
+        }
+        if let Ok(lines) = result {
+            for line in lines.flatten() {
+                let line = line.trim();
+                if line.starts_with('/') {
+                    continue;
+                }
+                let split = line.split(',');
+                let split: Vec<&str> = split.map(|item| item.trim()).collect();
+                let min_arguments = split[1].parse::<usize>().unwrap();
+                let max_arguments = split[2].parse::<usize>().unwrap();
+                let return_type = if split.len() > 3 {
+                    match split[3] {
+                        "Number" | "number" => Some(ValueType::Number),
+                        "String" | "string" => Some(ValueType::String),
+                        _ => None
+                    }
+                } else {
+                    None
+                };
+                native_functions.push(NativeFunction { name: split[0].to_string(), return_type, min_arguments, max_arguments});
+            }
+        } else {
+            panic!()
+        }
+        native_functions
     }
 
     pub fn dump(&self, out: &mut Stdout) {

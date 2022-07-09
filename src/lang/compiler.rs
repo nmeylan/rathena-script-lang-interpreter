@@ -19,7 +19,7 @@ use antlr_rust::tree::{NodeText, ParseTree, ParseTreeVisitor, Tree};
 use crate::parser::rathenascriptlangvisitor::{*};
 use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
-use crate::lang::vm::{NATIVE_FUNCTIONS, Vm};
+use crate::lang::vm::{NATIVE_FUNCTIONS, NativeFunction, Vm};
 
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition, Label};
@@ -36,34 +36,6 @@ const HOOK_LABEL: &[&str] = &[
     "OnInstanceInit",
     "OnInstanceDestroy",
 ];
-
-#[derive(Clone)]
-struct NativeFunction {
-    pub name: String,
-    pub return_type: Option<ValueType>,
-    pub min_arguments: usize,
-    pub max_arguments: usize,
-}
-
-impl NativeFunction {
-    fn from_vm_native(vm_native: &crate::lang::vm::NativeFunction) -> Self {
-        NativeFunction::new(
-            vm_native.name.to_string(),
-            vm_native.return_type.clone(),
-            vm_native.min_arguments,
-            vm_native.max_arguments,
-        )
-    }
-
-    fn new(name: String, return_type: Option<ValueType>, min_arguments: usize, max_arguments: usize) -> Self {
-        Self {
-            name,
-            return_type,
-            min_arguments,
-            max_arguments,
-        }
-    }
-}
 
 #[allow(dead_code)]
 #[derive(Default)]
@@ -131,7 +103,10 @@ impl Display for CompilationDetail {
 
 impl Compiler {
     pub(crate) fn new(file_name: String, script: String, native_function_list_file_path: &str) -> Self {
-        let native_functions = Self::collect_native_functions(native_function_list_file_path);
+        let mut native_functions: Vec<NativeFunction> = NATIVE_FUNCTIONS.to_vec().iter()
+            .map(|native_function| NativeFunction::from_vm_native(&native_function))
+            .collect();
+        native_functions.extend(Vm::collect_native_functions(native_function_list_file_path));
         Self {
             file_name,
             native_functions,
@@ -143,40 +118,6 @@ impl Compiler {
         }
     }
 
-    fn collect_native_functions(native_function_list_file_path: &str) -> Vec<NativeFunction> {
-        let mut native_functions: Vec<NativeFunction> = NATIVE_FUNCTIONS.to_vec().iter()
-            .map(|native_function| NativeFunction::from_vm_native(&native_function))
-            .collect();
-        let result = read_lines(native_function_list_file_path);
-        if result.is_err() {
-            panic!("{}", result.err().unwrap());
-        }
-        if let Ok(lines) = result {
-            for line in lines.flatten() {
-                let line = line.trim();
-                if line.starts_with('/') {
-                    continue;
-                }
-                let split = line.split(',');
-                let split: Vec<&str> = split.map(|item| item.trim()).collect();
-                let min_arguments = split[1].parse::<usize>().unwrap();
-                let max_arguments = split[2].parse::<usize>().unwrap();
-                let return_type = if split.len() > 3 {
-                    match split[3] {
-                        "Number" | "number" => Some(ValueType::Number),
-                        "String" | "string" => Some(ValueType::String),
-                        _ => None
-                    }
-                } else {
-                    None
-                };
-                native_functions.push(NativeFunction { name: split[0].to_string(), return_type, min_arguments, max_arguments});
-            }
-        } else {
-            panic!()
-        }
-        native_functions
-    }
     pub fn compile_script(name: String, script: &str, native_function_list_file_path: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
         Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path)
     }
