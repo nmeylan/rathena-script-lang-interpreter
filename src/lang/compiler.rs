@@ -1,33 +1,32 @@
+use std::mem;
 use std::borrow::{Borrow, Cow};
-use std::default::Default;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::default::Default;
 use std::fmt::{Debug, Display, Formatter};
-use std::{mem};
 use std::fs::File;
 use std::io::{BufReader, Read};
-
 use std::ops::Deref;
 use std::path::Path;
-
 use std::rc::Rc;
+
+use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream};
 use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::token::Token;
 use antlr_rust::tree::{NodeText, ParseTree, ParseTreeVisitor, Tree};
-use crate::parser::rathenascriptlangvisitor::{*};
-use crate::parser::rathenascriptlanglexer::{*};
-use crate::parser::rathenascriptlangparser::{*};
-use crate::lang::vm::{NATIVE_FUNCTIONS, NativeFunction, Vm};
 
+use crate::lang::chunk::{Chunk, ClassFile, FunctionDefinition, Label, NumericOperation, OpCode, Relational};
 use crate::lang::chunk::OpCode::{*};
-use crate::lang::chunk::{Chunk, NumericOperation, OpCode, Relational, ClassFile, FunctionDefinition, Label};
 use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreInstance, StoreLocal};
 use crate::lang::error::{CompilationError, CompilationErrorType};
 use crate::lang::error::CompilationErrorType::{FunctionAlreadyDefined, Generic, LabelNotInMain, NativeAlreadyDefined, NativeArgumentCount, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{*};
+use crate::lang::vm::{NATIVE_FUNCTIONS, NativeFunction, Vm};
+use crate::parser::rathenascriptlanglexer::{*};
+use crate::parser::rathenascriptlangparser::{*};
+use crate::parser::rathenascriptlangvisitor::{*};
 use crate::util::file::read_lines;
 
 // Labels below will be turned into functions
@@ -522,6 +521,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
             if let Some(returned_type) = native.return_type.as_ref() {
                 self.add_current_assigment_type(returned_type.clone());
+            }
+            if native.name == "close" {
+                self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
             }
         } else {
             self.remove_current_assigment_type(argument_count);
