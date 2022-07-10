@@ -331,11 +331,11 @@ scriptLocation : Identifier;
 scriptXPos : Number;
 scriptYPos : Number;
 scriptDir : Number;
-scriptSprite : (Minus? Number);
+scriptSprite : (Minus? Number | Identifier);
 
 npcInitialization
     : Identifier (',' Number?)+  Identifier  scriptName (Number | Identifier) (',' (Number | Identifier))*
-    | Identifier (',' Number?)+  'duplicate' '(' Identifier ')' scriptName (Number | Identifier) (',' (Number | Identifier))*
+    | scriptLocation ',' scriptXPos ',' scriptYPos ',' scriptDir  'duplicate' '(' scriptName ')' scriptName (scriptSprite) (',' (scriptSprite))*
     ;
 scriptName
     : (Identifier | ':' | '#' | Colon | Label | Number)*

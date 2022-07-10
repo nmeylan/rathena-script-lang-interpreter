@@ -10,9 +10,10 @@ use antlr_rust::tree::{ParseTree, ParseTreeVisitor};
 use crate::lang::chunk::ClassFile;
 use crate::lang::compiler::{Compiler, parse_number};
 use std::default::Default;
+use antlr_rust::parser_rule_context::ParserRuleContext;
 use crate::lang::error::CompilationError;
 use crate::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
-use crate::parser::rathenascriptlangparser::{RathenaScriptLangParser, RathenaScriptLangParserContextType, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptSpriteContextAttrs, ScriptXPosContextAttrs, ScriptYPosContextAttrs};
+use crate::parser::rathenascriptlangparser::{AdditiveExpressionContext, AdditiveOperatorContext, AndExpressionContext, ArgumentExpressionListContext, AssignmentExpressionContext, AssignmentLeftExpressionContext, AssignmentOperatorContext, BlockItemContext, BlockItemListContext, CastExpressionContext, CompilationUnitContext, CompoundStatementContext, ConditionalExpressionContext, ConstantExpressionContext, DeclarationContext, DeclarationSpecifierContext, DeclarationSpecifiers2Context, DeclarationSpecifiersContext, DeclaratorContext, DesignationContext, DesignatorContext, DesignatorListContext, DirectAbstractDeclaratorContext, DirectDeclaratorContext, EqualityExpressionContext, EqualityOperatorContext, ExclusiveOrExpressionContext, ExpressionContext, ExpressionStatementContext, ExternalDeclarationContext, ForConditionContext, ForDeclarationContext, ForExpressionContext, ForStopExpressionContext, FunctionCallExpressionContext, FunctionDefinitionContext, IdentifierListContext, InclusiveOrExpressionContext, InitDeclaratorContext, InitDeclaratorListContext, InitializerContext, InitializerListContext, IterationStatementContext, JumpStatementContext, LabeledStatementContext, LogicalAndExpressionContext, LogicalOrExpressionContext, MultiplicativeExpressionContext, MultiplicativeOperatorContext, NestedParenthesesBlockContext, NpcInitializationContext, NpcInitializationContextAttrs, ParameterDeclarationContext, ParameterListContext, ParameterTypeListContext, PostfixExpressionContext, PrimaryExpressionContext, RathenaScriptLangParser, RathenaScriptLangParserContextType, RelationalExpressionContext, RelationalOperatorContext, Scope_specifierContext, ScriptDirContext, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptLocationContext, ScriptNameContext, ScriptSpriteContext, ScriptSpriteContextAttrs, ScriptXPosContext, ScriptXPosContextAttrs, ScriptYPosContext, ScriptYPosContextAttrs, SelectionStatementContext, ShiftExpressionContext, ShiftOperatorContext, SpecifierQualifierListContext, StatementContext, SwitchBlockContext, SwitchBlockStatementGroupContext, SwitchLabelContext, SwitchLabelsContext, SwitchStatementContext, TranslationUnitContext, UnaryExpressionContext, UnaryOperatorContext, Variable_nameContext, VariableContext};
 use crate::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
 
 pub struct Script {
@@ -21,13 +22,15 @@ pub struct Script {
     pub y_pos: usize,
     pub dir: usize,
     pub map: String,
-    pub sprite: isize,
+    pub sprite: String,
     pub x_size: usize,
     pub y_size: usize,
+    pub class_name: String,
     pub class_reference: u64,
 }
 pub struct ScriptVisitor {
     scripts: Vec<Script>,
+    pub file_content: Vec<String>,
 }
 
 pub fn compile(paths: Vec<String>, native_function_list_file_path: &str) -> Result<(Vec<Script>, Vec<ClassFile>), Vec<CompilationError>> {
@@ -42,7 +45,7 @@ pub fn compile(paths: Vec<String>, native_function_list_file_path: &str) -> Resu
     class_files.iter_mut().for_each(|class_file| class_file.set_reference());
     let mut class_references = HashMap::<String, u64>::new();
     class_files.iter().for_each(|class| {class_references.insert(class.name.clone(), class.reference);} );
-    scripts.iter_mut().for_each(|script| {script.class_reference = *class_references.get(&script.name).unwrap();});
+    scripts.iter_mut().for_each(|script| {script.class_reference = *class_references.get(&script.class_name).unwrap();});
     Ok((scripts, class_files))
 }
 
@@ -55,7 +58,7 @@ pub fn visit(path: &Path) -> Vec<Script> {
     let token_stream = CommonTokenStream::new(lexer);
     let mut parser = RathenaScriptLangParser::new(token_stream);
     let tree = parser.compilationUnit();
-    let mut script_visitor = ScriptVisitor{ scripts: vec![] };
+    let mut script_visitor = ScriptVisitor{ scripts: vec![], file_content: file_content.split('\n').map(|l| l.to_string()).collect::<Vec<String>>() };
     script_visitor.visit_compilationUnit(tree.as_ref().unwrap());
     mem::take(&mut script_visitor.scripts)
 }
@@ -65,16 +68,40 @@ impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Sc
 impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
     fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>) {
         if ctx.scriptLocation().is_some() {
-            let sprite = parse_number(ctx.scriptSprite_all().get(0).unwrap().Number().unwrap().symbol.text.clone());
+            let script_declaration = self.file_content[ctx.start().line as usize - 1].clone();
+            println!("{:?}", script_declaration.split("\t").collect::<Vec<&str>>());
+            let script_name = script_declaration.split("\t").collect::<Vec<&str>>()[2].to_string();
+            let sprite = ctx.scriptSprite_all().get(0).unwrap().Number().unwrap().symbol.text.to_string();
             self.scripts.push(Script {
-                name: ctx.scriptName().unwrap().get_text(),
+                name: script_name,
                 x_pos: parse_number(ctx.scriptXPos().unwrap().Number().unwrap().symbol.text.clone()) as usize,
                 y_pos: parse_number(ctx.scriptYPos().unwrap().Number().unwrap().symbol.text.clone()) as usize,
                 dir: parse_number(ctx.scriptDir().unwrap().Number().unwrap().symbol.text.clone()) as usize,
                 map: ctx.scriptLocation().unwrap().get_text(),
-                sprite: sprite as isize,
+                sprite,
                 x_size: 0,
                 y_size: 0,
+                class_name: ctx.scriptName().unwrap().get_text(),
+                class_reference: 0
+            });
+        }
+    }
+    fn visit_npcInitialization(&mut self, ctx: &NpcInitializationContext<'input>) {
+        if ctx.scriptLocation().is_some() {
+            let script_declaration = self.file_content[ctx.start().line as usize - 1].clone();
+            println!("{:?}", script_declaration.split("\t").collect::<Vec<&str>>());
+            let script_name = script_declaration.split("\t").collect::<Vec<&str>>()[2].to_string();
+            let sprite = ctx.scriptSprite_all().get(0).unwrap().Number().unwrap().symbol.text.to_string();
+            self.scripts.push(Script {
+                name: script_name,
+                x_pos: parse_number(ctx.scriptXPos().unwrap().Number().unwrap().symbol.text.clone()) as usize,
+                y_pos: parse_number(ctx.scriptYPos().unwrap().Number().unwrap().symbol.text.clone()) as usize,
+                dir: parse_number(ctx.scriptDir().unwrap().Number().unwrap().symbol.text.clone()) as usize,
+                map: ctx.scriptLocation().unwrap().get_text(),
+                sprite,
+                x_size: 0,
+                y_size: 0,
+                class_name: ctx.scriptName_all().get(0).unwrap().get_text(),
                 class_reference: 0
             });
         }
