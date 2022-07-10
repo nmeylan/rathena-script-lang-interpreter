@@ -324,7 +324,7 @@ functionDefinition
     :  Function Identifier  compoundStatement?
     ;
 scriptInitialization
-    : '-' 'script' scriptName (Minus? Number) (',' (Minus? Number))* ',' compoundStatement
+    : '-' 'script' scriptName (scriptSprite) (',' (scriptSprite))* ',' compoundStatement
     | scriptLocation ',' scriptXPos ',' scriptYPos ',' scriptDir  'script'  scriptName  (scriptSprite) (',' (scriptSprite))* ',' compoundStatement
     ;
 scriptLocation : Identifier;
@@ -346,7 +346,7 @@ scope_specifier
 variable
   : scope_specifier variable_name | variable_name;
 variable_name
-  : (Identifier | Menu) '$'? ('[' Number ']')?;
+  : Identifier '$'? ('[' Number ']')?;
 
 // Tokens
 LeftParen : '(';
@@ -416,7 +416,6 @@ Default : 'default:';
 Function : 'function';
 Break : 'break';
 Callfunc: 'callfunc';
-Menu: 'menu';
 Eof : 'eof';
 Setarray: 'setarray';
 Copyarray: 'copyarray';
@@ -451,6 +450,9 @@ BlockComment
     ;
 
 LineComment
-    :   '//' ~[\r\n]*
+    :
+        ('//' Newline
+    |    '//' ~[\r\n]*
+    )
         -> skip
     ;
