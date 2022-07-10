@@ -1,3 +1,5 @@
+![build](https://github.com/nmeylan/rathena-script-lang-interpreter/actions/workflows/rust.yml/badge.svg)
+
 **WIP** [Check remaining todos](https://github.com/nmeylan/rathena-script-lang-interpreter/issues/1) or [code samples](https://github.com/nmeylan/rathena-script-lang-interpreter/tree/master/tests)
 
 # rAthena script language interpreter
