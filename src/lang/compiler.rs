@@ -101,7 +101,7 @@ impl Display for CompilationDetail {
 }
 
 impl Compiler {
-    pub(crate) fn new(file_name: String, script: String, native_function_list_file_path: &str) -> Self {
+    pub fn new(file_name: String, script: String, native_function_list_file_path: &str) -> Self {
         let mut native_functions: Vec<NativeFunction> = NATIVE_FUNCTIONS.to_vec().iter()
             .map(|native_function| NativeFunction::from_vm_native(&native_function))
             .collect();
@@ -198,7 +198,9 @@ impl Compiler {
             let mut function_definition = FunctionDefinition::new(format!("_{}", hook_label.name.clone()));
             let mut chunk = Chunk::default();
             let mut declared_local_variable_references: HashMap<u64, Variable, NoopHasher> = Default::default();
-            for index in hook_label.first_op_code_index..hook_label.last_op_code_index {
+            let mut index = hook_label.first_op_code_index;
+            loop {
+                if index > 2048 { break ;}
                 let op_code = main_function.chunk.op_codes.borrow()[index].clone();
                 let compilation_details = main_function.chunk.compilation_details.borrow()[index].clone();
                 if let StoreLocal(reference) = op_code {
@@ -207,6 +209,11 @@ impl Compiler {
                     }
                 }
                 chunk.emit_op_code(op_code.clone(), compilation_details);
+                if mem::discriminant(&op_code) == mem::discriminant(&OpCode::End)
+                    || mem::discriminant(&op_code) == mem::discriminant(&OpCode::Return(false)) {
+                    break;
+                }
+                index += 1;
             }
             chunk.locals = RefCell::new(declared_local_variable_references);
             function_definition.chunk = Rc::new(chunk);
@@ -464,8 +471,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
         }
-        if ctx.expression().is_some() {
-            self.visit_expression(ctx.expression().as_ref().unwrap());
+        if ctx.conditionalExpression().is_some() {
+            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
         }
         // self.visit_children(ctx)
     }
@@ -474,7 +481,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         let first_argument_op_code_index = self.current_chunk().last_op_code_index() + 1;
         let argument_count = if ctx.argumentExpressionList().is_some() {
             self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
-            ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as usize
+            ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize
         } else {
             0
         };
@@ -498,7 +505,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 // do not remove default value type, so we can check at compile time that default type match variable type
                 self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
             } else if native.name == "setd" {
-                let setd_variable_expression = ctx.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
+                let setd_variable_expression = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
                 if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                     self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
                 }
@@ -506,7 +513,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 // Replacing first argument LoadStatic with a LoadConstant instead.
                 // Syntax want first argument to be the variable, instead of a string with the variable name.
                 // In this implementation variable will be interpreted and its value will be pushed in the stack instead of its name..
-                let static_variable_identifier = ctx.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
+                let static_variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
                 if !static_variable_identifier.starts_with("getd(") { // we can use getd to use reference of another variable containing the variable identifier
                     let constant_reference = self.current_chunk().add_constant(Constant::String(static_variable_identifier));
                     let npc_name_load_constant_op_code_index = self.current_chunk().last_op_code_index();
@@ -536,23 +543,23 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_argumentExpressionList(&mut self, ctx: &ArgumentExpressionListContext<'input>) {
-        for expression in ctx.assignmentExpression_all().iter() {
-            if expression.Number().is_some() {
-                let number_value = &expression.Number().unwrap().symbol.text;
-                self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
-            }
-        }
+        // for expression in ctx.conditionalExpression_all().iter() {
+        //     if expression.Number().is_some() {
+        //         let number_value = &expression.Number().unwrap().symbol.text;
+        //         self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
+        //     }
+        // }
         self.visit_children(ctx);
     }
 
     fn visit_multiplicativeExpression(&mut self, ctx: &MultiplicativeExpressionContext<'input>) {
-        self.visit_castExpression(&ctx.castExpression(ctx.castExpression_all().len() - 1).unwrap());
+        self.visit_unaryExpression(&ctx.unaryExpression(ctx.unaryExpression_all().len() - 1).unwrap());
 
-        for (i, _) in ctx.castExpression_all().iter().enumerate().rev() {
-            if i == ctx.castExpression_all().len() - 1 {
+        for (i, _) in ctx.unaryExpression_all().iter().enumerate().rev() {
+            if i == ctx.unaryExpression_all().len() - 1 {
                 continue;
             }
-            self.visit_castExpression(&ctx.castExpression(i).unwrap());
+            self.visit_unaryExpression(&ctx.unaryExpression(i).unwrap());
             let operator = ctx.multiplicativeOperator(i).unwrap();
 
             if operator.Star().is_some() {
@@ -680,7 +687,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 // *setarray <array name>[<first value>],<value>{,<value>...<value>};
                 self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap()); // <value>. In this language declaration require a value to assign
                 self.visit_assignmentLeftExpression(&left); // <array name>[<first value>]. Declare array variable.
-                let argument_count = ctx.argumentExpressionList().unwrap().assignmentExpression_all().len() as usize; // {,<value>...<value>}
+                let argument_count = ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize; // {,<value>...<value>}
                 if argument_count > 0 {
                     self.visit_variable(left.variable().as_ref().unwrap());
                     self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
@@ -725,13 +732,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "Only \"getd\" function allowed here".to_string());
                 return;
             }
-            if function_call.argumentExpressionList().unwrap().assignmentExpression_all().len() != 1 {
+            if function_call.argumentExpressionList().unwrap().conditionalExpression_all().len() != 1 {
                 self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "\"getd\" accept only 1 argument".to_string());
                 return;
             }
             self.visit_argumentExpressionList(function_call.argumentExpressionList().as_ref().unwrap());
             self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
-            let setd_variable_expression = function_call.argumentExpressionList().unwrap().assignmentExpression_all().get(0).unwrap().get_text();
+            let setd_variable_expression = function_call.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
             if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                 self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
             }
@@ -793,23 +800,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
-    fn visit_declaration(&mut self, ctx: &DeclarationContext<'input>) {
-        self.visit_children(ctx);
-        self.current_assignment_type_drop();
-    }
-
-    fn visit_initDeclarator(&mut self, ctx: &InitDeclaratorContext<'input>) {
-        if ctx.variable().is_some() {
-            self.visit_variable(ctx.variable().as_ref().unwrap());
-        } else {
-            self.visit_children(ctx)
-        }
-    }
-
-    fn visit_specifierQualifierList(&mut self, ctx: &SpecifierQualifierListContext<'input>) {
-        self.visit_children(ctx)
-    }
-
     fn visit_labeledStatement(&mut self, ctx: &LabeledStatementContext<'input>) {
         if ctx.Label().is_some() {
             let label_name = ctx.Label().unwrap().symbol.text.clone();
@@ -838,7 +828,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_selectionStatement(&mut self, ctx: &SelectionStatementContext<'input>) {
         if ctx.If().is_some() {
-            self.visit_expression(ctx.expression().as_ref().unwrap());
+            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
             let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
             self.visit_statement(ctx.statement(0).as_ref().unwrap());
             let jump_to_index = self.current_chunk().last_op_code_index() + 2;
@@ -860,7 +850,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_switchStatement(&mut self, ctx: &SwitchStatementContext<'input>) {
         self.current_chunk().add_new_block_state();
-        self.visit_expression(ctx.expression().as_ref().unwrap());
+        self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
         let switch_expression_index = self.current_chunk().last_op_code_index();
         let switch_block = ctx.switchBlock();
         let switch_block = switch_block.as_ref().unwrap();
@@ -971,7 +961,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 None
             };
             let while_start_index = self.current_chunk().last_op_code_index();
-            self.visit_expression(ctx.expression().as_ref().unwrap());
+            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
             let while_if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
             if let Some(do_jump_index) = do_jump_index {
                 self.current_chunk().set_op_code_at(do_jump_index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
@@ -987,7 +977,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_jumpStatement(&mut self, ctx: &JumpStatementContext<'input>) {
         self.visit_children(ctx);
         if ctx.Return().is_some() {
-            let not_empty_return = ctx.expression().is_some();
+            let not_empty_return = ctx.conditionalExpression().is_some();
             self.current_chunk().emit_op_code(OpCode::Return(not_empty_return), self.compilation_details_from_context(ctx));
         } else if ctx.Break().is_some() {
             let index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(ctx));

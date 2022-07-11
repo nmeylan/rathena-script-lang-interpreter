@@ -9,7 +9,7 @@ primaryExpression
     | variable
     |   Number
     |   String
-    | '(' expression ')'
+    | '(' conditionalExpression ')'
     |   '-' // it is a special arguments for command, lets see if it can cause weird parse issue
     ;
 
@@ -20,18 +20,19 @@ functionCallExpression
     ;
 
 postfixExpression
-    : functionCallExpression | primaryExpression ('[' expression ']' | ('++' | '--') )*
+    : functionCallExpression
+    | primaryExpression ('[' conditionalExpression ']' | ('++' | '--') )?
     ;
 
 argumentExpressionList
-    :   assignmentExpression (',' assignmentExpression)*
+    :   conditionalExpression (',' conditionalExpression)*
     ;
 
 unaryExpression
     :
     ('++' |  '--')*
     (postfixExpression
-    |   unaryOperator castExpression
+    |   unaryOperator unaryExpression
     )
     ;
 
@@ -39,13 +40,8 @@ unaryOperator
     :   '&' | '*' | '+' | '-' | '~' | '!'
     ;
 
-castExpression
-    :   unaryExpression
-    |   Number // for
-    ;
-
 multiplicativeExpression
-    :   castExpression (multiplicativeOperator castExpression)*
+    :   unaryExpression (multiplicativeOperator unaryExpression)*
     ;
 
 multiplicativeOperator
@@ -98,7 +94,7 @@ logicalOrExpression
     ;
 
 conditionalExpression
-    :   logicalOrExpression ('?' expression ':' conditionalExpression)?
+    :   logicalOrExpression ('?' conditionalExpression ':' conditionalExpression)?
     ;
 
 assignmentExpression
@@ -108,7 +104,6 @@ assignmentExpression
     |   'set' '('? assignmentLeftExpression ',' assignmentExpression ')'?
     |   'setarray' '('? assignmentLeftExpression ',' assignmentExpression (',' argumentExpressionList)? ')'?
     |   'copyarray' '('? assignmentLeftExpression ',' assignmentExpression ',' argumentExpressionList ')'?
-    |   Number // for
     ;
 assignmentLeftExpression
     : Identifier | variable;
@@ -117,105 +112,9 @@ assignmentOperator
     :   '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='
     ;
 
-expression
-    :   assignmentExpression (',' assignmentExpression)*
-    ;
 
 constantExpression
     :   conditionalExpression
-    ;
-
-declaration
-    :   initDeclaratorList? ';'
-    ;
-
-declarationSpecifiers
-    :   declarationSpecifier+
-    ;
-
-declarationSpecifiers2
-    :   scope_specifier
-    ;
-
-declarationSpecifier
-    :   scope_specifier
-    ;
-
-initDeclaratorList
-    :   initDeclarator (',' initDeclarator)*
-    ;
-
-initDeclarator
-    :  variable ('=' initializer)?
-    | Function Identifier
-    ;
-
-specifierQualifierList
-    :   (scope_specifier) specifierQualifierList?
-    ;
-
-declarator
-    :   directDeclarator
-    ;
-
-directDeclarator
-    :   variable
-    |   '(' declarator ')'
-    |   directDeclarator '[' '*' ']'
-    |   directDeclarator '(' parameterTypeList ')'
-    |   directDeclarator '(' identifierList? ')'
-    |   '('  directDeclarator ')'
-    ;
-
-nestedParenthesesBlock
-    :   (   ~('(' | ')')
-        |   '(' nestedParenthesesBlock ')'
-        )*
-    ;
-
-
-parameterTypeList
-    :   parameterList (',' '...')?
-    ;
-
-parameterList
-    :   parameterDeclaration (',' parameterDeclaration)*
-    ;
-
-parameterDeclaration
-    :   declarationSpecifiers declarator
-    |   declarationSpecifiers2 directAbstractDeclarator?
-    ;
-
-identifierList
-    :   Identifier (',' Identifier)*
-    ;
-
-directAbstractDeclarator
-    :   '[' '*' ']'
-    |   directAbstractDeclarator '[' '*' ']'
-    ;
-
-initializer
-    :   assignmentExpression
-    |   '{' initializerList ','? '}'
-    ;
-
-initializerList
-    :   designation? initializer (',' designation? initializer)*
-    ;
-
-designation
-    :   designatorList '='
-    ;
-
-designatorList
-    :   designator+
-    ;
-
-designator
-    :   '[' constantExpression ']'
-    |   '.' Identifier
     ;
 
 
@@ -225,11 +124,11 @@ statement
     |   selectionStatement
     |   iterationStatement
     |   jumpStatement
+    |   labeledStatement
     ;
 
 labeledStatement
-    : Label statement*
-    ;
+    : Label;
 
 compoundStatement
     :   '{' blockItemList? '}'
@@ -241,23 +140,20 @@ blockItemList
 
 blockItem
     :   statement
-    |   labeledStatement
     |   functionDefinition
-    |   declaration
     ;
 
 expressionStatement
-    :   expression? ';'
+    :  assignmentExpression ';'
     ;
 
 selectionStatement
-    :   'if' '(' expression ')' statement ('else' statement)?
+    :   'if' '(' conditionalExpression ')' statement ('else' statement)?
     |   switchStatement
-//    |   'switch' '(' expression ')' statement
     ;
 
 switchStatement
-	:	'switch' '(' expression ')' switchBlock
+	:	'switch' '(' conditionalExpression ')' switchBlock
 	;
 
 switchBlock
@@ -278,20 +174,17 @@ switchLabel
 	;
 
 iterationStatement
-    :   While '(' expression ')' statement
-    |   Do statement While '(' expression ')' ';'
+    :   While '(' conditionalExpression ')' statement
+    |   Do statement While '(' conditionalExpression ')' ';'
     |   For '(' forCondition ')' statement
     ;
-
-//    |   'for' '(' expression? ';' expression?  ';' forUpdate? ')' statement
-//    |   For '(' declaration  expression? ';' expression? ')' statement
 
 forCondition
 	:  forDeclaration ';' forStopExpression? ';' forExpression?
 	;
 
 forDeclaration
-    :  expression?
+    :  assignmentExpression?
     ;
 
 forStopExpression
@@ -304,7 +197,7 @@ forExpression
 jumpStatement
     :   ('goto' Identifier
     |   ('continue'| 'break' | 'end')
-    |   'return' expression?
+    |   'return' conditionalExpression?
     )
     ';'
     ;
@@ -321,7 +214,8 @@ externalDeclaration
     ;
 
 functionDefinition
-    :  Function Identifier  compoundStatement?
+    :  Function Identifier compoundStatement
+    |  Function Identifier ';'
     ;
 scriptInitialization
     : '-' 'script' scriptName (scriptSprite) (',' (scriptSprite))* ',' compoundStatement

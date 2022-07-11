@@ -132,7 +132,7 @@ fn undefined_function() {
 #[test]
 fn function_definition() {
     // Given
-    let script = r#"function my_func() {}"#;
+    let script = r#"function my_func {}"#;
     // When
     let result = compile_script(script);
     // Then
@@ -304,7 +304,7 @@ fn label_defined_in_a_function_is_not_valid() {
     assert_eq!(r#"Label "Assign" is declared in "my_func" function scope but label should be declared in script scope only.
 test_script 4:12.
 l4	            Assign:
-	            ^^^^^^^^^^^^
+	            ^
 "#, result.as_ref().err().unwrap()[0].message());
 }
 

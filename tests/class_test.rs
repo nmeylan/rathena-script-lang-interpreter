@@ -134,6 +134,7 @@ fn on_init_hook_test() {
             .@hello$ = "hello";
             .counter = .@zero;
             .hello$ = .@hello$;
+            end;
     }
     "#).unwrap();
     let events_clone = events.clone();
@@ -143,7 +144,7 @@ fn on_init_hook_test() {
         i.lock().unwrap().insert(e.name.clone(), i1 + 1);
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, i1 + 1), e);
     }) };
-    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
@@ -182,6 +183,7 @@ fn on_instance_init_hook_test() {
             .@hello$ = "hello";
             'counter = .@zero;
             'hello$ = .@hello$;
+            end;
     }
     "#).unwrap();
     let events_clone = events.clone();
@@ -226,6 +228,7 @@ fn setd_instance_variable() {
         OnInstanceInit:
             setd "'counter", 0;
             setd("'my_array[" + 1 + "]$", "hello_world array");
+            end;
     }
     "#).unwrap();
     let events_clone = events.clone();
@@ -267,6 +270,7 @@ fn setd_static_variable() {
         OnInit:
             setd ".counter", 0;
             setd(".my_array[" + 1 + "]$", "hello_world array");
+            end;
     }
     "#).unwrap();
     let events_clone = events.clone();
@@ -301,6 +305,7 @@ fn getvariableofnpc_when_npc_exist() {
         OnInit:
             .value = 1;
             setarray .array$[0], "hello", "world";
+            end;
     }
 
     - script My NPC2 -1, {

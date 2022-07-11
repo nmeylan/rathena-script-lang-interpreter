@@ -47,82 +47,81 @@ use std::any::{Any,TypeId};
 		pub const T__6:isize=7; 
 		pub const T__7:isize=8; 
 		pub const T__8:isize=9; 
-		pub const T__9:isize=10; 
-		pub const LeftParen:isize=11; 
-		pub const RightParen:isize=12; 
-		pub const LeftBrace:isize=13; 
-		pub const RightBrace:isize=14; 
-		pub const LeftBracket:isize=15; 
-		pub const RightBracket:isize=16; 
-		pub const Comma:isize=17; 
-		pub const At:isize=18; 
-		pub const Colon:isize=19; 
-		pub const SemiColon:isize=20; 
-		pub const Percent:isize=21; 
-		pub const Star:isize=22; 
-		pub const Tilde:isize=23; 
-		pub const QuestionMark:isize=24; 
-		pub const Quote:isize=25; 
-		pub const DoubleQuote:isize=26; 
-		pub const LogicalOr:isize=27; 
-		pub const OrOp:isize=28; 
-		pub const LogicalAnd:isize=29; 
-		pub const AndOp:isize=30; 
-		pub const Slash:isize=31; 
-		pub const SlashStar:isize=32; 
-		pub const StarSlash:isize=33; 
-		pub const DoubleSlash:isize=34; 
-		pub const Sharp:isize=35; 
-		pub const DoubleSharp:isize=36; 
-		pub const Minus:isize=37; 
-		pub const DecrementOp:isize=38; 
-		pub const Plus:isize=39; 
-		pub const IncrementOp:isize=40; 
-		pub const Dot:isize=41; 
-		pub const DotAt:isize=42; 
-		pub const Dollar:isize=43; 
-		pub const DollarAt:isize=44; 
-		pub const Bang:isize=45; 
-		pub const BangEqual:isize=46; 
-		pub const Equal:isize=47; 
-		pub const DoubleEqual:isize=48; 
-		pub const LeftCaret:isize=49; 
-		pub const DoubleLeftCaret:isize=50; 
-		pub const LeftCaretEqual:isize=51; 
-		pub const RightCaret:isize=52; 
-		pub const DoubleRightCaret:isize=53; 
-		pub const RightCaretEqual:isize=54; 
-		pub const PlusEqual:isize=55; 
-		pub const MinusEqual:isize=56; 
-		pub const MultiplyEqual:isize=57; 
-		pub const DivideEqual:isize=58; 
-		pub const PercentEqual:isize=59; 
-		pub const If:isize=60; 
-		pub const Else:isize=61; 
-		pub const End:isize=62; 
-		pub const Set:isize=63; 
-		pub const For:isize=64; 
-		pub const While:isize=65; 
-		pub const Do:isize=66; 
-		pub const Goto:isize=67; 
-		pub const Return:isize=68; 
-		pub const Switch:isize=69; 
-		pub const Case:isize=70; 
-		pub const Default:isize=71; 
-		pub const Function:isize=72; 
-		pub const Break:isize=73; 
-		pub const Callfunc:isize=74; 
-		pub const Eof:isize=75; 
-		pub const Setarray:isize=76; 
-		pub const Copyarray:isize=77; 
-		pub const Identifier:isize=78; 
-		pub const Label:isize=79; 
-		pub const String:isize=80; 
-		pub const Number:isize=81; 
-		pub const Whitespace:isize=82; 
-		pub const Newline:isize=83; 
-		pub const BlockComment:isize=84; 
-		pub const LineComment:isize=85;
+		pub const LeftParen:isize=10; 
+		pub const RightParen:isize=11; 
+		pub const LeftBrace:isize=12; 
+		pub const RightBrace:isize=13; 
+		pub const LeftBracket:isize=14; 
+		pub const RightBracket:isize=15; 
+		pub const Comma:isize=16; 
+		pub const At:isize=17; 
+		pub const Colon:isize=18; 
+		pub const SemiColon:isize=19; 
+		pub const Percent:isize=20; 
+		pub const Star:isize=21; 
+		pub const Tilde:isize=22; 
+		pub const QuestionMark:isize=23; 
+		pub const Quote:isize=24; 
+		pub const DoubleQuote:isize=25; 
+		pub const LogicalOr:isize=26; 
+		pub const OrOp:isize=27; 
+		pub const LogicalAnd:isize=28; 
+		pub const AndOp:isize=29; 
+		pub const Slash:isize=30; 
+		pub const SlashStar:isize=31; 
+		pub const StarSlash:isize=32; 
+		pub const DoubleSlash:isize=33; 
+		pub const Sharp:isize=34; 
+		pub const DoubleSharp:isize=35; 
+		pub const Minus:isize=36; 
+		pub const DecrementOp:isize=37; 
+		pub const Plus:isize=38; 
+		pub const IncrementOp:isize=39; 
+		pub const Dot:isize=40; 
+		pub const DotAt:isize=41; 
+		pub const Dollar:isize=42; 
+		pub const DollarAt:isize=43; 
+		pub const Bang:isize=44; 
+		pub const BangEqual:isize=45; 
+		pub const Equal:isize=46; 
+		pub const DoubleEqual:isize=47; 
+		pub const LeftCaret:isize=48; 
+		pub const DoubleLeftCaret:isize=49; 
+		pub const LeftCaretEqual:isize=50; 
+		pub const RightCaret:isize=51; 
+		pub const DoubleRightCaret:isize=52; 
+		pub const RightCaretEqual:isize=53; 
+		pub const PlusEqual:isize=54; 
+		pub const MinusEqual:isize=55; 
+		pub const MultiplyEqual:isize=56; 
+		pub const DivideEqual:isize=57; 
+		pub const PercentEqual:isize=58; 
+		pub const If:isize=59; 
+		pub const Else:isize=60; 
+		pub const End:isize=61; 
+		pub const Set:isize=62; 
+		pub const For:isize=63; 
+		pub const While:isize=64; 
+		pub const Do:isize=65; 
+		pub const Goto:isize=66; 
+		pub const Return:isize=67; 
+		pub const Switch:isize=68; 
+		pub const Case:isize=69; 
+		pub const Default:isize=70; 
+		pub const Function:isize=71; 
+		pub const Break:isize=72; 
+		pub const Callfunc:isize=73; 
+		pub const Eof:isize=74; 
+		pub const Setarray:isize=75; 
+		pub const Copyarray:isize=76; 
+		pub const Identifier:isize=77; 
+		pub const Label:isize=78; 
+		pub const String:isize=79; 
+		pub const Number:isize=80; 
+		pub const Whitespace:isize=81; 
+		pub const Newline:isize=82; 
+		pub const BlockComment:isize=83; 
+		pub const LineComment:isize=84;
 	pub const RULE_compilationUnit:usize = 0; 
 	pub const RULE_primaryExpression:usize = 1; 
 	pub const RULE_functionCallExpression:usize = 2; 
@@ -130,108 +129,80 @@ use std::any::{Any,TypeId};
 	pub const RULE_argumentExpressionList:usize = 4; 
 	pub const RULE_unaryExpression:usize = 5; 
 	pub const RULE_unaryOperator:usize = 6; 
-	pub const RULE_castExpression:usize = 7; 
-	pub const RULE_multiplicativeExpression:usize = 8; 
-	pub const RULE_multiplicativeOperator:usize = 9; 
-	pub const RULE_additiveExpression:usize = 10; 
-	pub const RULE_additiveOperator:usize = 11; 
-	pub const RULE_shiftExpression:usize = 12; 
-	pub const RULE_shiftOperator:usize = 13; 
-	pub const RULE_relationalExpression:usize = 14; 
-	pub const RULE_relationalOperator:usize = 15; 
-	pub const RULE_equalityExpression:usize = 16; 
-	pub const RULE_equalityOperator:usize = 17; 
-	pub const RULE_andExpression:usize = 18; 
-	pub const RULE_exclusiveOrExpression:usize = 19; 
-	pub const RULE_inclusiveOrExpression:usize = 20; 
-	pub const RULE_logicalAndExpression:usize = 21; 
-	pub const RULE_logicalOrExpression:usize = 22; 
-	pub const RULE_conditionalExpression:usize = 23; 
-	pub const RULE_assignmentExpression:usize = 24; 
-	pub const RULE_assignmentLeftExpression:usize = 25; 
-	pub const RULE_assignmentOperator:usize = 26; 
-	pub const RULE_expression:usize = 27; 
-	pub const RULE_constantExpression:usize = 28; 
-	pub const RULE_declaration:usize = 29; 
-	pub const RULE_declarationSpecifiers:usize = 30; 
-	pub const RULE_declarationSpecifiers2:usize = 31; 
-	pub const RULE_declarationSpecifier:usize = 32; 
-	pub const RULE_initDeclaratorList:usize = 33; 
-	pub const RULE_initDeclarator:usize = 34; 
-	pub const RULE_specifierQualifierList:usize = 35; 
-	pub const RULE_declarator:usize = 36; 
-	pub const RULE_directDeclarator:usize = 37; 
-	pub const RULE_nestedParenthesesBlock:usize = 38; 
-	pub const RULE_parameterTypeList:usize = 39; 
-	pub const RULE_parameterList:usize = 40; 
-	pub const RULE_parameterDeclaration:usize = 41; 
-	pub const RULE_identifierList:usize = 42; 
-	pub const RULE_directAbstractDeclarator:usize = 43; 
-	pub const RULE_initializer:usize = 44; 
-	pub const RULE_initializerList:usize = 45; 
-	pub const RULE_designation:usize = 46; 
-	pub const RULE_designatorList:usize = 47; 
-	pub const RULE_designator:usize = 48; 
-	pub const RULE_statement:usize = 49; 
-	pub const RULE_labeledStatement:usize = 50; 
-	pub const RULE_compoundStatement:usize = 51; 
-	pub const RULE_blockItemList:usize = 52; 
-	pub const RULE_blockItem:usize = 53; 
-	pub const RULE_expressionStatement:usize = 54; 
-	pub const RULE_selectionStatement:usize = 55; 
-	pub const RULE_switchStatement:usize = 56; 
-	pub const RULE_switchBlock:usize = 57; 
-	pub const RULE_switchBlockStatementGroup:usize = 58; 
-	pub const RULE_switchLabels:usize = 59; 
-	pub const RULE_switchLabel:usize = 60; 
-	pub const RULE_iterationStatement:usize = 61; 
-	pub const RULE_forCondition:usize = 62; 
-	pub const RULE_forDeclaration:usize = 63; 
-	pub const RULE_forStopExpression:usize = 64; 
-	pub const RULE_forExpression:usize = 65; 
-	pub const RULE_jumpStatement:usize = 66; 
-	pub const RULE_translationUnit:usize = 67; 
-	pub const RULE_externalDeclaration:usize = 68; 
-	pub const RULE_functionDefinition:usize = 69; 
-	pub const RULE_scriptInitialization:usize = 70; 
-	pub const RULE_scriptLocation:usize = 71; 
-	pub const RULE_scriptXPos:usize = 72; 
-	pub const RULE_scriptYPos:usize = 73; 
-	pub const RULE_scriptDir:usize = 74; 
-	pub const RULE_scriptSprite:usize = 75; 
-	pub const RULE_npcInitialization:usize = 76; 
-	pub const RULE_scriptName:usize = 77; 
-	pub const RULE_scope_specifier:usize = 78; 
-	pub const RULE_variable:usize = 79; 
-	pub const RULE_variable_name:usize = 80;
-	pub const ruleNames: [&'static str; 81] =  [
+	pub const RULE_multiplicativeExpression:usize = 7; 
+	pub const RULE_multiplicativeOperator:usize = 8; 
+	pub const RULE_additiveExpression:usize = 9; 
+	pub const RULE_additiveOperator:usize = 10; 
+	pub const RULE_shiftExpression:usize = 11; 
+	pub const RULE_shiftOperator:usize = 12; 
+	pub const RULE_relationalExpression:usize = 13; 
+	pub const RULE_relationalOperator:usize = 14; 
+	pub const RULE_equalityExpression:usize = 15; 
+	pub const RULE_equalityOperator:usize = 16; 
+	pub const RULE_andExpression:usize = 17; 
+	pub const RULE_exclusiveOrExpression:usize = 18; 
+	pub const RULE_inclusiveOrExpression:usize = 19; 
+	pub const RULE_logicalAndExpression:usize = 20; 
+	pub const RULE_logicalOrExpression:usize = 21; 
+	pub const RULE_conditionalExpression:usize = 22; 
+	pub const RULE_assignmentExpression:usize = 23; 
+	pub const RULE_assignmentLeftExpression:usize = 24; 
+	pub const RULE_assignmentOperator:usize = 25; 
+	pub const RULE_constantExpression:usize = 26; 
+	pub const RULE_statement:usize = 27; 
+	pub const RULE_labeledStatement:usize = 28; 
+	pub const RULE_compoundStatement:usize = 29; 
+	pub const RULE_blockItemList:usize = 30; 
+	pub const RULE_blockItem:usize = 31; 
+	pub const RULE_expressionStatement:usize = 32; 
+	pub const RULE_selectionStatement:usize = 33; 
+	pub const RULE_switchStatement:usize = 34; 
+	pub const RULE_switchBlock:usize = 35; 
+	pub const RULE_switchBlockStatementGroup:usize = 36; 
+	pub const RULE_switchLabels:usize = 37; 
+	pub const RULE_switchLabel:usize = 38; 
+	pub const RULE_iterationStatement:usize = 39; 
+	pub const RULE_forCondition:usize = 40; 
+	pub const RULE_forDeclaration:usize = 41; 
+	pub const RULE_forStopExpression:usize = 42; 
+	pub const RULE_forExpression:usize = 43; 
+	pub const RULE_jumpStatement:usize = 44; 
+	pub const RULE_translationUnit:usize = 45; 
+	pub const RULE_externalDeclaration:usize = 46; 
+	pub const RULE_functionDefinition:usize = 47; 
+	pub const RULE_scriptInitialization:usize = 48; 
+	pub const RULE_scriptLocation:usize = 49; 
+	pub const RULE_scriptXPos:usize = 50; 
+	pub const RULE_scriptYPos:usize = 51; 
+	pub const RULE_scriptDir:usize = 52; 
+	pub const RULE_scriptSprite:usize = 53; 
+	pub const RULE_npcInitialization:usize = 54; 
+	pub const RULE_scriptName:usize = 55; 
+	pub const RULE_scope_specifier:usize = 56; 
+	pub const RULE_variable:usize = 57; 
+	pub const RULE_variable_name:usize = 58;
+	pub const ruleNames: [&'static str; 59] =  [
 		"compilationUnit", "primaryExpression", "functionCallExpression", "postfixExpression", 
-		"argumentExpressionList", "unaryExpression", "unaryOperator", "castExpression", 
-		"multiplicativeExpression", "multiplicativeOperator", "additiveExpression", 
-		"additiveOperator", "shiftExpression", "shiftOperator", "relationalExpression", 
-		"relationalOperator", "equalityExpression", "equalityOperator", "andExpression", 
-		"exclusiveOrExpression", "inclusiveOrExpression", "logicalAndExpression", 
-		"logicalOrExpression", "conditionalExpression", "assignmentExpression", 
-		"assignmentLeftExpression", "assignmentOperator", "expression", "constantExpression", 
-		"declaration", "declarationSpecifiers", "declarationSpecifiers2", "declarationSpecifier", 
-		"initDeclaratorList", "initDeclarator", "specifierQualifierList", "declarator", 
-		"directDeclarator", "nestedParenthesesBlock", "parameterTypeList", "parameterList", 
-		"parameterDeclaration", "identifierList", "directAbstractDeclarator", 
-		"initializer", "initializerList", "designation", "designatorList", "designator", 
-		"statement", "labeledStatement", "compoundStatement", "blockItemList", 
-		"blockItem", "expressionStatement", "selectionStatement", "switchStatement", 
-		"switchBlock", "switchBlockStatementGroup", "switchLabels", "switchLabel", 
-		"iterationStatement", "forCondition", "forDeclaration", "forStopExpression", 
-		"forExpression", "jumpStatement", "translationUnit", "externalDeclaration", 
-		"functionDefinition", "scriptInitialization", "scriptLocation", "scriptXPos", 
-		"scriptYPos", "scriptDir", "scriptSprite", "npcInitialization", "scriptName", 
-		"scope_specifier", "variable", "variable_name"
+		"argumentExpressionList", "unaryExpression", "unaryOperator", "multiplicativeExpression", 
+		"multiplicativeOperator", "additiveExpression", "additiveOperator", "shiftExpression", 
+		"shiftOperator", "relationalExpression", "relationalOperator", "equalityExpression", 
+		"equalityOperator", "andExpression", "exclusiveOrExpression", "inclusiveOrExpression", 
+		"logicalAndExpression", "logicalOrExpression", "conditionalExpression", 
+		"assignmentExpression", "assignmentLeftExpression", "assignmentOperator", 
+		"constantExpression", "statement", "labeledStatement", "compoundStatement", 
+		"blockItemList", "blockItem", "expressionStatement", "selectionStatement", 
+		"switchStatement", "switchBlock", "switchBlockStatementGroup", "switchLabels", 
+		"switchLabel", "iterationStatement", "forCondition", "forDeclaration", 
+		"forStopExpression", "forExpression", "jumpStatement", "translationUnit", 
+		"externalDeclaration", "functionDefinition", "scriptInitialization", "scriptLocation", 
+		"scriptXPos", "scriptYPos", "scriptDir", "scriptSprite", "npcInitialization", 
+		"scriptName", "scope_specifier", "variable", "variable_name"
 	];
 
 
-	pub const _LITERAL_NAMES: [Option<&'static str>;78] = [
+	pub const _LITERAL_NAMES: [Option<&'static str>;77] = [
 		None, Some("'^'"), Some("'<<='"), Some("'>>='"), Some("'&='"), Some("'^='"), 
-		Some("'|='"), Some("'...'"), Some("'continue'"), Some("'script'"), Some("'duplicate'"), 
+		Some("'|='"), Some("'continue'"), Some("'script'"), Some("'duplicate'"), 
 		Some("'('"), Some("')'"), Some("'{'"), Some("'}'"), Some("'['"), Some("']'"), 
 		Some("','"), Some("'@'"), Some("':'"), Some("';'"), Some("'%'"), Some("'*'"), 
 		Some("'~'"), Some("'?'"), Some("'''"), Some("'\"'"), Some("'|'"), Some("'||'"), 
@@ -246,8 +217,8 @@ use std::any::{Any,TypeId};
 		Some("'function'"), Some("'break'"), Some("'callfunc'"), Some("'eof'"), 
 		Some("'setarray'"), Some("'copyarray'")
 	];
-	pub const _SYMBOLIC_NAMES: [Option<&'static str>;86]  = [
-		None, None, None, None, None, None, None, None, None, None, None, Some("LeftParen"), 
+	pub const _SYMBOLIC_NAMES: [Option<&'static str>;85]  = [
+		None, None, None, None, None, None, None, None, None, None, Some("LeftParen"), 
 		Some("RightParen"), Some("LeftBrace"), Some("RightBrace"), Some("LeftBracket"), 
 		Some("RightBracket"), Some("Comma"), Some("At"), Some("Colon"), Some("SemiColon"), 
 		Some("Percent"), Some("Star"), Some("Tilde"), Some("QuestionMark"), Some("Quote"), 
@@ -420,47 +391,6 @@ impl<'input,I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'i
    	fn get_rule_names(&self) -> &[& str] {&ruleNames}
 
    	fn get_vocabulary(&self) -> &dyn Vocabulary { &**VOCABULARY }
-	fn sempred(_localctx: Option<&(dyn RathenaScriptLangParserContext<'input> + 'input)>, rule_index: isize, pred_index: isize,
-			   recog:&mut BaseParserType<'input,I>
-	)->bool{
-		match rule_index {
-					37 => RathenaScriptLangParser::<'input,I,_>::directDeclarator_sempred(_localctx.and_then(|x|x.downcast_ref()), pred_index, recog),
-					43 => RathenaScriptLangParser::<'input,I,_>::directAbstractDeclarator_sempred(_localctx.and_then(|x|x.downcast_ref()), pred_index, recog),
-			_ => true
-		}
-	}
-}
-
-impl<'input, I> RathenaScriptLangParser<'input, I, DefaultErrorStrategy<'input,RathenaScriptLangParserContextType>>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-{
-	fn directDeclarator_sempred(_localctx: Option<&DirectDeclaratorContext<'input>>, pred_index:isize,
-						recog:&mut <Self as Deref>::Target
-		) -> bool {
-		match pred_index {
-				0=>{
-					recog.precpred(None, 4)
-				}
-				1=>{
-					recog.precpred(None, 3)
-				}
-				2=>{
-					recog.precpred(None, 2)
-				}
-			_ => true
-		}
-	}
-	fn directAbstractDeclarator_sempred(_localctx: Option<&DirectAbstractDeclaratorContext<'input>>, pred_index:isize,
-						recog:&mut <Self as Deref>::Target
-		) -> bool {
-		match pred_index {
-				3=>{
-					recog.precpred(None, 1)
-				}
-			_ => true
-		}
-	}
 }
 //------------------- compilationUnit ----------------
 pub type CompilationUnitContextAll<'input> = CompilationUnitContext<'input>;
@@ -543,10 +473,10 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule translationUnit*/
-			recog.base.set_state(162);
+			recog.base.set_state(118);
 			recog.translationUnit()?;
 
-			recog.base.set_state(163);
+			recog.base.set_state(119);
 			recog.base.match_token(EOF,&mut recog.err_handler)?;
 
 			}
@@ -638,7 +568,7 @@ fn String(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContext
 fn LeftParen(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(LeftParen, 0)
 }
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
+fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves first TerminalNode corresponding to token RightParen
@@ -670,14 +600,14 @@ where
         let mut _localctx: Rc<PrimaryExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(174);
+			recog.base.set_state(130);
 			recog.err_handler.sync(&mut recog.base)?;
 			match  recog.interpreter.adaptive_predict(0,&mut recog.base)? {
 				1 =>{
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(165);
+					recog.base.set_state(121);
 					recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
 					}
@@ -688,7 +618,7 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule variable*/
-					recog.base.set_state(166);
+					recog.base.set_state(122);
 					recog.variable()?;
 
 					}
@@ -698,7 +628,7 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 3);
 					recog.base.enter_outer_alt(None, 3);
 					{
-					recog.base.set_state(167);
+					recog.base.set_state(123);
 					recog.base.match_token(Number,&mut recog.err_handler)?;
 
 					}
@@ -708,7 +638,7 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 4);
 					recog.base.enter_outer_alt(None, 4);
 					{
-					recog.base.set_state(168);
+					recog.base.set_state(124);
 					recog.base.match_token(String,&mut recog.err_handler)?;
 
 					}
@@ -718,14 +648,14 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 5);
 					recog.base.enter_outer_alt(None, 5);
 					{
-					recog.base.set_state(169);
+					recog.base.set_state(125);
 					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
-					/*InvokeRule expression*/
-					recog.base.set_state(170);
-					recog.expression()?;
+					/*InvokeRule conditionalExpression*/
+					recog.base.set_state(126);
+					recog.conditionalExpression()?;
 
-					recog.base.set_state(171);
+					recog.base.set_state(127);
 					recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 					}
@@ -735,7 +665,7 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 6);
 					recog.base.enter_outer_alt(None, 6);
 					{
-					recog.base.set_state(173);
+					recog.base.set_state(129);
 					recog.base.match_token(Minus,&mut recog.err_handler)?;
 
 					}
@@ -861,22 +791,22 @@ where
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(202);
+			recog.base.set_state(158);
 			recog.err_handler.sync(&mut recog.base)?;
 			match  recog.interpreter.adaptive_predict(7,&mut recog.base)? {
 				1 =>{
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(176);
+					recog.base.set_state(132);
 					recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
-					recog.base.set_state(178);
+					recog.base.set_state(134);
 					recog.err_handler.sync(&mut recog.base)?;
 					match  recog.interpreter.adaptive_predict(1,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(177);
+							recog.base.set_state(133);
 							recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 							}
@@ -884,13 +814,13 @@ where
 
 						_ => {}
 					}
-					recog.base.set_state(181);
+					recog.base.set_state(137);
 					recog.err_handler.sync(&mut recog.base)?;
 					match  recog.interpreter.adaptive_predict(2,&mut recog.base)? {
 						x if x == 1=>{
 							{
 							/*InvokeRule argumentExpressionList*/
-							recog.base.set_state(180);
+							recog.base.set_state(136);
 							recog.argumentExpressionList()?;
 
 							}
@@ -898,12 +828,12 @@ where
 
 						_ => {}
 					}
-					recog.base.set_state(184);
+					recog.base.set_state(140);
 					recog.err_handler.sync(&mut recog.base)?;
 					match  recog.interpreter.adaptive_predict(3,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(183);
+							recog.base.set_state(139);
 							recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 							}
@@ -918,39 +848,39 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 2);
 					recog.base.enter_outer_alt(None, 2);
 					{
-					recog.base.set_state(186);
+					recog.base.set_state(142);
 					recog.base.match_token(Callfunc,&mut recog.err_handler)?;
 
-					recog.base.set_state(188);
+					recog.base.set_state(144);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					if _la==LeftParen {
 						{
-						recog.base.set_state(187);
+						recog.base.set_state(143);
 						recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 						}
 					}
 
-					recog.base.set_state(190);
+					recog.base.set_state(146);
 					recog.base.match_token(String,&mut recog.err_handler)?;
 
-					recog.base.set_state(193);
+					recog.base.set_state(149);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					if _la==Comma {
 						{
-						recog.base.set_state(191);
+						recog.base.set_state(147);
 						recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 						/*InvokeRule argumentExpressionList*/
-						recog.base.set_state(192);
+						recog.base.set_state(148);
 						recog.argumentExpressionList()?;
 
 						}
 					}
 
-					recog.base.set_state(195);
+					recog.base.set_state(151);
 					recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 					}
@@ -960,22 +890,22 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 3);
 					recog.base.enter_outer_alt(None, 3);
 					{
-					recog.base.set_state(196);
+					recog.base.set_state(152);
 					recog.base.match_token(Callfunc,&mut recog.err_handler)?;
 
-					recog.base.set_state(197);
+					recog.base.set_state(153);
 					recog.base.match_token(String,&mut recog.err_handler)?;
 
-					recog.base.set_state(200);
+					recog.base.set_state(156);
 					recog.err_handler.sync(&mut recog.base)?;
 					match  recog.interpreter.adaptive_predict(6,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(198);
+							recog.base.set_state(154);
 							recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 							/*InvokeRule argumentExpressionList*/
-							recog.base.set_state(199);
+							recog.base.set_state(155);
 							recog.argumentExpressionList()?;
 
 							}
@@ -1059,47 +989,28 @@ fn functionCallExpression(&self) -> Option<Rc<FunctionCallExpressionContextAll<'
 fn primaryExpression(&self) -> Option<Rc<PrimaryExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
-/// Retrieves all `TerminalNode`s corresponding to token LeftBracket in current rule
-fn LeftBracket_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(LeftBracket)
+/// Retrieves first TerminalNode corresponding to token LeftBracket
+/// Returns `None` if there is no child corresponding to token LeftBracket
+fn LeftBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(LeftBracket, 0)
 }
-/// Retrieves 'i's TerminalNode corresponding to token LeftBracket, starting from 0.
-/// Returns `None` if number of children corresponding to token LeftBracket is less or equal than `i`.
-fn LeftBracket(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LeftBracket, i)
+fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
+	self.child_of_type(0)
 }
-fn expression_all(&self) ->  Vec<Rc<ExpressionContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
+/// Retrieves first TerminalNode corresponding to token RightBracket
+/// Returns `None` if there is no child corresponding to token RightBracket
+fn RightBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(RightBracket, 0)
 }
-fn expression(&self, i: usize) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
+/// Retrieves first TerminalNode corresponding to token IncrementOp
+/// Returns `None` if there is no child corresponding to token IncrementOp
+fn IncrementOp(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(IncrementOp, 0)
 }
-/// Retrieves all `TerminalNode`s corresponding to token RightBracket in current rule
-fn RightBracket_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(RightBracket)
-}
-/// Retrieves 'i's TerminalNode corresponding to token RightBracket, starting from 0.
-/// Returns `None` if number of children corresponding to token RightBracket is less or equal than `i`.
-fn RightBracket(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(RightBracket, i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token IncrementOp in current rule
-fn IncrementOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(IncrementOp)
-}
-/// Retrieves 'i's TerminalNode corresponding to token IncrementOp, starting from 0.
-/// Returns `None` if number of children corresponding to token IncrementOp is less or equal than `i`.
-fn IncrementOp(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(IncrementOp, i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token DecrementOp in current rule
-fn DecrementOp_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(DecrementOp)
-}
-/// Retrieves 'i's TerminalNode corresponding to token DecrementOp, starting from 0.
-/// Returns `None` if number of children corresponding to token DecrementOp is less or equal than `i`.
-fn DecrementOp(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(DecrementOp, i)
+/// Retrieves first TerminalNode corresponding to token DecrementOp
+/// Returns `None` if there is no child corresponding to token DecrementOp
+fn DecrementOp(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(DecrementOp, 0)
 }
 
 }
@@ -1121,15 +1032,15 @@ where
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(216);
+			recog.base.set_state(169);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(10,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(9,&mut recog.base)? {
 				1 =>{
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
 					/*InvokeRule functionCallExpression*/
-					recog.base.set_state(204);
+					recog.base.set_state(160);
 					recog.functionCallExpression()?;
 
 					}
@@ -1140,56 +1051,53 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule primaryExpression*/
-					recog.base.set_state(205);
+					recog.base.set_state(161);
 					recog.primaryExpression()?;
 
-					recog.base.set_state(213);
+					recog.base.set_state(167);
 					recog.err_handler.sync(&mut recog.base)?;
-					_la = recog.base.input.la(1);
-					while (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftBracket) | (1usize << DecrementOp) | (1usize << IncrementOp))) != 0) {
-						{
-						recog.base.set_state(211);
-						recog.err_handler.sync(&mut recog.base)?;
-						match recog.base.input.la(1) {
-						 LeftBracket 
-							=> {
-								{
-								recog.base.set_state(206);
-								recog.base.match_token(LeftBracket,&mut recog.err_handler)?;
+					match recog.base.input.la(1) {
+					 LeftBracket 
+						=> {
+					    	{
+					    	recog.base.set_state(162);
+					    	recog.base.match_token(LeftBracket,&mut recog.err_handler)?;
 
-								/*InvokeRule expression*/
-								recog.base.set_state(207);
-								recog.expression()?;
+					    	/*InvokeRule conditionalExpression*/
+					    	recog.base.set_state(163);
+					    	recog.conditionalExpression()?;
 
-								recog.base.set_state(208);
-								recog.base.match_token(RightBracket,&mut recog.err_handler)?;
+					    	recog.base.set_state(164);
+					    	recog.base.match_token(RightBracket,&mut recog.err_handler)?;
 
-								}
-							}
+					    	}
+					    }
 
-						 DecrementOp | IncrementOp 
-							=> {
-								{
-								recog.base.set_state(210);
-								_la = recog.base.input.la(1);
-								if { !(_la==DecrementOp || _la==IncrementOp) } {
-									recog.err_handler.recover_inline(&mut recog.base)?;
+					 DecrementOp | IncrementOp 
+						=> {
+					    	{
+					    	recog.base.set_state(166);
+					    	_la = recog.base.input.la(1);
+					    	if { !(_la==DecrementOp || _la==IncrementOp) } {
+					    		recog.err_handler.recover_inline(&mut recog.base)?;
 
-								}
-								else {
-									if  recog.base.input.la(1)==TOKEN_EOF { recog.base.matched_eof = true };
-									recog.err_handler.report_match(&mut recog.base);
-									recog.base.consume(&mut recog.err_handler);
-								}
-								}
-							}
+					    	}
+					    	else {
+					    		if  recog.base.input.la(1)==TOKEN_EOF { recog.base.matched_eof = true };
+					    		recog.err_handler.report_match(&mut recog.base);
+					    		recog.base.consume(&mut recog.err_handler);
+					    	}
+					    	}
+					    }
 
-							_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
-						}
-						}
-						recog.base.set_state(215);
-						recog.err_handler.sync(&mut recog.base)?;
-						_la = recog.base.input.la(1);
+					 T__0 | RightParen | RightBracket | Comma | Colon | SemiColon | Percent |
+					 Star | QuestionMark | LogicalOr | OrOp | LogicalAnd | AndOp | Slash |
+					 Minus | Plus | BangEqual | DoubleEqual | LeftCaret | DoubleLeftCaret |
+					 LeftCaretEqual | RightCaret | DoubleRightCaret | RightCaretEqual 
+						=> {
+					    }
+
+						_ => {}
 					}
 					}
 				}
@@ -1261,10 +1169,10 @@ impl<'input> ArgumentExpressionListContextExt<'input>{
 
 pub trait ArgumentExpressionListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<ArgumentExpressionListContextExt<'input>>{
 
-fn assignmentExpression_all(&self) ->  Vec<Rc<AssignmentExpressionContextAll<'input>>> where Self:Sized{
+fn conditionalExpression_all(&self) ->  Vec<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.children_of_type()
 }
-fn assignmentExpression(&self, i: usize) -> Option<Rc<AssignmentExpressionContextAll<'input>>> where Self:Sized{
+fn conditionalExpression(&self, i: usize) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(i)
 }
 /// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
@@ -1299,30 +1207,30 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			/*InvokeRule assignmentExpression*/
-			recog.base.set_state(218);
-			recog.assignmentExpression()?;
+			/*InvokeRule conditionalExpression*/
+			recog.base.set_state(171);
+			recog.conditionalExpression()?;
 
-			recog.base.set_state(223);
+			recog.base.set_state(176);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(11,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(10,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
-					recog.base.set_state(219);
+					recog.base.set_state(172);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
-					/*InvokeRule assignmentExpression*/
-					recog.base.set_state(220);
-					recog.assignmentExpression()?;
+					/*InvokeRule conditionalExpression*/
+					recog.base.set_state(173);
+					recog.conditionalExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(225);
+				recog.base.set_state(178);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(11,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(10,&mut recog.base)?;
 			}
 			}
 		};
@@ -1396,7 +1304,7 @@ fn postfixExpression(&self) -> Option<Rc<PostfixExpressionContextAll<'input>>> w
 fn unaryOperator(&self) -> Option<Rc<UnaryOperatorContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
-fn castExpression(&self) -> Option<Rc<CastExpressionContextAll<'input>>> where Self:Sized{
+fn unaryExpression(&self) -> Option<Rc<UnaryExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves all `TerminalNode`s corresponding to token IncrementOp in current rule
@@ -1440,13 +1348,13 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(229);
+			recog.base.set_state(182);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
 			while _la==DecrementOp || _la==IncrementOp {
 				{
 				{
-				recog.base.set_state(226);
+				recog.base.set_state(179);
 				_la = recog.base.input.la(1);
 				if { !(_la==DecrementOp || _la==IncrementOp) } {
 					recog.err_handler.recover_inline(&mut recog.base)?;
@@ -1459,17 +1367,17 @@ where
 				}
 				}
 				}
-				recog.base.set_state(231);
+				recog.base.set_state(184);
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
 			}
-			recog.base.set_state(236);
+			recog.base.set_state(189);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(13,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(12,&mut recog.base)? {
 				1 =>{
 					{
 					/*InvokeRule postfixExpression*/
-					recog.base.set_state(232);
+					recog.base.set_state(185);
 					recog.postfixExpression()?;
 
 					}
@@ -1478,12 +1386,12 @@ where
 				2 =>{
 					{
 					/*InvokeRule unaryOperator*/
-					recog.base.set_state(233);
+					recog.base.set_state(186);
 					recog.unaryOperator()?;
 
-					/*InvokeRule castExpression*/
-					recog.base.set_state(234);
-					recog.castExpression()?;
+					/*InvokeRule unaryExpression*/
+					recog.base.set_state(187);
+					recog.unaryExpression()?;
 
 					}
 				}
@@ -1609,7 +1517,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(238);
+			recog.base.set_state(191);
 			_la = recog.base.input.la(1);
 			if { !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << Star) | (1usize << Tilde) | (1usize << LogicalAnd) | (1usize << Minus) | (1usize << Plus) | (1usize << Bang))) != 0)) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -1620,124 +1528,6 @@ where
 				recog.err_handler.report_match(&mut recog.base);
 				recog.base.consume(&mut recog.err_handler);
 			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- castExpression ----------------
-pub type CastExpressionContextAll<'input> = CastExpressionContext<'input>;
-
-
-pub type CastExpressionContext<'input> = BaseParserRuleContext<'input,CastExpressionContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct CastExpressionContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for CastExpressionContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for CastExpressionContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_castExpression(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_castExpression(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for CastExpressionContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_castExpression(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for CastExpressionContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_castExpression }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_castExpression }
-}
-antlr_rust::type_id!{CastExpressionContextExt<'a>}
-
-impl<'input> CastExpressionContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<CastExpressionContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,CastExpressionContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait CastExpressionContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<CastExpressionContextExt<'input>>{
-
-fn unaryExpression(&self) -> Option<Rc<UnaryExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token Number
-/// Returns `None` if there is no child corresponding to token Number
-fn Number(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Number, 0)
-}
-
-}
-
-impl<'input> CastExpressionContextAttrs<'input> for CastExpressionContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn castExpression(&mut self,)
-	-> Result<Rc<CastExpressionContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = CastExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 14, RULE_castExpression);
-        let mut _localctx: Rc<CastExpressionContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			recog.base.set_state(242);
-			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(14,&mut recog.base)? {
-				1 =>{
-					//recog.base.enter_outer_alt(_localctx.clone(), 1);
-					recog.base.enter_outer_alt(None, 1);
-					{
-					/*InvokeRule unaryExpression*/
-					recog.base.set_state(240);
-					recog.unaryExpression()?;
-
-					}
-				}
-			,
-				2 =>{
-					//recog.base.enter_outer_alt(_localctx.clone(), 2);
-					recog.base.enter_outer_alt(None, 2);
-					{
-					recog.base.set_state(241);
-					recog.base.match_token(Number,&mut recog.err_handler)?;
-
-					}
-				}
-
-				_ => {}
 			}
 		};
 		match result {
@@ -1804,10 +1594,10 @@ impl<'input> MultiplicativeExpressionContextExt<'input>{
 
 pub trait MultiplicativeExpressionContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<MultiplicativeExpressionContextExt<'input>>{
 
-fn castExpression_all(&self) ->  Vec<Rc<CastExpressionContextAll<'input>>> where Self:Sized{
+fn unaryExpression_all(&self) ->  Vec<Rc<UnaryExpressionContextAll<'input>>> where Self:Sized{
 	self.children_of_type()
 }
-fn castExpression(&self, i: usize) -> Option<Rc<CastExpressionContextAll<'input>>> where Self:Sized{
+fn unaryExpression(&self, i: usize) -> Option<Rc<UnaryExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(i)
 }
 fn multiplicativeOperator_all(&self) ->  Vec<Rc<MultiplicativeOperatorContextAll<'input>>> where Self:Sized{
@@ -1831,7 +1621,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = MultiplicativeExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 16, RULE_multiplicativeExpression);
+        recog.base.enter_rule(_localctx.clone(), 14, RULE_multiplicativeExpression);
         let mut _localctx: Rc<MultiplicativeExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -1839,31 +1629,31 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			/*InvokeRule castExpression*/
-			recog.base.set_state(244);
-			recog.castExpression()?;
+			/*InvokeRule unaryExpression*/
+			recog.base.set_state(193);
+			recog.unaryExpression()?;
 
-			recog.base.set_state(250);
+			recog.base.set_state(199);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(15,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(13,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
 					/*InvokeRule multiplicativeOperator*/
-					recog.base.set_state(245);
+					recog.base.set_state(194);
 					recog.multiplicativeOperator()?;
 
-					/*InvokeRule castExpression*/
-					recog.base.set_state(246);
-					recog.castExpression()?;
+					/*InvokeRule unaryExpression*/
+					recog.base.set_state(195);
+					recog.unaryExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(252);
+				recog.base.set_state(201);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(15,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(13,&mut recog.base)?;
 			}
 			}
 		};
@@ -1961,7 +1751,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = MultiplicativeOperatorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 18, RULE_multiplicativeOperator);
+        recog.base.enter_rule(_localctx.clone(), 16, RULE_multiplicativeOperator);
         let mut _localctx: Rc<MultiplicativeOperatorContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -1969,7 +1759,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(253);
+			recog.base.set_state(202);
 			_la = recog.base.input.la(1);
 			if { !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << Percent) | (1usize << Star) | (1usize << Slash))) != 0)) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -2073,7 +1863,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = AdditiveExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 20, RULE_additiveExpression);
+        recog.base.enter_rule(_localctx.clone(), 18, RULE_additiveExpression);
         let mut _localctx: Rc<AdditiveExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -2082,30 +1872,30 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule multiplicativeExpression*/
-			recog.base.set_state(255);
+			recog.base.set_state(204);
 			recog.multiplicativeExpression()?;
 
-			recog.base.set_state(261);
+			recog.base.set_state(210);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(16,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(14,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
 					/*InvokeRule additiveOperator*/
-					recog.base.set_state(256);
+					recog.base.set_state(205);
 					recog.additiveOperator()?;
 
 					/*InvokeRule multiplicativeExpression*/
-					recog.base.set_state(257);
+					recog.base.set_state(206);
 					recog.multiplicativeExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(263);
+				recog.base.set_state(212);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(16,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(14,&mut recog.base)?;
 			}
 			}
 		};
@@ -2198,7 +1988,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = AdditiveOperatorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 22, RULE_additiveOperator);
+        recog.base.enter_rule(_localctx.clone(), 20, RULE_additiveOperator);
         let mut _localctx: Rc<AdditiveOperatorContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -2206,7 +1996,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(264);
+			recog.base.set_state(213);
 			_la = recog.base.input.la(1);
 			if { !(_la==Minus || _la==Plus) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -2310,7 +2100,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ShiftExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 24, RULE_shiftExpression);
+        recog.base.enter_rule(_localctx.clone(), 22, RULE_shiftExpression);
         let mut _localctx: Rc<ShiftExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -2319,30 +2109,30 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule additiveExpression*/
-			recog.base.set_state(266);
+			recog.base.set_state(215);
 			recog.additiveExpression()?;
 
-			recog.base.set_state(272);
+			recog.base.set_state(221);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(17,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(15,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
 					/*InvokeRule shiftOperator*/
-					recog.base.set_state(267);
+					recog.base.set_state(216);
 					recog.shiftOperator()?;
 
 					/*InvokeRule additiveExpression*/
-					recog.base.set_state(268);
+					recog.base.set_state(217);
 					recog.additiveExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(274);
+				recog.base.set_state(223);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(17,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(15,&mut recog.base)?;
 			}
 			}
 		};
@@ -2435,7 +2225,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ShiftOperatorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 26, RULE_shiftOperator);
+        recog.base.enter_rule(_localctx.clone(), 24, RULE_shiftOperator);
         let mut _localctx: Rc<ShiftOperatorContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -2443,7 +2233,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(275);
+			recog.base.set_state(224);
 			_la = recog.base.input.la(1);
 			if { !(_la==DoubleLeftCaret || _la==DoubleRightCaret) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -2547,7 +2337,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = RelationalExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 28, RULE_relationalExpression);
+        recog.base.enter_rule(_localctx.clone(), 26, RULE_relationalExpression);
         let mut _localctx: Rc<RelationalExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -2556,30 +2346,30 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule shiftExpression*/
-			recog.base.set_state(277);
+			recog.base.set_state(226);
 			recog.shiftExpression()?;
 
-			recog.base.set_state(283);
+			recog.base.set_state(232);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(18,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(16,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
 					/*InvokeRule relationalOperator*/
-					recog.base.set_state(278);
+					recog.base.set_state(227);
 					recog.relationalOperator()?;
 
 					/*InvokeRule shiftExpression*/
-					recog.base.set_state(279);
+					recog.base.set_state(228);
 					recog.shiftExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(285);
+				recog.base.set_state(234);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(18,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(16,&mut recog.base)?;
 			}
 			}
 		};
@@ -2682,7 +2472,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = RelationalOperatorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 30, RULE_relationalOperator);
+        recog.base.enter_rule(_localctx.clone(), 28, RULE_relationalOperator);
         let mut _localctx: Rc<RelationalOperatorContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -2690,7 +2480,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(286);
+			recog.base.set_state(235);
 			_la = recog.base.input.la(1);
 			if { !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftCaret) | (1usize << LeftCaretEqual) | (1usize << RightCaret) | (1usize << RightCaretEqual))) != 0)) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -2794,7 +2584,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = EqualityExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 32, RULE_equalityExpression);
+        recog.base.enter_rule(_localctx.clone(), 30, RULE_equalityExpression);
         let mut _localctx: Rc<EqualityExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -2803,30 +2593,30 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule relationalExpression*/
-			recog.base.set_state(288);
+			recog.base.set_state(237);
 			recog.relationalExpression()?;
 
-			recog.base.set_state(294);
+			recog.base.set_state(243);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(19,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(17,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
 					/*InvokeRule equalityOperator*/
-					recog.base.set_state(289);
+					recog.base.set_state(238);
 					recog.equalityOperator()?;
 
 					/*InvokeRule relationalExpression*/
-					recog.base.set_state(290);
+					recog.base.set_state(239);
 					recog.relationalExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(296);
+				recog.base.set_state(245);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(19,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(17,&mut recog.base)?;
 			}
 			}
 		};
@@ -2919,7 +2709,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = EqualityOperatorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 34, RULE_equalityOperator);
+        recog.base.enter_rule(_localctx.clone(), 32, RULE_equalityOperator);
         let mut _localctx: Rc<EqualityOperatorContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -2927,7 +2717,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(297);
+			recog.base.set_state(246);
 			_la = recog.base.input.la(1);
 			if { !(_la==BangEqual || _la==DoubleEqual) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -3034,7 +2824,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = AndExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 36, RULE_andExpression);
+        recog.base.enter_rule(_localctx.clone(), 34, RULE_andExpression);
         let mut _localctx: Rc<AndExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -3043,29 +2833,29 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule equalityExpression*/
-			recog.base.set_state(299);
+			recog.base.set_state(248);
 			recog.equalityExpression()?;
 
-			recog.base.set_state(304);
+			recog.base.set_state(253);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(20,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(18,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
-					recog.base.set_state(300);
+					recog.base.set_state(249);
 					recog.base.match_token(LogicalAnd,&mut recog.err_handler)?;
 
 					/*InvokeRule equalityExpression*/
-					recog.base.set_state(301);
+					recog.base.set_state(250);
 					recog.equalityExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(306);
+				recog.base.set_state(255);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(20,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(18,&mut recog.base)?;
 			}
 			}
 		};
@@ -3154,7 +2944,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ExclusiveOrExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 38, RULE_exclusiveOrExpression);
+        recog.base.enter_rule(_localctx.clone(), 36, RULE_exclusiveOrExpression);
         let mut _localctx: Rc<ExclusiveOrExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -3163,29 +2953,29 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule andExpression*/
-			recog.base.set_state(307);
+			recog.base.set_state(256);
 			recog.andExpression()?;
 
-			recog.base.set_state(312);
+			recog.base.set_state(261);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(21,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(19,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
-					recog.base.set_state(308);
+					recog.base.set_state(257);
 					recog.base.match_token(T__0,&mut recog.err_handler)?;
 
 					/*InvokeRule andExpression*/
-					recog.base.set_state(309);
+					recog.base.set_state(258);
 					recog.andExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(314);
+				recog.base.set_state(263);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(21,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(19,&mut recog.base)?;
 			}
 			}
 		};
@@ -3283,7 +3073,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = InclusiveOrExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 40, RULE_inclusiveOrExpression);
+        recog.base.enter_rule(_localctx.clone(), 38, RULE_inclusiveOrExpression);
         let mut _localctx: Rc<InclusiveOrExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -3292,29 +3082,29 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule exclusiveOrExpression*/
-			recog.base.set_state(315);
+			recog.base.set_state(264);
 			recog.exclusiveOrExpression()?;
 
-			recog.base.set_state(320);
+			recog.base.set_state(269);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(22,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(20,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
-					recog.base.set_state(316);
+					recog.base.set_state(265);
 					recog.base.match_token(LogicalOr,&mut recog.err_handler)?;
 
 					/*InvokeRule exclusiveOrExpression*/
-					recog.base.set_state(317);
+					recog.base.set_state(266);
 					recog.exclusiveOrExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(322);
+				recog.base.set_state(271);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(22,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(20,&mut recog.base)?;
 			}
 			}
 		};
@@ -3412,7 +3202,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = LogicalAndExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 42, RULE_logicalAndExpression);
+        recog.base.enter_rule(_localctx.clone(), 40, RULE_logicalAndExpression);
         let mut _localctx: Rc<LogicalAndExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -3421,29 +3211,29 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule inclusiveOrExpression*/
-			recog.base.set_state(323);
+			recog.base.set_state(272);
 			recog.inclusiveOrExpression()?;
 
-			recog.base.set_state(328);
+			recog.base.set_state(277);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(23,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(21,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
-					recog.base.set_state(324);
+					recog.base.set_state(273);
 					recog.base.match_token(AndOp,&mut recog.err_handler)?;
 
 					/*InvokeRule inclusiveOrExpression*/
-					recog.base.set_state(325);
+					recog.base.set_state(274);
 					recog.inclusiveOrExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(330);
+				recog.base.set_state(279);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(23,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(21,&mut recog.base)?;
 			}
 			}
 		};
@@ -3541,7 +3331,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = LogicalOrExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 44, RULE_logicalOrExpression);
+        recog.base.enter_rule(_localctx.clone(), 42, RULE_logicalOrExpression);
         let mut _localctx: Rc<LogicalOrExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -3550,29 +3340,29 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule logicalAndExpression*/
-			recog.base.set_state(331);
+			recog.base.set_state(280);
 			recog.logicalAndExpression()?;
 
-			recog.base.set_state(336);
+			recog.base.set_state(285);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(24,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(22,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
-					recog.base.set_state(332);
+					recog.base.set_state(281);
 					recog.base.match_token(OrOp,&mut recog.err_handler)?;
 
 					/*InvokeRule logicalAndExpression*/
-					recog.base.set_state(333);
+					recog.base.set_state(282);
 					recog.logicalAndExpression()?;
 
 					}
 					} 
 				}
-				recog.base.set_state(338);
+				recog.base.set_state(287);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(24,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(22,&mut recog.base)?;
 			}
 			}
 		};
@@ -3648,16 +3438,16 @@ fn logicalOrExpression(&self) -> Option<Rc<LogicalOrExpressionContextAll<'input>
 fn QuestionMark(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(QuestionMark, 0)
 }
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
+fn conditionalExpression_all(&self) ->  Vec<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
+	self.children_of_type()
+}
+fn conditionalExpression(&self, i: usize) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
+	self.child_of_type(i)
 }
 /// Retrieves first TerminalNode corresponding to token Colon
 /// Returns `None` if there is no child corresponding to token Colon
 fn Colon(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(Colon, 0)
-}
-fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
 }
 
 }
@@ -3674,7 +3464,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ConditionalExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 46, RULE_conditionalExpression);
+        recog.base.enter_rule(_localctx.clone(), 44, RULE_conditionalExpression);
         let mut _localctx: Rc<ConditionalExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -3682,26 +3472,26 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule logicalOrExpression*/
-			recog.base.set_state(339);
+			recog.base.set_state(288);
 			recog.logicalOrExpression()?;
 
-			recog.base.set_state(345);
+			recog.base.set_state(294);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(25,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(23,&mut recog.base)? {
 				x if x == 1=>{
 					{
-					recog.base.set_state(340);
+					recog.base.set_state(289);
 					recog.base.match_token(QuestionMark,&mut recog.err_handler)?;
 
-					/*InvokeRule expression*/
-					recog.base.set_state(341);
-					recog.expression()?;
+					/*InvokeRule conditionalExpression*/
+					recog.base.set_state(290);
+					recog.conditionalExpression()?;
 
-					recog.base.set_state(342);
+					recog.base.set_state(291);
 					recog.base.match_token(Colon,&mut recog.err_handler)?;
 
 					/*InvokeRule conditionalExpression*/
-					recog.base.set_state(343);
+					recog.base.set_state(292);
 					recog.conditionalExpression()?;
 
 					}
@@ -3827,11 +3617,6 @@ fn argumentExpressionList(&self) -> Option<Rc<ArgumentExpressionListContextAll<'
 fn Copyarray(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(Copyarray, 0)
 }
-/// Retrieves first TerminalNode corresponding to token Number
-/// Returns `None` if there is no child corresponding to token Number
-fn Number(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Number, 0)
-}
 
 }
 
@@ -3847,20 +3632,20 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = AssignmentExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 48, RULE_assignmentExpression);
+        recog.base.enter_rule(_localctx.clone(), 46, RULE_assignmentExpression);
         let mut _localctx: Rc<AssignmentExpressionContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(399);
+			recog.base.set_state(347);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(35,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(33,&mut recog.base)? {
 				1 =>{
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
 					/*InvokeRule conditionalExpression*/
-					recog.base.set_state(347);
+					recog.base.set_state(296);
 					recog.conditionalExpression()?;
 
 					}
@@ -3871,15 +3656,15 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule assignmentLeftExpression*/
-					recog.base.set_state(348);
+					recog.base.set_state(297);
 					recog.assignmentLeftExpression()?;
 
 					/*InvokeRule assignmentOperator*/
-					recog.base.set_state(349);
+					recog.base.set_state(298);
 					recog.assignmentOperator()?;
 
 					/*InvokeRule assignmentExpression*/
-					recog.base.set_state(350);
+					recog.base.set_state(299);
 					recog.assignmentExpression()?;
 
 					}
@@ -3889,37 +3674,37 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 3);
 					recog.base.enter_outer_alt(None, 3);
 					{
-					recog.base.set_state(352);
+					recog.base.set_state(301);
 					recog.base.match_token(Set,&mut recog.err_handler)?;
 
-					recog.base.set_state(354);
+					recog.base.set_state(303);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					if _la==LeftParen {
 						{
-						recog.base.set_state(353);
+						recog.base.set_state(302);
 						recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 						}
 					}
 
 					/*InvokeRule functionCallExpression*/
-					recog.base.set_state(356);
+					recog.base.set_state(305);
 					recog.functionCallExpression()?;
 
-					recog.base.set_state(357);
+					recog.base.set_state(306);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule assignmentExpression*/
-					recog.base.set_state(358);
+					recog.base.set_state(307);
 					recog.assignmentExpression()?;
 
-					recog.base.set_state(360);
+					recog.base.set_state(309);
 					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(27,&mut recog.base)? {
+					match  recog.interpreter.adaptive_predict(25,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(359);
+							recog.base.set_state(308);
 							recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 							}
@@ -3934,37 +3719,37 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 4);
 					recog.base.enter_outer_alt(None, 4);
 					{
-					recog.base.set_state(362);
+					recog.base.set_state(311);
 					recog.base.match_token(Set,&mut recog.err_handler)?;
 
-					recog.base.set_state(364);
+					recog.base.set_state(313);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					if _la==LeftParen {
 						{
-						recog.base.set_state(363);
+						recog.base.set_state(312);
 						recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 						}
 					}
 
 					/*InvokeRule assignmentLeftExpression*/
-					recog.base.set_state(366);
+					recog.base.set_state(315);
 					recog.assignmentLeftExpression()?;
 
-					recog.base.set_state(367);
+					recog.base.set_state(316);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule assignmentExpression*/
-					recog.base.set_state(368);
+					recog.base.set_state(317);
 					recog.assignmentExpression()?;
 
-					recog.base.set_state(370);
+					recog.base.set_state(319);
 					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(29,&mut recog.base)? {
+					match  recog.interpreter.adaptive_predict(27,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(369);
+							recog.base.set_state(318);
 							recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 							}
@@ -3979,41 +3764,41 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 5);
 					recog.base.enter_outer_alt(None, 5);
 					{
-					recog.base.set_state(372);
+					recog.base.set_state(321);
 					recog.base.match_token(Setarray,&mut recog.err_handler)?;
 
-					recog.base.set_state(374);
+					recog.base.set_state(323);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					if _la==LeftParen {
 						{
-						recog.base.set_state(373);
+						recog.base.set_state(322);
 						recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 						}
 					}
 
 					/*InvokeRule assignmentLeftExpression*/
-					recog.base.set_state(376);
+					recog.base.set_state(325);
 					recog.assignmentLeftExpression()?;
 
-					recog.base.set_state(377);
+					recog.base.set_state(326);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule assignmentExpression*/
-					recog.base.set_state(378);
+					recog.base.set_state(327);
 					recog.assignmentExpression()?;
 
-					recog.base.set_state(381);
+					recog.base.set_state(330);
 					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(31,&mut recog.base)? {
+					match  recog.interpreter.adaptive_predict(29,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(379);
+							recog.base.set_state(328);
 							recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 							/*InvokeRule argumentExpressionList*/
-							recog.base.set_state(380);
+							recog.base.set_state(329);
 							recog.argumentExpressionList()?;
 
 							}
@@ -4021,12 +3806,12 @@ where
 
 						_ => {}
 					}
-					recog.base.set_state(384);
+					recog.base.set_state(333);
 					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(32,&mut recog.base)? {
+					match  recog.interpreter.adaptive_predict(30,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(383);
+							recog.base.set_state(332);
 							recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 							}
@@ -4041,44 +3826,44 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 6);
 					recog.base.enter_outer_alt(None, 6);
 					{
-					recog.base.set_state(386);
+					recog.base.set_state(335);
 					recog.base.match_token(Copyarray,&mut recog.err_handler)?;
 
-					recog.base.set_state(388);
+					recog.base.set_state(337);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					if _la==LeftParen {
 						{
-						recog.base.set_state(387);
+						recog.base.set_state(336);
 						recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 						}
 					}
 
 					/*InvokeRule assignmentLeftExpression*/
-					recog.base.set_state(390);
+					recog.base.set_state(339);
 					recog.assignmentLeftExpression()?;
 
-					recog.base.set_state(391);
+					recog.base.set_state(340);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule assignmentExpression*/
-					recog.base.set_state(392);
+					recog.base.set_state(341);
 					recog.assignmentExpression()?;
 
-					recog.base.set_state(393);
+					recog.base.set_state(342);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule argumentExpressionList*/
-					recog.base.set_state(394);
+					recog.base.set_state(343);
 					recog.argumentExpressionList()?;
 
-					recog.base.set_state(396);
+					recog.base.set_state(345);
 					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(34,&mut recog.base)? {
+					match  recog.interpreter.adaptive_predict(32,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(395);
+							recog.base.set_state(344);
 							recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 							}
@@ -4086,16 +3871,6 @@ where
 
 						_ => {}
 					}
-					}
-				}
-			,
-				7 =>{
-					//recog.base.enter_outer_alt(_localctx.clone(), 7);
-					recog.base.enter_outer_alt(None, 7);
-					{
-					recog.base.set_state(398);
-					recog.base.match_token(Number,&mut recog.err_handler)?;
-
 					}
 				}
 
@@ -4189,18 +3964,18 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = AssignmentLeftExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 50, RULE_assignmentLeftExpression);
+        recog.base.enter_rule(_localctx.clone(), 48, RULE_assignmentLeftExpression);
         let mut _localctx: Rc<AssignmentLeftExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(403);
+			recog.base.set_state(351);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(36,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(34,&mut recog.base)? {
 				1 =>{
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(401);
+					recog.base.set_state(349);
 					recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
 					}
@@ -4211,7 +3986,7 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule variable*/
-					recog.base.set_state(402);
+					recog.base.set_state(350);
 					recog.variable()?;
 
 					}
@@ -4329,7 +4104,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = AssignmentOperatorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 52, RULE_assignmentOperator);
+        recog.base.enter_rule(_localctx.clone(), 50, RULE_assignmentOperator);
         let mut _localctx: Rc<AssignmentOperatorContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -4337,7 +4112,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(405);
+			recog.base.set_state(353);
 			_la = recog.base.input.la(1);
 			if { !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__1) | (1usize << T__2) | (1usize << T__3) | (1usize << T__4) | (1usize << T__5) | (1usize << Equal) | (1usize << PlusEqual) | (1usize << MinusEqual) | (1usize << MultiplyEqual) | (1usize << DivideEqual) | (1usize << PercentEqual))) != 0)) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -4347,133 +4122,6 @@ where
 				if  recog.base.input.la(1)==TOKEN_EOF { recog.base.matched_eof = true };
 				recog.err_handler.report_match(&mut recog.base);
 				recog.base.consume(&mut recog.err_handler);
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- expression ----------------
-pub type ExpressionContextAll<'input> = ExpressionContext<'input>;
-
-
-pub type ExpressionContext<'input> = BaseParserRuleContext<'input,ExpressionContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct ExpressionContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for ExpressionContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for ExpressionContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_expression(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_expression(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for ExpressionContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_expression(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for ExpressionContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_expression }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_expression }
-}
-antlr_rust::type_id!{ExpressionContextExt<'a>}
-
-impl<'input> ExpressionContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<ExpressionContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,ExpressionContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait ExpressionContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<ExpressionContextExt<'input>>{
-
-fn assignmentExpression_all(&self) ->  Vec<Rc<AssignmentExpressionContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn assignmentExpression(&self, i: usize) -> Option<Rc<AssignmentExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
-fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(Comma)
-}
-/// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
-/// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
-fn Comma(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Comma, i)
-}
-
-}
-
-impl<'input> ExpressionContextAttrs<'input> for ExpressionContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn expression(&mut self,)
-	-> Result<Rc<ExpressionContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = ExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 54, RULE_expression);
-        let mut _localctx: Rc<ExpressionContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule assignmentExpression*/
-			recog.base.set_state(407);
-			recog.assignmentExpression()?;
-
-			recog.base.set_state(412);
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			while _la==Comma {
-				{
-				{
-				recog.base.set_state(408);
-				recog.base.match_token(Comma,&mut recog.err_handler)?;
-
-				/*InvokeRule assignmentExpression*/
-				recog.base.set_state(409);
-				recog.assignmentExpression()?;
-
-				}
-				}
-				recog.base.set_state(414);
-				recog.err_handler.sync(&mut recog.base)?;
-				_la = recog.base.input.la(1);
 			}
 			}
 		};
@@ -4559,7 +4207,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ConstantExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 56, RULE_constantExpression);
+        recog.base.enter_rule(_localctx.clone(), 52, RULE_constantExpression);
         let mut _localctx: Rc<ConstantExpressionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -4567,2716 +4215,9 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule conditionalExpression*/
-			recog.base.set_state(415);
+			recog.base.set_state(355);
 			recog.conditionalExpression()?;
 
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- declaration ----------------
-pub type DeclarationContextAll<'input> = DeclarationContext<'input>;
-
-
-pub type DeclarationContext<'input> = BaseParserRuleContext<'input,DeclarationContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DeclarationContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DeclarationContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DeclarationContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_declaration(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_declaration(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DeclarationContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_declaration(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DeclarationContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_declaration }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_declaration }
-}
-antlr_rust::type_id!{DeclarationContextExt<'a>}
-
-impl<'input> DeclarationContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DeclarationContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DeclarationContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DeclarationContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DeclarationContextExt<'input>>{
-
-/// Retrieves first TerminalNode corresponding to token SemiColon
-/// Returns `None` if there is no child corresponding to token SemiColon
-fn SemiColon(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(SemiColon, 0)
-}
-fn initDeclaratorList(&self) -> Option<Rc<InitDeclaratorListContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> DeclarationContextAttrs<'input> for DeclarationContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn declaration(&mut self,)
-	-> Result<Rc<DeclarationContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DeclarationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 58, RULE_declaration);
-        let mut _localctx: Rc<DeclarationContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(418);
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			if ((((_la - 18)) & !0x3f) == 0 && ((1usize << (_la - 18)) & ((1usize << (At - 18)) | (1usize << (Quote - 18)) | (1usize << (Sharp - 18)) | (1usize << (DoubleSharp - 18)) | (1usize << (Dot - 18)) | (1usize << (DotAt - 18)) | (1usize << (Dollar - 18)) | (1usize << (DollarAt - 18)) | (1usize << (Function - 18)) | (1usize << (Identifier - 18)))) != 0) {
-				{
-				/*InvokeRule initDeclaratorList*/
-				recog.base.set_state(417);
-				recog.initDeclaratorList()?;
-
-				}
-			}
-
-			recog.base.set_state(420);
-			recog.base.match_token(SemiColon,&mut recog.err_handler)?;
-
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- declarationSpecifiers ----------------
-pub type DeclarationSpecifiersContextAll<'input> = DeclarationSpecifiersContext<'input>;
-
-
-pub type DeclarationSpecifiersContext<'input> = BaseParserRuleContext<'input,DeclarationSpecifiersContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DeclarationSpecifiersContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DeclarationSpecifiersContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DeclarationSpecifiersContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_declarationSpecifiers(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_declarationSpecifiers(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DeclarationSpecifiersContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_declarationSpecifiers(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DeclarationSpecifiersContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_declarationSpecifiers }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_declarationSpecifiers }
-}
-antlr_rust::type_id!{DeclarationSpecifiersContextExt<'a>}
-
-impl<'input> DeclarationSpecifiersContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DeclarationSpecifiersContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DeclarationSpecifiersContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DeclarationSpecifiersContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DeclarationSpecifiersContextExt<'input>>{
-
-fn declarationSpecifier_all(&self) ->  Vec<Rc<DeclarationSpecifierContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn declarationSpecifier(&self, i: usize) -> Option<Rc<DeclarationSpecifierContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-
-}
-
-impl<'input> DeclarationSpecifiersContextAttrs<'input> for DeclarationSpecifiersContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn declarationSpecifiers(&mut self,)
-	-> Result<Rc<DeclarationSpecifiersContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DeclarationSpecifiersContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 60, RULE_declarationSpecifiers);
-        let mut _localctx: Rc<DeclarationSpecifiersContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			let mut _alt: isize;
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(423); 
-			recog.err_handler.sync(&mut recog.base)?;
-			_alt = 1;
-			loop {
-				match _alt {
-				    x if x == 1=>
-					{
-					{
-					/*InvokeRule declarationSpecifier*/
-					recog.base.set_state(422);
-					recog.declarationSpecifier()?;
-
-					}
-					}
-
-				_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
-				}
-				recog.base.set_state(425); 
-				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(39,&mut recog.base)?;
-				if _alt==2 || _alt==INVALID_ALT { break }
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- declarationSpecifiers2 ----------------
-pub type DeclarationSpecifiers2ContextAll<'input> = DeclarationSpecifiers2Context<'input>;
-
-
-pub type DeclarationSpecifiers2Context<'input> = BaseParserRuleContext<'input,DeclarationSpecifiers2ContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DeclarationSpecifiers2ContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DeclarationSpecifiers2Context<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DeclarationSpecifiers2Context<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_declarationSpecifiers2(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_declarationSpecifiers2(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DeclarationSpecifiers2Context<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_declarationSpecifiers2(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DeclarationSpecifiers2ContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_declarationSpecifiers2 }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_declarationSpecifiers2 }
-}
-antlr_rust::type_id!{DeclarationSpecifiers2ContextExt<'a>}
-
-impl<'input> DeclarationSpecifiers2ContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DeclarationSpecifiers2ContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DeclarationSpecifiers2ContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DeclarationSpecifiers2ContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DeclarationSpecifiers2ContextExt<'input>>{
-
-fn scope_specifier(&self) -> Option<Rc<Scope_specifierContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> DeclarationSpecifiers2ContextAttrs<'input> for DeclarationSpecifiers2Context<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn declarationSpecifiers2(&mut self,)
-	-> Result<Rc<DeclarationSpecifiers2ContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DeclarationSpecifiers2ContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 62, RULE_declarationSpecifiers2);
-        let mut _localctx: Rc<DeclarationSpecifiers2ContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule scope_specifier*/
-			recog.base.set_state(427);
-			recog.scope_specifier()?;
-
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- declarationSpecifier ----------------
-pub type DeclarationSpecifierContextAll<'input> = DeclarationSpecifierContext<'input>;
-
-
-pub type DeclarationSpecifierContext<'input> = BaseParserRuleContext<'input,DeclarationSpecifierContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DeclarationSpecifierContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DeclarationSpecifierContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DeclarationSpecifierContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_declarationSpecifier(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_declarationSpecifier(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DeclarationSpecifierContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_declarationSpecifier(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DeclarationSpecifierContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_declarationSpecifier }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_declarationSpecifier }
-}
-antlr_rust::type_id!{DeclarationSpecifierContextExt<'a>}
-
-impl<'input> DeclarationSpecifierContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DeclarationSpecifierContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DeclarationSpecifierContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DeclarationSpecifierContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DeclarationSpecifierContextExt<'input>>{
-
-fn scope_specifier(&self) -> Option<Rc<Scope_specifierContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> DeclarationSpecifierContextAttrs<'input> for DeclarationSpecifierContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn declarationSpecifier(&mut self,)
-	-> Result<Rc<DeclarationSpecifierContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DeclarationSpecifierContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 64, RULE_declarationSpecifier);
-        let mut _localctx: Rc<DeclarationSpecifierContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule scope_specifier*/
-			recog.base.set_state(429);
-			recog.scope_specifier()?;
-
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- initDeclaratorList ----------------
-pub type InitDeclaratorListContextAll<'input> = InitDeclaratorListContext<'input>;
-
-
-pub type InitDeclaratorListContext<'input> = BaseParserRuleContext<'input,InitDeclaratorListContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct InitDeclaratorListContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for InitDeclaratorListContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for InitDeclaratorListContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_initDeclaratorList(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_initDeclaratorList(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for InitDeclaratorListContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_initDeclaratorList(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for InitDeclaratorListContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_initDeclaratorList }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_initDeclaratorList }
-}
-antlr_rust::type_id!{InitDeclaratorListContextExt<'a>}
-
-impl<'input> InitDeclaratorListContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<InitDeclaratorListContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,InitDeclaratorListContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait InitDeclaratorListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<InitDeclaratorListContextExt<'input>>{
-
-fn initDeclarator_all(&self) ->  Vec<Rc<InitDeclaratorContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn initDeclarator(&self, i: usize) -> Option<Rc<InitDeclaratorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
-fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(Comma)
-}
-/// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
-/// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
-fn Comma(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Comma, i)
-}
-
-}
-
-impl<'input> InitDeclaratorListContextAttrs<'input> for InitDeclaratorListContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn initDeclaratorList(&mut self,)
-	-> Result<Rc<InitDeclaratorListContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = InitDeclaratorListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 66, RULE_initDeclaratorList);
-        let mut _localctx: Rc<InitDeclaratorListContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule initDeclarator*/
-			recog.base.set_state(431);
-			recog.initDeclarator()?;
-
-			recog.base.set_state(436);
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			while _la==Comma {
-				{
-				{
-				recog.base.set_state(432);
-				recog.base.match_token(Comma,&mut recog.err_handler)?;
-
-				/*InvokeRule initDeclarator*/
-				recog.base.set_state(433);
-				recog.initDeclarator()?;
-
-				}
-				}
-				recog.base.set_state(438);
-				recog.err_handler.sync(&mut recog.base)?;
-				_la = recog.base.input.la(1);
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- initDeclarator ----------------
-pub type InitDeclaratorContextAll<'input> = InitDeclaratorContext<'input>;
-
-
-pub type InitDeclaratorContext<'input> = BaseParserRuleContext<'input,InitDeclaratorContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct InitDeclaratorContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for InitDeclaratorContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for InitDeclaratorContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_initDeclarator(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_initDeclarator(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for InitDeclaratorContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_initDeclarator(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for InitDeclaratorContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_initDeclarator }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_initDeclarator }
-}
-antlr_rust::type_id!{InitDeclaratorContextExt<'a>}
-
-impl<'input> InitDeclaratorContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<InitDeclaratorContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,InitDeclaratorContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait InitDeclaratorContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<InitDeclaratorContextExt<'input>>{
-
-fn variable(&self) -> Option<Rc<VariableContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token Equal
-/// Returns `None` if there is no child corresponding to token Equal
-fn Equal(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Equal, 0)
-}
-fn initializer(&self) -> Option<Rc<InitializerContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token Function
-/// Returns `None` if there is no child corresponding to token Function
-fn Function(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Function, 0)
-}
-/// Retrieves first TerminalNode corresponding to token Identifier
-/// Returns `None` if there is no child corresponding to token Identifier
-fn Identifier(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Identifier, 0)
-}
-
-}
-
-impl<'input> InitDeclaratorContextAttrs<'input> for InitDeclaratorContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn initDeclarator(&mut self,)
-	-> Result<Rc<InitDeclaratorContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = InitDeclaratorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 68, RULE_initDeclarator);
-        let mut _localctx: Rc<InitDeclaratorContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			recog.base.set_state(446);
-			recog.err_handler.sync(&mut recog.base)?;
-			match recog.base.input.la(1) {
-			 At | Quote | Sharp | DoubleSharp | Dot | DotAt | Dollar | DollarAt |
-			 Identifier 
-				=> {
-					//recog.base.enter_outer_alt(_localctx.clone(), 1);
-					recog.base.enter_outer_alt(None, 1);
-					{
-					/*InvokeRule variable*/
-					recog.base.set_state(439);
-					recog.variable()?;
-
-					recog.base.set_state(442);
-					recog.err_handler.sync(&mut recog.base)?;
-					_la = recog.base.input.la(1);
-					if _la==Equal {
-						{
-						recog.base.set_state(440);
-						recog.base.match_token(Equal,&mut recog.err_handler)?;
-
-						/*InvokeRule initializer*/
-						recog.base.set_state(441);
-						recog.initializer()?;
-
-						}
-					}
-
-					}
-				}
-
-			 Function 
-				=> {
-					//recog.base.enter_outer_alt(_localctx.clone(), 2);
-					recog.base.enter_outer_alt(None, 2);
-					{
-					recog.base.set_state(444);
-					recog.base.match_token(Function,&mut recog.err_handler)?;
-
-					recog.base.set_state(445);
-					recog.base.match_token(Identifier,&mut recog.err_handler)?;
-
-					}
-				}
-
-				_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- specifierQualifierList ----------------
-pub type SpecifierQualifierListContextAll<'input> = SpecifierQualifierListContext<'input>;
-
-
-pub type SpecifierQualifierListContext<'input> = BaseParserRuleContext<'input,SpecifierQualifierListContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct SpecifierQualifierListContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for SpecifierQualifierListContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for SpecifierQualifierListContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_specifierQualifierList(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_specifierQualifierList(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for SpecifierQualifierListContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_specifierQualifierList(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for SpecifierQualifierListContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_specifierQualifierList }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_specifierQualifierList }
-}
-antlr_rust::type_id!{SpecifierQualifierListContextExt<'a>}
-
-impl<'input> SpecifierQualifierListContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<SpecifierQualifierListContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,SpecifierQualifierListContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait SpecifierQualifierListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<SpecifierQualifierListContextExt<'input>>{
-
-fn scope_specifier(&self) -> Option<Rc<Scope_specifierContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-fn specifierQualifierList(&self) -> Option<Rc<SpecifierQualifierListContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> SpecifierQualifierListContextAttrs<'input> for SpecifierQualifierListContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn specifierQualifierList(&mut self,)
-	-> Result<Rc<SpecifierQualifierListContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = SpecifierQualifierListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 70, RULE_specifierQualifierList);
-        let mut _localctx: Rc<SpecifierQualifierListContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			{
-			/*InvokeRule scope_specifier*/
-			recog.base.set_state(448);
-			recog.scope_specifier()?;
-
-			}
-			recog.base.set_state(450);
-			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(43,&mut recog.base)? {
-				x if x == 1=>{
-					{
-					/*InvokeRule specifierQualifierList*/
-					recog.base.set_state(449);
-					recog.specifierQualifierList()?;
-
-					}
-				}
-
-				_ => {}
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- declarator ----------------
-pub type DeclaratorContextAll<'input> = DeclaratorContext<'input>;
-
-
-pub type DeclaratorContext<'input> = BaseParserRuleContext<'input,DeclaratorContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DeclaratorContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DeclaratorContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DeclaratorContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_declarator(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_declarator(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DeclaratorContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_declarator(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DeclaratorContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_declarator }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_declarator }
-}
-antlr_rust::type_id!{DeclaratorContextExt<'a>}
-
-impl<'input> DeclaratorContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DeclaratorContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DeclaratorContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DeclaratorContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DeclaratorContextExt<'input>>{
-
-fn directDeclarator(&self) -> Option<Rc<DirectDeclaratorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> DeclaratorContextAttrs<'input> for DeclaratorContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn declarator(&mut self,)
-	-> Result<Rc<DeclaratorContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DeclaratorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 72, RULE_declarator);
-        let mut _localctx: Rc<DeclaratorContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule directDeclarator*/
-			recog.base.set_state(452);
-			recog.directDeclarator_rec(0)?;
-
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- directDeclarator ----------------
-pub type DirectDeclaratorContextAll<'input> = DirectDeclaratorContext<'input>;
-
-
-pub type DirectDeclaratorContext<'input> = BaseParserRuleContext<'input,DirectDeclaratorContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DirectDeclaratorContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DirectDeclaratorContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DirectDeclaratorContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_directDeclarator(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_directDeclarator(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DirectDeclaratorContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_directDeclarator(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DirectDeclaratorContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_directDeclarator }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_directDeclarator }
-}
-antlr_rust::type_id!{DirectDeclaratorContextExt<'a>}
-
-impl<'input> DirectDeclaratorContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DirectDeclaratorContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DirectDeclaratorContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DirectDeclaratorContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DirectDeclaratorContextExt<'input>>{
-
-fn variable(&self) -> Option<Rc<VariableContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token LeftParen
-/// Returns `None` if there is no child corresponding to token LeftParen
-fn LeftParen(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LeftParen, 0)
-}
-fn declarator(&self) -> Option<Rc<DeclaratorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token RightParen
-/// Returns `None` if there is no child corresponding to token RightParen
-fn RightParen(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(RightParen, 0)
-}
-fn directDeclarator(&self) -> Option<Rc<DirectDeclaratorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token LeftBracket
-/// Returns `None` if there is no child corresponding to token LeftBracket
-fn LeftBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LeftBracket, 0)
-}
-/// Retrieves first TerminalNode corresponding to token Star
-/// Returns `None` if there is no child corresponding to token Star
-fn Star(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Star, 0)
-}
-/// Retrieves first TerminalNode corresponding to token RightBracket
-/// Returns `None` if there is no child corresponding to token RightBracket
-fn RightBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(RightBracket, 0)
-}
-fn parameterTypeList(&self) -> Option<Rc<ParameterTypeListContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-fn identifierList(&self) -> Option<Rc<IdentifierListContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> DirectDeclaratorContextAttrs<'input> for DirectDeclaratorContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn  directDeclarator(&mut self,)
-	-> Result<Rc<DirectDeclaratorContextAll<'input>>,ANTLRError> {
-		self.directDeclarator_rec(0)
-	}
-
-	fn directDeclarator_rec(&mut self, _p: isize)
-	-> Result<Rc<DirectDeclaratorContextAll<'input>>,ANTLRError> {
-		let recog = self;
-		let _parentctx = recog.ctx.take();
-		let _parentState = recog.base.get_state();
-		let mut _localctx = DirectDeclaratorContextExt::new(_parentctx.clone(), recog.base.get_state());
-		recog.base.enter_recursion_rule(_localctx.clone(), 74, RULE_directDeclarator, _p);
-	    let mut _localctx: Rc<DirectDeclaratorContextAll> = _localctx;
-        let mut _prevctx = _localctx.clone();
-		let _startState = 74;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-			let mut _alt: isize;
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(464);
-			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(44,&mut recog.base)? {
-				1 =>{
-					{
-					/*InvokeRule variable*/
-					recog.base.set_state(455);
-					recog.variable()?;
-
-					}
-				}
-			,
-				2 =>{
-					{
-					recog.base.set_state(456);
-					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
-
-					/*InvokeRule declarator*/
-					recog.base.set_state(457);
-					recog.declarator()?;
-
-					recog.base.set_state(458);
-					recog.base.match_token(RightParen,&mut recog.err_handler)?;
-
-					}
-				}
-			,
-				3 =>{
-					{
-					recog.base.set_state(460);
-					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
-
-					/*InvokeRule directDeclarator*/
-					recog.base.set_state(461);
-					recog.directDeclarator_rec(0)?;
-
-					recog.base.set_state(462);
-					recog.base.match_token(RightParen,&mut recog.err_handler)?;
-
-					}
-				}
-
-				_ => {}
-			}
-
-			let tmp = recog.input.lt(-1).cloned();
-			recog.ctx.as_ref().unwrap().set_stop(tmp);
-			recog.base.set_state(483);
-			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(47,&mut recog.base)?;
-			while { _alt!=2 && _alt!=INVALID_ALT } {
-				if _alt==1 {
-					recog.trigger_exit_rule_event();
-					_prevctx = _localctx.clone();
-					{
-					recog.base.set_state(481);
-					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(46,&mut recog.base)? {
-						1 =>{
-							{
-							/*recRuleAltStartAction*/
-							let mut tmp = DirectDeclaratorContextExt::new(_parentctx.clone(), _parentState);
-							recog.push_new_recursion_context(tmp.clone(), _startState, RULE_directDeclarator);
-							_localctx = tmp;
-							recog.base.set_state(466);
-							if !({recog.precpred(None, 4)}) {
-								Err(FailedPredicateError::new(&mut recog.base, Some("recog.precpred(None, 4)".to_owned()), None))?;
-							}
-							recog.base.set_state(467);
-							recog.base.match_token(LeftBracket,&mut recog.err_handler)?;
-
-							recog.base.set_state(468);
-							recog.base.match_token(Star,&mut recog.err_handler)?;
-
-							recog.base.set_state(469);
-							recog.base.match_token(RightBracket,&mut recog.err_handler)?;
-
-							}
-						}
-					,
-						2 =>{
-							{
-							/*recRuleAltStartAction*/
-							let mut tmp = DirectDeclaratorContextExt::new(_parentctx.clone(), _parentState);
-							recog.push_new_recursion_context(tmp.clone(), _startState, RULE_directDeclarator);
-							_localctx = tmp;
-							recog.base.set_state(470);
-							if !({recog.precpred(None, 3)}) {
-								Err(FailedPredicateError::new(&mut recog.base, Some("recog.precpred(None, 3)".to_owned()), None))?;
-							}
-							recog.base.set_state(471);
-							recog.base.match_token(LeftParen,&mut recog.err_handler)?;
-
-							/*InvokeRule parameterTypeList*/
-							recog.base.set_state(472);
-							recog.parameterTypeList()?;
-
-							recog.base.set_state(473);
-							recog.base.match_token(RightParen,&mut recog.err_handler)?;
-
-							}
-						}
-					,
-						3 =>{
-							{
-							/*recRuleAltStartAction*/
-							let mut tmp = DirectDeclaratorContextExt::new(_parentctx.clone(), _parentState);
-							recog.push_new_recursion_context(tmp.clone(), _startState, RULE_directDeclarator);
-							_localctx = tmp;
-							recog.base.set_state(475);
-							if !({recog.precpred(None, 2)}) {
-								Err(FailedPredicateError::new(&mut recog.base, Some("recog.precpred(None, 2)".to_owned()), None))?;
-							}
-							recog.base.set_state(476);
-							recog.base.match_token(LeftParen,&mut recog.err_handler)?;
-
-							recog.base.set_state(478);
-							recog.err_handler.sync(&mut recog.base)?;
-							_la = recog.base.input.la(1);
-							if _la==Identifier {
-								{
-								/*InvokeRule identifierList*/
-								recog.base.set_state(477);
-								recog.identifierList()?;
-
-								}
-							}
-
-							recog.base.set_state(480);
-							recog.base.match_token(RightParen,&mut recog.err_handler)?;
-
-							}
-						}
-
-						_ => {}
-					}
-					} 
-				}
-				recog.base.set_state(485);
-				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(47,&mut recog.base)?;
-			}
-			}
-		};
-		match result {
-		Ok(_) => {},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re)=>{
-			//_localctx.exception = re;
-			recog.err_handler.report_error(&mut recog.base, re);
-	        recog.err_handler.recover(&mut recog.base, re)?;}
-		}
-		recog.base.unroll_recursion_context(_parentctx);
-
-		Ok(_localctx)
-	}
-}
-//------------------- nestedParenthesesBlock ----------------
-pub type NestedParenthesesBlockContextAll<'input> = NestedParenthesesBlockContext<'input>;
-
-
-pub type NestedParenthesesBlockContext<'input> = BaseParserRuleContext<'input,NestedParenthesesBlockContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct NestedParenthesesBlockContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for NestedParenthesesBlockContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for NestedParenthesesBlockContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_nestedParenthesesBlock(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_nestedParenthesesBlock(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for NestedParenthesesBlockContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_nestedParenthesesBlock(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for NestedParenthesesBlockContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_nestedParenthesesBlock }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_nestedParenthesesBlock }
-}
-antlr_rust::type_id!{NestedParenthesesBlockContextExt<'a>}
-
-impl<'input> NestedParenthesesBlockContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<NestedParenthesesBlockContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,NestedParenthesesBlockContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait NestedParenthesesBlockContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<NestedParenthesesBlockContextExt<'input>>{
-
-/// Retrieves all `TerminalNode`s corresponding to token LeftParen in current rule
-fn LeftParen_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(LeftParen)
-}
-/// Retrieves 'i's TerminalNode corresponding to token LeftParen, starting from 0.
-/// Returns `None` if number of children corresponding to token LeftParen is less or equal than `i`.
-fn LeftParen(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LeftParen, i)
-}
-fn nestedParenthesesBlock_all(&self) ->  Vec<Rc<NestedParenthesesBlockContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn nestedParenthesesBlock(&self, i: usize) -> Option<Rc<NestedParenthesesBlockContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token RightParen in current rule
-fn RightParen_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(RightParen)
-}
-/// Retrieves 'i's TerminalNode corresponding to token RightParen, starting from 0.
-/// Returns `None` if number of children corresponding to token RightParen is less or equal than `i`.
-fn RightParen(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(RightParen, i)
-}
-
-}
-
-impl<'input> NestedParenthesesBlockContextAttrs<'input> for NestedParenthesesBlockContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn nestedParenthesesBlock(&mut self,)
-	-> Result<Rc<NestedParenthesesBlockContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = NestedParenthesesBlockContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 76, RULE_nestedParenthesesBlock);
-        let mut _localctx: Rc<NestedParenthesesBlockContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(493);
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			while (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__0) | (1usize << T__1) | (1usize << T__2) | (1usize << T__3) | (1usize << T__4) | (1usize << T__5) | (1usize << T__6) | (1usize << T__7) | (1usize << T__8) | (1usize << T__9) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << RightBrace) | (1usize << LeftBracket) | (1usize << RightBracket) | (1usize << Comma) | (1usize << At) | (1usize << Colon) | (1usize << SemiColon) | (1usize << Percent) | (1usize << Star) | (1usize << Tilde) | (1usize << QuestionMark) | (1usize << Quote) | (1usize << DoubleQuote) | (1usize << LogicalOr) | (1usize << OrOp) | (1usize << LogicalAnd) | (1usize << AndOp) | (1usize << Slash) | (1usize << SlashStar) | (1usize << StarSlash) | (1usize << DoubleSlash) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << BangEqual) | (1usize << Equal) | (1usize << DoubleEqual) | (1usize << LeftCaret) | (1usize << DoubleLeftCaret) | (1usize << LeftCaretEqual) | (1usize << RightCaret) | (1usize << DoubleRightCaret) | (1usize << RightCaretEqual) | (1usize << PlusEqual) | (1usize << MinusEqual) | (1usize << MultiplyEqual) | (1usize << DivideEqual) | (1usize << PercentEqual) | (1usize << If) | (1usize << Else) | (1usize << End) | (1usize << Set))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (For - 64)) | (1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Case - 64)) | (1usize << (Default - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Eof - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)) | (1usize << (Whitespace - 64)) | (1usize << (Newline - 64)) | (1usize << (BlockComment - 64)) | (1usize << (LineComment - 64)))) != 0) {
-				{
-				recog.base.set_state(491);
-				recog.err_handler.sync(&mut recog.base)?;
-				match recog.base.input.la(1) {
-				 T__0 | T__1 | T__2 | T__3 | T__4 | T__5 | T__6 | T__7 | T__8 | T__9 |
-				 LeftBrace | RightBrace | LeftBracket | RightBracket | Comma | At | Colon |
-				 SemiColon | Percent | Star | Tilde | QuestionMark | Quote | DoubleQuote |
-				 LogicalOr | OrOp | LogicalAnd | AndOp | Slash | SlashStar | StarSlash |
-				 DoubleSlash | Sharp | DoubleSharp | Minus | DecrementOp | Plus | IncrementOp |
-				 Dot | DotAt | Dollar | DollarAt | Bang | BangEqual | Equal | DoubleEqual |
-				 LeftCaret | DoubleLeftCaret | LeftCaretEqual | RightCaret | DoubleRightCaret |
-				 RightCaretEqual | PlusEqual | MinusEqual | MultiplyEqual | DivideEqual |
-				 PercentEqual | If | Else | End | Set | For | While | Do | Goto | Return |
-				 Switch | Case | Default | Function | Break | Callfunc | Eof | Setarray |
-				 Copyarray | Identifier | Label | String | Number | Whitespace | Newline |
-				 BlockComment | LineComment 
-					=> {
-						{
-						recog.base.set_state(486);
-						_la = recog.base.input.la(1);
-						if { _la <= 0 || (_la==LeftParen || _la==RightParen) } {
-							recog.err_handler.recover_inline(&mut recog.base)?;
-
-						}
-						else {
-							if  recog.base.input.la(1)==TOKEN_EOF { recog.base.matched_eof = true };
-							recog.err_handler.report_match(&mut recog.base);
-							recog.base.consume(&mut recog.err_handler);
-						}
-						}
-					}
-
-				 LeftParen 
-					=> {
-						{
-						recog.base.set_state(487);
-						recog.base.match_token(LeftParen,&mut recog.err_handler)?;
-
-						/*InvokeRule nestedParenthesesBlock*/
-						recog.base.set_state(488);
-						recog.nestedParenthesesBlock()?;
-
-						recog.base.set_state(489);
-						recog.base.match_token(RightParen,&mut recog.err_handler)?;
-
-						}
-					}
-
-					_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
-				}
-				}
-				recog.base.set_state(495);
-				recog.err_handler.sync(&mut recog.base)?;
-				_la = recog.base.input.la(1);
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- parameterTypeList ----------------
-pub type ParameterTypeListContextAll<'input> = ParameterTypeListContext<'input>;
-
-
-pub type ParameterTypeListContext<'input> = BaseParserRuleContext<'input,ParameterTypeListContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct ParameterTypeListContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for ParameterTypeListContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for ParameterTypeListContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_parameterTypeList(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_parameterTypeList(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for ParameterTypeListContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_parameterTypeList(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for ParameterTypeListContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_parameterTypeList }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_parameterTypeList }
-}
-antlr_rust::type_id!{ParameterTypeListContextExt<'a>}
-
-impl<'input> ParameterTypeListContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<ParameterTypeListContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,ParameterTypeListContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait ParameterTypeListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<ParameterTypeListContextExt<'input>>{
-
-fn parameterList(&self) -> Option<Rc<ParameterListContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token Comma
-/// Returns `None` if there is no child corresponding to token Comma
-fn Comma(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Comma, 0)
-}
-
-}
-
-impl<'input> ParameterTypeListContextAttrs<'input> for ParameterTypeListContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn parameterTypeList(&mut self,)
-	-> Result<Rc<ParameterTypeListContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = ParameterTypeListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 78, RULE_parameterTypeList);
-        let mut _localctx: Rc<ParameterTypeListContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule parameterList*/
-			recog.base.set_state(496);
-			recog.parameterList()?;
-
-			recog.base.set_state(499);
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			if _la==Comma {
-				{
-				recog.base.set_state(497);
-				recog.base.match_token(Comma,&mut recog.err_handler)?;
-
-				recog.base.set_state(498);
-				recog.base.match_token(T__6,&mut recog.err_handler)?;
-
-				}
-			}
-
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- parameterList ----------------
-pub type ParameterListContextAll<'input> = ParameterListContext<'input>;
-
-
-pub type ParameterListContext<'input> = BaseParserRuleContext<'input,ParameterListContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct ParameterListContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for ParameterListContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for ParameterListContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_parameterList(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_parameterList(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for ParameterListContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_parameterList(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for ParameterListContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_parameterList }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_parameterList }
-}
-antlr_rust::type_id!{ParameterListContextExt<'a>}
-
-impl<'input> ParameterListContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<ParameterListContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,ParameterListContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait ParameterListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<ParameterListContextExt<'input>>{
-
-fn parameterDeclaration_all(&self) ->  Vec<Rc<ParameterDeclarationContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn parameterDeclaration(&self, i: usize) -> Option<Rc<ParameterDeclarationContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
-fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(Comma)
-}
-/// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
-/// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
-fn Comma(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Comma, i)
-}
-
-}
-
-impl<'input> ParameterListContextAttrs<'input> for ParameterListContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn parameterList(&mut self,)
-	-> Result<Rc<ParameterListContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = ParameterListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 80, RULE_parameterList);
-        let mut _localctx: Rc<ParameterListContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			let mut _alt: isize;
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule parameterDeclaration*/
-			recog.base.set_state(501);
-			recog.parameterDeclaration()?;
-
-			recog.base.set_state(506);
-			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(51,&mut recog.base)?;
-			while { _alt!=2 && _alt!=INVALID_ALT } {
-				if _alt==1 {
-					{
-					{
-					recog.base.set_state(502);
-					recog.base.match_token(Comma,&mut recog.err_handler)?;
-
-					/*InvokeRule parameterDeclaration*/
-					recog.base.set_state(503);
-					recog.parameterDeclaration()?;
-
-					}
-					} 
-				}
-				recog.base.set_state(508);
-				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(51,&mut recog.base)?;
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- parameterDeclaration ----------------
-pub type ParameterDeclarationContextAll<'input> = ParameterDeclarationContext<'input>;
-
-
-pub type ParameterDeclarationContext<'input> = BaseParserRuleContext<'input,ParameterDeclarationContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct ParameterDeclarationContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for ParameterDeclarationContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for ParameterDeclarationContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_parameterDeclaration(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_parameterDeclaration(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for ParameterDeclarationContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_parameterDeclaration(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for ParameterDeclarationContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_parameterDeclaration }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_parameterDeclaration }
-}
-antlr_rust::type_id!{ParameterDeclarationContextExt<'a>}
-
-impl<'input> ParameterDeclarationContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<ParameterDeclarationContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,ParameterDeclarationContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait ParameterDeclarationContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<ParameterDeclarationContextExt<'input>>{
-
-fn declarationSpecifiers(&self) -> Option<Rc<DeclarationSpecifiersContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-fn declarator(&self) -> Option<Rc<DeclaratorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-fn declarationSpecifiers2(&self) -> Option<Rc<DeclarationSpecifiers2ContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-fn directAbstractDeclarator(&self) -> Option<Rc<DirectAbstractDeclaratorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> ParameterDeclarationContextAttrs<'input> for ParameterDeclarationContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn parameterDeclaration(&mut self,)
-	-> Result<Rc<ParameterDeclarationContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = ParameterDeclarationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 82, RULE_parameterDeclaration);
-        let mut _localctx: Rc<ParameterDeclarationContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			recog.base.set_state(516);
-			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(53,&mut recog.base)? {
-				1 =>{
-					//recog.base.enter_outer_alt(_localctx.clone(), 1);
-					recog.base.enter_outer_alt(None, 1);
-					{
-					/*InvokeRule declarationSpecifiers*/
-					recog.base.set_state(509);
-					recog.declarationSpecifiers()?;
-
-					/*InvokeRule declarator*/
-					recog.base.set_state(510);
-					recog.declarator()?;
-
-					}
-				}
-			,
-				2 =>{
-					//recog.base.enter_outer_alt(_localctx.clone(), 2);
-					recog.base.enter_outer_alt(None, 2);
-					{
-					/*InvokeRule declarationSpecifiers2*/
-					recog.base.set_state(512);
-					recog.declarationSpecifiers2()?;
-
-					recog.base.set_state(514);
-					recog.err_handler.sync(&mut recog.base)?;
-					_la = recog.base.input.la(1);
-					if _la==LeftBracket {
-						{
-						/*InvokeRule directAbstractDeclarator*/
-						recog.base.set_state(513);
-						recog.directAbstractDeclarator_rec(0)?;
-
-						}
-					}
-
-					}
-				}
-
-				_ => {}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- identifierList ----------------
-pub type IdentifierListContextAll<'input> = IdentifierListContext<'input>;
-
-
-pub type IdentifierListContext<'input> = BaseParserRuleContext<'input,IdentifierListContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct IdentifierListContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for IdentifierListContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for IdentifierListContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_identifierList(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_identifierList(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for IdentifierListContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_identifierList(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for IdentifierListContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_identifierList }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_identifierList }
-}
-antlr_rust::type_id!{IdentifierListContextExt<'a>}
-
-impl<'input> IdentifierListContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<IdentifierListContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,IdentifierListContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait IdentifierListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<IdentifierListContextExt<'input>>{
-
-/// Retrieves all `TerminalNode`s corresponding to token Identifier in current rule
-fn Identifier_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(Identifier)
-}
-/// Retrieves 'i's TerminalNode corresponding to token Identifier, starting from 0.
-/// Returns `None` if number of children corresponding to token Identifier is less or equal than `i`.
-fn Identifier(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Identifier, i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
-fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(Comma)
-}
-/// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
-/// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
-fn Comma(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Comma, i)
-}
-
-}
-
-impl<'input> IdentifierListContextAttrs<'input> for IdentifierListContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn identifierList(&mut self,)
-	-> Result<Rc<IdentifierListContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = IdentifierListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 84, RULE_identifierList);
-        let mut _localctx: Rc<IdentifierListContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(518);
-			recog.base.match_token(Identifier,&mut recog.err_handler)?;
-
-			recog.base.set_state(523);
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			while _la==Comma {
-				{
-				{
-				recog.base.set_state(519);
-				recog.base.match_token(Comma,&mut recog.err_handler)?;
-
-				recog.base.set_state(520);
-				recog.base.match_token(Identifier,&mut recog.err_handler)?;
-
-				}
-				}
-				recog.base.set_state(525);
-				recog.err_handler.sync(&mut recog.base)?;
-				_la = recog.base.input.la(1);
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- directAbstractDeclarator ----------------
-pub type DirectAbstractDeclaratorContextAll<'input> = DirectAbstractDeclaratorContext<'input>;
-
-
-pub type DirectAbstractDeclaratorContext<'input> = BaseParserRuleContext<'input,DirectAbstractDeclaratorContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DirectAbstractDeclaratorContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DirectAbstractDeclaratorContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DirectAbstractDeclaratorContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_directAbstractDeclarator(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_directAbstractDeclarator(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DirectAbstractDeclaratorContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_directAbstractDeclarator(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DirectAbstractDeclaratorContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_directAbstractDeclarator }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_directAbstractDeclarator }
-}
-antlr_rust::type_id!{DirectAbstractDeclaratorContextExt<'a>}
-
-impl<'input> DirectAbstractDeclaratorContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DirectAbstractDeclaratorContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DirectAbstractDeclaratorContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DirectAbstractDeclaratorContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DirectAbstractDeclaratorContextExt<'input>>{
-
-/// Retrieves first TerminalNode corresponding to token LeftBracket
-/// Returns `None` if there is no child corresponding to token LeftBracket
-fn LeftBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LeftBracket, 0)
-}
-/// Retrieves first TerminalNode corresponding to token Star
-/// Returns `None` if there is no child corresponding to token Star
-fn Star(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Star, 0)
-}
-/// Retrieves first TerminalNode corresponding to token RightBracket
-/// Returns `None` if there is no child corresponding to token RightBracket
-fn RightBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(RightBracket, 0)
-}
-fn directAbstractDeclarator(&self) -> Option<Rc<DirectAbstractDeclaratorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-
-}
-
-impl<'input> DirectAbstractDeclaratorContextAttrs<'input> for DirectAbstractDeclaratorContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn  directAbstractDeclarator(&mut self,)
-	-> Result<Rc<DirectAbstractDeclaratorContextAll<'input>>,ANTLRError> {
-		self.directAbstractDeclarator_rec(0)
-	}
-
-	fn directAbstractDeclarator_rec(&mut self, _p: isize)
-	-> Result<Rc<DirectAbstractDeclaratorContextAll<'input>>,ANTLRError> {
-		let recog = self;
-		let _parentctx = recog.ctx.take();
-		let _parentState = recog.base.get_state();
-		let mut _localctx = DirectAbstractDeclaratorContextExt::new(_parentctx.clone(), recog.base.get_state());
-		recog.base.enter_recursion_rule(_localctx.clone(), 86, RULE_directAbstractDeclarator, _p);
-	    let mut _localctx: Rc<DirectAbstractDeclaratorContextAll> = _localctx;
-        let mut _prevctx = _localctx.clone();
-		let _startState = 86;
-		let result: Result<(), ANTLRError> = try {
-			let mut _alt: isize;
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			{
-			recog.base.set_state(527);
-			recog.base.match_token(LeftBracket,&mut recog.err_handler)?;
-
-			recog.base.set_state(528);
-			recog.base.match_token(Star,&mut recog.err_handler)?;
-
-			recog.base.set_state(529);
-			recog.base.match_token(RightBracket,&mut recog.err_handler)?;
-
-			}
-
-			let tmp = recog.input.lt(-1).cloned();
-			recog.ctx.as_ref().unwrap().set_stop(tmp);
-			recog.base.set_state(537);
-			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(55,&mut recog.base)?;
-			while { _alt!=2 && _alt!=INVALID_ALT } {
-				if _alt==1 {
-					recog.trigger_exit_rule_event();
-					_prevctx = _localctx.clone();
-					{
-					{
-					/*recRuleAltStartAction*/
-					let mut tmp = DirectAbstractDeclaratorContextExt::new(_parentctx.clone(), _parentState);
-					recog.push_new_recursion_context(tmp.clone(), _startState, RULE_directAbstractDeclarator);
-					_localctx = tmp;
-					recog.base.set_state(531);
-					if !({recog.precpred(None, 1)}) {
-						Err(FailedPredicateError::new(&mut recog.base, Some("recog.precpred(None, 1)".to_owned()), None))?;
-					}
-					recog.base.set_state(532);
-					recog.base.match_token(LeftBracket,&mut recog.err_handler)?;
-
-					recog.base.set_state(533);
-					recog.base.match_token(Star,&mut recog.err_handler)?;
-
-					recog.base.set_state(534);
-					recog.base.match_token(RightBracket,&mut recog.err_handler)?;
-
-					}
-					} 
-				}
-				recog.base.set_state(539);
-				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(55,&mut recog.base)?;
-			}
-			}
-		};
-		match result {
-		Ok(_) => {},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re)=>{
-			//_localctx.exception = re;
-			recog.err_handler.report_error(&mut recog.base, re);
-	        recog.err_handler.recover(&mut recog.base, re)?;}
-		}
-		recog.base.unroll_recursion_context(_parentctx);
-
-		Ok(_localctx)
-	}
-}
-//------------------- initializer ----------------
-pub type InitializerContextAll<'input> = InitializerContext<'input>;
-
-
-pub type InitializerContext<'input> = BaseParserRuleContext<'input,InitializerContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct InitializerContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for InitializerContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for InitializerContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_initializer(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_initializer(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for InitializerContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_initializer(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for InitializerContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_initializer }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_initializer }
-}
-antlr_rust::type_id!{InitializerContextExt<'a>}
-
-impl<'input> InitializerContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<InitializerContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,InitializerContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait InitializerContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<InitializerContextExt<'input>>{
-
-fn assignmentExpression(&self) -> Option<Rc<AssignmentExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token LeftBrace
-/// Returns `None` if there is no child corresponding to token LeftBrace
-fn LeftBrace(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LeftBrace, 0)
-}
-fn initializerList(&self) -> Option<Rc<InitializerListContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token RightBrace
-/// Returns `None` if there is no child corresponding to token RightBrace
-fn RightBrace(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(RightBrace, 0)
-}
-/// Retrieves first TerminalNode corresponding to token Comma
-/// Returns `None` if there is no child corresponding to token Comma
-fn Comma(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Comma, 0)
-}
-
-}
-
-impl<'input> InitializerContextAttrs<'input> for InitializerContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn initializer(&mut self,)
-	-> Result<Rc<InitializerContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = InitializerContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 88, RULE_initializer);
-        let mut _localctx: Rc<InitializerContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			recog.base.set_state(548);
-			recog.err_handler.sync(&mut recog.base)?;
-			match recog.base.input.la(1) {
-			 LeftParen | At | Star | Tilde | Quote | LogicalAnd | Sharp | DoubleSharp |
-			 Minus | DecrementOp | Plus | IncrementOp | Dot | DotAt | Dollar | DollarAt |
-			 Bang | Set | Callfunc | Setarray | Copyarray | Identifier | String |
-			 Number 
-				=> {
-					//recog.base.enter_outer_alt(_localctx.clone(), 1);
-					recog.base.enter_outer_alt(None, 1);
-					{
-					/*InvokeRule assignmentExpression*/
-					recog.base.set_state(540);
-					recog.assignmentExpression()?;
-
-					}
-				}
-
-			 LeftBrace 
-				=> {
-					//recog.base.enter_outer_alt(_localctx.clone(), 2);
-					recog.base.enter_outer_alt(None, 2);
-					{
-					recog.base.set_state(541);
-					recog.base.match_token(LeftBrace,&mut recog.err_handler)?;
-
-					/*InvokeRule initializerList*/
-					recog.base.set_state(542);
-					recog.initializerList()?;
-
-					recog.base.set_state(544);
-					recog.err_handler.sync(&mut recog.base)?;
-					_la = recog.base.input.la(1);
-					if _la==Comma {
-						{
-						recog.base.set_state(543);
-						recog.base.match_token(Comma,&mut recog.err_handler)?;
-
-						}
-					}
-
-					recog.base.set_state(546);
-					recog.base.match_token(RightBrace,&mut recog.err_handler)?;
-
-					}
-				}
-
-				_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- initializerList ----------------
-pub type InitializerListContextAll<'input> = InitializerListContext<'input>;
-
-
-pub type InitializerListContext<'input> = BaseParserRuleContext<'input,InitializerListContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct InitializerListContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for InitializerListContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for InitializerListContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_initializerList(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_initializerList(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for InitializerListContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_initializerList(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for InitializerListContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_initializerList }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_initializerList }
-}
-antlr_rust::type_id!{InitializerListContextExt<'a>}
-
-impl<'input> InitializerListContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<InitializerListContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,InitializerListContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait InitializerListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<InitializerListContextExt<'input>>{
-
-fn initializer_all(&self) ->  Vec<Rc<InitializerContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn initializer(&self, i: usize) -> Option<Rc<InitializerContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-fn designation_all(&self) ->  Vec<Rc<DesignationContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn designation(&self, i: usize) -> Option<Rc<DesignationContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-/// Retrieves all `TerminalNode`s corresponding to token Comma in current rule
-fn Comma_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(Comma)
-}
-/// Retrieves 'i's TerminalNode corresponding to token Comma, starting from 0.
-/// Returns `None` if number of children corresponding to token Comma is less or equal than `i`.
-fn Comma(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Comma, i)
-}
-
-}
-
-impl<'input> InitializerListContextAttrs<'input> for InitializerListContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn initializerList(&mut self,)
-	-> Result<Rc<InitializerListContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = InitializerListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 90, RULE_initializerList);
-        let mut _localctx: Rc<InitializerListContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			let mut _alt: isize;
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(551);
-			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(58,&mut recog.base)? {
-				x if x == 1=>{
-					{
-					/*InvokeRule designation*/
-					recog.base.set_state(550);
-					recog.designation()?;
-
-					}
-				}
-
-				_ => {}
-			}
-			/*InvokeRule initializer*/
-			recog.base.set_state(553);
-			recog.initializer()?;
-
-			recog.base.set_state(561);
-			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(60,&mut recog.base)?;
-			while { _alt!=2 && _alt!=INVALID_ALT } {
-				if _alt==1 {
-					{
-					{
-					recog.base.set_state(554);
-					recog.base.match_token(Comma,&mut recog.err_handler)?;
-
-					recog.base.set_state(556);
-					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(59,&mut recog.base)? {
-						x if x == 1=>{
-							{
-							/*InvokeRule designation*/
-							recog.base.set_state(555);
-							recog.designation()?;
-
-							}
-						}
-
-						_ => {}
-					}
-					/*InvokeRule initializer*/
-					recog.base.set_state(558);
-					recog.initializer()?;
-
-					}
-					} 
-				}
-				recog.base.set_state(563);
-				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(60,&mut recog.base)?;
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- designation ----------------
-pub type DesignationContextAll<'input> = DesignationContext<'input>;
-
-
-pub type DesignationContext<'input> = BaseParserRuleContext<'input,DesignationContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DesignationContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DesignationContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DesignationContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_designation(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_designation(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DesignationContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_designation(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DesignationContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_designation }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_designation }
-}
-antlr_rust::type_id!{DesignationContextExt<'a>}
-
-impl<'input> DesignationContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DesignationContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DesignationContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DesignationContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DesignationContextExt<'input>>{
-
-fn designatorList(&self) -> Option<Rc<DesignatorListContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token Equal
-/// Returns `None` if there is no child corresponding to token Equal
-fn Equal(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Equal, 0)
-}
-
-}
-
-impl<'input> DesignationContextAttrs<'input> for DesignationContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn designation(&mut self,)
-	-> Result<Rc<DesignationContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DesignationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 92, RULE_designation);
-        let mut _localctx: Rc<DesignationContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			/*InvokeRule designatorList*/
-			recog.base.set_state(564);
-			recog.designatorList()?;
-
-			recog.base.set_state(565);
-			recog.base.match_token(Equal,&mut recog.err_handler)?;
-
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- designatorList ----------------
-pub type DesignatorListContextAll<'input> = DesignatorListContext<'input>;
-
-
-pub type DesignatorListContext<'input> = BaseParserRuleContext<'input,DesignatorListContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DesignatorListContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DesignatorListContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DesignatorListContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_designatorList(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_designatorList(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DesignatorListContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_designatorList(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DesignatorListContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_designatorList }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_designatorList }
-}
-antlr_rust::type_id!{DesignatorListContextExt<'a>}
-
-impl<'input> DesignatorListContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DesignatorListContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DesignatorListContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DesignatorListContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DesignatorListContextExt<'input>>{
-
-fn designator_all(&self) ->  Vec<Rc<DesignatorContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn designator(&self, i: usize) -> Option<Rc<DesignatorContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
-
-}
-
-impl<'input> DesignatorListContextAttrs<'input> for DesignatorListContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn designatorList(&mut self,)
-	-> Result<Rc<DesignatorListContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DesignatorListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 94, RULE_designatorList);
-        let mut _localctx: Rc<DesignatorListContextAll> = _localctx;
-		let mut _la: isize;
-		let result: Result<(), ANTLRError> = try {
-
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(568); 
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			loop {
-				{
-				{
-				/*InvokeRule designator*/
-				recog.base.set_state(567);
-				recog.designator()?;
-
-				}
-				}
-				recog.base.set_state(570); 
-				recog.err_handler.sync(&mut recog.base)?;
-				_la = recog.base.input.la(1);
-				if !(_la==LeftBracket || _la==Dot) {break}
-			}
-			}
-		};
-		match result {
-		Ok(_)=>{},
-        Err(e @ ANTLRError::FallThrough(_)) => return Err(e),
-		Err(ref re) => {
-				//_localctx.exception = re;
-				recog.err_handler.report_error(&mut recog.base, re);
-				recog.err_handler.recover(&mut recog.base, re)?;
-			}
-		}
-		recog.base.exit_rule();
-
-		Ok(_localctx)
-	}
-}
-//------------------- designator ----------------
-pub type DesignatorContextAll<'input> = DesignatorContext<'input>;
-
-
-pub type DesignatorContext<'input> = BaseParserRuleContext<'input,DesignatorContextExt<'input>>;
-
-#[derive(Clone)]
-pub struct DesignatorContextExt<'input>{
-ph:PhantomData<&'input str>
-}
-
-impl<'input> RathenaScriptLangParserContext<'input> for DesignatorContext<'input>{}
-
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for DesignatorContext<'input>{
-	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.enter_every_rule(self);
-		listener.enter_designator(self);
-	}
-	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_designator(self);
-		listener.exit_every_rule(self);
-	}
-}
-
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for DesignatorContext<'input>{
-	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_designator(self);
-	}
-}
-
-impl<'input> CustomRuleContext<'input> for DesignatorContextExt<'input>{
-	type TF = LocalTokenFactory<'input>;
-	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_designator }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_designator }
-}
-antlr_rust::type_id!{DesignatorContextExt<'a>}
-
-impl<'input> DesignatorContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<DesignatorContextAll<'input>> {
-		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,DesignatorContextExt{
-				ph:PhantomData
-			}),
-		)
-	}
-}
-
-pub trait DesignatorContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<DesignatorContextExt<'input>>{
-
-/// Retrieves first TerminalNode corresponding to token LeftBracket
-/// Returns `None` if there is no child corresponding to token LeftBracket
-fn LeftBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LeftBracket, 0)
-}
-fn constantExpression(&self) -> Option<Rc<ConstantExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-/// Retrieves first TerminalNode corresponding to token RightBracket
-/// Returns `None` if there is no child corresponding to token RightBracket
-fn RightBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(RightBracket, 0)
-}
-/// Retrieves first TerminalNode corresponding to token Dot
-/// Returns `None` if there is no child corresponding to token Dot
-fn Dot(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Dot, 0)
-}
-/// Retrieves first TerminalNode corresponding to token Identifier
-/// Returns `None` if there is no child corresponding to token Identifier
-fn Identifier(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(Identifier, 0)
-}
-
-}
-
-impl<'input> DesignatorContextAttrs<'input> for DesignatorContext<'input>{}
-
-impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
-where
-    I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
-    H: ErrorStrategy<'input,BaseParserType<'input,I>>
-{
-	pub fn designator(&mut self,)
-	-> Result<Rc<DesignatorContextAll<'input>>,ANTLRError> {
-		let mut recog = self;
-		let _parentctx = recog.ctx.take();
-		let mut _localctx = DesignatorContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 96, RULE_designator);
-        let mut _localctx: Rc<DesignatorContextAll> = _localctx;
-		let result: Result<(), ANTLRError> = try {
-
-			recog.base.set_state(578);
-			recog.err_handler.sync(&mut recog.base)?;
-			match recog.base.input.la(1) {
-			 LeftBracket 
-				=> {
-					//recog.base.enter_outer_alt(_localctx.clone(), 1);
-					recog.base.enter_outer_alt(None, 1);
-					{
-					recog.base.set_state(572);
-					recog.base.match_token(LeftBracket,&mut recog.err_handler)?;
-
-					/*InvokeRule constantExpression*/
-					recog.base.set_state(573);
-					recog.constantExpression()?;
-
-					recog.base.set_state(574);
-					recog.base.match_token(RightBracket,&mut recog.err_handler)?;
-
-					}
-				}
-
-			 Dot 
-				=> {
-					//recog.base.enter_outer_alt(_localctx.clone(), 2);
-					recog.base.enter_outer_alt(None, 2);
-					{
-					recog.base.set_state(576);
-					recog.base.match_token(Dot,&mut recog.err_handler)?;
-
-					recog.base.set_state(577);
-					recog.base.match_token(Identifier,&mut recog.err_handler)?;
-
-					}
-				}
-
-				_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
 			}
 		};
 		match result {
@@ -7358,6 +4299,9 @@ fn iterationStatement(&self) -> Option<Rc<IterationStatementContextAll<'input>>>
 fn jumpStatement(&self) -> Option<Rc<JumpStatementContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
+fn labeledStatement(&self) -> Option<Rc<LabeledStatementContextAll<'input>>> where Self:Sized{
+	self.child_of_type(0)
+}
 
 }
 
@@ -7373,11 +4317,11 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = StatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 98, RULE_statement);
+        recog.base.enter_rule(_localctx.clone(), 54, RULE_statement);
         let mut _localctx: Rc<StatementContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(585);
+			recog.base.set_state(363);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 LeftBrace 
@@ -7386,22 +4330,22 @@ where
 					recog.base.enter_outer_alt(None, 1);
 					{
 					/*InvokeRule compoundStatement*/
-					recog.base.set_state(580);
+					recog.base.set_state(357);
 					recog.compoundStatement()?;
 
 					}
 				}
 
-			 LeftParen | At | SemiColon | Star | Tilde | Quote | LogicalAnd | Sharp |
-			 DoubleSharp | Minus | DecrementOp | Plus | IncrementOp | Dot | DotAt |
-			 Dollar | DollarAt | Bang | Set | Callfunc | Setarray | Copyarray | Identifier |
-			 String | Number 
+			 LeftParen | At | Star | Tilde | Quote | LogicalAnd | Sharp | DoubleSharp |
+			 Minus | DecrementOp | Plus | IncrementOp | Dot | DotAt | Dollar | DollarAt |
+			 Bang | Set | Callfunc | Setarray | Copyarray | Identifier | String |
+			 Number 
 				=> {
 					//recog.base.enter_outer_alt(_localctx.clone(), 2);
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule expressionStatement*/
-					recog.base.set_state(581);
+					recog.base.set_state(358);
 					recog.expressionStatement()?;
 
 					}
@@ -7413,7 +4357,7 @@ where
 					recog.base.enter_outer_alt(None, 3);
 					{
 					/*InvokeRule selectionStatement*/
-					recog.base.set_state(582);
+					recog.base.set_state(359);
 					recog.selectionStatement()?;
 
 					}
@@ -7425,20 +4369,32 @@ where
 					recog.base.enter_outer_alt(None, 4);
 					{
 					/*InvokeRule iterationStatement*/
-					recog.base.set_state(583);
+					recog.base.set_state(360);
 					recog.iterationStatement()?;
 
 					}
 				}
 
-			 T__7 | End | Goto | Return | Break 
+			 T__6 | End | Goto | Return | Break 
 				=> {
 					//recog.base.enter_outer_alt(_localctx.clone(), 5);
 					recog.base.enter_outer_alt(None, 5);
 					{
 					/*InvokeRule jumpStatement*/
-					recog.base.set_state(584);
+					recog.base.set_state(361);
 					recog.jumpStatement()?;
+
+					}
+				}
+
+			 Label 
+				=> {
+					//recog.base.enter_outer_alt(_localctx.clone(), 6);
+					recog.base.enter_outer_alt(None, 6);
+					{
+					/*InvokeRule labeledStatement*/
+					recog.base.set_state(362);
+					recog.labeledStatement()?;
 
 					}
 				}
@@ -7515,12 +4471,6 @@ pub trait LabeledStatementContextAttrs<'input>: RathenaScriptLangParserContext<'
 fn Label(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(Label, 0)
 }
-fn statement_all(&self) ->  Vec<Rc<StatementContextAll<'input>>> where Self:Sized{
-	self.children_of_type()
-}
-fn statement(&self, i: usize) -> Option<Rc<StatementContextAll<'input>>> where Self:Sized{
-	self.child_of_type(i)
-}
 
 }
 
@@ -7536,35 +4486,16 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = LabeledStatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 100, RULE_labeledStatement);
+        recog.base.enter_rule(_localctx.clone(), 56, RULE_labeledStatement);
         let mut _localctx: Rc<LabeledStatementContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			let mut _alt: isize;
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(587);
+			recog.base.set_state(365);
 			recog.base.match_token(Label,&mut recog.err_handler)?;
 
-			recog.base.set_state(591);
-			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(64,&mut recog.base)?;
-			while { _alt!=2 && _alt!=INVALID_ALT } {
-				if _alt==1 {
-					{
-					{
-					/*InvokeRule statement*/
-					recog.base.set_state(588);
-					recog.statement()?;
-
-					}
-					} 
-				}
-				recog.base.set_state(593);
-				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(64,&mut recog.base)?;
-			}
 			}
 		};
 		match result {
@@ -7659,7 +4590,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = CompoundStatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 102, RULE_compoundStatement);
+        recog.base.enter_rule(_localctx.clone(), 58, RULE_compoundStatement);
         let mut _localctx: Rc<CompoundStatementContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -7667,22 +4598,22 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(594);
+			recog.base.set_state(367);
 			recog.base.match_token(LeftBrace,&mut recog.err_handler)?;
 
-			recog.base.set_state(596);
+			recog.base.set_state(369);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__7) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << SemiColon) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (For - 64)) | (1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__6) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set) | (1usize << For))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0) {
 				{
 				/*InvokeRule blockItemList*/
-				recog.base.set_state(595);
+				recog.base.set_state(368);
 				recog.blockItemList()?;
 
 				}
 			}
 
-			recog.base.set_state(598);
+			recog.base.set_state(371);
 			recog.base.match_token(RightBrace,&mut recog.err_handler)?;
 
 			}
@@ -7772,7 +4703,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = BlockItemListContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 104, RULE_blockItemList);
+        recog.base.enter_rule(_localctx.clone(), 60, RULE_blockItemList);
         let mut _localctx: Rc<BlockItemListContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -7780,22 +4711,22 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(601); 
+			recog.base.set_state(374); 
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
 			loop {
 				{
 				{
 				/*InvokeRule blockItem*/
-				recog.base.set_state(600);
+				recog.base.set_state(373);
 				recog.blockItem()?;
 
 				}
 				}
-				recog.base.set_state(603); 
+				recog.base.set_state(376); 
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
-				if !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__7) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << SemiColon) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (For - 64)) | (1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0)) {break}
+				if !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__6) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set) | (1usize << For))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0)) {break}
 			}
 			}
 		};
@@ -7866,13 +4797,7 @@ pub trait BlockItemContextAttrs<'input>: RathenaScriptLangParserContext<'input> 
 fn statement(&self) -> Option<Rc<StatementContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
-fn labeledStatement(&self) -> Option<Rc<LabeledStatementContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
 fn functionDefinition(&self) -> Option<Rc<FunctionDefinitionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
-}
-fn declaration(&self) -> Option<Rc<DeclarationContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 
@@ -7890,58 +4815,42 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = BlockItemContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 106, RULE_blockItem);
+        recog.base.enter_rule(_localctx.clone(), 62, RULE_blockItem);
         let mut _localctx: Rc<BlockItemContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(609);
+			recog.base.set_state(380);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(67,&mut recog.base)? {
-				1 =>{
+			match recog.base.input.la(1) {
+			 T__6 | LeftParen | LeftBrace | At | Star | Tilde | Quote | LogicalAnd |
+			 Sharp | DoubleSharp | Minus | DecrementOp | Plus | IncrementOp | Dot |
+			 DotAt | Dollar | DollarAt | Bang | If | End | Set | For | While | Do |
+			 Goto | Return | Switch | Break | Callfunc | Setarray | Copyarray | Identifier |
+			 Label | String | Number 
+				=> {
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
 					/*InvokeRule statement*/
-					recog.base.set_state(605);
+					recog.base.set_state(378);
 					recog.statement()?;
 
 					}
 				}
-			,
-				2 =>{
+
+			 Function 
+				=> {
 					//recog.base.enter_outer_alt(_localctx.clone(), 2);
 					recog.base.enter_outer_alt(None, 2);
 					{
-					/*InvokeRule labeledStatement*/
-					recog.base.set_state(606);
-					recog.labeledStatement()?;
-
-					}
-				}
-			,
-				3 =>{
-					//recog.base.enter_outer_alt(_localctx.clone(), 3);
-					recog.base.enter_outer_alt(None, 3);
-					{
 					/*InvokeRule functionDefinition*/
-					recog.base.set_state(607);
+					recog.base.set_state(379);
 					recog.functionDefinition()?;
 
 					}
 				}
-			,
-				4 =>{
-					//recog.base.enter_outer_alt(_localctx.clone(), 4);
-					recog.base.enter_outer_alt(None, 4);
-					{
-					/*InvokeRule declaration*/
-					recog.base.set_state(608);
-					recog.declaration()?;
 
-					}
-				}
-
-				_ => {}
+				_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
 			}
 		};
 		match result {
@@ -8008,13 +4917,13 @@ impl<'input> ExpressionStatementContextExt<'input>{
 
 pub trait ExpressionStatementContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<ExpressionStatementContextExt<'input>>{
 
+fn assignmentExpression(&self) -> Option<Rc<AssignmentExpressionContextAll<'input>>> where Self:Sized{
+	self.child_of_type(0)
+}
 /// Retrieves first TerminalNode corresponding to token SemiColon
 /// Returns `None` if there is no child corresponding to token SemiColon
 fn SemiColon(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(SemiColon, 0)
-}
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
-	self.child_of_type(0)
 }
 
 }
@@ -8031,27 +4940,18 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ExpressionStatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 108, RULE_expressionStatement);
+        recog.base.enter_rule(_localctx.clone(), 64, RULE_expressionStatement);
         let mut _localctx: Rc<ExpressionStatementContextAll> = _localctx;
-		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(612);
-			recog.err_handler.sync(&mut recog.base)?;
-			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
-				{
-				/*InvokeRule expression*/
-				recog.base.set_state(611);
-				recog.expression()?;
+			/*InvokeRule assignmentExpression*/
+			recog.base.set_state(382);
+			recog.assignmentExpression()?;
 
-				}
-			}
-
-			recog.base.set_state(614);
+			recog.base.set_state(383);
 			recog.base.match_token(SemiColon,&mut recog.err_handler)?;
 
 			}
@@ -8130,7 +5030,7 @@ fn If(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType
 fn LeftParen(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(LeftParen, 0)
 }
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
+fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves first TerminalNode corresponding to token RightParen
@@ -8167,11 +5067,11 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = SelectionStatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 110, RULE_selectionStatement);
+        recog.base.enter_rule(_localctx.clone(), 66, RULE_selectionStatement);
         let mut _localctx: Rc<SelectionStatementContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(626);
+			recog.base.set_state(395);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 If 
@@ -8179,33 +5079,33 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(616);
+					recog.base.set_state(385);
 					recog.base.match_token(If,&mut recog.err_handler)?;
 
-					recog.base.set_state(617);
+					recog.base.set_state(386);
 					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
-					/*InvokeRule expression*/
-					recog.base.set_state(618);
-					recog.expression()?;
+					/*InvokeRule conditionalExpression*/
+					recog.base.set_state(387);
+					recog.conditionalExpression()?;
 
-					recog.base.set_state(619);
+					recog.base.set_state(388);
 					recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 					/*InvokeRule statement*/
-					recog.base.set_state(620);
+					recog.base.set_state(389);
 					recog.statement()?;
 
-					recog.base.set_state(623);
+					recog.base.set_state(392);
 					recog.err_handler.sync(&mut recog.base)?;
-					match  recog.interpreter.adaptive_predict(69,&mut recog.base)? {
+					match  recog.interpreter.adaptive_predict(39,&mut recog.base)? {
 						x if x == 1=>{
 							{
-							recog.base.set_state(621);
+							recog.base.set_state(390);
 							recog.base.match_token(Else,&mut recog.err_handler)?;
 
 							/*InvokeRule statement*/
-							recog.base.set_state(622);
+							recog.base.set_state(391);
 							recog.statement()?;
 
 							}
@@ -8222,7 +5122,7 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule switchStatement*/
-					recog.base.set_state(625);
+					recog.base.set_state(394);
 					recog.switchStatement()?;
 
 					}
@@ -8305,7 +5205,7 @@ fn Switch(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContext
 fn LeftParen(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(LeftParen, 0)
 }
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
+fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves first TerminalNode corresponding to token RightParen
@@ -8331,28 +5231,28 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = SwitchStatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 112, RULE_switchStatement);
+        recog.base.enter_rule(_localctx.clone(), 68, RULE_switchStatement);
         let mut _localctx: Rc<SwitchStatementContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(628);
+			recog.base.set_state(397);
 			recog.base.match_token(Switch,&mut recog.err_handler)?;
 
-			recog.base.set_state(629);
+			recog.base.set_state(398);
 			recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
-			/*InvokeRule expression*/
-			recog.base.set_state(630);
-			recog.expression()?;
+			/*InvokeRule conditionalExpression*/
+			recog.base.set_state(399);
+			recog.conditionalExpression()?;
 
-			recog.base.set_state(631);
+			recog.base.set_state(400);
 			recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 			/*InvokeRule switchBlock*/
-			recog.base.set_state(632);
+			recog.base.set_state(401);
 			recog.switchBlock()?;
 
 			}
@@ -8452,7 +5352,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = SwitchBlockContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 114, RULE_switchBlock);
+        recog.base.enter_rule(_localctx.clone(), 70, RULE_switchBlock);
         let mut _localctx: Rc<SwitchBlockContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -8460,26 +5360,26 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(634);
+			recog.base.set_state(403);
 			recog.base.match_token(LeftBrace,&mut recog.err_handler)?;
 
-			recog.base.set_state(638);
+			recog.base.set_state(407);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
 			while _la==Case || _la==Default {
 				{
 				{
 				/*InvokeRule switchBlockStatementGroup*/
-				recog.base.set_state(635);
+				recog.base.set_state(404);
 				recog.switchBlockStatementGroup()?;
 
 				}
 				}
-				recog.base.set_state(640);
+				recog.base.set_state(409);
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
 			}
-			recog.base.set_state(641);
+			recog.base.set_state(410);
 			recog.base.match_token(RightBrace,&mut recog.err_handler)?;
 
 			}
@@ -8569,7 +5469,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = SwitchBlockStatementGroupContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 116, RULE_switchBlockStatementGroup);
+        recog.base.enter_rule(_localctx.clone(), 72, RULE_switchBlockStatementGroup);
         let mut _localctx: Rc<SwitchBlockStatementGroupContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
@@ -8577,11 +5477,11 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule switchLabels*/
-			recog.base.set_state(643);
+			recog.base.set_state(412);
 			recog.switchLabels()?;
 
 			/*InvokeRule blockItemList*/
-			recog.base.set_state(644);
+			recog.base.set_state(413);
 			recog.blockItemList()?;
 
 			}
@@ -8671,7 +5571,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = SwitchLabelsContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 118, RULE_switchLabels);
+        recog.base.enter_rule(_localctx.clone(), 74, RULE_switchLabels);
         let mut _localctx: Rc<SwitchLabelsContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -8680,22 +5580,22 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule switchLabel*/
-			recog.base.set_state(646);
+			recog.base.set_state(415);
 			recog.switchLabel()?;
 
-			recog.base.set_state(650);
+			recog.base.set_state(419);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
 			while _la==Case || _la==Default {
 				{
 				{
 				/*InvokeRule switchLabel*/
-				recog.base.set_state(647);
+				recog.base.set_state(416);
 				recog.switchLabel()?;
 
 				}
 				}
-				recog.base.set_state(652);
+				recog.base.set_state(421);
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
 			}
@@ -8798,11 +5698,11 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = SwitchLabelContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 120, RULE_switchLabel);
+        recog.base.enter_rule(_localctx.clone(), 76, RULE_switchLabel);
         let mut _localctx: Rc<SwitchLabelContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(658);
+			recog.base.set_state(427);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 Case 
@@ -8810,14 +5710,14 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(653);
+					recog.base.set_state(422);
 					recog.base.match_token(Case,&mut recog.err_handler)?;
 
 					/*InvokeRule constantExpression*/
-					recog.base.set_state(654);
+					recog.base.set_state(423);
 					recog.constantExpression()?;
 
-					recog.base.set_state(655);
+					recog.base.set_state(424);
 					recog.base.match_token(Colon,&mut recog.err_handler)?;
 
 					}
@@ -8828,7 +5728,7 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 2);
 					recog.base.enter_outer_alt(None, 2);
 					{
-					recog.base.set_state(657);
+					recog.base.set_state(426);
 					recog.base.match_token(Default,&mut recog.err_handler)?;
 
 					}
@@ -8911,7 +5811,7 @@ fn While(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextT
 fn LeftParen(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(LeftParen, 0)
 }
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
+fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves first TerminalNode corresponding to token RightParen
@@ -8955,11 +5855,11 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = IterationStatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 122, RULE_iterationStatement);
+        recog.base.enter_rule(_localctx.clone(), 78, RULE_iterationStatement);
         let mut _localctx: Rc<IterationStatementContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(680);
+			recog.base.set_state(449);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 While 
@@ -8967,21 +5867,21 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(660);
+					recog.base.set_state(429);
 					recog.base.match_token(While,&mut recog.err_handler)?;
 
-					recog.base.set_state(661);
+					recog.base.set_state(430);
 					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
-					/*InvokeRule expression*/
-					recog.base.set_state(662);
-					recog.expression()?;
+					/*InvokeRule conditionalExpression*/
+					recog.base.set_state(431);
+					recog.conditionalExpression()?;
 
-					recog.base.set_state(663);
+					recog.base.set_state(432);
 					recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 					/*InvokeRule statement*/
-					recog.base.set_state(664);
+					recog.base.set_state(433);
 					recog.statement()?;
 
 					}
@@ -8992,27 +5892,27 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 2);
 					recog.base.enter_outer_alt(None, 2);
 					{
-					recog.base.set_state(666);
+					recog.base.set_state(435);
 					recog.base.match_token(Do,&mut recog.err_handler)?;
 
 					/*InvokeRule statement*/
-					recog.base.set_state(667);
+					recog.base.set_state(436);
 					recog.statement()?;
 
-					recog.base.set_state(668);
+					recog.base.set_state(437);
 					recog.base.match_token(While,&mut recog.err_handler)?;
 
-					recog.base.set_state(669);
+					recog.base.set_state(438);
 					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
-					/*InvokeRule expression*/
-					recog.base.set_state(670);
-					recog.expression()?;
+					/*InvokeRule conditionalExpression*/
+					recog.base.set_state(439);
+					recog.conditionalExpression()?;
 
-					recog.base.set_state(671);
+					recog.base.set_state(440);
 					recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
-					recog.base.set_state(672);
+					recog.base.set_state(441);
 					recog.base.match_token(SemiColon,&mut recog.err_handler)?;
 
 					}
@@ -9023,21 +5923,21 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 3);
 					recog.base.enter_outer_alt(None, 3);
 					{
-					recog.base.set_state(674);
+					recog.base.set_state(443);
 					recog.base.match_token(For,&mut recog.err_handler)?;
 
-					recog.base.set_state(675);
+					recog.base.set_state(444);
 					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 					/*InvokeRule forCondition*/
-					recog.base.set_state(676);
+					recog.base.set_state(445);
 					recog.forCondition()?;
 
-					recog.base.set_state(677);
+					recog.base.set_state(446);
 					recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 					/*InvokeRule statement*/
-					recog.base.set_state(678);
+					recog.base.set_state(447);
 					recog.statement()?;
 
 					}
@@ -9143,7 +6043,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ForConditionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 124, RULE_forCondition);
+        recog.base.enter_rule(_localctx.clone(), 80, RULE_forCondition);
         let mut _localctx: Rc<ForConditionContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -9152,34 +6052,34 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule forDeclaration*/
-			recog.base.set_state(682);
+			recog.base.set_state(451);
 			recog.forDeclaration()?;
 
-			recog.base.set_state(683);
+			recog.base.set_state(452);
 			recog.base.match_token(SemiColon,&mut recog.err_handler)?;
 
-			recog.base.set_state(685);
+			recog.base.set_state(454);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Setarray - 73)) | (1usize << (Copyarray - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 				{
 				/*InvokeRule forStopExpression*/
-				recog.base.set_state(684);
+				recog.base.set_state(453);
 				recog.forStopExpression()?;
 
 				}
 			}
 
-			recog.base.set_state(687);
+			recog.base.set_state(456);
 			recog.base.match_token(SemiColon,&mut recog.err_handler)?;
 
-			recog.base.set_state(689);
+			recog.base.set_state(458);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Setarray - 73)) | (1usize << (Copyarray - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 				{
 				/*InvokeRule forExpression*/
-				recog.base.set_state(688);
+				recog.base.set_state(457);
 				recog.forExpression()?;
 
 				}
@@ -9251,7 +6151,7 @@ impl<'input> ForDeclarationContextExt<'input>{
 
 pub trait ForDeclarationContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<ForDeclarationContextExt<'input>>{
 
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
+fn assignmentExpression(&self) -> Option<Rc<AssignmentExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 
@@ -9269,7 +6169,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ForDeclarationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 126, RULE_forDeclaration);
+        recog.base.enter_rule(_localctx.clone(), 82, RULE_forDeclaration);
         let mut _localctx: Rc<ForDeclarationContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -9277,14 +6177,14 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(692);
+			recog.base.set_state(461);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Setarray - 73)) | (1usize << (Copyarray - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 				{
-				/*InvokeRule expression*/
-				recog.base.set_state(691);
-				recog.expression()?;
+				/*InvokeRule assignmentExpression*/
+				recog.base.set_state(460);
+				recog.assignmentExpression()?;
 
 				}
 			}
@@ -9385,7 +6285,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ForStopExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 128, RULE_forStopExpression);
+        recog.base.enter_rule(_localctx.clone(), 84, RULE_forStopExpression);
         let mut _localctx: Rc<ForStopExpressionContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -9394,25 +6294,25 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule assignmentExpression*/
-			recog.base.set_state(694);
+			recog.base.set_state(463);
 			recog.assignmentExpression()?;
 
-			recog.base.set_state(699);
+			recog.base.set_state(468);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
 			while _la==Comma {
 				{
 				{
-				recog.base.set_state(695);
+				recog.base.set_state(464);
 				recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 				/*InvokeRule assignmentExpression*/
-				recog.base.set_state(696);
+				recog.base.set_state(465);
 				recog.assignmentExpression()?;
 
 				}
 				}
-				recog.base.set_state(701);
+				recog.base.set_state(470);
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
 			}
@@ -9512,7 +6412,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ForExpressionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 130, RULE_forExpression);
+        recog.base.enter_rule(_localctx.clone(), 86, RULE_forExpression);
         let mut _localctx: Rc<ForExpressionContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -9521,25 +6421,25 @@ where
 			recog.base.enter_outer_alt(None, 1);
 			{
 			/*InvokeRule assignmentExpression*/
-			recog.base.set_state(702);
+			recog.base.set_state(471);
 			recog.assignmentExpression()?;
 
-			recog.base.set_state(707);
+			recog.base.set_state(476);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
 			while _la==Comma {
 				{
 				{
-				recog.base.set_state(703);
+				recog.base.set_state(472);
 				recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 				/*InvokeRule assignmentExpression*/
-				recog.base.set_state(704);
+				recog.base.set_state(473);
 				recog.assignmentExpression()?;
 
 				}
 				}
-				recog.base.set_state(709);
+				recog.base.set_state(478);
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
 			}
@@ -9639,7 +6539,7 @@ fn Break(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextT
 fn End(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(End, 0)
 }
-fn expression(&self) -> Option<Rc<ExpressionContextAll<'input>>> where Self:Sized{
+fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 
@@ -9657,7 +6557,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = JumpStatementContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 132, RULE_jumpStatement);
+        recog.base.enter_rule(_localctx.clone(), 88, RULE_jumpStatement);
         let mut _localctx: Rc<JumpStatementContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -9665,27 +6565,27 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(717);
+			recog.base.set_state(486);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 Goto 
 				=> {
 					{
-					recog.base.set_state(710);
+					recog.base.set_state(479);
 					recog.base.match_token(Goto,&mut recog.err_handler)?;
 
-					recog.base.set_state(711);
+					recog.base.set_state(480);
 					recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
 					}
 				}
 
-			 T__7 | End | Break 
+			 T__6 | End | Break 
 				=> {
 					{
-					recog.base.set_state(712);
+					recog.base.set_state(481);
 					_la = recog.base.input.la(1);
-					if { !(_la==T__7 || _la==End || _la==Break) } {
+					if { !(_la==T__6 || _la==End || _la==Break) } {
 						recog.err_handler.recover_inline(&mut recog.base)?;
 
 					}
@@ -9700,17 +6600,17 @@ where
 			 Return 
 				=> {
 					{
-					recog.base.set_state(713);
+					recog.base.set_state(482);
 					recog.base.match_token(Return,&mut recog.err_handler)?;
 
-					recog.base.set_state(715);
+					recog.base.set_state(484);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
-					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 						{
-						/*InvokeRule expression*/
-						recog.base.set_state(714);
-						recog.expression()?;
+						/*InvokeRule conditionalExpression*/
+						recog.base.set_state(483);
+						recog.conditionalExpression()?;
 
 						}
 					}
@@ -9720,7 +6620,7 @@ where
 
 				_ => Err(ANTLRError::NoAltError(NoViableAltError::new(&mut recog.base)))?
 			}
-			recog.base.set_state(719);
+			recog.base.set_state(488);
 			recog.base.match_token(SemiColon,&mut recog.err_handler)?;
 
 			}
@@ -9810,7 +6710,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = TranslationUnitContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 134, RULE_translationUnit);
+        recog.base.enter_rule(_localctx.clone(), 90, RULE_translationUnit);
         let mut _localctx: Rc<TranslationUnitContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -9818,22 +6718,22 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(722); 
+			recog.base.set_state(491); 
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
 			loop {
 				{
 				{
 				/*InvokeRule externalDeclaration*/
-				recog.base.set_state(721);
+				recog.base.set_state(490);
 				recog.externalDeclaration()?;
 
 				}
 				}
-				recog.base.set_state(724); 
+				recog.base.set_state(493); 
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
-				if !(((((_la - 20)) & !0x3f) == 0 && ((1usize << (_la - 20)) & ((1usize << (SemiColon - 20)) | (1usize << (Minus - 20)) | (1usize << (Function - 20)) | (1usize << (Identifier - 20)))) != 0)) {break}
+				if !(((((_la - 19)) & !0x3f) == 0 && ((1usize << (_la - 19)) & ((1usize << (SemiColon - 19)) | (1usize << (Minus - 19)) | (1usize << (Function - 19)) | (1usize << (Identifier - 19)))) != 0)) {break}
 			}
 			}
 		};
@@ -9930,19 +6830,19 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ExternalDeclarationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 136, RULE_externalDeclaration);
+        recog.base.enter_rule(_localctx.clone(), 92, RULE_externalDeclaration);
         let mut _localctx: Rc<ExternalDeclarationContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(730);
+			recog.base.set_state(499);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(83,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(53,&mut recog.base)? {
 				1 =>{
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
 					/*InvokeRule functionDefinition*/
-					recog.base.set_state(726);
+					recog.base.set_state(495);
 					recog.functionDefinition()?;
 
 					}
@@ -9953,7 +6853,7 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule scriptInitialization*/
-					recog.base.set_state(727);
+					recog.base.set_state(496);
 					recog.scriptInitialization()?;
 
 					}
@@ -9964,7 +6864,7 @@ where
 					recog.base.enter_outer_alt(None, 3);
 					{
 					/*InvokeRule npcInitialization*/
-					recog.base.set_state(728);
+					recog.base.set_state(497);
 					recog.npcInitialization()?;
 
 					}
@@ -9974,7 +6874,7 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 4);
 					recog.base.enter_outer_alt(None, 4);
 					{
-					recog.base.set_state(729);
+					recog.base.set_state(498);
 					recog.base.match_token(SemiColon,&mut recog.err_handler)?;
 
 					}
@@ -10060,6 +6960,11 @@ fn Identifier(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserCon
 fn compoundStatement(&self) -> Option<Rc<CompoundStatementContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
+/// Retrieves first TerminalNode corresponding to token SemiColon
+/// Returns `None` if there is no child corresponding to token SemiColon
+fn SemiColon(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(SemiColon, 0)
+}
 
 }
 
@@ -10075,33 +6980,47 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = FunctionDefinitionContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 138, RULE_functionDefinition);
+        recog.base.enter_rule(_localctx.clone(), 94, RULE_functionDefinition);
         let mut _localctx: Rc<FunctionDefinitionContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			//recog.base.enter_outer_alt(_localctx.clone(), 1);
-			recog.base.enter_outer_alt(None, 1);
-			{
-			recog.base.set_state(732);
-			recog.base.match_token(Function,&mut recog.err_handler)?;
-
-			recog.base.set_state(733);
-			recog.base.match_token(Identifier,&mut recog.err_handler)?;
-
-			recog.base.set_state(735);
+			recog.base.set_state(507);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(84,&mut recog.base)? {
-				x if x == 1=>{
+			match  recog.interpreter.adaptive_predict(54,&mut recog.base)? {
+				1 =>{
+					//recog.base.enter_outer_alt(_localctx.clone(), 1);
+					recog.base.enter_outer_alt(None, 1);
 					{
+					recog.base.set_state(501);
+					recog.base.match_token(Function,&mut recog.err_handler)?;
+
+					recog.base.set_state(502);
+					recog.base.match_token(Identifier,&mut recog.err_handler)?;
+
 					/*InvokeRule compoundStatement*/
-					recog.base.set_state(734);
+					recog.base.set_state(503);
 					recog.compoundStatement()?;
+
+					}
+				}
+			,
+				2 =>{
+					//recog.base.enter_outer_alt(_localctx.clone(), 2);
+					recog.base.enter_outer_alt(None, 2);
+					{
+					recog.base.set_state(504);
+					recog.base.match_token(Function,&mut recog.err_handler)?;
+
+					recog.base.set_state(505);
+					recog.base.match_token(Identifier,&mut recog.err_handler)?;
+
+					recog.base.set_state(506);
+					recog.base.match_token(SemiColon,&mut recog.err_handler)?;
 
 					}
 				}
 
 				_ => {}
-			}
 			}
 		};
 		match result {
@@ -10221,12 +7140,12 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ScriptInitializationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 140, RULE_scriptInitialization);
+        recog.base.enter_rule(_localctx.clone(), 96, RULE_scriptInitialization);
         let mut _localctx: Rc<ScriptInitializationContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
 			let mut _alt: isize;
-			recog.base.set_state(771);
+			recog.base.set_state(543);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 Minus 
@@ -10234,50 +7153,50 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(737);
+					recog.base.set_state(509);
 					recog.base.match_token(Minus,&mut recog.err_handler)?;
 
-					recog.base.set_state(738);
-					recog.base.match_token(T__8,&mut recog.err_handler)?;
+					recog.base.set_state(510);
+					recog.base.match_token(T__7,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptName*/
-					recog.base.set_state(739);
+					recog.base.set_state(511);
 					recog.scriptName()?;
 
 					{
 					/*InvokeRule scriptSprite*/
-					recog.base.set_state(740);
+					recog.base.set_state(512);
 					recog.scriptSprite()?;
 
 					}
-					recog.base.set_state(745);
+					recog.base.set_state(517);
 					recog.err_handler.sync(&mut recog.base)?;
-					_alt = recog.interpreter.adaptive_predict(85,&mut recog.base)?;
+					_alt = recog.interpreter.adaptive_predict(55,&mut recog.base)?;
 					while { _alt!=2 && _alt!=INVALID_ALT } {
 						if _alt==1 {
 							{
 							{
-							recog.base.set_state(741);
+							recog.base.set_state(513);
 							recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 							{
 							/*InvokeRule scriptSprite*/
-							recog.base.set_state(742);
+							recog.base.set_state(514);
 							recog.scriptSprite()?;
 
 							}
 							}
 							} 
 						}
-						recog.base.set_state(747);
+						recog.base.set_state(519);
 						recog.err_handler.sync(&mut recog.base)?;
-						_alt = recog.interpreter.adaptive_predict(85,&mut recog.base)?;
+						_alt = recog.interpreter.adaptive_predict(55,&mut recog.base)?;
 					}
-					recog.base.set_state(748);
+					recog.base.set_state(520);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule compoundStatement*/
-					recog.base.set_state(749);
+					recog.base.set_state(521);
 					recog.compoundStatement()?;
 
 					}
@@ -10289,71 +7208,71 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule scriptLocation*/
-					recog.base.set_state(751);
+					recog.base.set_state(523);
 					recog.scriptLocation()?;
 
-					recog.base.set_state(752);
+					recog.base.set_state(524);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptXPos*/
-					recog.base.set_state(753);
+					recog.base.set_state(525);
 					recog.scriptXPos()?;
 
-					recog.base.set_state(754);
+					recog.base.set_state(526);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptYPos*/
-					recog.base.set_state(755);
+					recog.base.set_state(527);
 					recog.scriptYPos()?;
 
-					recog.base.set_state(756);
+					recog.base.set_state(528);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptDir*/
-					recog.base.set_state(757);
+					recog.base.set_state(529);
 					recog.scriptDir()?;
 
-					recog.base.set_state(758);
-					recog.base.match_token(T__8,&mut recog.err_handler)?;
+					recog.base.set_state(530);
+					recog.base.match_token(T__7,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptName*/
-					recog.base.set_state(759);
+					recog.base.set_state(531);
 					recog.scriptName()?;
 
 					{
 					/*InvokeRule scriptSprite*/
-					recog.base.set_state(760);
+					recog.base.set_state(532);
 					recog.scriptSprite()?;
 
 					}
-					recog.base.set_state(765);
+					recog.base.set_state(537);
 					recog.err_handler.sync(&mut recog.base)?;
-					_alt = recog.interpreter.adaptive_predict(86,&mut recog.base)?;
+					_alt = recog.interpreter.adaptive_predict(56,&mut recog.base)?;
 					while { _alt!=2 && _alt!=INVALID_ALT } {
 						if _alt==1 {
 							{
 							{
-							recog.base.set_state(761);
+							recog.base.set_state(533);
 							recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 							{
 							/*InvokeRule scriptSprite*/
-							recog.base.set_state(762);
+							recog.base.set_state(534);
 							recog.scriptSprite()?;
 
 							}
 							}
 							} 
 						}
-						recog.base.set_state(767);
+						recog.base.set_state(539);
 						recog.err_handler.sync(&mut recog.base)?;
-						_alt = recog.interpreter.adaptive_predict(86,&mut recog.base)?;
+						_alt = recog.interpreter.adaptive_predict(56,&mut recog.base)?;
 					}
-					recog.base.set_state(768);
+					recog.base.set_state(540);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule compoundStatement*/
-					recog.base.set_state(769);
+					recog.base.set_state(541);
 					recog.compoundStatement()?;
 
 					}
@@ -10446,14 +7365,14 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ScriptLocationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 142, RULE_scriptLocation);
+        recog.base.enter_rule(_localctx.clone(), 98, RULE_scriptLocation);
         let mut _localctx: Rc<ScriptLocationContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(773);
+			recog.base.set_state(545);
 			recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
 			}
@@ -10542,14 +7461,14 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ScriptXPosContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 144, RULE_scriptXPos);
+        recog.base.enter_rule(_localctx.clone(), 100, RULE_scriptXPos);
         let mut _localctx: Rc<ScriptXPosContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(775);
+			recog.base.set_state(547);
 			recog.base.match_token(Number,&mut recog.err_handler)?;
 
 			}
@@ -10638,14 +7557,14 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ScriptYPosContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 146, RULE_scriptYPos);
+        recog.base.enter_rule(_localctx.clone(), 102, RULE_scriptYPos);
         let mut _localctx: Rc<ScriptYPosContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(777);
+			recog.base.set_state(549);
 			recog.base.match_token(Number,&mut recog.err_handler)?;
 
 			}
@@ -10734,14 +7653,14 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ScriptDirContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 148, RULE_scriptDir);
+        recog.base.enter_rule(_localctx.clone(), 104, RULE_scriptDir);
         let mut _localctx: Rc<ScriptDirContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(779);
+			recog.base.set_state(551);
 			recog.base.match_token(Number,&mut recog.err_handler)?;
 
 			}
@@ -10840,7 +7759,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ScriptSpriteContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 150, RULE_scriptSprite);
+        recog.base.enter_rule(_localctx.clone(), 106, RULE_scriptSprite);
         let mut _localctx: Rc<ScriptSpriteContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -10848,24 +7767,24 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(786);
+			recog.base.set_state(558);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 Minus | Number 
 				=> {
 					{
-					recog.base.set_state(782);
+					recog.base.set_state(554);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					if _la==Minus {
 						{
-						recog.base.set_state(781);
+						recog.base.set_state(553);
 						recog.base.match_token(Minus,&mut recog.err_handler)?;
 
 						}
 					}
 
-					recog.base.set_state(784);
+					recog.base.set_state(556);
 					recog.base.match_token(Number,&mut recog.err_handler)?;
 
 					}
@@ -10874,7 +7793,7 @@ where
 			 Identifier 
 				=> {
 					{
-					recog.base.set_state(785);
+					recog.base.set_state(557);
 					recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
 					}
@@ -11024,36 +7943,36 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = NpcInitializationContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 152, RULE_npcInitialization);
+        recog.base.enter_rule(_localctx.clone(), 108, RULE_npcInitialization);
         let mut _localctx: Rc<NpcInitializationContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(827);
+			recog.base.set_state(599);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(94,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(64,&mut recog.base)? {
 				1 =>{
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					recog.base.set_state(788);
+					recog.base.set_state(560);
 					recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
-					recog.base.set_state(793); 
+					recog.base.set_state(565); 
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					loop {
 						{
 						{
-						recog.base.set_state(789);
+						recog.base.set_state(561);
 						recog.base.match_token(Comma,&mut recog.err_handler)?;
 
-						recog.base.set_state(791);
+						recog.base.set_state(563);
 						recog.err_handler.sync(&mut recog.base)?;
 						_la = recog.base.input.la(1);
 						if _la==Number {
 							{
-							recog.base.set_state(790);
+							recog.base.set_state(562);
 							recog.base.match_token(Number,&mut recog.err_handler)?;
 
 							}
@@ -11061,19 +7980,19 @@ where
 
 						}
 						}
-						recog.base.set_state(795); 
+						recog.base.set_state(567); 
 						recog.err_handler.sync(&mut recog.base)?;
 						_la = recog.base.input.la(1);
 						if !(_la==Comma) {break}
 					}
-					recog.base.set_state(797);
+					recog.base.set_state(569);
 					recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptName*/
-					recog.base.set_state(798);
+					recog.base.set_state(570);
 					recog.scriptName()?;
 
-					recog.base.set_state(799);
+					recog.base.set_state(571);
 					_la = recog.base.input.la(1);
 					if { !(_la==Identifier || _la==Number) } {
 						recog.err_handler.recover_inline(&mut recog.base)?;
@@ -11084,16 +8003,16 @@ where
 						recog.err_handler.report_match(&mut recog.base);
 						recog.base.consume(&mut recog.err_handler);
 					}
-					recog.base.set_state(804);
+					recog.base.set_state(576);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					while _la==Comma {
 						{
 						{
-						recog.base.set_state(800);
+						recog.base.set_state(572);
 						recog.base.match_token(Comma,&mut recog.err_handler)?;
 
-						recog.base.set_state(801);
+						recog.base.set_state(573);
 						_la = recog.base.input.la(1);
 						if { !(_la==Identifier || _la==Number) } {
 							recog.err_handler.recover_inline(&mut recog.base)?;
@@ -11106,7 +8025,7 @@ where
 						}
 						}
 						}
-						recog.base.set_state(806);
+						recog.base.set_state(578);
 						recog.err_handler.sync(&mut recog.base)?;
 						_la = recog.base.input.la(1);
 					}
@@ -11118,71 +8037,71 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule scriptLocation*/
-					recog.base.set_state(807);
+					recog.base.set_state(579);
 					recog.scriptLocation()?;
 
-					recog.base.set_state(808);
+					recog.base.set_state(580);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptXPos*/
-					recog.base.set_state(809);
+					recog.base.set_state(581);
 					recog.scriptXPos()?;
 
-					recog.base.set_state(810);
+					recog.base.set_state(582);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptYPos*/
-					recog.base.set_state(811);
+					recog.base.set_state(583);
 					recog.scriptYPos()?;
 
-					recog.base.set_state(812);
+					recog.base.set_state(584);
 					recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptDir*/
-					recog.base.set_state(813);
+					recog.base.set_state(585);
 					recog.scriptDir()?;
 
-					recog.base.set_state(814);
-					recog.base.match_token(T__9,&mut recog.err_handler)?;
+					recog.base.set_state(586);
+					recog.base.match_token(T__8,&mut recog.err_handler)?;
 
-					recog.base.set_state(815);
+					recog.base.set_state(587);
 					recog.base.match_token(LeftParen,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptName*/
-					recog.base.set_state(816);
+					recog.base.set_state(588);
 					recog.scriptName()?;
 
-					recog.base.set_state(817);
+					recog.base.set_state(589);
 					recog.base.match_token(RightParen,&mut recog.err_handler)?;
 
 					/*InvokeRule scriptName*/
-					recog.base.set_state(818);
+					recog.base.set_state(590);
 					recog.scriptName()?;
 
 					{
 					/*InvokeRule scriptSprite*/
-					recog.base.set_state(819);
+					recog.base.set_state(591);
 					recog.scriptSprite()?;
 
 					}
-					recog.base.set_state(824);
+					recog.base.set_state(596);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
 					while _la==Comma {
 						{
 						{
-						recog.base.set_state(820);
+						recog.base.set_state(592);
 						recog.base.match_token(Comma,&mut recog.err_handler)?;
 
 						{
 						/*InvokeRule scriptSprite*/
-						recog.base.set_state(821);
+						recog.base.set_state(593);
 						recog.scriptSprite()?;
 
 						}
 						}
 						}
-						recog.base.set_state(826);
+						recog.base.set_state(598);
 						recog.err_handler.sync(&mut recog.base)?;
 						_la = recog.base.input.la(1);
 					}
@@ -11316,7 +8235,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = ScriptNameContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 154, RULE_scriptName);
+        recog.base.enter_rule(_localctx.clone(), 110, RULE_scriptName);
         let mut _localctx: Rc<ScriptNameContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -11325,16 +8244,16 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(832);
+			recog.base.set_state(604);
 			recog.err_handler.sync(&mut recog.base)?;
-			_alt = recog.interpreter.adaptive_predict(95,&mut recog.base)?;
+			_alt = recog.interpreter.adaptive_predict(65,&mut recog.base)?;
 			while { _alt!=2 && _alt!=INVALID_ALT } {
 				if _alt==1 {
 					{
 					{
-					recog.base.set_state(829);
+					recog.base.set_state(601);
 					_la = recog.base.input.la(1);
-					if { !(((((_la - 19)) & !0x3f) == 0 && ((1usize << (_la - 19)) & ((1usize << (Colon - 19)) | (1usize << (Sharp - 19)) | (1usize << (Identifier - 19)) | (1usize << (Label - 19)) | (1usize << (Number - 19)))) != 0)) } {
+					if { !(((((_la - 18)) & !0x3f) == 0 && ((1usize << (_la - 18)) & ((1usize << (Colon - 18)) | (1usize << (Sharp - 18)) | (1usize << (Identifier - 18)) | (1usize << (Label - 18)) | (1usize << (Number - 18)))) != 0)) } {
 						recog.err_handler.recover_inline(&mut recog.base)?;
 
 					}
@@ -11346,9 +8265,9 @@ where
 					}
 					} 
 				}
-				recog.base.set_state(834);
+				recog.base.set_state(606);
 				recog.err_handler.sync(&mut recog.base)?;
-				_alt = recog.interpreter.adaptive_predict(95,&mut recog.base)?;
+				_alt = recog.interpreter.adaptive_predict(65,&mut recog.base)?;
 			}
 			}
 		};
@@ -11471,7 +8390,7 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = Scope_specifierContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 156, RULE_scope_specifier);
+        recog.base.enter_rule(_localctx.clone(), 112, RULE_scope_specifier);
         let mut _localctx: Rc<Scope_specifierContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
@@ -11479,7 +8398,7 @@ where
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(835);
+			recog.base.set_state(607);
 			_la = recog.base.input.la(1);
 			if { !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << At) | (1usize << Quote) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt))) != 0)) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
@@ -11577,11 +8496,11 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = VariableContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 158, RULE_variable);
+        recog.base.enter_rule(_localctx.clone(), 114, RULE_variable);
         let mut _localctx: Rc<VariableContextAll> = _localctx;
 		let result: Result<(), ANTLRError> = try {
 
-			recog.base.set_state(841);
+			recog.base.set_state(613);
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 At | Quote | Sharp | DoubleSharp | Dot | DotAt | Dollar | DollarAt 
@@ -11590,11 +8509,11 @@ where
 					recog.base.enter_outer_alt(None, 1);
 					{
 					/*InvokeRule scope_specifier*/
-					recog.base.set_state(837);
+					recog.base.set_state(609);
 					recog.scope_specifier()?;
 
 					/*InvokeRule variable_name*/
-					recog.base.set_state(838);
+					recog.base.set_state(610);
 					recog.variable_name()?;
 
 					}
@@ -11606,7 +8525,7 @@ where
 					recog.base.enter_outer_alt(None, 2);
 					{
 					/*InvokeRule variable_name*/
-					recog.base.set_state(840);
+					recog.base.set_state(612);
 					recog.variable_name()?;
 
 					}
@@ -11719,41 +8638,40 @@ where
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
 		let mut _localctx = Variable_nameContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 160, RULE_variable_name);
+        recog.base.enter_rule(_localctx.clone(), 116, RULE_variable_name);
         let mut _localctx: Rc<Variable_nameContextAll> = _localctx;
+		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
 			//recog.base.enter_outer_alt(_localctx.clone(), 1);
 			recog.base.enter_outer_alt(None, 1);
 			{
-			recog.base.set_state(843);
+			recog.base.set_state(615);
 			recog.base.match_token(Identifier,&mut recog.err_handler)?;
 
-			recog.base.set_state(845);
+			recog.base.set_state(617);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(97,&mut recog.base)? {
-				x if x == 1=>{
-					{
-					recog.base.set_state(844);
-					recog.base.match_token(Dollar,&mut recog.err_handler)?;
+			_la = recog.base.input.la(1);
+			if _la==Dollar {
+				{
+				recog.base.set_state(616);
+				recog.base.match_token(Dollar,&mut recog.err_handler)?;
 
-					}
 				}
-
-				_ => {}
 			}
-			recog.base.set_state(850);
+
+			recog.base.set_state(622);
 			recog.err_handler.sync(&mut recog.base)?;
-			match  recog.interpreter.adaptive_predict(98,&mut recog.base)? {
+			match  recog.interpreter.adaptive_predict(68,&mut recog.base)? {
 				x if x == 1=>{
 					{
-					recog.base.set_state(847);
+					recog.base.set_state(619);
 					recog.base.match_token(LeftBracket,&mut recog.err_handler)?;
 
-					recog.base.set_state(848);
+					recog.base.set_state(620);
 					recog.base.match_token(Number,&mut recog.err_handler)?;
 
-					recog.base.set_state(849);
+					recog.base.set_state(621);
 					recog.base.match_token(RightBracket,&mut recog.err_handler)?;
 
 					}
@@ -11799,7 +8717,7 @@ lazy_static! {
 
 const _serializedATN:&'static str =
 	"\x03\u{608b}\u{a72a}\u{8133}\u{b9ed}\u{417c}\u{3be7}\u{7786}\u{5964}\x03\
-	\x57\u{357}\x04\x02\x09\x02\x04\x03\x09\x03\x04\x04\x09\x04\x04\x05\x09\
+	\x56\u{273}\x04\x02\x09\x02\x04\x03\x09\x03\x04\x04\x09\x04\x04\x05\x09\
 	\x05\x04\x06\x09\x06\x04\x07\x09\x07\x04\x08\x09\x08\x04\x09\x09\x09\x04\
 	\x0a\x09\x0a\x04\x0b\x09\x0b\x04\x0c\x09\x0c\x04\x0d\x09\x0d\x04\x0e\x09\
 	\x0e\x04\x0f\x09\x0f\x04\x10\x09\x10\x04\x11\x09\x11\x04\x12\x09\x12\x04\
@@ -11812,478 +8730,343 @@ const _serializedATN:&'static str =
 	\x2e\x09\x2e\x04\x2f\x09\x2f\x04\x30\x09\x30\x04\x31\x09\x31\x04\x32\x09\
 	\x32\x04\x33\x09\x33\x04\x34\x09\x34\x04\x35\x09\x35\x04\x36\x09\x36\x04\
 	\x37\x09\x37\x04\x38\x09\x38\x04\x39\x09\x39\x04\x3a\x09\x3a\x04\x3b\x09\
-	\x3b\x04\x3c\x09\x3c\x04\x3d\x09\x3d\x04\x3e\x09\x3e\x04\x3f\x09\x3f\x04\
-	\x40\x09\x40\x04\x41\x09\x41\x04\x42\x09\x42\x04\x43\x09\x43\x04\x44\x09\
-	\x44\x04\x45\x09\x45\x04\x46\x09\x46\x04\x47\x09\x47\x04\x48\x09\x48\x04\
-	\x49\x09\x49\x04\x4a\x09\x4a\x04\x4b\x09\x4b\x04\x4c\x09\x4c\x04\x4d\x09\
-	\x4d\x04\x4e\x09\x4e\x04\x4f\x09\x4f\x04\x50\x09\x50\x04\x51\x09\x51\x04\
-	\x52\x09\x52\x03\x02\x03\x02\x03\x02\x03\x03\x03\x03\x03\x03\x03\x03\x03\
-	\x03\x03\x03\x03\x03\x03\x03\x03\x03\x05\x03\u{b1}\x0a\x03\x03\x04\x03\x04\
-	\x05\x04\u{b5}\x0a\x04\x03\x04\x05\x04\u{b8}\x0a\x04\x03\x04\x05\x04\u{bb}\
-	\x0a\x04\x03\x04\x03\x04\x05\x04\u{bf}\x0a\x04\x03\x04\x03\x04\x03\x04\x05\
-	\x04\u{c4}\x0a\x04\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04\x05\x04\u{cb}\
-	\x0a\x04\x05\x04\u{cd}\x0a\x04\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\
-	\x05\x03\x05\x07\x05\u{d6}\x0a\x05\x0c\x05\x0e\x05\u{d9}\x0b\x05\x05\x05\
-	\u{db}\x0a\x05\x03\x06\x03\x06\x03\x06\x07\x06\u{e0}\x0a\x06\x0c\x06\x0e\
-	\x06\u{e3}\x0b\x06\x03\x07\x07\x07\u{e6}\x0a\x07\x0c\x07\x0e\x07\u{e9}\x0b\
-	\x07\x03\x07\x03\x07\x03\x07\x03\x07\x05\x07\u{ef}\x0a\x07\x03\x08\x03\x08\
-	\x03\x09\x03\x09\x05\x09\u{f5}\x0a\x09\x03\x0a\x03\x0a\x03\x0a\x03\x0a\x07\
-	\x0a\u{fb}\x0a\x0a\x0c\x0a\x0e\x0a\u{fe}\x0b\x0a\x03\x0b\x03\x0b\x03\x0c\
-	\x03\x0c\x03\x0c\x03\x0c\x07\x0c\u{106}\x0a\x0c\x0c\x0c\x0e\x0c\u{109}\x0b\
-	\x0c\x03\x0d\x03\x0d\x03\x0e\x03\x0e\x03\x0e\x03\x0e\x07\x0e\u{111}\x0a\
-	\x0e\x0c\x0e\x0e\x0e\u{114}\x0b\x0e\x03\x0f\x03\x0f\x03\x10\x03\x10\x03\
-	\x10\x03\x10\x07\x10\u{11c}\x0a\x10\x0c\x10\x0e\x10\u{11f}\x0b\x10\x03\x11\
-	\x03\x11\x03\x12\x03\x12\x03\x12\x03\x12\x07\x12\u{127}\x0a\x12\x0c\x12\
-	\x0e\x12\u{12a}\x0b\x12\x03\x13\x03\x13\x03\x14\x03\x14\x03\x14\x07\x14\
-	\u{131}\x0a\x14\x0c\x14\x0e\x14\u{134}\x0b\x14\x03\x15\x03\x15\x03\x15\x07\
-	\x15\u{139}\x0a\x15\x0c\x15\x0e\x15\u{13c}\x0b\x15\x03\x16\x03\x16\x03\x16\
-	\x07\x16\u{141}\x0a\x16\x0c\x16\x0e\x16\u{144}\x0b\x16\x03\x17\x03\x17\x03\
-	\x17\x07\x17\u{149}\x0a\x17\x0c\x17\x0e\x17\u{14c}\x0b\x17\x03\x18\x03\x18\
-	\x03\x18\x07\x18\u{151}\x0a\x18\x0c\x18\x0e\x18\u{154}\x0b\x18\x03\x19\x03\
-	\x19\x03\x19\x03\x19\x03\x19\x03\x19\x05\x19\u{15c}\x0a\x19\x03\x1a\x03\
-	\x1a\x03\x1a\x03\x1a\x03\x1a\x03\x1a\x03\x1a\x05\x1a\u{165}\x0a\x1a\x03\
-	\x1a\x03\x1a\x03\x1a\x03\x1a\x05\x1a\u{16b}\x0a\x1a\x03\x1a\x03\x1a\x05\
-	\x1a\u{16f}\x0a\x1a\x03\x1a\x03\x1a\x03\x1a\x03\x1a\x05\x1a\u{175}\x0a\x1a\
-	\x03\x1a\x03\x1a\x05\x1a\u{179}\x0a\x1a\x03\x1a\x03\x1a\x03\x1a\x03\x1a\
-	\x03\x1a\x05\x1a\u{180}\x0a\x1a\x03\x1a\x05\x1a\u{183}\x0a\x1a\x03\x1a\x03\
-	\x1a\x05\x1a\u{187}\x0a\x1a\x03\x1a\x03\x1a\x03\x1a\x03\x1a\x03\x1a\x03\
-	\x1a\x05\x1a\u{18f}\x0a\x1a\x03\x1a\x05\x1a\u{192}\x0a\x1a\x03\x1b\x03\x1b\
-	\x05\x1b\u{196}\x0a\x1b\x03\x1c\x03\x1c\x03\x1d\x03\x1d\x03\x1d\x07\x1d\
-	\u{19d}\x0a\x1d\x0c\x1d\x0e\x1d\u{1a0}\x0b\x1d\x03\x1e\x03\x1e\x03\x1f\x05\
-	\x1f\u{1a5}\x0a\x1f\x03\x1f\x03\x1f\x03\x20\x06\x20\u{1aa}\x0a\x20\x0d\x20\
-	\x0e\x20\u{1ab}\x03\x21\x03\x21\x03\x22\x03\x22\x03\x23\x03\x23\x03\x23\
-	\x07\x23\u{1b5}\x0a\x23\x0c\x23\x0e\x23\u{1b8}\x0b\x23\x03\x24\x03\x24\x03\
-	\x24\x05\x24\u{1bd}\x0a\x24\x03\x24\x03\x24\x05\x24\u{1c1}\x0a\x24\x03\x25\
-	\x03\x25\x05\x25\u{1c5}\x0a\x25\x03\x26\x03\x26\x03\x27\x03\x27\x03\x27\
-	\x03\x27\x03\x27\x03\x27\x03\x27\x03\x27\x03\x27\x03\x27\x05\x27\u{1d3}\
-	\x0a\x27\x03\x27\x03\x27\x03\x27\x03\x27\x03\x27\x03\x27\x03\x27\x03\x27\
-	\x03\x27\x03\x27\x03\x27\x03\x27\x05\x27\u{1e1}\x0a\x27\x03\x27\x07\x27\
-	\u{1e4}\x0a\x27\x0c\x27\x0e\x27\u{1e7}\x0b\x27\x03\x28\x03\x28\x03\x28\x03\
-	\x28\x03\x28\x07\x28\u{1ee}\x0a\x28\x0c\x28\x0e\x28\u{1f1}\x0b\x28\x03\x29\
-	\x03\x29\x03\x29\x05\x29\u{1f6}\x0a\x29\x03\x2a\x03\x2a\x03\x2a\x07\x2a\
-	\u{1fb}\x0a\x2a\x0c\x2a\x0e\x2a\u{1fe}\x0b\x2a\x03\x2b\x03\x2b\x03\x2b\x03\
-	\x2b\x03\x2b\x05\x2b\u{205}\x0a\x2b\x05\x2b\u{207}\x0a\x2b\x03\x2c\x03\x2c\
-	\x03\x2c\x07\x2c\u{20c}\x0a\x2c\x0c\x2c\x0e\x2c\u{20f}\x0b\x2c\x03\x2d\x03\
-	\x2d\x03\x2d\x03\x2d\x03\x2d\x03\x2d\x03\x2d\x03\x2d\x03\x2d\x07\x2d\u{21a}\
-	\x0a\x2d\x0c\x2d\x0e\x2d\u{21d}\x0b\x2d\x03\x2e\x03\x2e\x03\x2e\x03\x2e\
-	\x05\x2e\u{223}\x0a\x2e\x03\x2e\x03\x2e\x05\x2e\u{227}\x0a\x2e\x03\x2f\x05\
-	\x2f\u{22a}\x0a\x2f\x03\x2f\x03\x2f\x03\x2f\x05\x2f\u{22f}\x0a\x2f\x03\x2f\
-	\x07\x2f\u{232}\x0a\x2f\x0c\x2f\x0e\x2f\u{235}\x0b\x2f\x03\x30\x03\x30\x03\
-	\x30\x03\x31\x06\x31\u{23b}\x0a\x31\x0d\x31\x0e\x31\u{23c}\x03\x32\x03\x32\
-	\x03\x32\x03\x32\x03\x32\x03\x32\x05\x32\u{245}\x0a\x32\x03\x33\x03\x33\
-	\x03\x33\x03\x33\x03\x33\x05\x33\u{24c}\x0a\x33\x03\x34\x03\x34\x07\x34\
-	\u{250}\x0a\x34\x0c\x34\x0e\x34\u{253}\x0b\x34\x03\x35\x03\x35\x05\x35\u{257}\
-	\x0a\x35\x03\x35\x03\x35\x03\x36\x06\x36\u{25c}\x0a\x36\x0d\x36\x0e\x36\
-	\u{25d}\x03\x37\x03\x37\x03\x37\x03\x37\x05\x37\u{264}\x0a\x37\x03\x38\x05\
-	\x38\u{267}\x0a\x38\x03\x38\x03\x38\x03\x39\x03\x39\x03\x39\x03\x39\x03\
-	\x39\x03\x39\x03\x39\x05\x39\u{272}\x0a\x39\x03\x39\x05\x39\u{275}\x0a\x39\
-	\x03\x3a\x03\x3a\x03\x3a\x03\x3a\x03\x3a\x03\x3a\x03\x3b\x03\x3b\x07\x3b\
-	\u{27f}\x0a\x3b\x0c\x3b\x0e\x3b\u{282}\x0b\x3b\x03\x3b\x03\x3b\x03\x3c\x03\
-	\x3c\x03\x3c\x03\x3d\x03\x3d\x07\x3d\u{28b}\x0a\x3d\x0c\x3d\x0e\x3d\u{28e}\
-	\x0b\x3d\x03\x3e\x03\x3e\x03\x3e\x03\x3e\x03\x3e\x05\x3e\u{295}\x0a\x3e\
-	\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\
-	\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\x03\x3f\
-	\x03\x3f\x03\x3f\x05\x3f\u{2ab}\x0a\x3f\x03\x40\x03\x40\x03\x40\x05\x40\
-	\u{2b0}\x0a\x40\x03\x40\x03\x40\x05\x40\u{2b4}\x0a\x40\x03\x41\x05\x41\u{2b7}\
-	\x0a\x41\x03\x42\x03\x42\x03\x42\x07\x42\u{2bc}\x0a\x42\x0c\x42\x0e\x42\
-	\u{2bf}\x0b\x42\x03\x43\x03\x43\x03\x43\x07\x43\u{2c4}\x0a\x43\x0c\x43\x0e\
-	\x43\u{2c7}\x0b\x43\x03\x44\x03\x44\x03\x44\x03\x44\x03\x44\x05\x44\u{2ce}\
-	\x0a\x44\x05\x44\u{2d0}\x0a\x44\x03\x44\x03\x44\x03\x45\x06\x45\u{2d5}\x0a\
-	\x45\x0d\x45\x0e\x45\u{2d6}\x03\x46\x03\x46\x03\x46\x03\x46\x05\x46\u{2dd}\
-	\x0a\x46\x03\x47\x03\x47\x03\x47\x05\x47\u{2e2}\x0a\x47\x03\x48\x03\x48\
-	\x03\x48\x03\x48\x03\x48\x03\x48\x07\x48\u{2ea}\x0a\x48\x0c\x48\x0e\x48\
-	\u{2ed}\x0b\x48\x03\x48\x03\x48\x03\x48\x03\x48\x03\x48\x03\x48\x03\x48\
-	\x03\x48\x03\x48\x03\x48\x03\x48\x03\x48\x03\x48\x03\x48\x03\x48\x07\x48\
-	\u{2fe}\x0a\x48\x0c\x48\x0e\x48\u{301}\x0b\x48\x03\x48\x03\x48\x03\x48\x05\
-	\x48\u{306}\x0a\x48\x03\x49\x03\x49\x03\x4a\x03\x4a\x03\x4b\x03\x4b\x03\
-	\x4c\x03\x4c\x03\x4d\x05\x4d\u{311}\x0a\x4d\x03\x4d\x03\x4d\x05\x4d\u{315}\
-	\x0a\x4d\x03\x4e\x03\x4e\x03\x4e\x05\x4e\u{31a}\x0a\x4e\x06\x4e\u{31c}\x0a\
-	\x4e\x0d\x4e\x0e\x4e\u{31d}\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x07\
-	\x4e\u{325}\x0a\x4e\x0c\x4e\x0e\x4e\u{328}\x0b\x4e\x03\x4e\x03\x4e\x03\x4e\
-	\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\x03\x4e\
-	\x03\x4e\x03\x4e\x03\x4e\x07\x4e\u{339}\x0a\x4e\x0c\x4e\x0e\x4e\u{33c}\x0b\
-	\x4e\x05\x4e\u{33e}\x0a\x4e\x03\x4f\x07\x4f\u{341}\x0a\x4f\x0c\x4f\x0e\x4f\
-	\u{344}\x0b\x4f\x03\x50\x03\x50\x03\x51\x03\x51\x03\x51\x03\x51\x05\x51\
-	\u{34c}\x0a\x51\x03\x52\x03\x52\x05\x52\u{350}\x0a\x52\x03\x52\x03\x52\x03\
-	\x52\x05\x52\u{355}\x0a\x52\x03\x52\x02\x04\x4c\x58\x53\x02\x04\x06\x08\
-	\x0a\x0c\x0e\x10\x12\x14\x16\x18\x1a\x1c\x1e\x20\x22\x24\x26\x28\x2a\x2c\
-	\x2e\x30\x32\x34\x36\x38\x3a\x3c\x3e\x40\x42\x44\x46\x48\x4a\x4c\x4e\x50\
-	\x52\x54\x56\x58\x5a\x5c\x5e\x60\x62\x64\x66\x68\x6a\x6c\x6e\x70\x72\x74\
-	\x76\x78\x7a\x7c\x7e\u{80}\u{82}\u{84}\u{86}\u{88}\u{8a}\u{8c}\u{8e}\u{90}\
-	\u{92}\u{94}\u{96}\u{98}\u{9a}\u{9c}\u{9e}\u{a0}\u{a2}\x02\x0f\x04\x02\x28\
-	\x28\x2a\x2a\x07\x02\x18\x19\x1f\x1f\x27\x27\x29\x29\x2f\x2f\x04\x02\x17\
-	\x18\x21\x21\x04\x02\x27\x27\x29\x29\x04\x02\x34\x34\x37\x37\x05\x02\x33\
-	\x33\x35\x36\x38\x38\x04\x02\x30\x30\x32\x32\x05\x02\x04\x08\x31\x31\x39\
-	\x3d\x03\x02\x0d\x0e\x05\x02\x0a\x0a\x40\x40\x4b\x4b\x04\x02\x50\x50\x53\
-	\x53\x06\x02\x15\x15\x25\x25\x50\x51\x53\x53\x06\x02\x14\x14\x1b\x1b\x25\
-	\x26\x2b\x2e\x02\u{37d}\x02\u{a4}\x03\x02\x02\x02\x04\u{b0}\x03\x02\x02\
-	\x02\x06\u{cc}\x03\x02\x02\x02\x08\u{da}\x03\x02\x02\x02\x0a\u{dc}\x03\x02\
-	\x02\x02\x0c\u{e7}\x03\x02\x02\x02\x0e\u{f0}\x03\x02\x02\x02\x10\u{f4}\x03\
-	\x02\x02\x02\x12\u{f6}\x03\x02\x02\x02\x14\u{ff}\x03\x02\x02\x02\x16\u{101}\
-	\x03\x02\x02\x02\x18\u{10a}\x03\x02\x02\x02\x1a\u{10c}\x03\x02\x02\x02\x1c\
-	\u{115}\x03\x02\x02\x02\x1e\u{117}\x03\x02\x02\x02\x20\u{120}\x03\x02\x02\
-	\x02\x22\u{122}\x03\x02\x02\x02\x24\u{12b}\x03\x02\x02\x02\x26\u{12d}\x03\
-	\x02\x02\x02\x28\u{135}\x03\x02\x02\x02\x2a\u{13d}\x03\x02\x02\x02\x2c\u{145}\
-	\x03\x02\x02\x02\x2e\u{14d}\x03\x02\x02\x02\x30\u{155}\x03\x02\x02\x02\x32\
-	\u{191}\x03\x02\x02\x02\x34\u{195}\x03\x02\x02\x02\x36\u{197}\x03\x02\x02\
-	\x02\x38\u{199}\x03\x02\x02\x02\x3a\u{1a1}\x03\x02\x02\x02\x3c\u{1a4}\x03\
-	\x02\x02\x02\x3e\u{1a9}\x03\x02\x02\x02\x40\u{1ad}\x03\x02\x02\x02\x42\u{1af}\
-	\x03\x02\x02\x02\x44\u{1b1}\x03\x02\x02\x02\x46\u{1c0}\x03\x02\x02\x02\x48\
-	\u{1c2}\x03\x02\x02\x02\x4a\u{1c6}\x03\x02\x02\x02\x4c\u{1d2}\x03\x02\x02\
-	\x02\x4e\u{1ef}\x03\x02\x02\x02\x50\u{1f2}\x03\x02\x02\x02\x52\u{1f7}\x03\
-	\x02\x02\x02\x54\u{206}\x03\x02\x02\x02\x56\u{208}\x03\x02\x02\x02\x58\u{210}\
-	\x03\x02\x02\x02\x5a\u{226}\x03\x02\x02\x02\x5c\u{229}\x03\x02\x02\x02\x5e\
-	\u{236}\x03\x02\x02\x02\x60\u{23a}\x03\x02\x02\x02\x62\u{244}\x03\x02\x02\
-	\x02\x64\u{24b}\x03\x02\x02\x02\x66\u{24d}\x03\x02\x02\x02\x68\u{254}\x03\
-	\x02\x02\x02\x6a\u{25b}\x03\x02\x02\x02\x6c\u{263}\x03\x02\x02\x02\x6e\u{266}\
-	\x03\x02\x02\x02\x70\u{274}\x03\x02\x02\x02\x72\u{276}\x03\x02\x02\x02\x74\
-	\u{27c}\x03\x02\x02\x02\x76\u{285}\x03\x02\x02\x02\x78\u{288}\x03\x02\x02\
-	\x02\x7a\u{294}\x03\x02\x02\x02\x7c\u{2aa}\x03\x02\x02\x02\x7e\u{2ac}\x03\
-	\x02\x02\x02\u{80}\u{2b6}\x03\x02\x02\x02\u{82}\u{2b8}\x03\x02\x02\x02\u{84}\
-	\u{2c0}\x03\x02\x02\x02\u{86}\u{2cf}\x03\x02\x02\x02\u{88}\u{2d4}\x03\x02\
-	\x02\x02\u{8a}\u{2dc}\x03\x02\x02\x02\u{8c}\u{2de}\x03\x02\x02\x02\u{8e}\
-	\u{305}\x03\x02\x02\x02\u{90}\u{307}\x03\x02\x02\x02\u{92}\u{309}\x03\x02\
-	\x02\x02\u{94}\u{30b}\x03\x02\x02\x02\u{96}\u{30d}\x03\x02\x02\x02\u{98}\
-	\u{314}\x03\x02\x02\x02\u{9a}\u{33d}\x03\x02\x02\x02\u{9c}\u{342}\x03\x02\
-	\x02\x02\u{9e}\u{345}\x03\x02\x02\x02\u{a0}\u{34b}\x03\x02\x02\x02\u{a2}\
-	\u{34d}\x03\x02\x02\x02\u{a4}\u{a5}\x05\u{88}\x45\x02\u{a5}\u{a6}\x07\x02\
-	\x02\x03\u{a6}\x03\x03\x02\x02\x02\u{a7}\u{b1}\x07\x50\x02\x02\u{a8}\u{b1}\
-	\x05\u{a0}\x51\x02\u{a9}\u{b1}\x07\x53\x02\x02\u{aa}\u{b1}\x07\x52\x02\x02\
-	\u{ab}\u{ac}\x07\x0d\x02\x02\u{ac}\u{ad}\x05\x38\x1d\x02\u{ad}\u{ae}\x07\
-	\x0e\x02\x02\u{ae}\u{b1}\x03\x02\x02\x02\u{af}\u{b1}\x07\x27\x02\x02\u{b0}\
-	\u{a7}\x03\x02\x02\x02\u{b0}\u{a8}\x03\x02\x02\x02\u{b0}\u{a9}\x03\x02\x02\
-	\x02\u{b0}\u{aa}\x03\x02\x02\x02\u{b0}\u{ab}\x03\x02\x02\x02\u{b0}\u{af}\
-	\x03\x02\x02\x02\u{b1}\x05\x03\x02\x02\x02\u{b2}\u{b4}\x07\x50\x02\x02\u{b3}\
-	\u{b5}\x07\x0d\x02\x02\u{b4}\u{b3}\x03\x02\x02\x02\u{b4}\u{b5}\x03\x02\x02\
-	\x02\u{b5}\u{b7}\x03\x02\x02\x02\u{b6}\u{b8}\x05\x0a\x06\x02\u{b7}\u{b6}\
-	\x03\x02\x02\x02\u{b7}\u{b8}\x03\x02\x02\x02\u{b8}\u{ba}\x03\x02\x02\x02\
-	\u{b9}\u{bb}\x07\x0e\x02\x02\u{ba}\u{b9}\x03\x02\x02\x02\u{ba}\u{bb}\x03\
-	\x02\x02\x02\u{bb}\u{cd}\x03\x02\x02\x02\u{bc}\u{be}\x07\x4c\x02\x02\u{bd}\
-	\u{bf}\x07\x0d\x02\x02\u{be}\u{bd}\x03\x02\x02\x02\u{be}\u{bf}\x03\x02\x02\
-	\x02\u{bf}\u{c0}\x03\x02\x02\x02\u{c0}\u{c3}\x07\x52\x02\x02\u{c1}\u{c2}\
-	\x07\x13\x02\x02\u{c2}\u{c4}\x05\x0a\x06\x02\u{c3}\u{c1}\x03\x02\x02\x02\
-	\u{c3}\u{c4}\x03\x02\x02\x02\u{c4}\u{c5}\x03\x02\x02\x02\u{c5}\u{cd}\x07\
-	\x0e\x02\x02\u{c6}\u{c7}\x07\x4c\x02\x02\u{c7}\u{ca}\x07\x52\x02\x02\u{c8}\
-	\u{c9}\x07\x13\x02\x02\u{c9}\u{cb}\x05\x0a\x06\x02\u{ca}\u{c8}\x03\x02\x02\
-	\x02\u{ca}\u{cb}\x03\x02\x02\x02\u{cb}\u{cd}\x03\x02\x02\x02\u{cc}\u{b2}\
-	\x03\x02\x02\x02\u{cc}\u{bc}\x03\x02\x02\x02\u{cc}\u{c6}\x03\x02\x02\x02\
-	\u{cd}\x07\x03\x02\x02\x02\u{ce}\u{db}\x05\x06\x04\x02\u{cf}\u{d7}\x05\x04\
-	\x03\x02\u{d0}\u{d1}\x07\x11\x02\x02\u{d1}\u{d2}\x05\x38\x1d\x02\u{d2}\u{d3}\
-	\x07\x12\x02\x02\u{d3}\u{d6}\x03\x02\x02\x02\u{d4}\u{d6}\x09\x02\x02\x02\
-	\u{d5}\u{d0}\x03\x02\x02\x02\u{d5}\u{d4}\x03\x02\x02\x02\u{d6}\u{d9}\x03\
-	\x02\x02\x02\u{d7}\u{d5}\x03\x02\x02\x02\u{d7}\u{d8}\x03\x02\x02\x02\u{d8}\
-	\u{db}\x03\x02\x02\x02\u{d9}\u{d7}\x03\x02\x02\x02\u{da}\u{ce}\x03\x02\x02\
-	\x02\u{da}\u{cf}\x03\x02\x02\x02\u{db}\x09\x03\x02\x02\x02\u{dc}\u{e1}\x05\
-	\x32\x1a\x02\u{dd}\u{de}\x07\x13\x02\x02\u{de}\u{e0}\x05\x32\x1a\x02\u{df}\
-	\u{dd}\x03\x02\x02\x02\u{e0}\u{e3}\x03\x02\x02\x02\u{e1}\u{df}\x03\x02\x02\
-	\x02\u{e1}\u{e2}\x03\x02\x02\x02\u{e2}\x0b\x03\x02\x02\x02\u{e3}\u{e1}\x03\
-	\x02\x02\x02\u{e4}\u{e6}\x09\x02\x02\x02\u{e5}\u{e4}\x03\x02\x02\x02\u{e6}\
-	\u{e9}\x03\x02\x02\x02\u{e7}\u{e5}\x03\x02\x02\x02\u{e7}\u{e8}\x03\x02\x02\
-	\x02\u{e8}\u{ee}\x03\x02\x02\x02\u{e9}\u{e7}\x03\x02\x02\x02\u{ea}\u{ef}\
-	\x05\x08\x05\x02\u{eb}\u{ec}\x05\x0e\x08\x02\u{ec}\u{ed}\x05\x10\x09\x02\
-	\u{ed}\u{ef}\x03\x02\x02\x02\u{ee}\u{ea}\x03\x02\x02\x02\u{ee}\u{eb}\x03\
-	\x02\x02\x02\u{ef}\x0d\x03\x02\x02\x02\u{f0}\u{f1}\x09\x03\x02\x02\u{f1}\
-	\x0f\x03\x02\x02\x02\u{f2}\u{f5}\x05\x0c\x07\x02\u{f3}\u{f5}\x07\x53\x02\
-	\x02\u{f4}\u{f2}\x03\x02\x02\x02\u{f4}\u{f3}\x03\x02\x02\x02\u{f5}\x11\x03\
-	\x02\x02\x02\u{f6}\u{fc}\x05\x10\x09\x02\u{f7}\u{f8}\x05\x14\x0b\x02\u{f8}\
-	\u{f9}\x05\x10\x09\x02\u{f9}\u{fb}\x03\x02\x02\x02\u{fa}\u{f7}\x03\x02\x02\
-	\x02\u{fb}\u{fe}\x03\x02\x02\x02\u{fc}\u{fa}\x03\x02\x02\x02\u{fc}\u{fd}\
-	\x03\x02\x02\x02\u{fd}\x13\x03\x02\x02\x02\u{fe}\u{fc}\x03\x02\x02\x02\u{ff}\
-	\u{100}\x09\x04\x02\x02\u{100}\x15\x03\x02\x02\x02\u{101}\u{107}\x05\x12\
-	\x0a\x02\u{102}\u{103}\x05\x18\x0d\x02\u{103}\u{104}\x05\x12\x0a\x02\u{104}\
-	\u{106}\x03\x02\x02\x02\u{105}\u{102}\x03\x02\x02\x02\u{106}\u{109}\x03\
-	\x02\x02\x02\u{107}\u{105}\x03\x02\x02\x02\u{107}\u{108}\x03\x02\x02\x02\
-	\u{108}\x17\x03\x02\x02\x02\u{109}\u{107}\x03\x02\x02\x02\u{10a}\u{10b}\
-	\x09\x05\x02\x02\u{10b}\x19\x03\x02\x02\x02\u{10c}\u{112}\x05\x16\x0c\x02\
-	\u{10d}\u{10e}\x05\x1c\x0f\x02\u{10e}\u{10f}\x05\x16\x0c\x02\u{10f}\u{111}\
-	\x03\x02\x02\x02\u{110}\u{10d}\x03\x02\x02\x02\u{111}\u{114}\x03\x02\x02\
-	\x02\u{112}\u{110}\x03\x02\x02\x02\u{112}\u{113}\x03\x02\x02\x02\u{113}\
-	\x1b\x03\x02\x02\x02\u{114}\u{112}\x03\x02\x02\x02\u{115}\u{116}\x09\x06\
-	\x02\x02\u{116}\x1d\x03\x02\x02\x02\u{117}\u{11d}\x05\x1a\x0e\x02\u{118}\
-	\u{119}\x05\x20\x11\x02\u{119}\u{11a}\x05\x1a\x0e\x02\u{11a}\u{11c}\x03\
-	\x02\x02\x02\u{11b}\u{118}\x03\x02\x02\x02\u{11c}\u{11f}\x03\x02\x02\x02\
-	\u{11d}\u{11b}\x03\x02\x02\x02\u{11d}\u{11e}\x03\x02\x02\x02\u{11e}\x1f\
-	\x03\x02\x02\x02\u{11f}\u{11d}\x03\x02\x02\x02\u{120}\u{121}\x09\x07\x02\
-	\x02\u{121}\x21\x03\x02\x02\x02\u{122}\u{128}\x05\x1e\x10\x02\u{123}\u{124}\
-	\x05\x24\x13\x02\u{124}\u{125}\x05\x1e\x10\x02\u{125}\u{127}\x03\x02\x02\
-	\x02\u{126}\u{123}\x03\x02\x02\x02\u{127}\u{12a}\x03\x02\x02\x02\u{128}\
-	\u{126}\x03\x02\x02\x02\u{128}\u{129}\x03\x02\x02\x02\u{129}\x23\x03\x02\
-	\x02\x02\u{12a}\u{128}\x03\x02\x02\x02\u{12b}\u{12c}\x09\x08\x02\x02\u{12c}\
-	\x25\x03\x02\x02\x02\u{12d}\u{132}\x05\x22\x12\x02\u{12e}\u{12f}\x07\x1f\
-	\x02\x02\u{12f}\u{131}\x05\x22\x12\x02\u{130}\u{12e}\x03\x02\x02\x02\u{131}\
-	\u{134}\x03\x02\x02\x02\u{132}\u{130}\x03\x02\x02\x02\u{132}\u{133}\x03\
-	\x02\x02\x02\u{133}\x27\x03\x02\x02\x02\u{134}\u{132}\x03\x02\x02\x02\u{135}\
-	\u{13a}\x05\x26\x14\x02\u{136}\u{137}\x07\x03\x02\x02\u{137}\u{139}\x05\
-	\x26\x14\x02\u{138}\u{136}\x03\x02\x02\x02\u{139}\u{13c}\x03\x02\x02\x02\
-	\u{13a}\u{138}\x03\x02\x02\x02\u{13a}\u{13b}\x03\x02\x02\x02\u{13b}\x29\
-	\x03\x02\x02\x02\u{13c}\u{13a}\x03\x02\x02\x02\u{13d}\u{142}\x05\x28\x15\
-	\x02\u{13e}\u{13f}\x07\x1d\x02\x02\u{13f}\u{141}\x05\x28\x15\x02\u{140}\
-	\u{13e}\x03\x02\x02\x02\u{141}\u{144}\x03\x02\x02\x02\u{142}\u{140}\x03\
-	\x02\x02\x02\u{142}\u{143}\x03\x02\x02\x02\u{143}\x2b\x03\x02\x02\x02\u{144}\
-	\u{142}\x03\x02\x02\x02\u{145}\u{14a}\x05\x2a\x16\x02\u{146}\u{147}\x07\
-	\x20\x02\x02\u{147}\u{149}\x05\x2a\x16\x02\u{148}\u{146}\x03\x02\x02\x02\
-	\u{149}\u{14c}\x03\x02\x02\x02\u{14a}\u{148}\x03\x02\x02\x02\u{14a}\u{14b}\
-	\x03\x02\x02\x02\u{14b}\x2d\x03\x02\x02\x02\u{14c}\u{14a}\x03\x02\x02\x02\
-	\u{14d}\u{152}\x05\x2c\x17\x02\u{14e}\u{14f}\x07\x1e\x02\x02\u{14f}\u{151}\
-	\x05\x2c\x17\x02\u{150}\u{14e}\x03\x02\x02\x02\u{151}\u{154}\x03\x02\x02\
-	\x02\u{152}\u{150}\x03\x02\x02\x02\u{152}\u{153}\x03\x02\x02\x02\u{153}\
-	\x2f\x03\x02\x02\x02\u{154}\u{152}\x03\x02\x02\x02\u{155}\u{15b}\x05\x2e\
-	\x18\x02\u{156}\u{157}\x07\x1a\x02\x02\u{157}\u{158}\x05\x38\x1d\x02\u{158}\
-	\u{159}\x07\x15\x02\x02\u{159}\u{15a}\x05\x30\x19\x02\u{15a}\u{15c}\x03\
-	\x02\x02\x02\u{15b}\u{156}\x03\x02\x02\x02\u{15b}\u{15c}\x03\x02\x02\x02\
-	\u{15c}\x31\x03\x02\x02\x02\u{15d}\u{192}\x05\x30\x19\x02\u{15e}\u{15f}\
-	\x05\x34\x1b\x02\u{15f}\u{160}\x05\x36\x1c\x02\u{160}\u{161}\x05\x32\x1a\
-	\x02\u{161}\u{192}\x03\x02\x02\x02\u{162}\u{164}\x07\x41\x02\x02\u{163}\
-	\u{165}\x07\x0d\x02\x02\u{164}\u{163}\x03\x02\x02\x02\u{164}\u{165}\x03\
-	\x02\x02\x02\u{165}\u{166}\x03\x02\x02\x02\u{166}\u{167}\x05\x06\x04\x02\
-	\u{167}\u{168}\x07\x13\x02\x02\u{168}\u{16a}\x05\x32\x1a\x02\u{169}\u{16b}\
-	\x07\x0e\x02\x02\u{16a}\u{169}\x03\x02\x02\x02\u{16a}\u{16b}\x03\x02\x02\
-	\x02\u{16b}\u{192}\x03\x02\x02\x02\u{16c}\u{16e}\x07\x41\x02\x02\u{16d}\
-	\u{16f}\x07\x0d\x02\x02\u{16e}\u{16d}\x03\x02\x02\x02\u{16e}\u{16f}\x03\
-	\x02\x02\x02\u{16f}\u{170}\x03\x02\x02\x02\u{170}\u{171}\x05\x34\x1b\x02\
-	\u{171}\u{172}\x07\x13\x02\x02\u{172}\u{174}\x05\x32\x1a\x02\u{173}\u{175}\
-	\x07\x0e\x02\x02\u{174}\u{173}\x03\x02\x02\x02\u{174}\u{175}\x03\x02\x02\
-	\x02\u{175}\u{192}\x03\x02\x02\x02\u{176}\u{178}\x07\x4e\x02\x02\u{177}\
-	\u{179}\x07\x0d\x02\x02\u{178}\u{177}\x03\x02\x02\x02\u{178}\u{179}\x03\
-	\x02\x02\x02\u{179}\u{17a}\x03\x02\x02\x02\u{17a}\u{17b}\x05\x34\x1b\x02\
-	\u{17b}\u{17c}\x07\x13\x02\x02\u{17c}\u{17f}\x05\x32\x1a\x02\u{17d}\u{17e}\
-	\x07\x13\x02\x02\u{17e}\u{180}\x05\x0a\x06\x02\u{17f}\u{17d}\x03\x02\x02\
-	\x02\u{17f}\u{180}\x03\x02\x02\x02\u{180}\u{182}\x03\x02\x02\x02\u{181}\
-	\u{183}\x07\x0e\x02\x02\u{182}\u{181}\x03\x02\x02\x02\u{182}\u{183}\x03\
-	\x02\x02\x02\u{183}\u{192}\x03\x02\x02\x02\u{184}\u{186}\x07\x4f\x02\x02\
-	\u{185}\u{187}\x07\x0d\x02\x02\u{186}\u{185}\x03\x02\x02\x02\u{186}\u{187}\
-	\x03\x02\x02\x02\u{187}\u{188}\x03\x02\x02\x02\u{188}\u{189}\x05\x34\x1b\
-	\x02\u{189}\u{18a}\x07\x13\x02\x02\u{18a}\u{18b}\x05\x32\x1a\x02\u{18b}\
-	\u{18c}\x07\x13\x02\x02\u{18c}\u{18e}\x05\x0a\x06\x02\u{18d}\u{18f}\x07\
-	\x0e\x02\x02\u{18e}\u{18d}\x03\x02\x02\x02\u{18e}\u{18f}\x03\x02\x02\x02\
-	\u{18f}\u{192}\x03\x02\x02\x02\u{190}\u{192}\x07\x53\x02\x02\u{191}\u{15d}\
-	\x03\x02\x02\x02\u{191}\u{15e}\x03\x02\x02\x02\u{191}\u{162}\x03\x02\x02\
-	\x02\u{191}\u{16c}\x03\x02\x02\x02\u{191}\u{176}\x03\x02\x02\x02\u{191}\
-	\u{184}\x03\x02\x02\x02\u{191}\u{190}\x03\x02\x02\x02\u{192}\x33\x03\x02\
-	\x02\x02\u{193}\u{196}\x07\x50\x02\x02\u{194}\u{196}\x05\u{a0}\x51\x02\u{195}\
-	\u{193}\x03\x02\x02\x02\u{195}\u{194}\x03\x02\x02\x02\u{196}\x35\x03\x02\
-	\x02\x02\u{197}\u{198}\x09\x09\x02\x02\u{198}\x37\x03\x02\x02\x02\u{199}\
-	\u{19e}\x05\x32\x1a\x02\u{19a}\u{19b}\x07\x13\x02\x02\u{19b}\u{19d}\x05\
-	\x32\x1a\x02\u{19c}\u{19a}\x03\x02\x02\x02\u{19d}\u{1a0}\x03\x02\x02\x02\
-	\u{19e}\u{19c}\x03\x02\x02\x02\u{19e}\u{19f}\x03\x02\x02\x02\u{19f}\x39\
-	\x03\x02\x02\x02\u{1a0}\u{19e}\x03\x02\x02\x02\u{1a1}\u{1a2}\x05\x30\x19\
-	\x02\u{1a2}\x3b\x03\x02\x02\x02\u{1a3}\u{1a5}\x05\x44\x23\x02\u{1a4}\u{1a3}\
-	\x03\x02\x02\x02\u{1a4}\u{1a5}\x03\x02\x02\x02\u{1a5}\u{1a6}\x03\x02\x02\
-	\x02\u{1a6}\u{1a7}\x07\x16\x02\x02\u{1a7}\x3d\x03\x02\x02\x02\u{1a8}\u{1aa}\
-	\x05\x42\x22\x02\u{1a9}\u{1a8}\x03\x02\x02\x02\u{1aa}\u{1ab}\x03\x02\x02\
-	\x02\u{1ab}\u{1a9}\x03\x02\x02\x02\u{1ab}\u{1ac}\x03\x02\x02\x02\u{1ac}\
-	\x3f\x03\x02\x02\x02\u{1ad}\u{1ae}\x05\u{9e}\x50\x02\u{1ae}\x41\x03\x02\
-	\x02\x02\u{1af}\u{1b0}\x05\u{9e}\x50\x02\u{1b0}\x43\x03\x02\x02\x02\u{1b1}\
-	\u{1b6}\x05\x46\x24\x02\u{1b2}\u{1b3}\x07\x13\x02\x02\u{1b3}\u{1b5}\x05\
-	\x46\x24\x02\u{1b4}\u{1b2}\x03\x02\x02\x02\u{1b5}\u{1b8}\x03\x02\x02\x02\
-	\u{1b6}\u{1b4}\x03\x02\x02\x02\u{1b6}\u{1b7}\x03\x02\x02\x02\u{1b7}\x45\
-	\x03\x02\x02\x02\u{1b8}\u{1b6}\x03\x02\x02\x02\u{1b9}\u{1bc}\x05\u{a0}\x51\
-	\x02\u{1ba}\u{1bb}\x07\x31\x02\x02\u{1bb}\u{1bd}\x05\x5a\x2e\x02\u{1bc}\
-	\u{1ba}\x03\x02\x02\x02\u{1bc}\u{1bd}\x03\x02\x02\x02\u{1bd}\u{1c1}\x03\
-	\x02\x02\x02\u{1be}\u{1bf}\x07\x4a\x02\x02\u{1bf}\u{1c1}\x07\x50\x02\x02\
-	\u{1c0}\u{1b9}\x03\x02\x02\x02\u{1c0}\u{1be}\x03\x02\x02\x02\u{1c1}\x47\
-	\x03\x02\x02\x02\u{1c2}\u{1c4}\x05\u{9e}\x50\x02\u{1c3}\u{1c5}\x05\x48\x25\
-	\x02\u{1c4}\u{1c3}\x03\x02\x02\x02\u{1c4}\u{1c5}\x03\x02\x02\x02\u{1c5}\
-	\x49\x03\x02\x02\x02\u{1c6}\u{1c7}\x05\x4c\x27\x02\u{1c7}\x4b\x03\x02\x02\
-	\x02\u{1c8}\u{1c9}\x08\x27\x01\x02\u{1c9}\u{1d3}\x05\u{a0}\x51\x02\u{1ca}\
-	\u{1cb}\x07\x0d\x02\x02\u{1cb}\u{1cc}\x05\x4a\x26\x02\u{1cc}\u{1cd}\x07\
-	\x0e\x02\x02\u{1cd}\u{1d3}\x03\x02\x02\x02\u{1ce}\u{1cf}\x07\x0d\x02\x02\
-	\u{1cf}\u{1d0}\x05\x4c\x27\x02\u{1d0}\u{1d1}\x07\x0e\x02\x02\u{1d1}\u{1d3}\
-	\x03\x02\x02\x02\u{1d2}\u{1c8}\x03\x02\x02\x02\u{1d2}\u{1ca}\x03\x02\x02\
-	\x02\u{1d2}\u{1ce}\x03\x02\x02\x02\u{1d3}\u{1e5}\x03\x02\x02\x02\u{1d4}\
-	\u{1d5}\x0c\x06\x02\x02\u{1d5}\u{1d6}\x07\x11\x02\x02\u{1d6}\u{1d7}\x07\
-	\x18\x02\x02\u{1d7}\u{1e4}\x07\x12\x02\x02\u{1d8}\u{1d9}\x0c\x05\x02\x02\
-	\u{1d9}\u{1da}\x07\x0d\x02\x02\u{1da}\u{1db}\x05\x50\x29\x02\u{1db}\u{1dc}\
-	\x07\x0e\x02\x02\u{1dc}\u{1e4}\x03\x02\x02\x02\u{1dd}\u{1de}\x0c\x04\x02\
-	\x02\u{1de}\u{1e0}\x07\x0d\x02\x02\u{1df}\u{1e1}\x05\x56\x2c\x02\u{1e0}\
-	\u{1df}\x03\x02\x02\x02\u{1e0}\u{1e1}\x03\x02\x02\x02\u{1e1}\u{1e2}\x03\
-	\x02\x02\x02\u{1e2}\u{1e4}\x07\x0e\x02\x02\u{1e3}\u{1d4}\x03\x02\x02\x02\
-	\u{1e3}\u{1d8}\x03\x02\x02\x02\u{1e3}\u{1dd}\x03\x02\x02\x02\u{1e4}\u{1e7}\
-	\x03\x02\x02\x02\u{1e5}\u{1e3}\x03\x02\x02\x02\u{1e5}\u{1e6}\x03\x02\x02\
-	\x02\u{1e6}\x4d\x03\x02\x02\x02\u{1e7}\u{1e5}\x03\x02\x02\x02\u{1e8}\u{1ee}\
-	\x0a\x0a\x02\x02\u{1e9}\u{1ea}\x07\x0d\x02\x02\u{1ea}\u{1eb}\x05\x4e\x28\
-	\x02\u{1eb}\u{1ec}\x07\x0e\x02\x02\u{1ec}\u{1ee}\x03\x02\x02\x02\u{1ed}\
-	\u{1e8}\x03\x02\x02\x02\u{1ed}\u{1e9}\x03\x02\x02\x02\u{1ee}\u{1f1}\x03\
-	\x02\x02\x02\u{1ef}\u{1ed}\x03\x02\x02\x02\u{1ef}\u{1f0}\x03\x02\x02\x02\
-	\u{1f0}\x4f\x03\x02\x02\x02\u{1f1}\u{1ef}\x03\x02\x02\x02\u{1f2}\u{1f5}\
-	\x05\x52\x2a\x02\u{1f3}\u{1f4}\x07\x13\x02\x02\u{1f4}\u{1f6}\x07\x09\x02\
-	\x02\u{1f5}\u{1f3}\x03\x02\x02\x02\u{1f5}\u{1f6}\x03\x02\x02\x02\u{1f6}\
-	\x51\x03\x02\x02\x02\u{1f7}\u{1fc}\x05\x54\x2b\x02\u{1f8}\u{1f9}\x07\x13\
-	\x02\x02\u{1f9}\u{1fb}\x05\x54\x2b\x02\u{1fa}\u{1f8}\x03\x02\x02\x02\u{1fb}\
-	\u{1fe}\x03\x02\x02\x02\u{1fc}\u{1fa}\x03\x02\x02\x02\u{1fc}\u{1fd}\x03\
-	\x02\x02\x02\u{1fd}\x53\x03\x02\x02\x02\u{1fe}\u{1fc}\x03\x02\x02\x02\u{1ff}\
-	\u{200}\x05\x3e\x20\x02\u{200}\u{201}\x05\x4a\x26\x02\u{201}\u{207}\x03\
-	\x02\x02\x02\u{202}\u{204}\x05\x40\x21\x02\u{203}\u{205}\x05\x58\x2d\x02\
-	\u{204}\u{203}\x03\x02\x02\x02\u{204}\u{205}\x03\x02\x02\x02\u{205}\u{207}\
-	\x03\x02\x02\x02\u{206}\u{1ff}\x03\x02\x02\x02\u{206}\u{202}\x03\x02\x02\
-	\x02\u{207}\x55\x03\x02\x02\x02\u{208}\u{20d}\x07\x50\x02\x02\u{209}\u{20a}\
-	\x07\x13\x02\x02\u{20a}\u{20c}\x07\x50\x02\x02\u{20b}\u{209}\x03\x02\x02\
-	\x02\u{20c}\u{20f}\x03\x02\x02\x02\u{20d}\u{20b}\x03\x02\x02\x02\u{20d}\
-	\u{20e}\x03\x02\x02\x02\u{20e}\x57\x03\x02\x02\x02\u{20f}\u{20d}\x03\x02\
-	\x02\x02\u{210}\u{211}\x08\x2d\x01\x02\u{211}\u{212}\x07\x11\x02\x02\u{212}\
-	\u{213}\x07\x18\x02\x02\u{213}\u{214}\x07\x12\x02\x02\u{214}\u{21b}\x03\
-	\x02\x02\x02\u{215}\u{216}\x0c\x03\x02\x02\u{216}\u{217}\x07\x11\x02\x02\
-	\u{217}\u{218}\x07\x18\x02\x02\u{218}\u{21a}\x07\x12\x02\x02\u{219}\u{215}\
-	\x03\x02\x02\x02\u{21a}\u{21d}\x03\x02\x02\x02\u{21b}\u{219}\x03\x02\x02\
-	\x02\u{21b}\u{21c}\x03\x02\x02\x02\u{21c}\x59\x03\x02\x02\x02\u{21d}\u{21b}\
-	\x03\x02\x02\x02\u{21e}\u{227}\x05\x32\x1a\x02\u{21f}\u{220}\x07\x0f\x02\
-	\x02\u{220}\u{222}\x05\x5c\x2f\x02\u{221}\u{223}\x07\x13\x02\x02\u{222}\
-	\u{221}\x03\x02\x02\x02\u{222}\u{223}\x03\x02\x02\x02\u{223}\u{224}\x03\
-	\x02\x02\x02\u{224}\u{225}\x07\x10\x02\x02\u{225}\u{227}\x03\x02\x02\x02\
-	\u{226}\u{21e}\x03\x02\x02\x02\u{226}\u{21f}\x03\x02\x02\x02\u{227}\x5b\
-	\x03\x02\x02\x02\u{228}\u{22a}\x05\x5e\x30\x02\u{229}\u{228}\x03\x02\x02\
-	\x02\u{229}\u{22a}\x03\x02\x02\x02\u{22a}\u{22b}\x03\x02\x02\x02\u{22b}\
-	\u{233}\x05\x5a\x2e\x02\u{22c}\u{22e}\x07\x13\x02\x02\u{22d}\u{22f}\x05\
-	\x5e\x30\x02\u{22e}\u{22d}\x03\x02\x02\x02\u{22e}\u{22f}\x03\x02\x02\x02\
-	\u{22f}\u{230}\x03\x02\x02\x02\u{230}\u{232}\x05\x5a\x2e\x02\u{231}\u{22c}\
-	\x03\x02\x02\x02\u{232}\u{235}\x03\x02\x02\x02\u{233}\u{231}\x03\x02\x02\
-	\x02\u{233}\u{234}\x03\x02\x02\x02\u{234}\x5d\x03\x02\x02\x02\u{235}\u{233}\
-	\x03\x02\x02\x02\u{236}\u{237}\x05\x60\x31\x02\u{237}\u{238}\x07\x31\x02\
-	\x02\u{238}\x5f\x03\x02\x02\x02\u{239}\u{23b}\x05\x62\x32\x02\u{23a}\u{239}\
-	\x03\x02\x02\x02\u{23b}\u{23c}\x03\x02\x02\x02\u{23c}\u{23a}\x03\x02\x02\
-	\x02\u{23c}\u{23d}\x03\x02\x02\x02\u{23d}\x61\x03\x02\x02\x02\u{23e}\u{23f}\
-	\x07\x11\x02\x02\u{23f}\u{240}\x05\x3a\x1e\x02\u{240}\u{241}\x07\x12\x02\
-	\x02\u{241}\u{245}\x03\x02\x02\x02\u{242}\u{243}\x07\x2b\x02\x02\u{243}\
-	\u{245}\x07\x50\x02\x02\u{244}\u{23e}\x03\x02\x02\x02\u{244}\u{242}\x03\
-	\x02\x02\x02\u{245}\x63\x03\x02\x02\x02\u{246}\u{24c}\x05\x68\x35\x02\u{247}\
-	\u{24c}\x05\x6e\x38\x02\u{248}\u{24c}\x05\x70\x39\x02\u{249}\u{24c}\x05\
-	\x7c\x3f\x02\u{24a}\u{24c}\x05\u{86}\x44\x02\u{24b}\u{246}\x03\x02\x02\x02\
-	\u{24b}\u{247}\x03\x02\x02\x02\u{24b}\u{248}\x03\x02\x02\x02\u{24b}\u{249}\
-	\x03\x02\x02\x02\u{24b}\u{24a}\x03\x02\x02\x02\u{24c}\x65\x03\x02\x02\x02\
-	\u{24d}\u{251}\x07\x51\x02\x02\u{24e}\u{250}\x05\x64\x33\x02\u{24f}\u{24e}\
-	\x03\x02\x02\x02\u{250}\u{253}\x03\x02\x02\x02\u{251}\u{24f}\x03\x02\x02\
-	\x02\u{251}\u{252}\x03\x02\x02\x02\u{252}\x67\x03\x02\x02\x02\u{253}\u{251}\
-	\x03\x02\x02\x02\u{254}\u{256}\x07\x0f\x02\x02\u{255}\u{257}\x05\x6a\x36\
-	\x02\u{256}\u{255}\x03\x02\x02\x02\u{256}\u{257}\x03\x02\x02\x02\u{257}\
-	\u{258}\x03\x02\x02\x02\u{258}\u{259}\x07\x10\x02\x02\u{259}\x69\x03\x02\
-	\x02\x02\u{25a}\u{25c}\x05\x6c\x37\x02\u{25b}\u{25a}\x03\x02\x02\x02\u{25c}\
-	\u{25d}\x03\x02\x02\x02\u{25d}\u{25b}\x03\x02\x02\x02\u{25d}\u{25e}\x03\
-	\x02\x02\x02\u{25e}\x6b\x03\x02\x02\x02\u{25f}\u{264}\x05\x64\x33\x02\u{260}\
-	\u{264}\x05\x66\x34\x02\u{261}\u{264}\x05\u{8c}\x47\x02\u{262}\u{264}\x05\
-	\x3c\x1f\x02\u{263}\u{25f}\x03\x02\x02\x02\u{263}\u{260}\x03\x02\x02\x02\
-	\u{263}\u{261}\x03\x02\x02\x02\u{263}\u{262}\x03\x02\x02\x02\u{264}\x6d\
-	\x03\x02\x02\x02\u{265}\u{267}\x05\x38\x1d\x02\u{266}\u{265}\x03\x02\x02\
-	\x02\u{266}\u{267}\x03\x02\x02\x02\u{267}\u{268}\x03\x02\x02\x02\u{268}\
-	\u{269}\x07\x16\x02\x02\u{269}\x6f\x03\x02\x02\x02\u{26a}\u{26b}\x07\x3e\
-	\x02\x02\u{26b}\u{26c}\x07\x0d\x02\x02\u{26c}\u{26d}\x05\x38\x1d\x02\u{26d}\
-	\u{26e}\x07\x0e\x02\x02\u{26e}\u{271}\x05\x64\x33\x02\u{26f}\u{270}\x07\
-	\x3f\x02\x02\u{270}\u{272}\x05\x64\x33\x02\u{271}\u{26f}\x03\x02\x02\x02\
-	\u{271}\u{272}\x03\x02\x02\x02\u{272}\u{275}\x03\x02\x02\x02\u{273}\u{275}\
-	\x05\x72\x3a\x02\u{274}\u{26a}\x03\x02\x02\x02\u{274}\u{273}\x03\x02\x02\
-	\x02\u{275}\x71\x03\x02\x02\x02\u{276}\u{277}\x07\x47\x02\x02\u{277}\u{278}\
-	\x07\x0d\x02\x02\u{278}\u{279}\x05\x38\x1d\x02\u{279}\u{27a}\x07\x0e\x02\
-	\x02\u{27a}\u{27b}\x05\x74\x3b\x02\u{27b}\x73\x03\x02\x02\x02\u{27c}\u{280}\
-	\x07\x0f\x02\x02\u{27d}\u{27f}\x05\x76\x3c\x02\u{27e}\u{27d}\x03\x02\x02\
-	\x02\u{27f}\u{282}\x03\x02\x02\x02\u{280}\u{27e}\x03\x02\x02\x02\u{280}\
-	\u{281}\x03\x02\x02\x02\u{281}\u{283}\x03\x02\x02\x02\u{282}\u{280}\x03\
-	\x02\x02\x02\u{283}\u{284}\x07\x10\x02\x02\u{284}\x75\x03\x02\x02\x02\u{285}\
-	\u{286}\x05\x78\x3d\x02\u{286}\u{287}\x05\x6a\x36\x02\u{287}\x77\x03\x02\
-	\x02\x02\u{288}\u{28c}\x05\x7a\x3e\x02\u{289}\u{28b}\x05\x7a\x3e\x02\u{28a}\
-	\u{289}\x03\x02\x02\x02\u{28b}\u{28e}\x03\x02\x02\x02\u{28c}\u{28a}\x03\
-	\x02\x02\x02\u{28c}\u{28d}\x03\x02\x02\x02\u{28d}\x79\x03\x02\x02\x02\u{28e}\
-	\u{28c}\x03\x02\x02\x02\u{28f}\u{290}\x07\x48\x02\x02\u{290}\u{291}\x05\
-	\x3a\x1e\x02\u{291}\u{292}\x07\x15\x02\x02\u{292}\u{295}\x03\x02\x02\x02\
-	\u{293}\u{295}\x07\x49\x02\x02\u{294}\u{28f}\x03\x02\x02\x02\u{294}\u{293}\
-	\x03\x02\x02\x02\u{295}\x7b\x03\x02\x02\x02\u{296}\u{297}\x07\x43\x02\x02\
-	\u{297}\u{298}\x07\x0d\x02\x02\u{298}\u{299}\x05\x38\x1d\x02\u{299}\u{29a}\
-	\x07\x0e\x02\x02\u{29a}\u{29b}\x05\x64\x33\x02\u{29b}\u{2ab}\x03\x02\x02\
-	\x02\u{29c}\u{29d}\x07\x44\x02\x02\u{29d}\u{29e}\x05\x64\x33\x02\u{29e}\
-	\u{29f}\x07\x43\x02\x02\u{29f}\u{2a0}\x07\x0d\x02\x02\u{2a0}\u{2a1}\x05\
-	\x38\x1d\x02\u{2a1}\u{2a2}\x07\x0e\x02\x02\u{2a2}\u{2a3}\x07\x16\x02\x02\
-	\u{2a3}\u{2ab}\x03\x02\x02\x02\u{2a4}\u{2a5}\x07\x42\x02\x02\u{2a5}\u{2a6}\
-	\x07\x0d\x02\x02\u{2a6}\u{2a7}\x05\x7e\x40\x02\u{2a7}\u{2a8}\x07\x0e\x02\
-	\x02\u{2a8}\u{2a9}\x05\x64\x33\x02\u{2a9}\u{2ab}\x03\x02\x02\x02\u{2aa}\
-	\u{296}\x03\x02\x02\x02\u{2aa}\u{29c}\x03\x02\x02\x02\u{2aa}\u{2a4}\x03\
-	\x02\x02\x02\u{2ab}\x7d\x03\x02\x02\x02\u{2ac}\u{2ad}\x05\u{80}\x41\x02\
-	\u{2ad}\u{2af}\x07\x16\x02\x02\u{2ae}\u{2b0}\x05\u{82}\x42\x02\u{2af}\u{2ae}\
-	\x03\x02\x02\x02\u{2af}\u{2b0}\x03\x02\x02\x02\u{2b0}\u{2b1}\x03\x02\x02\
-	\x02\u{2b1}\u{2b3}\x07\x16\x02\x02\u{2b2}\u{2b4}\x05\u{84}\x43\x02\u{2b3}\
-	\u{2b2}\x03\x02\x02\x02\u{2b3}\u{2b4}\x03\x02\x02\x02\u{2b4}\x7f\x03\x02\
-	\x02\x02\u{2b5}\u{2b7}\x05\x38\x1d\x02\u{2b6}\u{2b5}\x03\x02\x02\x02\u{2b6}\
-	\u{2b7}\x03\x02\x02\x02\u{2b7}\u{81}\x03\x02\x02\x02\u{2b8}\u{2bd}\x05\x32\
-	\x1a\x02\u{2b9}\u{2ba}\x07\x13\x02\x02\u{2ba}\u{2bc}\x05\x32\x1a\x02\u{2bb}\
-	\u{2b9}\x03\x02\x02\x02\u{2bc}\u{2bf}\x03\x02\x02\x02\u{2bd}\u{2bb}\x03\
-	\x02\x02\x02\u{2bd}\u{2be}\x03\x02\x02\x02\u{2be}\u{83}\x03\x02\x02\x02\
-	\u{2bf}\u{2bd}\x03\x02\x02\x02\u{2c0}\u{2c5}\x05\x32\x1a\x02\u{2c1}\u{2c2}\
-	\x07\x13\x02\x02\u{2c2}\u{2c4}\x05\x32\x1a\x02\u{2c3}\u{2c1}\x03\x02\x02\
-	\x02\u{2c4}\u{2c7}\x03\x02\x02\x02\u{2c5}\u{2c3}\x03\x02\x02\x02\u{2c5}\
-	\u{2c6}\x03\x02\x02\x02\u{2c6}\u{85}\x03\x02\x02\x02\u{2c7}\u{2c5}\x03\x02\
-	\x02\x02\u{2c8}\u{2c9}\x07\x45\x02\x02\u{2c9}\u{2d0}\x07\x50\x02\x02\u{2ca}\
-	\u{2d0}\x09\x0b\x02\x02\u{2cb}\u{2cd}\x07\x46\x02\x02\u{2cc}\u{2ce}\x05\
-	\x38\x1d\x02\u{2cd}\u{2cc}\x03\x02\x02\x02\u{2cd}\u{2ce}\x03\x02\x02\x02\
-	\u{2ce}\u{2d0}\x03\x02\x02\x02\u{2cf}\u{2c8}\x03\x02\x02\x02\u{2cf}\u{2ca}\
-	\x03\x02\x02\x02\u{2cf}\u{2cb}\x03\x02\x02\x02\u{2d0}\u{2d1}\x03\x02\x02\
-	\x02\u{2d1}\u{2d2}\x07\x16\x02\x02\u{2d2}\u{87}\x03\x02\x02\x02\u{2d3}\u{2d5}\
-	\x05\u{8a}\x46\x02\u{2d4}\u{2d3}\x03\x02\x02\x02\u{2d5}\u{2d6}\x03\x02\x02\
-	\x02\u{2d6}\u{2d4}\x03\x02\x02\x02\u{2d6}\u{2d7}\x03\x02\x02\x02\u{2d7}\
-	\u{89}\x03\x02\x02\x02\u{2d8}\u{2dd}\x05\u{8c}\x47\x02\u{2d9}\u{2dd}\x05\
-	\u{8e}\x48\x02\u{2da}\u{2dd}\x05\u{9a}\x4e\x02\u{2db}\u{2dd}\x07\x16\x02\
-	\x02\u{2dc}\u{2d8}\x03\x02\x02\x02\u{2dc}\u{2d9}\x03\x02\x02\x02\u{2dc}\
-	\u{2da}\x03\x02\x02\x02\u{2dc}\u{2db}\x03\x02\x02\x02\u{2dd}\u{8b}\x03\x02\
-	\x02\x02\u{2de}\u{2df}\x07\x4a\x02\x02\u{2df}\u{2e1}\x07\x50\x02\x02\u{2e0}\
-	\u{2e2}\x05\x68\x35\x02\u{2e1}\u{2e0}\x03\x02\x02\x02\u{2e1}\u{2e2}\x03\
-	\x02\x02\x02\u{2e2}\u{8d}\x03\x02\x02\x02\u{2e3}\u{2e4}\x07\x27\x02\x02\
-	\u{2e4}\u{2e5}\x07\x0b\x02\x02\u{2e5}\u{2e6}\x05\u{9c}\x4f\x02\u{2e6}\u{2eb}\
-	\x05\u{98}\x4d\x02\u{2e7}\u{2e8}\x07\x13\x02\x02\u{2e8}\u{2ea}\x05\u{98}\
-	\x4d\x02\u{2e9}\u{2e7}\x03\x02\x02\x02\u{2ea}\u{2ed}\x03\x02\x02\x02\u{2eb}\
-	\u{2e9}\x03\x02\x02\x02\u{2eb}\u{2ec}\x03\x02\x02\x02\u{2ec}\u{2ee}\x03\
-	\x02\x02\x02\u{2ed}\u{2eb}\x03\x02\x02\x02\u{2ee}\u{2ef}\x07\x13\x02\x02\
-	\u{2ef}\u{2f0}\x05\x68\x35\x02\u{2f0}\u{306}\x03\x02\x02\x02\u{2f1}\u{2f2}\
-	\x05\u{90}\x49\x02\u{2f2}\u{2f3}\x07\x13\x02\x02\u{2f3}\u{2f4}\x05\u{92}\
-	\x4a\x02\u{2f4}\u{2f5}\x07\x13\x02\x02\u{2f5}\u{2f6}\x05\u{94}\x4b\x02\u{2f6}\
-	\u{2f7}\x07\x13\x02\x02\u{2f7}\u{2f8}\x05\u{96}\x4c\x02\u{2f8}\u{2f9}\x07\
-	\x0b\x02\x02\u{2f9}\u{2fa}\x05\u{9c}\x4f\x02\u{2fa}\u{2ff}\x05\u{98}\x4d\
-	\x02\u{2fb}\u{2fc}\x07\x13\x02\x02\u{2fc}\u{2fe}\x05\u{98}\x4d\x02\u{2fd}\
-	\u{2fb}\x03\x02\x02\x02\u{2fe}\u{301}\x03\x02\x02\x02\u{2ff}\u{2fd}\x03\
-	\x02\x02\x02\u{2ff}\u{300}\x03\x02\x02\x02\u{300}\u{302}\x03\x02\x02\x02\
-	\u{301}\u{2ff}\x03\x02\x02\x02\u{302}\u{303}\x07\x13\x02\x02\u{303}\u{304}\
-	\x05\x68\x35\x02\u{304}\u{306}\x03\x02\x02\x02\u{305}\u{2e3}\x03\x02\x02\
-	\x02\u{305}\u{2f1}\x03\x02\x02\x02\u{306}\u{8f}\x03\x02\x02\x02\u{307}\u{308}\
-	\x07\x50\x02\x02\u{308}\u{91}\x03\x02\x02\x02\u{309}\u{30a}\x07\x53\x02\
-	\x02\u{30a}\u{93}\x03\x02\x02\x02\u{30b}\u{30c}\x07\x53\x02\x02\u{30c}\u{95}\
-	\x03\x02\x02\x02\u{30d}\u{30e}\x07\x53\x02\x02\u{30e}\u{97}\x03\x02\x02\
-	\x02\u{30f}\u{311}\x07\x27\x02\x02\u{310}\u{30f}\x03\x02\x02\x02\u{310}\
-	\u{311}\x03\x02\x02\x02\u{311}\u{312}\x03\x02\x02\x02\u{312}\u{315}\x07\
-	\x53\x02\x02\u{313}\u{315}\x07\x50\x02\x02\u{314}\u{310}\x03\x02\x02\x02\
-	\u{314}\u{313}\x03\x02\x02\x02\u{315}\u{99}\x03\x02\x02\x02\u{316}\u{31b}\
-	\x07\x50\x02\x02\u{317}\u{319}\x07\x13\x02\x02\u{318}\u{31a}\x07\x53\x02\
-	\x02\u{319}\u{318}\x03\x02\x02\x02\u{319}\u{31a}\x03\x02\x02\x02\u{31a}\
-	\u{31c}\x03\x02\x02\x02\u{31b}\u{317}\x03\x02\x02\x02\u{31c}\u{31d}\x03\
-	\x02\x02\x02\u{31d}\u{31b}\x03\x02\x02\x02\u{31d}\u{31e}\x03\x02\x02\x02\
-	\u{31e}\u{31f}\x03\x02\x02\x02\u{31f}\u{320}\x07\x50\x02\x02\u{320}\u{321}\
-	\x05\u{9c}\x4f\x02\u{321}\u{326}\x09\x0c\x02\x02\u{322}\u{323}\x07\x13\x02\
-	\x02\u{323}\u{325}\x09\x0c\x02\x02\u{324}\u{322}\x03\x02\x02\x02\u{325}\
-	\u{328}\x03\x02\x02\x02\u{326}\u{324}\x03\x02\x02\x02\u{326}\u{327}\x03\
-	\x02\x02\x02\u{327}\u{33e}\x03\x02\x02\x02\u{328}\u{326}\x03\x02\x02\x02\
-	\u{329}\u{32a}\x05\u{90}\x49\x02\u{32a}\u{32b}\x07\x13\x02\x02\u{32b}\u{32c}\
-	\x05\u{92}\x4a\x02\u{32c}\u{32d}\x07\x13\x02\x02\u{32d}\u{32e}\x05\u{94}\
-	\x4b\x02\u{32e}\u{32f}\x07\x13\x02\x02\u{32f}\u{330}\x05\u{96}\x4c\x02\u{330}\
-	\u{331}\x07\x0c\x02\x02\u{331}\u{332}\x07\x0d\x02\x02\u{332}\u{333}\x05\
-	\u{9c}\x4f\x02\u{333}\u{334}\x07\x0e\x02\x02\u{334}\u{335}\x05\u{9c}\x4f\
-	\x02\u{335}\u{33a}\x05\u{98}\x4d\x02\u{336}\u{337}\x07\x13\x02\x02\u{337}\
-	\u{339}\x05\u{98}\x4d\x02\u{338}\u{336}\x03\x02\x02\x02\u{339}\u{33c}\x03\
-	\x02\x02\x02\u{33a}\u{338}\x03\x02\x02\x02\u{33a}\u{33b}\x03\x02\x02\x02\
-	\u{33b}\u{33e}\x03\x02\x02\x02\u{33c}\u{33a}\x03\x02\x02\x02\u{33d}\u{316}\
-	\x03\x02\x02\x02\u{33d}\u{329}\x03\x02\x02\x02\u{33e}\u{9b}\x03\x02\x02\
-	\x02\u{33f}\u{341}\x09\x0d\x02\x02\u{340}\u{33f}\x03\x02\x02\x02\u{341}\
-	\u{344}\x03\x02\x02\x02\u{342}\u{340}\x03\x02\x02\x02\u{342}\u{343}\x03\
-	\x02\x02\x02\u{343}\u{9d}\x03\x02\x02\x02\u{344}\u{342}\x03\x02\x02\x02\
-	\u{345}\u{346}\x09\x0e\x02\x02\u{346}\u{9f}\x03\x02\x02\x02\u{347}\u{348}\
-	\x05\u{9e}\x50\x02\u{348}\u{349}\x05\u{a2}\x52\x02\u{349}\u{34c}\x03\x02\
-	\x02\x02\u{34a}\u{34c}\x05\u{a2}\x52\x02\u{34b}\u{347}\x03\x02\x02\x02\u{34b}\
-	\u{34a}\x03\x02\x02\x02\u{34c}\u{a1}\x03\x02\x02\x02\u{34d}\u{34f}\x07\x50\
-	\x02\x02\u{34e}\u{350}\x07\x2d\x02\x02\u{34f}\u{34e}\x03\x02\x02\x02\u{34f}\
-	\u{350}\x03\x02\x02\x02\u{350}\u{354}\x03\x02\x02\x02\u{351}\u{352}\x07\
-	\x11\x02\x02\u{352}\u{353}\x07\x53\x02\x02\u{353}\u{355}\x07\x12\x02\x02\
-	\u{354}\u{351}\x03\x02\x02\x02\u{354}\u{355}\x03\x02\x02\x02\u{355}\u{a3}\
-	\x03\x02\x02\x02\x65\u{b0}\u{b4}\u{b7}\u{ba}\u{be}\u{c3}\u{ca}\u{cc}\u{d5}\
-	\u{d7}\u{da}\u{e1}\u{e7}\u{ee}\u{f4}\u{fc}\u{107}\u{112}\u{11d}\u{128}\u{132}\
-	\u{13a}\u{142}\u{14a}\u{152}\u{15b}\u{164}\u{16a}\u{16e}\u{174}\u{178}\u{17f}\
-	\u{182}\u{186}\u{18e}\u{191}\u{195}\u{19e}\u{1a4}\u{1ab}\u{1b6}\u{1bc}\u{1c0}\
-	\u{1c4}\u{1d2}\u{1e0}\u{1e3}\u{1e5}\u{1ed}\u{1ef}\u{1f5}\u{1fc}\u{204}\u{206}\
-	\u{20d}\u{21b}\u{222}\u{226}\u{229}\u{22e}\u{233}\u{23c}\u{244}\u{24b}\u{251}\
-	\u{256}\u{25d}\u{263}\u{266}\u{271}\u{274}\u{280}\u{28c}\u{294}\u{2aa}\u{2af}\
-	\u{2b3}\u{2b6}\u{2bd}\u{2c5}\u{2cd}\u{2cf}\u{2d6}\u{2dc}\u{2e1}\u{2eb}\u{2ff}\
-	\u{305}\u{310}\u{314}\u{319}\u{31d}\u{326}\u{33a}\u{33d}\u{342}\u{34b}\u{34f}\
-	\u{354}";
+	\x3b\x04\x3c\x09\x3c\x03\x02\x03\x02\x03\x02\x03\x03\x03\x03\x03\x03\x03\
+	\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x05\x03\u{85}\x0a\x03\x03\x04\
+	\x03\x04\x05\x04\u{89}\x0a\x04\x03\x04\x05\x04\u{8c}\x0a\x04\x03\x04\x05\
+	\x04\u{8f}\x0a\x04\x03\x04\x03\x04\x05\x04\u{93}\x0a\x04\x03\x04\x03\x04\
+	\x03\x04\x05\x04\u{98}\x0a\x04\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04\x05\
+	\x04\u{9f}\x0a\x04\x05\x04\u{a1}\x0a\x04\x03\x05\x03\x05\x03\x05\x03\x05\
+	\x03\x05\x03\x05\x03\x05\x05\x05\u{aa}\x0a\x05\x05\x05\u{ac}\x0a\x05\x03\
+	\x06\x03\x06\x03\x06\x07\x06\u{b1}\x0a\x06\x0c\x06\x0e\x06\u{b4}\x0b\x06\
+	\x03\x07\x07\x07\u{b7}\x0a\x07\x0c\x07\x0e\x07\u{ba}\x0b\x07\x03\x07\x03\
+	\x07\x03\x07\x03\x07\x05\x07\u{c0}\x0a\x07\x03\x08\x03\x08\x03\x09\x03\x09\
+	\x03\x09\x03\x09\x07\x09\u{c8}\x0a\x09\x0c\x09\x0e\x09\u{cb}\x0b\x09\x03\
+	\x0a\x03\x0a\x03\x0b\x03\x0b\x03\x0b\x03\x0b\x07\x0b\u{d3}\x0a\x0b\x0c\x0b\
+	\x0e\x0b\u{d6}\x0b\x0b\x03\x0c\x03\x0c\x03\x0d\x03\x0d\x03\x0d\x03\x0d\x07\
+	\x0d\u{de}\x0a\x0d\x0c\x0d\x0e\x0d\u{e1}\x0b\x0d\x03\x0e\x03\x0e\x03\x0f\
+	\x03\x0f\x03\x0f\x03\x0f\x07\x0f\u{e9}\x0a\x0f\x0c\x0f\x0e\x0f\u{ec}\x0b\
+	\x0f\x03\x10\x03\x10\x03\x11\x03\x11\x03\x11\x03\x11\x07\x11\u{f4}\x0a\x11\
+	\x0c\x11\x0e\x11\u{f7}\x0b\x11\x03\x12\x03\x12\x03\x13\x03\x13\x03\x13\x07\
+	\x13\u{fe}\x0a\x13\x0c\x13\x0e\x13\u{101}\x0b\x13\x03\x14\x03\x14\x03\x14\
+	\x07\x14\u{106}\x0a\x14\x0c\x14\x0e\x14\u{109}\x0b\x14\x03\x15\x03\x15\x03\
+	\x15\x07\x15\u{10e}\x0a\x15\x0c\x15\x0e\x15\u{111}\x0b\x15\x03\x16\x03\x16\
+	\x03\x16\x07\x16\u{116}\x0a\x16\x0c\x16\x0e\x16\u{119}\x0b\x16\x03\x17\x03\
+	\x17\x03\x17\x07\x17\u{11e}\x0a\x17\x0c\x17\x0e\x17\u{121}\x0b\x17\x03\x18\
+	\x03\x18\x03\x18\x03\x18\x03\x18\x03\x18\x05\x18\u{129}\x0a\x18\x03\x19\
+	\x03\x19\x03\x19\x03\x19\x03\x19\x03\x19\x03\x19\x05\x19\u{132}\x0a\x19\
+	\x03\x19\x03\x19\x03\x19\x03\x19\x05\x19\u{138}\x0a\x19\x03\x19\x03\x19\
+	\x05\x19\u{13c}\x0a\x19\x03\x19\x03\x19\x03\x19\x03\x19\x05\x19\u{142}\x0a\
+	\x19\x03\x19\x03\x19\x05\x19\u{146}\x0a\x19\x03\x19\x03\x19\x03\x19\x03\
+	\x19\x03\x19\x05\x19\u{14d}\x0a\x19\x03\x19\x05\x19\u{150}\x0a\x19\x03\x19\
+	\x03\x19\x05\x19\u{154}\x0a\x19\x03\x19\x03\x19\x03\x19\x03\x19\x03\x19\
+	\x03\x19\x05\x19\u{15c}\x0a\x19\x05\x19\u{15e}\x0a\x19\x03\x1a\x03\x1a\x05\
+	\x1a\u{162}\x0a\x1a\x03\x1b\x03\x1b\x03\x1c\x03\x1c\x03\x1d\x03\x1d\x03\
+	\x1d\x03\x1d\x03\x1d\x03\x1d\x05\x1d\u{16e}\x0a\x1d\x03\x1e\x03\x1e\x03\
+	\x1f\x03\x1f\x05\x1f\u{174}\x0a\x1f\x03\x1f\x03\x1f\x03\x20\x06\x20\u{179}\
+	\x0a\x20\x0d\x20\x0e\x20\u{17a}\x03\x21\x03\x21\x05\x21\u{17f}\x0a\x21\x03\
+	\x22\x03\x22\x03\x22\x03\x23\x03\x23\x03\x23\x03\x23\x03\x23\x03\x23\x03\
+	\x23\x05\x23\u{18b}\x0a\x23\x03\x23\x05\x23\u{18e}\x0a\x23\x03\x24\x03\x24\
+	\x03\x24\x03\x24\x03\x24\x03\x24\x03\x25\x03\x25\x07\x25\u{198}\x0a\x25\
+	\x0c\x25\x0e\x25\u{19b}\x0b\x25\x03\x25\x03\x25\x03\x26\x03\x26\x03\x26\
+	\x03\x27\x03\x27\x07\x27\u{1a4}\x0a\x27\x0c\x27\x0e\x27\u{1a7}\x0b\x27\x03\
+	\x28\x03\x28\x03\x28\x03\x28\x03\x28\x05\x28\u{1ae}\x0a\x28\x03\x29\x03\
+	\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\
+	\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\x29\x03\
+	\x29\x05\x29\u{1c4}\x0a\x29\x03\x2a\x03\x2a\x03\x2a\x05\x2a\u{1c9}\x0a\x2a\
+	\x03\x2a\x03\x2a\x05\x2a\u{1cd}\x0a\x2a\x03\x2b\x05\x2b\u{1d0}\x0a\x2b\x03\
+	\x2c\x03\x2c\x03\x2c\x07\x2c\u{1d5}\x0a\x2c\x0c\x2c\x0e\x2c\u{1d8}\x0b\x2c\
+	\x03\x2d\x03\x2d\x03\x2d\x07\x2d\u{1dd}\x0a\x2d\x0c\x2d\x0e\x2d\u{1e0}\x0b\
+	\x2d\x03\x2e\x03\x2e\x03\x2e\x03\x2e\x03\x2e\x05\x2e\u{1e7}\x0a\x2e\x05\
+	\x2e\u{1e9}\x0a\x2e\x03\x2e\x03\x2e\x03\x2f\x06\x2f\u{1ee}\x0a\x2f\x0d\x2f\
+	\x0e\x2f\u{1ef}\x03\x30\x03\x30\x03\x30\x03\x30\x05\x30\u{1f6}\x0a\x30\x03\
+	\x31\x03\x31\x03\x31\x03\x31\x03\x31\x03\x31\x05\x31\u{1fe}\x0a\x31\x03\
+	\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\x32\x07\x32\u{206}\x0a\x32\x0c\
+	\x32\x0e\x32\u{209}\x0b\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\
+	\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\x32\x03\
+	\x32\x07\x32\u{21a}\x0a\x32\x0c\x32\x0e\x32\u{21d}\x0b\x32\x03\x32\x03\x32\
+	\x03\x32\x05\x32\u{222}\x0a\x32\x03\x33\x03\x33\x03\x34\x03\x34\x03\x35\
+	\x03\x35\x03\x36\x03\x36\x03\x37\x05\x37\u{22d}\x0a\x37\x03\x37\x03\x37\
+	\x05\x37\u{231}\x0a\x37\x03\x38\x03\x38\x03\x38\x05\x38\u{236}\x0a\x38\x06\
+	\x38\u{238}\x0a\x38\x0d\x38\x0e\x38\u{239}\x03\x38\x03\x38\x03\x38\x03\x38\
+	\x03\x38\x07\x38\u{241}\x0a\x38\x0c\x38\x0e\x38\u{244}\x0b\x38\x03\x38\x03\
+	\x38\x03\x38\x03\x38\x03\x38\x03\x38\x03\x38\x03\x38\x03\x38\x03\x38\x03\
+	\x38\x03\x38\x03\x38\x03\x38\x03\x38\x07\x38\u{255}\x0a\x38\x0c\x38\x0e\
+	\x38\u{258}\x0b\x38\x05\x38\u{25a}\x0a\x38\x03\x39\x07\x39\u{25d}\x0a\x39\
+	\x0c\x39\x0e\x39\u{260}\x0b\x39\x03\x3a\x03\x3a\x03\x3b\x03\x3b\x03\x3b\
+	\x03\x3b\x05\x3b\u{268}\x0a\x3b\x03\x3c\x03\x3c\x05\x3c\u{26c}\x0a\x3c\x03\
+	\x3c\x03\x3c\x03\x3c\x05\x3c\u{271}\x0a\x3c\x03\x3c\x02\x02\x3d\x02\x04\
+	\x06\x08\x0a\x0c\x0e\x10\x12\x14\x16\x18\x1a\x1c\x1e\x20\x22\x24\x26\x28\
+	\x2a\x2c\x2e\x30\x32\x34\x36\x38\x3a\x3c\x3e\x40\x42\x44\x46\x48\x4a\x4c\
+	\x4e\x50\x52\x54\x56\x58\x5a\x5c\x5e\x60\x62\x64\x66\x68\x6a\x6c\x6e\x70\
+	\x72\x74\x76\x02\x0e\x04\x02\x27\x27\x29\x29\x07\x02\x17\x18\x1e\x1e\x26\
+	\x26\x28\x28\x2e\x2e\x04\x02\x16\x17\x20\x20\x04\x02\x26\x26\x28\x28\x04\
+	\x02\x33\x33\x36\x36\x05\x02\x32\x32\x34\x35\x37\x37\x04\x02\x2f\x2f\x31\
+	\x31\x05\x02\x04\x08\x30\x30\x38\x3c\x05\x02\x09\x09\x3f\x3f\x4a\x4a\x04\
+	\x02\x4f\x4f\x52\x52\x06\x02\x14\x14\x24\x24\x4f\x50\x52\x52\x06\x02\x13\
+	\x13\x1a\x1a\x24\x25\x2a\x2d\x02\u{28e}\x02\x78\x03\x02\x02\x02\x04\u{84}\
+	\x03\x02\x02\x02\x06\u{a0}\x03\x02\x02\x02\x08\u{ab}\x03\x02\x02\x02\x0a\
+	\u{ad}\x03\x02\x02\x02\x0c\u{b8}\x03\x02\x02\x02\x0e\u{c1}\x03\x02\x02\x02\
+	\x10\u{c3}\x03\x02\x02\x02\x12\u{cc}\x03\x02\x02\x02\x14\u{ce}\x03\x02\x02\
+	\x02\x16\u{d7}\x03\x02\x02\x02\x18\u{d9}\x03\x02\x02\x02\x1a\u{e2}\x03\x02\
+	\x02\x02\x1c\u{e4}\x03\x02\x02\x02\x1e\u{ed}\x03\x02\x02\x02\x20\u{ef}\x03\
+	\x02\x02\x02\x22\u{f8}\x03\x02\x02\x02\x24\u{fa}\x03\x02\x02\x02\x26\u{102}\
+	\x03\x02\x02\x02\x28\u{10a}\x03\x02\x02\x02\x2a\u{112}\x03\x02\x02\x02\x2c\
+	\u{11a}\x03\x02\x02\x02\x2e\u{122}\x03\x02\x02\x02\x30\u{15d}\x03\x02\x02\
+	\x02\x32\u{161}\x03\x02\x02\x02\x34\u{163}\x03\x02\x02\x02\x36\u{165}\x03\
+	\x02\x02\x02\x38\u{16d}\x03\x02\x02\x02\x3a\u{16f}\x03\x02\x02\x02\x3c\u{171}\
+	\x03\x02\x02\x02\x3e\u{178}\x03\x02\x02\x02\x40\u{17e}\x03\x02\x02\x02\x42\
+	\u{180}\x03\x02\x02\x02\x44\u{18d}\x03\x02\x02\x02\x46\u{18f}\x03\x02\x02\
+	\x02\x48\u{195}\x03\x02\x02\x02\x4a\u{19e}\x03\x02\x02\x02\x4c\u{1a1}\x03\
+	\x02\x02\x02\x4e\u{1ad}\x03\x02\x02\x02\x50\u{1c3}\x03\x02\x02\x02\x52\u{1c5}\
+	\x03\x02\x02\x02\x54\u{1cf}\x03\x02\x02\x02\x56\u{1d1}\x03\x02\x02\x02\x58\
+	\u{1d9}\x03\x02\x02\x02\x5a\u{1e8}\x03\x02\x02\x02\x5c\u{1ed}\x03\x02\x02\
+	\x02\x5e\u{1f5}\x03\x02\x02\x02\x60\u{1fd}\x03\x02\x02\x02\x62\u{221}\x03\
+	\x02\x02\x02\x64\u{223}\x03\x02\x02\x02\x66\u{225}\x03\x02\x02\x02\x68\u{227}\
+	\x03\x02\x02\x02\x6a\u{229}\x03\x02\x02\x02\x6c\u{230}\x03\x02\x02\x02\x6e\
+	\u{259}\x03\x02\x02\x02\x70\u{25e}\x03\x02\x02\x02\x72\u{261}\x03\x02\x02\
+	\x02\x74\u{267}\x03\x02\x02\x02\x76\u{269}\x03\x02\x02\x02\x78\x79\x05\x5c\
+	\x2f\x02\x79\x7a\x07\x02\x02\x03\x7a\x03\x03\x02\x02\x02\x7b\u{85}\x07\x4f\
+	\x02\x02\x7c\u{85}\x05\x74\x3b\x02\x7d\u{85}\x07\x52\x02\x02\x7e\u{85}\x07\
+	\x51\x02\x02\x7f\u{80}\x07\x0c\x02\x02\u{80}\u{81}\x05\x2e\x18\x02\u{81}\
+	\u{82}\x07\x0d\x02\x02\u{82}\u{85}\x03\x02\x02\x02\u{83}\u{85}\x07\x26\x02\
+	\x02\u{84}\x7b\x03\x02\x02\x02\u{84}\x7c\x03\x02\x02\x02\u{84}\x7d\x03\x02\
+	\x02\x02\u{84}\x7e\x03\x02\x02\x02\u{84}\x7f\x03\x02\x02\x02\u{84}\u{83}\
+	\x03\x02\x02\x02\u{85}\x05\x03\x02\x02\x02\u{86}\u{88}\x07\x4f\x02\x02\u{87}\
+	\u{89}\x07\x0c\x02\x02\u{88}\u{87}\x03\x02\x02\x02\u{88}\u{89}\x03\x02\x02\
+	\x02\u{89}\u{8b}\x03\x02\x02\x02\u{8a}\u{8c}\x05\x0a\x06\x02\u{8b}\u{8a}\
+	\x03\x02\x02\x02\u{8b}\u{8c}\x03\x02\x02\x02\u{8c}\u{8e}\x03\x02\x02\x02\
+	\u{8d}\u{8f}\x07\x0d\x02\x02\u{8e}\u{8d}\x03\x02\x02\x02\u{8e}\u{8f}\x03\
+	\x02\x02\x02\u{8f}\u{a1}\x03\x02\x02\x02\u{90}\u{92}\x07\x4b\x02\x02\u{91}\
+	\u{93}\x07\x0c\x02\x02\u{92}\u{91}\x03\x02\x02\x02\u{92}\u{93}\x03\x02\x02\
+	\x02\u{93}\u{94}\x03\x02\x02\x02\u{94}\u{97}\x07\x51\x02\x02\u{95}\u{96}\
+	\x07\x12\x02\x02\u{96}\u{98}\x05\x0a\x06\x02\u{97}\u{95}\x03\x02\x02\x02\
+	\u{97}\u{98}\x03\x02\x02\x02\u{98}\u{99}\x03\x02\x02\x02\u{99}\u{a1}\x07\
+	\x0d\x02\x02\u{9a}\u{9b}\x07\x4b\x02\x02\u{9b}\u{9e}\x07\x51\x02\x02\u{9c}\
+	\u{9d}\x07\x12\x02\x02\u{9d}\u{9f}\x05\x0a\x06\x02\u{9e}\u{9c}\x03\x02\x02\
+	\x02\u{9e}\u{9f}\x03\x02\x02\x02\u{9f}\u{a1}\x03\x02\x02\x02\u{a0}\u{86}\
+	\x03\x02\x02\x02\u{a0}\u{90}\x03\x02\x02\x02\u{a0}\u{9a}\x03\x02\x02\x02\
+	\u{a1}\x07\x03\x02\x02\x02\u{a2}\u{ac}\x05\x06\x04\x02\u{a3}\u{a9}\x05\x04\
+	\x03\x02\u{a4}\u{a5}\x07\x10\x02\x02\u{a5}\u{a6}\x05\x2e\x18\x02\u{a6}\u{a7}\
+	\x07\x11\x02\x02\u{a7}\u{aa}\x03\x02\x02\x02\u{a8}\u{aa}\x09\x02\x02\x02\
+	\u{a9}\u{a4}\x03\x02\x02\x02\u{a9}\u{a8}\x03\x02\x02\x02\u{a9}\u{aa}\x03\
+	\x02\x02\x02\u{aa}\u{ac}\x03\x02\x02\x02\u{ab}\u{a2}\x03\x02\x02\x02\u{ab}\
+	\u{a3}\x03\x02\x02\x02\u{ac}\x09\x03\x02\x02\x02\u{ad}\u{b2}\x05\x2e\x18\
+	\x02\u{ae}\u{af}\x07\x12\x02\x02\u{af}\u{b1}\x05\x2e\x18\x02\u{b0}\u{ae}\
+	\x03\x02\x02\x02\u{b1}\u{b4}\x03\x02\x02\x02\u{b2}\u{b0}\x03\x02\x02\x02\
+	\u{b2}\u{b3}\x03\x02\x02\x02\u{b3}\x0b\x03\x02\x02\x02\u{b4}\u{b2}\x03\x02\
+	\x02\x02\u{b5}\u{b7}\x09\x02\x02\x02\u{b6}\u{b5}\x03\x02\x02\x02\u{b7}\u{ba}\
+	\x03\x02\x02\x02\u{b8}\u{b6}\x03\x02\x02\x02\u{b8}\u{b9}\x03\x02\x02\x02\
+	\u{b9}\u{bf}\x03\x02\x02\x02\u{ba}\u{b8}\x03\x02\x02\x02\u{bb}\u{c0}\x05\
+	\x08\x05\x02\u{bc}\u{bd}\x05\x0e\x08\x02\u{bd}\u{be}\x05\x0c\x07\x02\u{be}\
+	\u{c0}\x03\x02\x02\x02\u{bf}\u{bb}\x03\x02\x02\x02\u{bf}\u{bc}\x03\x02\x02\
+	\x02\u{c0}\x0d\x03\x02\x02\x02\u{c1}\u{c2}\x09\x03\x02\x02\u{c2}\x0f\x03\
+	\x02\x02\x02\u{c3}\u{c9}\x05\x0c\x07\x02\u{c4}\u{c5}\x05\x12\x0a\x02\u{c5}\
+	\u{c6}\x05\x0c\x07\x02\u{c6}\u{c8}\x03\x02\x02\x02\u{c7}\u{c4}\x03\x02\x02\
+	\x02\u{c8}\u{cb}\x03\x02\x02\x02\u{c9}\u{c7}\x03\x02\x02\x02\u{c9}\u{ca}\
+	\x03\x02\x02\x02\u{ca}\x11\x03\x02\x02\x02\u{cb}\u{c9}\x03\x02\x02\x02\u{cc}\
+	\u{cd}\x09\x04\x02\x02\u{cd}\x13\x03\x02\x02\x02\u{ce}\u{d4}\x05\x10\x09\
+	\x02\u{cf}\u{d0}\x05\x16\x0c\x02\u{d0}\u{d1}\x05\x10\x09\x02\u{d1}\u{d3}\
+	\x03\x02\x02\x02\u{d2}\u{cf}\x03\x02\x02\x02\u{d3}\u{d6}\x03\x02\x02\x02\
+	\u{d4}\u{d2}\x03\x02\x02\x02\u{d4}\u{d5}\x03\x02\x02\x02\u{d5}\x15\x03\x02\
+	\x02\x02\u{d6}\u{d4}\x03\x02\x02\x02\u{d7}\u{d8}\x09\x05\x02\x02\u{d8}\x17\
+	\x03\x02\x02\x02\u{d9}\u{df}\x05\x14\x0b\x02\u{da}\u{db}\x05\x1a\x0e\x02\
+	\u{db}\u{dc}\x05\x14\x0b\x02\u{dc}\u{de}\x03\x02\x02\x02\u{dd}\u{da}\x03\
+	\x02\x02\x02\u{de}\u{e1}\x03\x02\x02\x02\u{df}\u{dd}\x03\x02\x02\x02\u{df}\
+	\u{e0}\x03\x02\x02\x02\u{e0}\x19\x03\x02\x02\x02\u{e1}\u{df}\x03\x02\x02\
+	\x02\u{e2}\u{e3}\x09\x06\x02\x02\u{e3}\x1b\x03\x02\x02\x02\u{e4}\u{ea}\x05\
+	\x18\x0d\x02\u{e5}\u{e6}\x05\x1e\x10\x02\u{e6}\u{e7}\x05\x18\x0d\x02\u{e7}\
+	\u{e9}\x03\x02\x02\x02\u{e8}\u{e5}\x03\x02\x02\x02\u{e9}\u{ec}\x03\x02\x02\
+	\x02\u{ea}\u{e8}\x03\x02\x02\x02\u{ea}\u{eb}\x03\x02\x02\x02\u{eb}\x1d\x03\
+	\x02\x02\x02\u{ec}\u{ea}\x03\x02\x02\x02\u{ed}\u{ee}\x09\x07\x02\x02\u{ee}\
+	\x1f\x03\x02\x02\x02\u{ef}\u{f5}\x05\x1c\x0f\x02\u{f0}\u{f1}\x05\x22\x12\
+	\x02\u{f1}\u{f2}\x05\x1c\x0f\x02\u{f2}\u{f4}\x03\x02\x02\x02\u{f3}\u{f0}\
+	\x03\x02\x02\x02\u{f4}\u{f7}\x03\x02\x02\x02\u{f5}\u{f3}\x03\x02\x02\x02\
+	\u{f5}\u{f6}\x03\x02\x02\x02\u{f6}\x21\x03\x02\x02\x02\u{f7}\u{f5}\x03\x02\
+	\x02\x02\u{f8}\u{f9}\x09\x08\x02\x02\u{f9}\x23\x03\x02\x02\x02\u{fa}\u{ff}\
+	\x05\x20\x11\x02\u{fb}\u{fc}\x07\x1e\x02\x02\u{fc}\u{fe}\x05\x20\x11\x02\
+	\u{fd}\u{fb}\x03\x02\x02\x02\u{fe}\u{101}\x03\x02\x02\x02\u{ff}\u{fd}\x03\
+	\x02\x02\x02\u{ff}\u{100}\x03\x02\x02\x02\u{100}\x25\x03\x02\x02\x02\u{101}\
+	\u{ff}\x03\x02\x02\x02\u{102}\u{107}\x05\x24\x13\x02\u{103}\u{104}\x07\x03\
+	\x02\x02\u{104}\u{106}\x05\x24\x13\x02\u{105}\u{103}\x03\x02\x02\x02\u{106}\
+	\u{109}\x03\x02\x02\x02\u{107}\u{105}\x03\x02\x02\x02\u{107}\u{108}\x03\
+	\x02\x02\x02\u{108}\x27\x03\x02\x02\x02\u{109}\u{107}\x03\x02\x02\x02\u{10a}\
+	\u{10f}\x05\x26\x14\x02\u{10b}\u{10c}\x07\x1c\x02\x02\u{10c}\u{10e}\x05\
+	\x26\x14\x02\u{10d}\u{10b}\x03\x02\x02\x02\u{10e}\u{111}\x03\x02\x02\x02\
+	\u{10f}\u{10d}\x03\x02\x02\x02\u{10f}\u{110}\x03\x02\x02\x02\u{110}\x29\
+	\x03\x02\x02\x02\u{111}\u{10f}\x03\x02\x02\x02\u{112}\u{117}\x05\x28\x15\
+	\x02\u{113}\u{114}\x07\x1f\x02\x02\u{114}\u{116}\x05\x28\x15\x02\u{115}\
+	\u{113}\x03\x02\x02\x02\u{116}\u{119}\x03\x02\x02\x02\u{117}\u{115}\x03\
+	\x02\x02\x02\u{117}\u{118}\x03\x02\x02\x02\u{118}\x2b\x03\x02\x02\x02\u{119}\
+	\u{117}\x03\x02\x02\x02\u{11a}\u{11f}\x05\x2a\x16\x02\u{11b}\u{11c}\x07\
+	\x1d\x02\x02\u{11c}\u{11e}\x05\x2a\x16\x02\u{11d}\u{11b}\x03\x02\x02\x02\
+	\u{11e}\u{121}\x03\x02\x02\x02\u{11f}\u{11d}\x03\x02\x02\x02\u{11f}\u{120}\
+	\x03\x02\x02\x02\u{120}\x2d\x03\x02\x02\x02\u{121}\u{11f}\x03\x02\x02\x02\
+	\u{122}\u{128}\x05\x2c\x17\x02\u{123}\u{124}\x07\x19\x02\x02\u{124}\u{125}\
+	\x05\x2e\x18\x02\u{125}\u{126}\x07\x14\x02\x02\u{126}\u{127}\x05\x2e\x18\
+	\x02\u{127}\u{129}\x03\x02\x02\x02\u{128}\u{123}\x03\x02\x02\x02\u{128}\
+	\u{129}\x03\x02\x02\x02\u{129}\x2f\x03\x02\x02\x02\u{12a}\u{15e}\x05\x2e\
+	\x18\x02\u{12b}\u{12c}\x05\x32\x1a\x02\u{12c}\u{12d}\x05\x34\x1b\x02\u{12d}\
+	\u{12e}\x05\x30\x19\x02\u{12e}\u{15e}\x03\x02\x02\x02\u{12f}\u{131}\x07\
+	\x40\x02\x02\u{130}\u{132}\x07\x0c\x02\x02\u{131}\u{130}\x03\x02\x02\x02\
+	\u{131}\u{132}\x03\x02\x02\x02\u{132}\u{133}\x03\x02\x02\x02\u{133}\u{134}\
+	\x05\x06\x04\x02\u{134}\u{135}\x07\x12\x02\x02\u{135}\u{137}\x05\x30\x19\
+	\x02\u{136}\u{138}\x07\x0d\x02\x02\u{137}\u{136}\x03\x02\x02\x02\u{137}\
+	\u{138}\x03\x02\x02\x02\u{138}\u{15e}\x03\x02\x02\x02\u{139}\u{13b}\x07\
+	\x40\x02\x02\u{13a}\u{13c}\x07\x0c\x02\x02\u{13b}\u{13a}\x03\x02\x02\x02\
+	\u{13b}\u{13c}\x03\x02\x02\x02\u{13c}\u{13d}\x03\x02\x02\x02\u{13d}\u{13e}\
+	\x05\x32\x1a\x02\u{13e}\u{13f}\x07\x12\x02\x02\u{13f}\u{141}\x05\x30\x19\
+	\x02\u{140}\u{142}\x07\x0d\x02\x02\u{141}\u{140}\x03\x02\x02\x02\u{141}\
+	\u{142}\x03\x02\x02\x02\u{142}\u{15e}\x03\x02\x02\x02\u{143}\u{145}\x07\
+	\x4d\x02\x02\u{144}\u{146}\x07\x0c\x02\x02\u{145}\u{144}\x03\x02\x02\x02\
+	\u{145}\u{146}\x03\x02\x02\x02\u{146}\u{147}\x03\x02\x02\x02\u{147}\u{148}\
+	\x05\x32\x1a\x02\u{148}\u{149}\x07\x12\x02\x02\u{149}\u{14c}\x05\x30\x19\
+	\x02\u{14a}\u{14b}\x07\x12\x02\x02\u{14b}\u{14d}\x05\x0a\x06\x02\u{14c}\
+	\u{14a}\x03\x02\x02\x02\u{14c}\u{14d}\x03\x02\x02\x02\u{14d}\u{14f}\x03\
+	\x02\x02\x02\u{14e}\u{150}\x07\x0d\x02\x02\u{14f}\u{14e}\x03\x02\x02\x02\
+	\u{14f}\u{150}\x03\x02\x02\x02\u{150}\u{15e}\x03\x02\x02\x02\u{151}\u{153}\
+	\x07\x4e\x02\x02\u{152}\u{154}\x07\x0c\x02\x02\u{153}\u{152}\x03\x02\x02\
+	\x02\u{153}\u{154}\x03\x02\x02\x02\u{154}\u{155}\x03\x02\x02\x02\u{155}\
+	\u{156}\x05\x32\x1a\x02\u{156}\u{157}\x07\x12\x02\x02\u{157}\u{158}\x05\
+	\x30\x19\x02\u{158}\u{159}\x07\x12\x02\x02\u{159}\u{15b}\x05\x0a\x06\x02\
+	\u{15a}\u{15c}\x07\x0d\x02\x02\u{15b}\u{15a}\x03\x02\x02\x02\u{15b}\u{15c}\
+	\x03\x02\x02\x02\u{15c}\u{15e}\x03\x02\x02\x02\u{15d}\u{12a}\x03\x02\x02\
+	\x02\u{15d}\u{12b}\x03\x02\x02\x02\u{15d}\u{12f}\x03\x02\x02\x02\u{15d}\
+	\u{139}\x03\x02\x02\x02\u{15d}\u{143}\x03\x02\x02\x02\u{15d}\u{151}\x03\
+	\x02\x02\x02\u{15e}\x31\x03\x02\x02\x02\u{15f}\u{162}\x07\x4f\x02\x02\u{160}\
+	\u{162}\x05\x74\x3b\x02\u{161}\u{15f}\x03\x02\x02\x02\u{161}\u{160}\x03\
+	\x02\x02\x02\u{162}\x33\x03\x02\x02\x02\u{163}\u{164}\x09\x09\x02\x02\u{164}\
+	\x35\x03\x02\x02\x02\u{165}\u{166}\x05\x2e\x18\x02\u{166}\x37\x03\x02\x02\
+	\x02\u{167}\u{16e}\x05\x3c\x1f\x02\u{168}\u{16e}\x05\x42\x22\x02\u{169}\
+	\u{16e}\x05\x44\x23\x02\u{16a}\u{16e}\x05\x50\x29\x02\u{16b}\u{16e}\x05\
+	\x5a\x2e\x02\u{16c}\u{16e}\x05\x3a\x1e\x02\u{16d}\u{167}\x03\x02\x02\x02\
+	\u{16d}\u{168}\x03\x02\x02\x02\u{16d}\u{169}\x03\x02\x02\x02\u{16d}\u{16a}\
+	\x03\x02\x02\x02\u{16d}\u{16b}\x03\x02\x02\x02\u{16d}\u{16c}\x03\x02\x02\
+	\x02\u{16e}\x39\x03\x02\x02\x02\u{16f}\u{170}\x07\x50\x02\x02\u{170}\x3b\
+	\x03\x02\x02\x02\u{171}\u{173}\x07\x0e\x02\x02\u{172}\u{174}\x05\x3e\x20\
+	\x02\u{173}\u{172}\x03\x02\x02\x02\u{173}\u{174}\x03\x02\x02\x02\u{174}\
+	\u{175}\x03\x02\x02\x02\u{175}\u{176}\x07\x0f\x02\x02\u{176}\x3d\x03\x02\
+	\x02\x02\u{177}\u{179}\x05\x40\x21\x02\u{178}\u{177}\x03\x02\x02\x02\u{179}\
+	\u{17a}\x03\x02\x02\x02\u{17a}\u{178}\x03\x02\x02\x02\u{17a}\u{17b}\x03\
+	\x02\x02\x02\u{17b}\x3f\x03\x02\x02\x02\u{17c}\u{17f}\x05\x38\x1d\x02\u{17d}\
+	\u{17f}\x05\x60\x31\x02\u{17e}\u{17c}\x03\x02\x02\x02\u{17e}\u{17d}\x03\
+	\x02\x02\x02\u{17f}\x41\x03\x02\x02\x02\u{180}\u{181}\x05\x30\x19\x02\u{181}\
+	\u{182}\x07\x15\x02\x02\u{182}\x43\x03\x02\x02\x02\u{183}\u{184}\x07\x3d\
+	\x02\x02\u{184}\u{185}\x07\x0c\x02\x02\u{185}\u{186}\x05\x2e\x18\x02\u{186}\
+	\u{187}\x07\x0d\x02\x02\u{187}\u{18a}\x05\x38\x1d\x02\u{188}\u{189}\x07\
+	\x3e\x02\x02\u{189}\u{18b}\x05\x38\x1d\x02\u{18a}\u{188}\x03\x02\x02\x02\
+	\u{18a}\u{18b}\x03\x02\x02\x02\u{18b}\u{18e}\x03\x02\x02\x02\u{18c}\u{18e}\
+	\x05\x46\x24\x02\u{18d}\u{183}\x03\x02\x02\x02\u{18d}\u{18c}\x03\x02\x02\
+	\x02\u{18e}\x45\x03\x02\x02\x02\u{18f}\u{190}\x07\x46\x02\x02\u{190}\u{191}\
+	\x07\x0c\x02\x02\u{191}\u{192}\x05\x2e\x18\x02\u{192}\u{193}\x07\x0d\x02\
+	\x02\u{193}\u{194}\x05\x48\x25\x02\u{194}\x47\x03\x02\x02\x02\u{195}\u{199}\
+	\x07\x0e\x02\x02\u{196}\u{198}\x05\x4a\x26\x02\u{197}\u{196}\x03\x02\x02\
+	\x02\u{198}\u{19b}\x03\x02\x02\x02\u{199}\u{197}\x03\x02\x02\x02\u{199}\
+	\u{19a}\x03\x02\x02\x02\u{19a}\u{19c}\x03\x02\x02\x02\u{19b}\u{199}\x03\
+	\x02\x02\x02\u{19c}\u{19d}\x07\x0f\x02\x02\u{19d}\x49\x03\x02\x02\x02\u{19e}\
+	\u{19f}\x05\x4c\x27\x02\u{19f}\u{1a0}\x05\x3e\x20\x02\u{1a0}\x4b\x03\x02\
+	\x02\x02\u{1a1}\u{1a5}\x05\x4e\x28\x02\u{1a2}\u{1a4}\x05\x4e\x28\x02\u{1a3}\
+	\u{1a2}\x03\x02\x02\x02\u{1a4}\u{1a7}\x03\x02\x02\x02\u{1a5}\u{1a3}\x03\
+	\x02\x02\x02\u{1a5}\u{1a6}\x03\x02\x02\x02\u{1a6}\x4d\x03\x02\x02\x02\u{1a7}\
+	\u{1a5}\x03\x02\x02\x02\u{1a8}\u{1a9}\x07\x47\x02\x02\u{1a9}\u{1aa}\x05\
+	\x36\x1c\x02\u{1aa}\u{1ab}\x07\x14\x02\x02\u{1ab}\u{1ae}\x03\x02\x02\x02\
+	\u{1ac}\u{1ae}\x07\x48\x02\x02\u{1ad}\u{1a8}\x03\x02\x02\x02\u{1ad}\u{1ac}\
+	\x03\x02\x02\x02\u{1ae}\x4f\x03\x02\x02\x02\u{1af}\u{1b0}\x07\x42\x02\x02\
+	\u{1b0}\u{1b1}\x07\x0c\x02\x02\u{1b1}\u{1b2}\x05\x2e\x18\x02\u{1b2}\u{1b3}\
+	\x07\x0d\x02\x02\u{1b3}\u{1b4}\x05\x38\x1d\x02\u{1b4}\u{1c4}\x03\x02\x02\
+	\x02\u{1b5}\u{1b6}\x07\x43\x02\x02\u{1b6}\u{1b7}\x05\x38\x1d\x02\u{1b7}\
+	\u{1b8}\x07\x42\x02\x02\u{1b8}\u{1b9}\x07\x0c\x02\x02\u{1b9}\u{1ba}\x05\
+	\x2e\x18\x02\u{1ba}\u{1bb}\x07\x0d\x02\x02\u{1bb}\u{1bc}\x07\x15\x02\x02\
+	\u{1bc}\u{1c4}\x03\x02\x02\x02\u{1bd}\u{1be}\x07\x41\x02\x02\u{1be}\u{1bf}\
+	\x07\x0c\x02\x02\u{1bf}\u{1c0}\x05\x52\x2a\x02\u{1c0}\u{1c1}\x07\x0d\x02\
+	\x02\u{1c1}\u{1c2}\x05\x38\x1d\x02\u{1c2}\u{1c4}\x03\x02\x02\x02\u{1c3}\
+	\u{1af}\x03\x02\x02\x02\u{1c3}\u{1b5}\x03\x02\x02\x02\u{1c3}\u{1bd}\x03\
+	\x02\x02\x02\u{1c4}\x51\x03\x02\x02\x02\u{1c5}\u{1c6}\x05\x54\x2b\x02\u{1c6}\
+	\u{1c8}\x07\x15\x02\x02\u{1c7}\u{1c9}\x05\x56\x2c\x02\u{1c8}\u{1c7}\x03\
+	\x02\x02\x02\u{1c8}\u{1c9}\x03\x02\x02\x02\u{1c9}\u{1ca}\x03\x02\x02\x02\
+	\u{1ca}\u{1cc}\x07\x15\x02\x02\u{1cb}\u{1cd}\x05\x58\x2d\x02\u{1cc}\u{1cb}\
+	\x03\x02\x02\x02\u{1cc}\u{1cd}\x03\x02\x02\x02\u{1cd}\x53\x03\x02\x02\x02\
+	\u{1ce}\u{1d0}\x05\x30\x19\x02\u{1cf}\u{1ce}\x03\x02\x02\x02\u{1cf}\u{1d0}\
+	\x03\x02\x02\x02\u{1d0}\x55\x03\x02\x02\x02\u{1d1}\u{1d6}\x05\x30\x19\x02\
+	\u{1d2}\u{1d3}\x07\x12\x02\x02\u{1d3}\u{1d5}\x05\x30\x19\x02\u{1d4}\u{1d2}\
+	\x03\x02\x02\x02\u{1d5}\u{1d8}\x03\x02\x02\x02\u{1d6}\u{1d4}\x03\x02\x02\
+	\x02\u{1d6}\u{1d7}\x03\x02\x02\x02\u{1d7}\x57\x03\x02\x02\x02\u{1d8}\u{1d6}\
+	\x03\x02\x02\x02\u{1d9}\u{1de}\x05\x30\x19\x02\u{1da}\u{1db}\x07\x12\x02\
+	\x02\u{1db}\u{1dd}\x05\x30\x19\x02\u{1dc}\u{1da}\x03\x02\x02\x02\u{1dd}\
+	\u{1e0}\x03\x02\x02\x02\u{1de}\u{1dc}\x03\x02\x02\x02\u{1de}\u{1df}\x03\
+	\x02\x02\x02\u{1df}\x59\x03\x02\x02\x02\u{1e0}\u{1de}\x03\x02\x02\x02\u{1e1}\
+	\u{1e2}\x07\x44\x02\x02\u{1e2}\u{1e9}\x07\x4f\x02\x02\u{1e3}\u{1e9}\x09\
+	\x0a\x02\x02\u{1e4}\u{1e6}\x07\x45\x02\x02\u{1e5}\u{1e7}\x05\x2e\x18\x02\
+	\u{1e6}\u{1e5}\x03\x02\x02\x02\u{1e6}\u{1e7}\x03\x02\x02\x02\u{1e7}\u{1e9}\
+	\x03\x02\x02\x02\u{1e8}\u{1e1}\x03\x02\x02\x02\u{1e8}\u{1e3}\x03\x02\x02\
+	\x02\u{1e8}\u{1e4}\x03\x02\x02\x02\u{1e9}\u{1ea}\x03\x02\x02\x02\u{1ea}\
+	\u{1eb}\x07\x15\x02\x02\u{1eb}\x5b\x03\x02\x02\x02\u{1ec}\u{1ee}\x05\x5e\
+	\x30\x02\u{1ed}\u{1ec}\x03\x02\x02\x02\u{1ee}\u{1ef}\x03\x02\x02\x02\u{1ef}\
+	\u{1ed}\x03\x02\x02\x02\u{1ef}\u{1f0}\x03\x02\x02\x02\u{1f0}\x5d\x03\x02\
+	\x02\x02\u{1f1}\u{1f6}\x05\x60\x31\x02\u{1f2}\u{1f6}\x05\x62\x32\x02\u{1f3}\
+	\u{1f6}\x05\x6e\x38\x02\u{1f4}\u{1f6}\x07\x15\x02\x02\u{1f5}\u{1f1}\x03\
+	\x02\x02\x02\u{1f5}\u{1f2}\x03\x02\x02\x02\u{1f5}\u{1f3}\x03\x02\x02\x02\
+	\u{1f5}\u{1f4}\x03\x02\x02\x02\u{1f6}\x5f\x03\x02\x02\x02\u{1f7}\u{1f8}\
+	\x07\x49\x02\x02\u{1f8}\u{1f9}\x07\x4f\x02\x02\u{1f9}\u{1fe}\x05\x3c\x1f\
+	\x02\u{1fa}\u{1fb}\x07\x49\x02\x02\u{1fb}\u{1fc}\x07\x4f\x02\x02\u{1fc}\
+	\u{1fe}\x07\x15\x02\x02\u{1fd}\u{1f7}\x03\x02\x02\x02\u{1fd}\u{1fa}\x03\
+	\x02\x02\x02\u{1fe}\x61\x03\x02\x02\x02\u{1ff}\u{200}\x07\x26\x02\x02\u{200}\
+	\u{201}\x07\x0a\x02\x02\u{201}\u{202}\x05\x70\x39\x02\u{202}\u{207}\x05\
+	\x6c\x37\x02\u{203}\u{204}\x07\x12\x02\x02\u{204}\u{206}\x05\x6c\x37\x02\
+	\u{205}\u{203}\x03\x02\x02\x02\u{206}\u{209}\x03\x02\x02\x02\u{207}\u{205}\
+	\x03\x02\x02\x02\u{207}\u{208}\x03\x02\x02\x02\u{208}\u{20a}\x03\x02\x02\
+	\x02\u{209}\u{207}\x03\x02\x02\x02\u{20a}\u{20b}\x07\x12\x02\x02\u{20b}\
+	\u{20c}\x05\x3c\x1f\x02\u{20c}\u{222}\x03\x02\x02\x02\u{20d}\u{20e}\x05\
+	\x64\x33\x02\u{20e}\u{20f}\x07\x12\x02\x02\u{20f}\u{210}\x05\x66\x34\x02\
+	\u{210}\u{211}\x07\x12\x02\x02\u{211}\u{212}\x05\x68\x35\x02\u{212}\u{213}\
+	\x07\x12\x02\x02\u{213}\u{214}\x05\x6a\x36\x02\u{214}\u{215}\x07\x0a\x02\
+	\x02\u{215}\u{216}\x05\x70\x39\x02\u{216}\u{21b}\x05\x6c\x37\x02\u{217}\
+	\u{218}\x07\x12\x02\x02\u{218}\u{21a}\x05\x6c\x37\x02\u{219}\u{217}\x03\
+	\x02\x02\x02\u{21a}\u{21d}\x03\x02\x02\x02\u{21b}\u{219}\x03\x02\x02\x02\
+	\u{21b}\u{21c}\x03\x02\x02\x02\u{21c}\u{21e}\x03\x02\x02\x02\u{21d}\u{21b}\
+	\x03\x02\x02\x02\u{21e}\u{21f}\x07\x12\x02\x02\u{21f}\u{220}\x05\x3c\x1f\
+	\x02\u{220}\u{222}\x03\x02\x02\x02\u{221}\u{1ff}\x03\x02\x02\x02\u{221}\
+	\u{20d}\x03\x02\x02\x02\u{222}\x63\x03\x02\x02\x02\u{223}\u{224}\x07\x4f\
+	\x02\x02\u{224}\x65\x03\x02\x02\x02\u{225}\u{226}\x07\x52\x02\x02\u{226}\
+	\x67\x03\x02\x02\x02\u{227}\u{228}\x07\x52\x02\x02\u{228}\x69\x03\x02\x02\
+	\x02\u{229}\u{22a}\x07\x52\x02\x02\u{22a}\x6b\x03\x02\x02\x02\u{22b}\u{22d}\
+	\x07\x26\x02\x02\u{22c}\u{22b}\x03\x02\x02\x02\u{22c}\u{22d}\x03\x02\x02\
+	\x02\u{22d}\u{22e}\x03\x02\x02\x02\u{22e}\u{231}\x07\x52\x02\x02\u{22f}\
+	\u{231}\x07\x4f\x02\x02\u{230}\u{22c}\x03\x02\x02\x02\u{230}\u{22f}\x03\
+	\x02\x02\x02\u{231}\x6d\x03\x02\x02\x02\u{232}\u{237}\x07\x4f\x02\x02\u{233}\
+	\u{235}\x07\x12\x02\x02\u{234}\u{236}\x07\x52\x02\x02\u{235}\u{234}\x03\
+	\x02\x02\x02\u{235}\u{236}\x03\x02\x02\x02\u{236}\u{238}\x03\x02\x02\x02\
+	\u{237}\u{233}\x03\x02\x02\x02\u{238}\u{239}\x03\x02\x02\x02\u{239}\u{237}\
+	\x03\x02\x02\x02\u{239}\u{23a}\x03\x02\x02\x02\u{23a}\u{23b}\x03\x02\x02\
+	\x02\u{23b}\u{23c}\x07\x4f\x02\x02\u{23c}\u{23d}\x05\x70\x39\x02\u{23d}\
+	\u{242}\x09\x0b\x02\x02\u{23e}\u{23f}\x07\x12\x02\x02\u{23f}\u{241}\x09\
+	\x0b\x02\x02\u{240}\u{23e}\x03\x02\x02\x02\u{241}\u{244}\x03\x02\x02\x02\
+	\u{242}\u{240}\x03\x02\x02\x02\u{242}\u{243}\x03\x02\x02\x02\u{243}\u{25a}\
+	\x03\x02\x02\x02\u{244}\u{242}\x03\x02\x02\x02\u{245}\u{246}\x05\x64\x33\
+	\x02\u{246}\u{247}\x07\x12\x02\x02\u{247}\u{248}\x05\x66\x34\x02\u{248}\
+	\u{249}\x07\x12\x02\x02\u{249}\u{24a}\x05\x68\x35\x02\u{24a}\u{24b}\x07\
+	\x12\x02\x02\u{24b}\u{24c}\x05\x6a\x36\x02\u{24c}\u{24d}\x07\x0b\x02\x02\
+	\u{24d}\u{24e}\x07\x0c\x02\x02\u{24e}\u{24f}\x05\x70\x39\x02\u{24f}\u{250}\
+	\x07\x0d\x02\x02\u{250}\u{251}\x05\x70\x39\x02\u{251}\u{256}\x05\x6c\x37\
+	\x02\u{252}\u{253}\x07\x12\x02\x02\u{253}\u{255}\x05\x6c\x37\x02\u{254}\
+	\u{252}\x03\x02\x02\x02\u{255}\u{258}\x03\x02\x02\x02\u{256}\u{254}\x03\
+	\x02\x02\x02\u{256}\u{257}\x03\x02\x02\x02\u{257}\u{25a}\x03\x02\x02\x02\
+	\u{258}\u{256}\x03\x02\x02\x02\u{259}\u{232}\x03\x02\x02\x02\u{259}\u{245}\
+	\x03\x02\x02\x02\u{25a}\x6f\x03\x02\x02\x02\u{25b}\u{25d}\x09\x0c\x02\x02\
+	\u{25c}\u{25b}\x03\x02\x02\x02\u{25d}\u{260}\x03\x02\x02\x02\u{25e}\u{25c}\
+	\x03\x02\x02\x02\u{25e}\u{25f}\x03\x02\x02\x02\u{25f}\x71\x03\x02\x02\x02\
+	\u{260}\u{25e}\x03\x02\x02\x02\u{261}\u{262}\x09\x0d\x02\x02\u{262}\x73\
+	\x03\x02\x02\x02\u{263}\u{264}\x05\x72\x3a\x02\u{264}\u{265}\x05\x76\x3c\
+	\x02\u{265}\u{268}\x03\x02\x02\x02\u{266}\u{268}\x05\x76\x3c\x02\u{267}\
+	\u{263}\x03\x02\x02\x02\u{267}\u{266}\x03\x02\x02\x02\u{268}\x75\x03\x02\
+	\x02\x02\u{269}\u{26b}\x07\x4f\x02\x02\u{26a}\u{26c}\x07\x2c\x02\x02\u{26b}\
+	\u{26a}\x03\x02\x02\x02\u{26b}\u{26c}\x03\x02\x02\x02\u{26c}\u{270}\x03\
+	\x02\x02\x02\u{26d}\u{26e}\x07\x10\x02\x02\u{26e}\u{26f}\x07\x52\x02\x02\
+	\u{26f}\u{271}\x07\x11\x02\x02\u{270}\u{26d}\x03\x02\x02\x02\u{270}\u{271}\
+	\x03\x02\x02\x02\u{271}\x77\x03\x02\x02\x02\x47\u{84}\u{88}\u{8b}\u{8e}\
+	\u{92}\u{97}\u{9e}\u{a0}\u{a9}\u{ab}\u{b2}\u{b8}\u{bf}\u{c9}\u{d4}\u{df}\
+	\u{ea}\u{f5}\u{ff}\u{107}\u{10f}\u{117}\u{11f}\u{128}\u{131}\u{137}\u{13b}\
+	\u{141}\u{145}\u{14c}\u{14f}\u{153}\u{15b}\u{15d}\u{161}\u{16d}\u{173}\u{17a}\
+	\u{17e}\u{18a}\u{18d}\u{199}\u{1a5}\u{1ad}\u{1c3}\u{1c8}\u{1cc}\u{1cf}\u{1d6}\
+	\u{1de}\u{1e6}\u{1e8}\u{1ef}\u{1f5}\u{1fd}\u{207}\u{21b}\u{221}\u{22c}\u{230}\
+	\u{235}\u{239}\u{242}\u{256}\u{259}\u{25e}\u{267}\u{26b}\u{270}";
 

@@ -52,12 +52,6 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_unaryOperator(&mut self, ctx: &UnaryOperatorContext<'input>) { self.visit_children(ctx) }
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#castExpression}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_castExpression(&mut self, ctx: &CastExpressionContext<'input>) { self.visit_children(ctx) }
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#multiplicativeExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -172,136 +166,10 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_assignmentOperator(&mut self, ctx: &AssignmentOperatorContext<'input>) { self.visit_children(ctx) }
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_expression(&mut self, ctx: &ExpressionContext<'input>) { self.visit_children(ctx) }
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#constantExpression}.
 	 * @param ctx the parse tree
 	 */
 	fn visit_constantExpression(&mut self, ctx: &ConstantExpressionContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declaration}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_declaration(&mut self, ctx: &DeclarationContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationSpecifiers}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_declarationSpecifiers(&mut self, ctx: &DeclarationSpecifiersContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationSpecifiers2}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_declarationSpecifiers2(&mut self, ctx: &DeclarationSpecifiers2Context<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationSpecifier}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_declarationSpecifier(&mut self, ctx: &DeclarationSpecifierContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initDeclaratorList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_initDeclaratorList(&mut self, ctx: &InitDeclaratorListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initDeclarator}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_initDeclarator(&mut self, ctx: &InitDeclaratorContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#specifierQualifierList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_specifierQualifierList(&mut self, ctx: &SpecifierQualifierListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarator}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_declarator(&mut self, ctx: &DeclaratorContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#directDeclarator}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_directDeclarator(&mut self, ctx: &DirectDeclaratorContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#nestedParenthesesBlock}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_nestedParenthesesBlock(&mut self, ctx: &NestedParenthesesBlockContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#parameterTypeList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_parameterTypeList(&mut self, ctx: &ParameterTypeListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#parameterList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_parameterList(&mut self, ctx: &ParameterListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#parameterDeclaration}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_parameterDeclaration(&mut self, ctx: &ParameterDeclarationContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#identifierList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_identifierList(&mut self, ctx: &IdentifierListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#directAbstractDeclarator}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_directAbstractDeclarator(&mut self, ctx: &DirectAbstractDeclaratorContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initializer}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_initializer(&mut self, ctx: &InitializerContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initializerList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_initializerList(&mut self, ctx: &InitializerListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#designation}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_designation(&mut self, ctx: &DesignationContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#designatorList}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_designatorList(&mut self, ctx: &DesignatorListContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#designator}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_designator(&mut self, ctx: &DesignatorContext<'input>) { self.visit_children(ctx) }
 
 	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#statement}.
@@ -555,14 +423,6 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#castExpression}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_castExpression(&mut self, ctx: &CastExpressionContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#multiplicativeExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -715,178 +575,10 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_expression(&mut self, ctx: &ExpressionContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#constantExpression}.
 	 * @param ctx the parse tree
 	 */
 		fn visit_constantExpression(&mut self, ctx: &ConstantExpressionContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declaration}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_declaration(&mut self, ctx: &DeclarationContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationSpecifiers}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_declarationSpecifiers(&mut self, ctx: &DeclarationSpecifiersContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationSpecifiers2}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_declarationSpecifiers2(&mut self, ctx: &DeclarationSpecifiers2Context<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationSpecifier}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_declarationSpecifier(&mut self, ctx: &DeclarationSpecifierContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initDeclaratorList}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_initDeclaratorList(&mut self, ctx: &InitDeclaratorListContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initDeclarator}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_initDeclarator(&mut self, ctx: &InitDeclaratorContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#specifierQualifierList}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_specifierQualifierList(&mut self, ctx: &SpecifierQualifierListContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarator}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_declarator(&mut self, ctx: &DeclaratorContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#directDeclarator}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_directDeclarator(&mut self, ctx: &DirectDeclaratorContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#nestedParenthesesBlock}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_nestedParenthesesBlock(&mut self, ctx: &NestedParenthesesBlockContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#parameterTypeList}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_parameterTypeList(&mut self, ctx: &ParameterTypeListContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#parameterList}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_parameterList(&mut self, ctx: &ParameterListContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#parameterDeclaration}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_parameterDeclaration(&mut self, ctx: &ParameterDeclarationContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#identifierList}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_identifierList(&mut self, ctx: &IdentifierListContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#directAbstractDeclarator}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_directAbstractDeclarator(&mut self, ctx: &DirectAbstractDeclaratorContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initializer}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_initializer(&mut self, ctx: &InitializerContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#initializerList}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_initializerList(&mut self, ctx: &InitializerListContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#designation}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_designation(&mut self, ctx: &DesignationContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#designatorList}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_designatorList(&mut self, ctx: &DesignatorListContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#designator}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_designator(&mut self, ctx: &DesignatorContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -1187,11 +879,6 @@ where
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
-	fn visit_castExpression(&mut self, ctx: &CastExpressionContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_castExpression(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
 	fn visit_multiplicativeExpression(&mut self, ctx: &MultiplicativeExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_multiplicativeExpression(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
@@ -1287,113 +974,8 @@ where
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
-	fn visit_expression(&mut self, ctx: &ExpressionContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_expression(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
 	fn visit_constantExpression(&mut self, ctx: &ConstantExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_constantExpression(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_declaration(&mut self, ctx: &DeclarationContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_declaration(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_declarationSpecifiers(&mut self, ctx: &DeclarationSpecifiersContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_declarationSpecifiers(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_declarationSpecifiers2(&mut self, ctx: &DeclarationSpecifiers2Context<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_declarationSpecifiers2(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_declarationSpecifier(&mut self, ctx: &DeclarationSpecifierContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_declarationSpecifier(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_initDeclaratorList(&mut self, ctx: &InitDeclaratorListContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_initDeclaratorList(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_initDeclarator(&mut self, ctx: &InitDeclaratorContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_initDeclarator(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_specifierQualifierList(&mut self, ctx: &SpecifierQualifierListContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_specifierQualifierList(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_declarator(&mut self, ctx: &DeclaratorContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_declarator(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_directDeclarator(&mut self, ctx: &DirectDeclaratorContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_directDeclarator(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_nestedParenthesesBlock(&mut self, ctx: &NestedParenthesesBlockContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_nestedParenthesesBlock(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_parameterTypeList(&mut self, ctx: &ParameterTypeListContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_parameterTypeList(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_parameterList(&mut self, ctx: &ParameterListContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_parameterList(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_parameterDeclaration(&mut self, ctx: &ParameterDeclarationContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_parameterDeclaration(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_identifierList(&mut self, ctx: &IdentifierListContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_identifierList(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_directAbstractDeclarator(&mut self, ctx: &DirectAbstractDeclaratorContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_directAbstractDeclarator(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_initializer(&mut self, ctx: &InitializerContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_initializer(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_initializerList(&mut self, ctx: &InitializerListContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_initializerList(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_designation(&mut self, ctx: &DesignationContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_designation(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_designatorList(&mut self, ctx: &DesignatorListContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_designatorList(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_designator(&mut self, ctx: &DesignatorContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_designator(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
