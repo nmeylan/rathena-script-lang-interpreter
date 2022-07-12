@@ -222,8 +222,8 @@ fn setd_instance_variable() {
         function inc {
             setd "'counter", 'counter + 1;
             vm_dump_var("counter", 'counter);
-            vm_dump_var("counter_getd", getd("'cou"+"nter");
-            vm_dump_var("my_array", getd("'my_array[" + 1 + "]$");
+            vm_dump_var("counter_getd", getd("'cou"+"nter"));
+            vm_dump_var("my_array", getd("'my_array[" + 1 + "]$"));
         }
         OnInstanceInit:
             setd "'counter", 0;
@@ -264,8 +264,8 @@ fn setd_static_variable() {
         function inc {
             setd ".counter", .counter + 1;
             vm_dump_var("counter", .counter);
-            vm_dump_var("counter_getd", getd(".co"+"unter");
-            vm_dump_var("my_array", getd(".my_array[" + 1 + "]$");
+            vm_dump_var("counter_getd", getd(".co"+"unter"));
+            vm_dump_var("my_array", getd(".my_array[" + 1 + "]$"));
         }
         OnInit:
             setd ".counter", 0;

@@ -5,23 +5,27 @@ compilationUnit
     ;
 
 primaryExpression
-    : Identifier
-    | variable
+    : variable
+    | Identifier
     |   Number
     |   String
-    | '(' conditionalExpression ')'
     |   '-' // it is a special arguments for command, lets see if it can cause weird parse issue
     ;
 
 functionCallExpression
-    : Identifier '('? argumentExpressionList? ')'?
+    : Identifier '(' argumentExpressionList? ')'
+    | Identifier argumentExpressionList
+    | 'close' | 'close2' | 'next'
     | 'callfunc' '('? String ( ',' argumentExpressionList)? ')'
     | 'callfunc' String ( ',' argumentExpressionList)?
     ;
 
 postfixExpression
     : functionCallExpression
-    | primaryExpression ('[' conditionalExpression ']' | ('++' | '--') )?
+    | primaryExpression
+    | variable ('++' | '--')
+    | ('++' | '--') variable
+    | '(' conditionalExpression ')'
     ;
 
 argumentExpressionList
@@ -30,10 +34,9 @@ argumentExpressionList
 
 unaryExpression
     :
-    ('++' |  '--')*
-    (postfixExpression
+    postfixExpression
     |   unaryOperator unaryExpression
-    )
+
     ;
 
 unaryOperator
@@ -238,9 +241,9 @@ scriptName
 scope_specifier
   :  '@' | '$' | '$@' | '.' | '.@' | '\'' | '#' | '##';
 variable
-  : scope_specifier variable_name | variable_name;
+  : scope_specifier? variable_name;
 variable_name
-  : Identifier '$'? ('[' Number ']')?;
+  : Identifier '$'? ('[' conditionalExpression ']')?;
 
 // Tokens
 LeftParen : '(';

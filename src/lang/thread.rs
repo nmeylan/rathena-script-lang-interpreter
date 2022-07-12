@@ -89,7 +89,9 @@ impl Thread {
                 OpCode::LoadReference => {
 
                 }
-                OpCode::ArrayStore(arr_index) => {
+                OpCode::ArrayStore => {
+                    let arr_index = self.stack.pop()?;
+                    let arr_index = self.value_from_stack_entry(&arr_index, &call_frame, class, instance)?.number_value().map_err(|e| self.new_runtime_from_temporary(e, "Expected array index to be a number"))?;
                     let array_ref_stack_entry = self.stack.pop()?;
                     let value_ref_stack_entry = self.stack.pop()?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
@@ -97,16 +99,18 @@ impl Thread {
                             .map_err(|err| self.new_runtime_from_temporary(err, "VM: ArrayStore expected to retrieve array from heap reference"))?;
                         let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
                         if let Ok(constant_ref) = value_constant_ref {
-                            array.assign(*arr_index, constant_ref);
+                            array.assign(arr_index as usize, constant_ref);
                         }
                     } else {
                         return Err(self.new_runtime_error("OpCode::ArrayStore - Expected stack entry to be a heap reference.".to_string()));
                     }
                 }
-                OpCode::ArrayLoad(arr_index) => {
+                OpCode::ArrayLoad => {
+                    let arr_index = self.stack.pop()?;
+                    let arr_index = self.value_from_stack_entry(&arr_index, &call_frame, class, instance)?.number_value().map_err(|e| self.new_runtime_from_temporary(e, "Expected array index to be a number"))?;
                     let array_ref_stack_entry = self.stack.pop()?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
-                        self.stack.push(StackEntry::ArrayHeapReference((owner_reference, reference, *arr_index)));
+                        self.stack.push(StackEntry::ArrayHeapReference((owner_reference, reference, arr_index as usize)));
                     } else {
                         return Err(self.new_runtime_error("OpCode::ArrayLoad - Expected stack entry to be a heap reference.".to_string()));
                     }

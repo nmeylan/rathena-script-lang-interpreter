@@ -325,12 +325,12 @@ fn array_type_checking() {
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(3, result.as_ref().err().unwrap().len());
-    assert_eq!(r#"Variable ".@a$[]" is declared as an Array of string but index 1 is assigned with a Number.
+    assert_eq!(r#"Variable ".@a$[]" is declared as an Array of string but an index is assigned with a Number.
 test_script 4:4.
 l4	    .@a$[1] = 2;
 	    ^^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
-    assert_eq!(r#"Variable ".@b[]" is declared as an Array of number but index 1 is assigned with a String.
+    assert_eq!(r#"Variable ".@b[]" is declared as an Array of number but an index is assigned with a String.
 test_script 6:4.
 l6	    .@b[1] = "2";
 	    ^^^^^^
@@ -355,7 +355,7 @@ fn array_type_checking_copy_array() {
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(1, result.as_ref().err().unwrap().len());
-    assert_eq!(r#"Variable ".@b[]" is declared as an Array of number but index 0 is assigned with a String.
+    assert_eq!(r#"Variable ".@b[]" is declared as an Array of number but an index is assigned with a String.
 test_script 5:14.
 l5	    copyarray .@b[0], .@a$[0], 1;
 	              ^^^^^^

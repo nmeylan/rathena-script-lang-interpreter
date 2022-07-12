@@ -46,7 +46,7 @@ pub const NATIVE_FUNCTIONS: &[StaticNativeFunction] = &[
     StaticNativeFunction { name: "setarray", return_type: None, min_arguments: 2, max_arguments: 255 },
     StaticNativeFunction { name: "getelementofarray", return_type: None, min_arguments: 2, max_arguments: 2 },
     StaticNativeFunction { name: "deletearray", return_type: None, min_arguments: 2, max_arguments: 2 },
-    StaticNativeFunction { name: "inarray", return_type: None, min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "inarray", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
     StaticNativeFunction { name: "copyarray", return_type: None, min_arguments: 3, max_arguments: 3 },
     StaticNativeFunction { name: "setd", return_type: None, min_arguments: 2, max_arguments: 2 },
     StaticNativeFunction { name: "getd", return_type: None, min_arguments: 1, max_arguments: 1 },

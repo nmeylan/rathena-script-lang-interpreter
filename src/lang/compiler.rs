@@ -1,4 +1,3 @@
-use std::mem;
 use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -6,12 +5,13 @@ use std::default::Default;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufReader, Read};
+use std::mem;
 use std::ops::Deref;
 use std::path::Path;
 use std::rc::Rc;
 
-use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
+use antlr_rust::InputStream;
 use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::token::Token;
 use antlr_rust::tree::{NodeText, ParseTree, ParseTreeVisitor, Tree};
@@ -200,7 +200,7 @@ impl Compiler {
             let mut declared_local_variable_references: HashMap<u64, Variable, NoopHasher> = Default::default();
             let mut index = hook_label.first_op_code_index;
             loop {
-                if index > 2048 { break ;}
+                if index > 2048 { break; }
                 let op_code = main_function.chunk.op_codes.borrow()[index].clone();
                 let compilation_details = main_function.chunk.compilation_details.borrow()[index].clone();
                 if let StoreLocal(reference) = op_code {
@@ -376,25 +376,18 @@ impl Compiler {
             || self.state.current_assignment_types.iter().all(|v| v.is_string())
     }
 
-    fn build_variable(ctx: &VariableContext) -> (Variable, Option<usize>) {
+    fn build_variable(ctx: &VariableContext) -> Variable {
         let scope = Self::get_variable_scope(ctx);
         let variable_name = ctx.variable_name().unwrap();
         let name = variable_name.Identifier().unwrap().symbol.text.deref().to_string();
-        let variable = Variable {
+        Variable {
             value_ref: Variable::variable_value(variable_name.Dollar().is_some(), variable_name.LeftBracket().is_some()),
             name,
             scope,
-        };
-        let index = if variable.value_ref.borrow().is_array() {
-            let index_str = variable_name.Number().unwrap().symbol.text.clone();
-            Some(parse_number(index_str) as usize)
-        } else {
-            None
-        };
-        (variable, index)
+        }
     }
 
-    fn load_variable<'input>(&mut self, variable: &Variable, index: Option<usize>, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
+    fn load_variable<'input>(&mut self, variable: &Variable, variable_ctx: &VariableContext, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
         match variable.scope {
             Scope::Server => {}
             Scope::Account => {}
@@ -435,7 +428,9 @@ impl Compiler {
         }
 
         if variable.value_ref.borrow().is_array() {
-            self.current_chunk().emit_op_code(ArrayLoad(index.unwrap()), self.compilation_details_from_context(node));
+            self.visit_conditionalExpression(variable_ctx.variable_name().as_ref().unwrap().conditionalExpression().as_ref().unwrap());
+            self.state.current_assignment_types.pop();
+            self.current_chunk().emit_op_code(ArrayLoad, self.compilation_details_from_context(node));
         }
     }
 }
@@ -470,9 +465,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
-        }
-        if ctx.conditionalExpression().is_some() {
-            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
         }
         // self.visit_children(ctx)
     }
@@ -711,14 +703,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     // Convert a += 1; into a = a + 1;
                     if assignment_operator.PlusEqual().is_some() {
                         if left.variable().is_some() {
-                            let (variable, index) = Self::build_variable(&left.variable().unwrap());
-                            self.load_variable(&variable, index, ctx);
+                            let variable = Self::build_variable(&left.variable().unwrap());
+                            self.load_variable(&variable, &left.variable().unwrap(), ctx);
                         }
                         self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(ctx));
                     } else if assignment_operator.MinusEqual().is_some() {
                         if left.variable().is_some() {
-                            let (variable, index) = Self::build_variable(&left.variable().unwrap());
-                            self.load_variable(&variable, index, ctx);
+                            let variable = Self::build_variable(&left.variable().unwrap());
+                            self.load_variable(&variable, &left.variable().unwrap(), ctx);
                         }
                         self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(ctx));
                     }
@@ -755,7 +747,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let _name = ctx.Identifier().unwrap().symbol.text.deref().to_string();
             // TODO
         } else if ctx.variable().is_some() {
-            let (variable, index) = Self::build_variable(&ctx.variable().unwrap());
+            let variable = Self::build_variable(&ctx.variable().unwrap());
             if let Some(current_value_type) = self.current_assignment_type_drop() {
                 if variable.value_ref.borrow().is_string() && current_value_type.is_number() {
                     self.register_error(CompilationErrorType::Type, ctx,
@@ -763,7 +755,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
                 if variable.value_ref.borrow().is_string_array() && current_value_type.is_number() {
                     self.register_error(CompilationErrorType::Type, ctx,
-                                        format!("Variable \"{}\" is declared as an Array of string but index {} is assigned with a Number.", variable.to_script_identifier(), index.unwrap()));
+                                        format!("Variable \"{}\" is declared as an Array of string but an index is assigned with a Number.", variable.to_script_identifier()));
                 }
                 if variable.value_ref.borrow().is_number() && current_value_type.is_string() {
                     self.register_error(CompilationErrorType::Type, ctx,
@@ -772,7 +764,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
                 if variable.value_ref.borrow().is_number_array() && current_value_type.is_string() {
                     self.register_error(CompilationErrorType::Type, ctx,
-                                        format!("Variable \"{}\" is declared as an Array of number but index {} is assigned with a String.", variable.to_script_identifier(), index.unwrap()));
+                                        format!("Variable \"{}\" is declared as an Array of number but an index is assigned with a String.", variable.to_script_identifier()));
                 }
             }
             let is_array = variable.value_ref.borrow().is_array();
@@ -794,8 +786,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
             }
             if is_array {
-                let number_value = ctx.variable().as_ref().unwrap().variable_name().as_ref().unwrap().Number().as_ref().unwrap().symbol.text.clone();
-                self.current_chunk().emit_op_code(ArrayStore(parse_number(number_value) as usize), self.compilation_details_from_context(ctx));
+                self.visit_conditionalExpression(ctx.variable().as_ref().unwrap().variable_name().as_ref().unwrap().conditionalExpression().as_ref().unwrap());
+                self.state.current_assignment_types.pop();
+                self.current_chunk().emit_op_code(ArrayStore, self.compilation_details_from_context(ctx));
             }
         }
     }
@@ -1032,9 +1025,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
-        let (variable, index) = Self::build_variable(ctx);
+        let variable = Self::build_variable(ctx);
         self.add_current_assignment_type_from_variable(&variable);
-        self.load_variable(&variable, index, ctx);
+        self.load_variable(&variable, ctx, ctx);
     }
 
     fn visit_scriptName(&mut self, ctx: &ScriptNameContext<'input>) {

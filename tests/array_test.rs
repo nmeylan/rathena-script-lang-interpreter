@@ -115,10 +115,11 @@ fn setarray() {
     vm_dump_var("a1", .@a$[1]);
     vm_dump_var("b1", .@b[1]);
     vm_dump_var("b2", .@b[2]);
-    vm_dump_var("b3", .@b[3]);
+    .@two = 2;
+    vm_dump_var("b3", .@b[.@two + 1]);
     "#).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
