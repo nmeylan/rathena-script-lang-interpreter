@@ -381,7 +381,7 @@ impl Compiler {
         let variable_name = ctx.variable_name().unwrap();
         let name = variable_name.Identifier().unwrap().symbol.text.deref().to_string();
         Variable {
-            value_ref: Variable::variable_value(variable_name.Dollar().is_some(), variable_name.LeftBracket().is_some()),
+            value_ref: Variable::variable_value(ctx.Dollar().is_some(), ctx.LeftBracket().is_some()),
             name,
             scope,
         }
@@ -428,7 +428,7 @@ impl Compiler {
         }
 
         if variable.value_ref.borrow().is_array() {
-            self.visit_conditionalExpression(variable_ctx.variable_name().as_ref().unwrap().conditionalExpression().as_ref().unwrap());
+            self.visit_conditionalExpression(variable_ctx.conditionalExpression().as_ref().unwrap());
             self.state.current_assignment_types.pop();
             self.current_chunk().emit_op_code(ArrayLoad, self.compilation_details_from_context(node));
         }
@@ -805,7 +805,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
             }
             if is_array {
-                self.visit_conditionalExpression(ctx.variable().as_ref().unwrap().variable_name().as_ref().unwrap().conditionalExpression().as_ref().unwrap());
+                self.visit_conditionalExpression(ctx.variable().as_ref().unwrap().conditionalExpression().as_ref().unwrap());
                 self.state.current_assignment_types.pop();
                 self.current_chunk().emit_op_code(ArrayStore, self.compilation_details_from_context(ctx));
             }

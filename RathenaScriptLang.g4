@@ -35,7 +35,6 @@ unaryExpression
     :
     postfixExpression
     |   unaryOperator unaryExpression
-
     ;
 
 unaryOperator
@@ -244,9 +243,11 @@ scriptName
 scope_specifier
   :  '@' | '$' | '$@' | '.' | '.@' | '\'' | '#' | '##';
 variable
-  : scope_specifier? variable_name;
+  : scope_specifier  variable_name '$'? ('[' conditionalExpression ']')?
+  | scope_specifier? variable_name '$' ('[' conditionalExpression ']')?
+  ;
 variable_name
-  : (Identifier | Menu) '$'? ('[' conditionalExpression ']')?;
+  : (Identifier | Menu);
 
 // Tokens
 LeftParen : '(';
