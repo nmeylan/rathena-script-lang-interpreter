@@ -535,17 +535,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) {
-        let native_name = if ctx.Next().is_some() {
-            String::from("next")
-        } else if ctx.Close().is_some() {
-            String::from("close")
-        } else if ctx.Close2().is_some() {
-            String::from("close2")
-        } else if ctx.Menu().is_some() {
-            String::from("menu")
-        } else {
-            return;
-        };
+        let native_name = ctx.get_child(0).as_ref().unwrap().get_text();
         self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 0 }, self.compilation_details_from_context(ctx));
         if native_name == "close" {
             self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
