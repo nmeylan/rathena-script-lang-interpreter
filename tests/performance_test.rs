@@ -19,6 +19,7 @@ fn parser_compiler_performance() {
     let mut file_content = String::new();
     reader.read_to_string(&mut file_content).unwrap();
     // When
+    let mut start_process = Instant::now();
     let mut start = Instant::now();
     let file_content_clone = file_content.clone();
     let lexer = RathenaScriptLangLexer::new(InputStream::new(file_content_clone.as_str()));
@@ -34,4 +35,6 @@ fn parser_compiler_performance() {
     let mut compiler = Compiler::new("warper.txt".to_string(), file_content, "native_functions_list.txt");
     compiler.visit_compilationUnit(tree.as_ref().unwrap());
     println!("Compilation took {}ms", start.elapsed().as_millis() as f32 );
+    // Then
+    assert_eq!(true, 2 > start_process.elapsed().as_secs());
 }

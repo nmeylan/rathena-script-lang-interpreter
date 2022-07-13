@@ -285,6 +285,16 @@ fn enter_statement(&mut self, _ctx: &StatementContext<'input>) { }
  */
 fn exit_statement(&mut self, _ctx: &StatementContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
+ * @param ctx the parse tree
+ */
+fn enter_commandStatement(&mut self, _ctx: &CommandStatementContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
+ * @param ctx the parse tree
+ */
+fn exit_commandStatement(&mut self, _ctx: &CommandStatementContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#labeledStatement}.
  * @param ctx the parse tree
  */

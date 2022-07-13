@@ -178,6 +178,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_statement(&mut self, ctx: &StatementContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#labeledStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -591,6 +597,14 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#commandStatement}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#labeledStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -981,6 +995,11 @@ where
 
 	fn visit_statement(&mut self, ctx: &StatementContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_statement(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_commandStatement(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

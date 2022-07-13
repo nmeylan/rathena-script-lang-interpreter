@@ -200,7 +200,7 @@ impl Compiler {
             let mut declared_local_variable_references: HashMap<u64, Variable, NoopHasher> = Default::default();
             let mut index = hook_label.first_op_code_index;
             loop {
-                if index > 2048 { break; }
+                if index >= main_function.chunk.op_codes.borrow().len() { break; }
                 let op_code = main_function.chunk.op_codes.borrow()[index].clone();
                 let compilation_details = main_function.chunk.compilation_details.borrow()[index].clone();
                 if let StoreLocal(reference) = op_code {
@@ -534,6 +534,25 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
+    fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) {
+        let native_name = if ctx.Next().is_some() {
+            String::from("next")
+        } else if ctx.Close().is_some() {
+            String::from("close")
+        } else if ctx.Close2().is_some() {
+            String::from("close2")
+        } else if ctx.Menu().is_some() {
+            String::from("menu")
+        } else {
+            return;
+        };
+        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 0 }, self.compilation_details_from_context(ctx));
+        if native_name == "close" {
+            self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
+        }
+    }
+
+
     fn visit_argumentExpressionList(&mut self, ctx: &ArgumentExpressionListContext<'input>) {
         // for expression in ctx.conditionalExpression_all().iter() {
         //     if expression.Number().is_some() {
@@ -677,7 +696,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if ctx.Setarray().is_some() {
                 // Array can be assigned using setarray too
                 // *setarray <array name>[<first value>],<value>{,<value>...<value>};
-                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap()); // <value>. In this language declaration require a value to assign
+                self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <value>. In this language declaration require a value to assign
                 self.visit_assignmentLeftExpression(&left); // <array name>[<first value>]. Declare array variable.
                 let argument_count = ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize; // {,<value>...<value>}
                 if argument_count > 0 {
@@ -688,16 +707,16 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             } else if ctx.Copyarray().is_some() {
                 // Array can be assigned using copyarray too
                 // *copyarray <destination array>[<first value>],<source array>[<first value>],<amount of data to copy>
-                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap()); // <source array>[<first value>]. Declare array variable.
+                self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <source array>[<first value>]. Declare array variable.
                 self.visit_assignmentLeftExpression(&left); // <destination array>[<first value>]. Declare array variable.
                 self.visit_variable(left.variable().as_ref().unwrap()); // Retrieve declared destination array
-                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap()); // Retrieve source array
+                self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // Retrieve source array
                 self.current_assignment_type_drop();
                 // TODO ensure that argument list contains only 1 element.
                 self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap()); // <amount of data to copy>
                 self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"copyarray"), argument_count: 3 }, self.compilation_details_from_context(ctx));
             } else {
-                self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+                self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap());
                 if ctx.assignmentOperator().is_some() {
                     let assignment_operator = &ctx.assignmentOperator().unwrap();
                     // Convert a += 1; into a = a + 1;
@@ -729,7 +748,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 return;
             }
             self.visit_argumentExpressionList(function_call.argumentExpressionList().as_ref().unwrap());
-            self.visit_assignmentExpression(&ctx.assignmentExpression().unwrap());
+            self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap());
             let setd_variable_expression = function_call.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
             if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                 self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))

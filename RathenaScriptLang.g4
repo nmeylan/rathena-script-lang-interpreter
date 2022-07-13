@@ -15,17 +15,16 @@ primaryExpression
 functionCallExpression
     : Identifier '(' argumentExpressionList? ')'
     | Identifier argumentExpressionList
-    | 'close' | 'close2' | 'next'
-    | 'callfunc' '('? String ( ',' argumentExpressionList)? ')'
-    | 'callfunc' String ( ',' argumentExpressionList)?
+    | Callfunc '('? String ( ',' argumentExpressionList)? ')'
+    | Callfunc String ( ',' argumentExpressionList)?
     ;
 
 postfixExpression
-    : functionCallExpression
-    | primaryExpression
+    : primaryExpression
     | variable ('++' | '--')
     | ('++' | '--') variable
     | '(' conditionalExpression ')'
+    | functionCallExpression
     ;
 
 argumentExpressionList
@@ -101,12 +100,11 @@ conditionalExpression
     ;
 
 assignmentExpression
-    :   conditionalExpression
-    |   assignmentLeftExpression assignmentOperator assignmentExpression
-    |   'set' '('? functionCallExpression ',' assignmentExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
-    |   'set' '('? assignmentLeftExpression ',' assignmentExpression ')'?
-    |   'setarray' '('? assignmentLeftExpression ',' assignmentExpression (',' argumentExpressionList)? ')'?
-    |   'copyarray' '('? assignmentLeftExpression ',' assignmentExpression ',' argumentExpressionList ')'?
+    :   assignmentLeftExpression assignmentOperator conditionalExpression
+    |   'set' '('? functionCallExpression ',' conditionalExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
+    |   'set' '('? assignmentLeftExpression ',' conditionalExpression ')'?
+    |   'setarray' '('? assignmentLeftExpression ',' conditionalExpression (',' argumentExpressionList)? ')'?
+    |   'copyarray' '('? assignmentLeftExpression ',' conditionalExpression ',' argumentExpressionList ')'?
     ;
 assignmentLeftExpression
     : Identifier | variable;
@@ -123,12 +121,16 @@ constantExpression
 
 statement
     :   compoundStatement
+    |   commandStatement ';'
     |   expressionStatement
     |   selectionStatement
     |   iterationStatement
     |   jumpStatement
     |   labeledStatement
     ;
+commandStatement
+    : Menu conditionalExpression ',' (Identifier | '-') (',' conditionalExpression ',' (Identifier | '-'))*
+    | Close | Close2 | Next;
 
 labeledStatement
     : Label;
@@ -147,7 +149,8 @@ blockItem
     ;
 
 expressionStatement
-    :  assignmentExpression ';'
+    : assignmentExpression ';'
+    | conditionalExpression ';'
     ;
 
 selectionStatement
@@ -191,10 +194,10 @@ forDeclaration
     ;
 
 forStopExpression
-    :   assignmentExpression (',' assignmentExpression)*
+    :   assignmentExpression | conditionalExpression
     ;
 forExpression
-    :   assignmentExpression (',' assignmentExpression)*
+    :   assignmentExpression | conditionalExpression
     ;
 
 jumpStatement
@@ -243,7 +246,7 @@ scope_specifier
 variable
   : scope_specifier? variable_name;
 variable_name
-  : Identifier '$'? ('[' conditionalExpression ']')?;
+  : (Identifier | Menu) '$'? ('[' conditionalExpression ']')?;
 
 // Tokens
 LeftParen : '(';
@@ -316,6 +319,11 @@ Callfunc: 'callfunc';
 Eof : 'eof';
 Setarray: 'setarray';
 Copyarray: 'copyarray';
+// Functions without args
+Menu: 'menu';
+Close: 'close';
+Close2: 'close2';
+Next: 'next';
 
 // Literal
 Identifier : Letter (Letter | Digit)*;
