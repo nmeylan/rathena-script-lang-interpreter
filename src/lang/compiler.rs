@@ -1,4 +1,3 @@
-
 use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -11,10 +10,9 @@ use std::ops::Deref;
 use std::path::Path;
 use std::rc::Rc;
 
+use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream};
 use antlr_rust::parser_rule_context::ParserRuleContext;
-
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 
@@ -29,7 +27,6 @@ use crate::lang::vm::{NATIVE_FUNCTIONS, NativeFunction, Vm};
 use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
 use crate::parser::rathenascriptlangvisitor::{*};
-
 
 // Labels below will be turned into functions
 const HOOK_LABEL: &[&str] = &[
@@ -210,7 +207,7 @@ impl Compiler {
             let (function_name, compilation_error_details) = rc.borrow();
             if !class.functions().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
                 compiler.register_error_with_details_class(class, UndefinedFunction, compilation_error_details.clone(),
-                                                     format!("Function \"{}\" is not defined", function_name))
+                                                           format!("Function \"{}\" is not defined", function_name))
             }
         }
     }
@@ -259,7 +256,7 @@ impl Compiler {
             } else {
                 for (_, compilation_detail) in indices {
                     compiler.register_error_with_details_class(class, UndefinedLabel, compilation_detail.clone(),
-                                                         format!("Undefined label \"{}\"", label_name))
+                                                               format!("Undefined label \"{}\"", label_name))
                 }
             }
         }
@@ -526,6 +523,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
+        }
+        if ctx.accountVariableGet().is_some() {
+            self.visit_accountVariableGet(ctx.accountVariableGet().as_ref().unwrap());
         }
         // self.visit_children(ctx)
     }
@@ -816,6 +816,15 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             let native_name = "setd";
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
+        } else if ctx.accountVariableSet().is_some() {
+            let accountVariableSet = ctx.accountVariableSet().unwrap();
+            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
+            let variable_type_reference = self.current_chunk().add_constant(Constant::String("account".to_string()));
+            self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
+            let variable_name_reference = self.current_chunk().add_constant(Constant::String(accountVariableSet.variable_name().as_ref().unwrap().get_text()));
+            self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_name_reference), self.compilation_details_from_context(ctx));
+            let native_name = String::from("setgamevariable");
+            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 3 }, self.compilation_details_from_context(ctx));
         } else {
             self.visit_children(ctx);
         }
@@ -876,6 +885,16 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.current_chunk().emit_op_code(ArrayStore, self.compilation_details_from_context(ctx));
             }
         }
+    }
+
+    fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>) {
+        let variable_type_reference = self.current_chunk().add_constant(Constant::String("account".to_string()));
+        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
+        let variable_name_reference = self.current_chunk().add_constant(Constant::String(ctx.variable_name().as_ref().unwrap().get_text()));
+        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_name_reference), self.compilation_details_from_context(ctx));
+        let native_name = String::from("getgamevariable");
+        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
+
     }
 
     fn visit_labeledStatement(&mut self, ctx: &LabeledStatementContext<'input>) {

@@ -605,24 +605,24 @@ fn enter_variable_name(&mut self, _ctx: &Variable_nameContext<'input>) { }
  */
 fn exit_variable_name(&mut self, _ctx: &Variable_nameContext<'input>) { }
 /**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#char_variable_get}.
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#accountVariableGet}.
  * @param ctx the parse tree
  */
-fn enter_char_variable_get(&mut self, _ctx: &Char_variable_getContext<'input>) { }
+fn enter_accountVariableGet(&mut self, _ctx: &AccountVariableGetContext<'input>) { }
 /**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#char_variable_get}.
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#accountVariableGet}.
  * @param ctx the parse tree
  */
-fn exit_char_variable_get(&mut self, _ctx: &Char_variable_getContext<'input>) { }
+fn exit_accountVariableGet(&mut self, _ctx: &AccountVariableGetContext<'input>) { }
 /**
- * Enter a parse tree produced by {@link RathenaScriptLangParser#char_variable_set}.
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#accountVariableSet}.
  * @param ctx the parse tree
  */
-fn enter_char_variable_set(&mut self, _ctx: &Char_variable_setContext<'input>) { }
+fn enter_accountVariableSet(&mut self, _ctx: &AccountVariableSetContext<'input>) { }
 /**
- * Exit a parse tree produced by {@link RathenaScriptLangParser#char_variable_set}.
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#accountVariableSet}.
  * @param ctx the parse tree
  */
-fn exit_char_variable_set(&mut self, _ctx: &Char_variable_setContext<'input>) { }
+fn exit_accountVariableSet(&mut self, _ctx: &AccountVariableSetContext<'input>) { }
 
 }

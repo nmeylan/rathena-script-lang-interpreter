@@ -186,8 +186,8 @@ use std::any::{Any,TypeId};
 	pub const RULE_scope_specifier:usize = 57; 
 	pub const RULE_variable:usize = 58; 
 	pub const RULE_variable_name:usize = 59; 
-	pub const RULE_char_variable_get:usize = 60; 
-	pub const RULE_char_variable_set:usize = 61;
+	pub const RULE_accountVariableGet:usize = 60; 
+	pub const RULE_accountVariableSet:usize = 61;
 	pub const ruleNames: [&'static str; 62] =  [
 		"compilationUnit", "primaryExpression", "functionCallExpression", "postfixExpression", 
 		"argumentExpressionList", "unaryExpression", "unaryOperator", "multiplicativeExpression", 
@@ -203,8 +203,8 @@ use std::any::{Any,TypeId};
 		"forStopExpression", "forExpression", "jumpStatement", "translationUnit", 
 		"externalDeclaration", "functionDefinition", "scriptInitialization", "scriptLocation", 
 		"scriptXPos", "scriptYPos", "scriptDir", "scriptSprite", "npcInitialization", 
-		"scriptName", "scope_specifier", "variable", "variable_name", "char_variable_get", 
-		"char_variable_set"
+		"scriptName", "scope_specifier", "variable", "variable_name", "accountVariableGet", 
+		"accountVariableSet"
 	];
 
 
@@ -557,7 +557,7 @@ pub trait PrimaryExpressionContextAttrs<'input>: RathenaScriptLangParserContext<
 fn variable(&self) -> Option<Rc<VariableContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
-fn char_variable_get(&self) -> Option<Rc<Char_variable_getContextAll<'input>>> where Self:Sized{
+fn accountVariableGet(&self) -> Option<Rc<AccountVariableGetContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves first TerminalNode corresponding to token Identifier
@@ -617,9 +617,9 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 2);
 					recog.base.enter_outer_alt(None, 2);
 					{
-					/*InvokeRule char_variable_get*/
+					/*InvokeRule accountVariableGet*/
 					recog.base.set_state(128);
-					recog.char_variable_get()?;
+					recog.accountVariableGet()?;
 
 					}
 				}
@@ -984,7 +984,7 @@ fn DecrementOp(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserCo
 fn variable(&self) -> Option<Rc<VariableContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
-fn char_variable_set(&self) -> Option<Rc<Char_variable_setContextAll<'input>>> where Self:Sized{
+fn accountVariableSet(&self) -> Option<Rc<AccountVariableSetContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves first TerminalNode corresponding to token LeftParen
@@ -1057,9 +1057,9 @@ where
 					 Menu | Identifier 
 						=> {
 							{
-							/*InvokeRule char_variable_set*/
+							/*InvokeRule accountVariableSet*/
 							recog.base.set_state(163);
-							recog.char_variable_set()?;
+							recog.accountVariableSet()?;
 
 							}
 						}
@@ -1111,9 +1111,9 @@ where
 					 Menu | Identifier 
 						=> {
 							{
-							/*InvokeRule char_variable_set*/
+							/*InvokeRule accountVariableSet*/
 							recog.base.set_state(170);
-							recog.char_variable_set()?;
+							recog.accountVariableSet()?;
 
 							}
 						}
@@ -3572,7 +3572,7 @@ impl<'input> AssignmentExpressionContextExt<'input>{
 
 pub trait AssignmentExpressionContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<AssignmentExpressionContextExt<'input>>{
 
-fn assignmentLeftExpression(&self) -> Option<Rc<AssignmentLeftExpressionContextAll<'input>>> where Self:Sized{
+fn accountVariableSet(&self) -> Option<Rc<AccountVariableSetContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 fn assignmentOperator(&self) -> Option<Rc<AssignmentOperatorContextAll<'input>>> where Self:Sized{
@@ -3581,7 +3581,7 @@ fn assignmentOperator(&self) -> Option<Rc<AssignmentOperatorContextAll<'input>>>
 fn conditionalExpression(&self) -> Option<Rc<ConditionalExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
-fn char_variable_set(&self) -> Option<Rc<Char_variable_setContextAll<'input>>> where Self:Sized{
+fn assignmentLeftExpression(&self) -> Option<Rc<AssignmentLeftExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
 }
 /// Retrieves first TerminalNode corresponding to token Set
@@ -3651,9 +3651,9 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 1);
 					recog.base.enter_outer_alt(None, 1);
 					{
-					/*InvokeRule assignmentLeftExpression*/
+					/*InvokeRule accountVariableSet*/
 					recog.base.set_state(299);
-					recog.assignmentLeftExpression()?;
+					recog.accountVariableSet()?;
 
 					/*InvokeRule assignmentOperator*/
 					recog.base.set_state(300);
@@ -3670,9 +3670,9 @@ where
 					//recog.base.enter_outer_alt(_localctx.clone(), 2);
 					recog.base.enter_outer_alt(None, 2);
 					{
-					/*InvokeRule char_variable_set*/
+					/*InvokeRule assignmentLeftExpression*/
 					recog.base.set_state(303);
-					recog.char_variable_set()?;
+					recog.assignmentLeftExpression()?;
 
 					/*InvokeRule assignmentOperator*/
 					recog.base.set_state(304);
@@ -8956,55 +8956,55 @@ where
 		Ok(_localctx)
 	}
 }
-//------------------- char_variable_get ----------------
-pub type Char_variable_getContextAll<'input> = Char_variable_getContext<'input>;
+//------------------- accountVariableGet ----------------
+pub type AccountVariableGetContextAll<'input> = AccountVariableGetContext<'input>;
 
 
-pub type Char_variable_getContext<'input> = BaseParserRuleContext<'input,Char_variable_getContextExt<'input>>;
+pub type AccountVariableGetContext<'input> = BaseParserRuleContext<'input,AccountVariableGetContextExt<'input>>;
 
 #[derive(Clone)]
-pub struct Char_variable_getContextExt<'input>{
+pub struct AccountVariableGetContextExt<'input>{
 ph:PhantomData<&'input str>
 }
 
-impl<'input> RathenaScriptLangParserContext<'input> for Char_variable_getContext<'input>{}
+impl<'input> RathenaScriptLangParserContext<'input> for AccountVariableGetContext<'input>{}
 
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for Char_variable_getContext<'input>{
+impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for AccountVariableGetContext<'input>{
 	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
 		listener.enter_every_rule(self);
-		listener.enter_char_variable_get(self);
+		listener.enter_accountVariableGet(self);
 	}
 	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_char_variable_get(self);
+		listener.exit_accountVariableGet(self);
 		listener.exit_every_rule(self);
 	}
 }
 
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for Char_variable_getContext<'input>{
+impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for AccountVariableGetContext<'input>{
 	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_char_variable_get(self);
+		visitor.visit_accountVariableGet(self);
 	}
 }
 
-impl<'input> CustomRuleContext<'input> for Char_variable_getContextExt<'input>{
+impl<'input> CustomRuleContext<'input> for AccountVariableGetContextExt<'input>{
 	type TF = LocalTokenFactory<'input>;
 	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_char_variable_get }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_char_variable_get }
+	fn get_rule_index(&self) -> usize { RULE_accountVariableGet }
+	//fn type_rule_index() -> usize where Self: Sized { RULE_accountVariableGet }
 }
-antlr_rust::type_id!{Char_variable_getContextExt<'a>}
+antlr_rust::type_id!{AccountVariableGetContextExt<'a>}
 
-impl<'input> Char_variable_getContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<Char_variable_getContextAll<'input>> {
+impl<'input> AccountVariableGetContextExt<'input>{
+	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<AccountVariableGetContextAll<'input>> {
 		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,Char_variable_getContextExt{
+			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,AccountVariableGetContextExt{
 				ph:PhantomData
 			}),
 		)
 	}
 }
 
-pub trait Char_variable_getContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<Char_variable_getContextExt<'input>>{
+pub trait AccountVariableGetContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<AccountVariableGetContextExt<'input>>{
 
 fn variable_name(&self) -> Option<Rc<Variable_nameContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
@@ -9030,20 +9030,20 @@ fn RightBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserC
 
 }
 
-impl<'input> Char_variable_getContextAttrs<'input> for Char_variable_getContext<'input>{}
+impl<'input> AccountVariableGetContextAttrs<'input> for AccountVariableGetContext<'input>{}
 
 impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
 where
     I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
     H: ErrorStrategy<'input,BaseParserType<'input,I>>
 {
-	pub fn char_variable_get(&mut self,)
-	-> Result<Rc<Char_variable_getContextAll<'input>>,ANTLRError> {
+	pub fn accountVariableGet(&mut self,)
+	-> Result<Rc<AccountVariableGetContextAll<'input>>,ANTLRError> {
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
-		let mut _localctx = Char_variable_getContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 120, RULE_char_variable_get);
-        let mut _localctx: Rc<Char_variable_getContextAll> = _localctx;
+		let mut _localctx = AccountVariableGetContextExt::new(_parentctx.clone(), recog.base.get_state());
+        recog.base.enter_rule(_localctx.clone(), 120, RULE_accountVariableGet);
+        let mut _localctx: Rc<AccountVariableGetContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
@@ -9099,55 +9099,55 @@ where
 		Ok(_localctx)
 	}
 }
-//------------------- char_variable_set ----------------
-pub type Char_variable_setContextAll<'input> = Char_variable_setContext<'input>;
+//------------------- accountVariableSet ----------------
+pub type AccountVariableSetContextAll<'input> = AccountVariableSetContext<'input>;
 
 
-pub type Char_variable_setContext<'input> = BaseParserRuleContext<'input,Char_variable_setContextExt<'input>>;
+pub type AccountVariableSetContext<'input> = BaseParserRuleContext<'input,AccountVariableSetContextExt<'input>>;
 
 #[derive(Clone)]
-pub struct Char_variable_setContextExt<'input>{
+pub struct AccountVariableSetContextExt<'input>{
 ph:PhantomData<&'input str>
 }
 
-impl<'input> RathenaScriptLangParserContext<'input> for Char_variable_setContext<'input>{}
+impl<'input> RathenaScriptLangParserContext<'input> for AccountVariableSetContext<'input>{}
 
-impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for Char_variable_setContext<'input>{
+impl<'input,'a> Listenable<dyn RathenaScriptLangListener<'input> + 'a> for AccountVariableSetContext<'input>{
 	fn enter(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
 		listener.enter_every_rule(self);
-		listener.enter_char_variable_set(self);
+		listener.enter_accountVariableSet(self);
 	}
 	fn exit(&self,listener: &mut (dyn RathenaScriptLangListener<'input> + 'a)) {
-		listener.exit_char_variable_set(self);
+		listener.exit_accountVariableSet(self);
 		listener.exit_every_rule(self);
 	}
 }
 
-impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for Char_variable_setContext<'input>{
+impl<'input,'a> Visitable<dyn RathenaScriptLangVisitor<'input> + 'a> for AccountVariableSetContext<'input>{
 	fn accept(&self,visitor: &mut (dyn RathenaScriptLangVisitor<'input> + 'a)) {
-		visitor.visit_char_variable_set(self);
+		visitor.visit_accountVariableSet(self);
 	}
 }
 
-impl<'input> CustomRuleContext<'input> for Char_variable_setContextExt<'input>{
+impl<'input> CustomRuleContext<'input> for AccountVariableSetContextExt<'input>{
 	type TF = LocalTokenFactory<'input>;
 	type Ctx = RathenaScriptLangParserContextType;
-	fn get_rule_index(&self) -> usize { RULE_char_variable_set }
-	//fn type_rule_index() -> usize where Self: Sized { RULE_char_variable_set }
+	fn get_rule_index(&self) -> usize { RULE_accountVariableSet }
+	//fn type_rule_index() -> usize where Self: Sized { RULE_accountVariableSet }
 }
-antlr_rust::type_id!{Char_variable_setContextExt<'a>}
+antlr_rust::type_id!{AccountVariableSetContextExt<'a>}
 
-impl<'input> Char_variable_setContextExt<'input>{
-	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<Char_variable_setContextAll<'input>> {
+impl<'input> AccountVariableSetContextExt<'input>{
+	fn new(parent: Option<Rc<dyn RathenaScriptLangParserContext<'input> + 'input > >, invoking_state: isize) -> Rc<AccountVariableSetContextAll<'input>> {
 		Rc::new(
-			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,Char_variable_setContextExt{
+			BaseParserRuleContext::new_parser_ctx(parent, invoking_state,AccountVariableSetContextExt{
 				ph:PhantomData
 			}),
 		)
 	}
 }
 
-pub trait Char_variable_setContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<Char_variable_setContextExt<'input>>{
+pub trait AccountVariableSetContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<AccountVariableSetContextExt<'input>>{
 
 fn variable_name(&self) -> Option<Rc<Variable_nameContextAll<'input>>> where Self:Sized{
 	self.child_of_type(0)
@@ -9173,20 +9173,20 @@ fn RightBracket(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserC
 
 }
 
-impl<'input> Char_variable_setContextAttrs<'input> for Char_variable_setContext<'input>{}
+impl<'input> AccountVariableSetContextAttrs<'input> for AccountVariableSetContext<'input>{}
 
 impl<'input, I, H> RathenaScriptLangParser<'input, I, H>
 where
     I: TokenStream<'input, TF = LocalTokenFactory<'input> > + TidAble<'input>,
     H: ErrorStrategy<'input,BaseParserType<'input,I>>
 {
-	pub fn char_variable_set(&mut self,)
-	-> Result<Rc<Char_variable_setContextAll<'input>>,ANTLRError> {
+	pub fn accountVariableSet(&mut self,)
+	-> Result<Rc<AccountVariableSetContextAll<'input>>,ANTLRError> {
 		let mut recog = self;
 		let _parentctx = recog.ctx.take();
-		let mut _localctx = Char_variable_setContextExt::new(_parentctx.clone(), recog.base.get_state());
-        recog.base.enter_rule(_localctx.clone(), 122, RULE_char_variable_set);
-        let mut _localctx: Rc<Char_variable_setContextAll> = _localctx;
+		let mut _localctx = AccountVariableSetContextExt::new(_parentctx.clone(), recog.base.get_state());
+        recog.base.enter_rule(_localctx.clone(), 122, RULE_accountVariableSet);
+        let mut _localctx: Rc<AccountVariableSetContextAll> = _localctx;
 		let mut _la: isize;
 		let result: Result<(), ANTLRError> = try {
 
@@ -9458,9 +9458,9 @@ const _serializedATN:&'static str =
 	\x02\u{126}\u{127}\x07\x19\x02\x02\u{127}\u{128}\x05\x2e\x18\x02\u{128}\
 	\u{129}\x07\x14\x02\x02\u{129}\u{12a}\x05\x2e\x18\x02\u{12a}\u{12c}\x03\
 	\x02\x02\x02\u{12b}\u{126}\x03\x02\x02\x02\u{12b}\u{12c}\x03\x02\x02\x02\
-	\u{12c}\x2f\x03\x02\x02\x02\u{12d}\u{12e}\x05\x32\x1a\x02\u{12e}\u{12f}\
+	\u{12c}\x2f\x03\x02\x02\x02\u{12d}\u{12e}\x05\x7c\x3f\x02\u{12e}\u{12f}\
 	\x05\x34\x1b\x02\u{12f}\u{130}\x05\x2e\x18\x02\u{130}\u{164}\x03\x02\x02\
-	\x02\u{131}\u{132}\x05\x7c\x3f\x02\u{132}\u{133}\x05\x34\x1b\x02\u{133}\
+	\x02\u{131}\u{132}\x05\x32\x1a\x02\u{132}\u{133}\x05\x34\x1b\x02\u{133}\
 	\u{134}\x05\x2e\x18\x02\u{134}\u{164}\x03\x02\x02\x02\u{135}\u{137}\x07\
 	\x40\x02\x02\u{136}\u{138}\x07\x0c\x02\x02\u{137}\u{136}\x03\x02\x02\x02\
 	\u{137}\u{138}\x03\x02\x02\x02\u{138}\u{139}\x03\x02\x02\x02\u{139}\u{13a}\

@@ -383,6 +383,11 @@ impl Thread {
         Ok(CallFrameBreak::Return(false))
     }
 
+    pub fn push_constant_on_stack(&self, value: Value) {
+        let reference = self.vm.add_in_constant_pool(value);
+        self.stack.push(StackEntry::ConstantPoolReference(reference));
+    }
+
     fn new_runtime_error(&self, message: String) -> RuntimeError {
         RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), message)
     }

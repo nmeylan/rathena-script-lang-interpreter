@@ -2,7 +2,7 @@
 // Generated from RathenaScriptLang.g4 by ANTLR 4.9.3
 use antlr_rust::tree::{ParseTreeVisitor,ParseTreeVisitorCompat};
 use super::rathenascriptlangparser::*;
-
+use std::mem;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced
@@ -370,16 +370,16 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) { self.visit_children(ctx) }
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_get}.
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableGet}.
 	 * @param ctx the parse tree
 	 */
-	fn visit_char_variable_get(&mut self, ctx: &Char_variable_getContext<'input>) { self.visit_children(ctx) }
+	fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>) { self.visit_children(ctx) }
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_set}.
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableSet}.
 	 * @param ctx the parse tree
 	 */
-	fn visit_char_variable_set(&mut self, ctx: &Char_variable_setContext<'input>) { self.visit_children(ctx) }
+	fn visit_accountVariableSet(&mut self, ctx: &AccountVariableSetContext<'input>) { self.visit_children(ctx) }
 
 }
 
@@ -865,18 +865,18 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_get}.
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableGet}.
 	 * @param ctx the parse tree
 	 */
-		fn visit_char_variable_get(&mut self, ctx: &Char_variable_getContext<'input>) -> Self::Return {
+		fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
 	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_set}.
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableSet}.
 	 * @param ctx the parse tree
 	 */
-		fn visit_char_variable_set(&mut self, ctx: &Char_variable_setContext<'input>) -> Self::Return {
+		fn visit_accountVariableSet(&mut self, ctx: &AccountVariableSetContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -1186,13 +1186,13 @@ where
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
-	fn visit_char_variable_get(&mut self, ctx: &Char_variable_getContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_char_variable_get(self, ctx);
+	fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_accountVariableGet(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
-	fn visit_char_variable_set(&mut self, ctx: &Char_variable_setContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_char_variable_set(self, ctx);
+	fn visit_accountVariableSet(&mut self, ctx: &AccountVariableSetContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_accountVariableSet(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

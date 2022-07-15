@@ -6,7 +6,7 @@ compilationUnit
 
 primaryExpression
     : variable
-    | char_variable_get
+    | accountVariableGet
     | Identifier
     |   Number
     |   String
@@ -22,8 +22,8 @@ functionCallExpression
 
 postfixExpression
     : primaryExpression
-    | (variable | char_variable_set) ('++' | '--')
-    | ('++' | '--') (variable | char_variable_set)
+    | (variable | accountVariableSet) ('++' | '--')
+    | ('++' | '--') (variable | accountVariableSet)
     | '(' conditionalExpression ')'
     | functionCallExpression
     ;
@@ -100,8 +100,8 @@ conditionalExpression
     ;
 
 assignmentExpression
-    :   assignmentLeftExpression assignmentOperator conditionalExpression
-    |   char_variable_set assignmentOperator conditionalExpression
+    : accountVariableSet assignmentOperator conditionalExpression
+    | assignmentLeftExpression assignmentOperator conditionalExpression
     |   'set' '('? functionCallExpression ',' conditionalExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
     |   'set' '('? assignmentLeftExpression ',' conditionalExpression ')'?
     |   'setarray' '('? assignmentLeftExpression ',' conditionalExpression (',' argumentExpressionList)? ')'?
@@ -245,15 +245,15 @@ scriptName
 scope_specifier
   :  '@' | '$' | '$@' | '.' | '.@' | '\'' | '#' | '##';
 variable
-  : scope_specifier  variable_name '$'? ('[' conditionalExpression ']')?
+  : scope_specifier variable_name '$'? ('[' conditionalExpression ']')?
   ;
 variable_name
   : (Identifier | Menu);
 
-char_variable_get
+accountVariableGet
     : variable_name '$'? ('[' conditionalExpression ']')? ;
 
-char_variable_set
+accountVariableSet
     : variable_name '$'? ('[' conditionalExpression ']')? ;
 
 // Tokens
