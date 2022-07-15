@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::mem;
@@ -6,7 +6,7 @@ use std::path::Path;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::input_stream::ByteStream;
 use antlr_rust::InputStream;
-use antlr_rust::tree::{ParseTree, ParseTreeVisitor};
+use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 use crate::lang::chunk::ClassFile;
 use crate::lang::compiler::{Compiler, DebugFlag, parse_number};
 use std::default::Default;
@@ -33,7 +33,7 @@ pub struct ScriptVisitor {
     pub file_content: Vec<String>,
 }
 
-pub fn compile(paths: Vec<String>, native_function_list_file_path: &str, debug_flag: u64) -> Result<(Vec<Script>, Vec<ClassFile>), Vec<CompilationError>> {
+pub fn compile(paths: Vec<String>, native_function_list_file_path: &str, debug_flag: u64) -> (Vec<Script>, Vec<ClassFile>, HashMap<String, Vec<CompilationError>>) {
     let mut compiler = Compiler::new(Default::default(), Default::default(), native_function_list_file_path, debug_flag);
     let mut scripts = Vec::<Script>::new();
     for path in paths.iter() {
@@ -41,12 +41,26 @@ pub fn compile(paths: Vec<String>, native_function_list_file_path: &str, debug_f
         scripts.extend(visit(path));
         compiler.compile_file_and_keep_state(path);
     }
-    let mut class_files = compiler.end_compilation()?;
+    compiler.file_name = String::from("server_internal");
+    compiler.compile_content_and_keep_state(r#"- script ErrorScript -1,{ mes "This NPC as a compilation error.", "Check server logs for error details."; close;}"#.to_string());
+    let (mut class_files, errors) = compiler.end_compilation();
+    let classes_in_error = errors.iter().map(|(k, _)| k.clone()).collect::<Vec<String>>();
+    classes_in_error.iter().for_each(|k| println!("in error -> {}", k));
+    class_files.iter().for_each(|k| println!("class file -> {}", k.name));
+    class_files = class_files.drain(..).filter(|class| !classes_in_error.contains(&class.name)).collect::<Vec<ClassFile>>();
+    class_files.iter().for_each(|k| println!("class file after filter -> {}", k.name));
     class_files.iter_mut().for_each(|class_file| class_file.set_reference());
     let mut class_references = HashMap::<String, u64>::new();
     class_files.iter().for_each(|class| {class_references.insert(class.name.clone(), class.reference);} );
-    scripts.iter_mut().for_each(|script| {script.class_reference = *class_references.get(&script.class_name).unwrap();});
-    Ok((scripts, class_files))
+    scripts.iter_mut().for_each(|script| {
+        if class_references.get(&script.class_name).is_some() {
+            script.class_reference = *class_references.get(&script.class_name).unwrap();
+        } else {
+            script.class_name = String::from("ErrorScript");
+            script.class_reference = *class_references.get(&String::from("ErrorScript")).unwrap();
+        }
+    });
+    (scripts, class_files, errors)
 }
 
 pub fn visit(path: &Path) -> Vec<Script> {
@@ -88,9 +102,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
     fn visit_npcInitialization(&mut self, ctx: &NpcInitializationContext<'input>) {
         if ctx.scriptLocation().is_some() {
             let script_declaration = self.file_content[ctx.start().line as usize - 1].clone();
-            println!("{:?}", script_declaration.split("\t").collect::<Vec<&str>>());
             let script_name = script_declaration.split("\t").collect::<Vec<&str>>()[2].to_string();
-            let sprite = ctx.scriptSprite_all().get(0).unwrap().Number().unwrap().symbol.text.to_string();
+            let sprite = ctx.scriptSprite_all().get(0).unwrap().get_child(0).as_ref().unwrap().get_text();
             self.scripts.push(Script {
                 name: script_name,
                 x_pos: parse_number(ctx.scriptXPos().unwrap().Number().unwrap().symbol.text.clone()) as usize,

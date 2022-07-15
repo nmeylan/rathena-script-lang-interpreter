@@ -12,7 +12,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::InputStream;
+use antlr_rust::{InputStream, RwLock};
 use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::rule_context::CustomRuleContext;
 use antlr_rust::token::Token;
@@ -63,11 +63,11 @@ impl Default for DebugFlag {
 #[allow(dead_code)]
 #[derive(Default)]
 pub struct Compiler {
-    file_name: String,
+    pub file_name: String,
     native_functions: Vec<NativeFunction>,
     hook_labels: Vec<String>,
     classes: Vec<ClassFile>,
-    errors: RefCell<Vec<CompilationError>>,
+    errors: RefCell<HashMap<String, Vec<CompilationError>>>,
     state: State,
     script_lines: Vec<String>,
     debug_flag: u64,
@@ -136,7 +136,7 @@ impl Compiler {
             native_functions,
             hook_labels: vec![],
             classes: vec![ClassFile::new("_Global".to_string(), "_globa_class_".to_string(), 0)],
-            errors: RefCell::new(vec![]),
+            errors: RefCell::new(HashMap::new()),
             state: Default::default(),
             script_lines: script.split('\n').map(|l| l.to_string()).collect::<Vec<String>>(),
             debug_flag,
@@ -153,6 +153,10 @@ impl Compiler {
         let mut file_content = String::new();
         reader.read_to_string(&mut file_content).unwrap();
         self.file_name = script_path.to_str().unwrap().to_string();
+        self.compile_content_and_keep_state(file_content)
+    }
+
+    pub fn compile_content_and_keep_state(&mut self, file_content: String) {
         self.script_lines = file_content.split('\n').map(|l| l.to_string()).collect::<Vec<String>>();
         let lexer = RathenaScriptLangLexer::new(InputStream::new(file_content.as_str()));
         let token_stream = CommonTokenStream::new(lexer);
@@ -161,7 +165,7 @@ impl Compiler {
         self.visit_compilationUnit(tree.as_ref().unwrap());
     }
 
-    pub fn end_compilation(&mut self) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+    pub fn end_compilation(&mut self) -> (Vec<ClassFile>, HashMap<String, Vec<CompilationError>>) {
         for class in self.classes.iter() {
             Self::check_called_function_are_defined(&self, class);
             Self::add_hook_functions(class);
@@ -170,12 +174,7 @@ impl Compiler {
             }
         }
 
-        if self.errors.borrow().is_empty() {
-            Ok(mem::take(&mut self.classes))
-        } else {
-            let errors_ref_cell = mem::replace(&mut self.errors, RefCell::new(vec![]));
-            Err(errors_ref_cell.take())
-        }
+        (mem::take(&mut self.classes), mem::take(&mut self.errors.take()))
     }
 
     pub fn compile(name: String, script: &str, native_function_list_file_path: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
@@ -198,8 +197,10 @@ impl Compiler {
         if compiler.errors.borrow().is_empty() {
             Ok(mem::take(&mut compiler.classes))
         } else {
-            let errors_ref_cell = mem::replace(&mut compiler.errors, RefCell::new(vec![]));
-            Err(errors_ref_cell.take())
+            let errors_ref_cell = mem::take(&mut compiler.errors);
+            let mut errors: Vec<CompilationError> = vec![];
+            errors_ref_cell.take().drain().for_each(|(_, errs)| errors.extend(errs));
+            Err(mem::take(&mut errors))
         }
     }
 
@@ -208,7 +209,7 @@ impl Compiler {
             let rc = rc.clone();
             let (function_name, compilation_error_details) = rc.borrow();
             if !class.functions().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
-                compiler.register_error_with_details(UndefinedFunction, compilation_error_details.clone(),
+                compiler.register_error_with_details_class(class, UndefinedFunction, compilation_error_details.clone(),
                                                      format!("Function \"{}\" is not defined", function_name))
             }
         }
@@ -257,7 +258,7 @@ impl Compiler {
                 }
             } else {
                 for (_, compilation_detail) in indices {
-                    compiler.register_error_with_details(UndefinedLabel, compilation_detail.clone(),
+                    compiler.register_error_with_details_class(class, UndefinedLabel, compilation_detail.clone(),
                                                          format!("Undefined label \"{}\"", label_name))
                 }
             }
@@ -304,16 +305,24 @@ impl Compiler {
             message,
             details: self.compilation_details_from_context(node),
         };
-        self.errors.borrow_mut().push(error);
+        self.insert_error(self.current_class(), error);
     }
 
-    fn register_error_with_details(&self, error_type: CompilationErrorType, details: CompilationDetail, message: String) {
+    fn register_error_with_details_class(&self, class: &ClassFile, error_type: CompilationErrorType, details: CompilationDetail, message: String) {
         let error = CompilationError {
             error_type,
             message,
             details,
         };
-        self.errors.borrow_mut().push(error);
+        self.insert_error(class, error);
+    }
+
+    fn insert_error(&self, class: &ClassFile, error: CompilationError) {
+        let mut errors_ref_mut = self.errors.borrow_mut();
+        if !errors_ref_mut.contains_key(&class.name) {
+            errors_ref_mut.insert(class.name.clone(), vec![]);
+        }
+        errors_ref_mut.get_mut(&class.name).unwrap().push(error);
     }
 
     fn compilation_details_from_context<'input>(&self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> CompilationDetail {
