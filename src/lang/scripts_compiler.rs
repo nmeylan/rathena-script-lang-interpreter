@@ -42,7 +42,7 @@ pub fn compile(paths: Vec<String>, native_function_list_file_path: &str, debug_f
         compiler.compile_file_and_keep_state(path);
     }
     compiler.file_name = String::from("server_internal");
-    compiler.compile_content_and_keep_state(r#"- script ErrorScript -1,{ mes "This NPC as a compilation error.", "Check server logs for error details."; close;}"#.to_string());
+    compiler.compile_content_and_keep_state(r#"- script ErrorScript -1,{ mes "^FF0000 This NPC has a compilation error.", "Check server logs for error details.^000000"; close;}"#.to_string());
     let (mut class_files, errors) = compiler.end_compilation();
     let classes_in_error = errors.iter().map(|(k, _)| k.clone()).collect::<Vec<String>>();
     classes_in_error.iter().for_each(|k| println!("in error -> {}", k));
