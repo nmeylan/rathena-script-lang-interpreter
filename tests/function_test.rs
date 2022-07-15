@@ -4,6 +4,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -21,7 +22,7 @@ fn simple_function_call() {
         .@a$ = "hello world";
         vm_dump_var("a", .@a$);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -42,7 +43,7 @@ fn function_call_with_arguments() {
         .@a$ = getarg(0) + " world";
         vm_dump_var("a", .@a$);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -64,7 +65,7 @@ fn function_call_with_variable_arguments() {
         .@a$ = getarg(0) + " world";
         vm_dump_var("a", .@a$);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -85,7 +86,7 @@ fn function_call_with_two_arguments() {
         .@a$ = getarg(0) + " " + getarg(1);
         vm_dump_var("a", .@a$);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -106,7 +107,7 @@ fn function_call_with_arguments_out_of_bounds() {
         .@a$ = getarg(1) + " world";
         vm_dump_var("a", .@a$);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -134,7 +135,7 @@ fn function_call_with_arguments_with_default() {
         .@a$ = getarg(1, "default") + " world";
         vm_dump_var("a", .@a$);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -154,7 +155,7 @@ fn function_call_with_number_arguments() {
         .@a = getarg(0) + 4;
         vm_dump_var("a", .@a);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -174,7 +175,7 @@ fn function_call_with_number_arguments_with_default() {
         .@a = getarg(1, 3) + 4;
         vm_dump_var("a", .@a);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -194,7 +195,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
         .@a$ = getarg(1, "3") + 4;
         vm_dump_var("a", .@a$);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -223,7 +224,7 @@ fn function_with_return_type() {
     .@c = callfunc("plus_four", 6);
     .@d = callfunc("one", "one");
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -255,7 +256,7 @@ fn function_with_return_type_multicall() {
     .@a = minus_one(plus_four(2));
     print_arg(.@a);
     vm_dump_var("a", .@a);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -280,7 +281,7 @@ fn recursive_function_call_with_return() {
         return .@my_local;
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));

@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex};
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 use common::Event;
+use rathena_script_lang_interpreter::lang::compiler;
 use rathena_script_lang_interpreter::lang::vm::DebugFlag::{Execution, OpCode, Stack};
 
 use crate::common::{compile_script, VmHook};
@@ -18,7 +19,7 @@ fn simple_assigment() {
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@a$ = "hello world";
-    vm_dump_var("a", .@a$);"#).unwrap();
+    vm_dump_var("a", .@a$);"#, compiler::DebugFlag::TypeChecker.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -38,7 +39,7 @@ fn assigment_to_local_variable() {
     .@b$ = .@a$;
     vm_dump_var("a", .@a$);
     vm_dump_var("b", .@b$);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -56,7 +57,7 @@ fn assignment_with_string_concat() {
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@a$ = "hello" + " world " + 1;
-    vm_dump_var("a", .@a$);"#).unwrap();
+    vm_dump_var("a", .@a$);"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -90,7 +91,7 @@ fn assignment_with_number_operation() {
     set .@f1, 2 + 3 * 2;
     set .@g1, 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
     set .@h1, 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
-    vm_dump_locals();"#).unwrap();
+    vm_dump_locals();"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -126,7 +127,7 @@ fn simple_re_assigment() {
     let script = compile_script(r#"
     .@a$ = "hello world";
     .@a$ = "hello wrld";
-    vm_dump_var("a", .@a$);"#).unwrap();
+    vm_dump_var("a", .@a$);"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -143,7 +144,7 @@ fn plus_equal_string_concat() {
     let script = compile_script(r#"
     .@a$ = "hello";
     .@a$ += " world";
-    vm_dump_var("a", .@a$);"#).unwrap();
+    vm_dump_var("a", .@a$);"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -160,7 +161,7 @@ fn plus_equal_num_addition() {
     let script = compile_script(r#"
     .@a = 1;
     .@a += 2;
-    vm_dump_var("a", .@a);"#).unwrap();
+    vm_dump_var("a", .@a);"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -192,7 +193,7 @@ fn setd_function() {
     vm_dump_var("my_var_via_getd_with_variable", getd(.@full_variable_name$));
     vm_dump_var("array_via_getd", getd(".@my_array$[" + 1 + "]"));
     vm_dump_var("set_with_getd_value$", .@set_with_getd_value$);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -223,7 +224,7 @@ fn set_with_getd_function() {
     vm_dump_var("set_with_getd_1", getd(".@set_with_getd"));
     vm_dump_var("setd", .@setd);
     vm_dump_var("setd_1", getd(".@setd"));
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -243,7 +244,7 @@ fn setd_function_error_wrong_type() {
     let script = compile_script(r#"
     .@var_name$ = "var";
     setd ".@my_" + .@var_name$, "hello_world";
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -268,7 +269,7 @@ fn setd_function_error_undefined_variable() {
     .@var_name$ = "var";
     setd ".@my_" + .@var_name$, 1;
     print(.@a);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

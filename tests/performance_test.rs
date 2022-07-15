@@ -4,7 +4,8 @@ use std::path::Path;
 use std::time::Instant;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
-use rathena_script_lang_interpreter::lang::compiler::Compiler;
+use rathena_script_lang_interpreter::lang::compiler;
+use rathena_script_lang_interpreter::lang::compiler::{Compiler, DebugFlag};
 use rathena_script_lang_interpreter::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
 use rathena_script_lang_interpreter::parser::rathenascriptlangparser::RathenaScriptLangParser;
 use rathena_script_lang_interpreter::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
@@ -32,7 +33,7 @@ fn parser_compiler_performance() {
     let tree = parser.compilationUnit();
     println!("Tree building tooks {}ms", start.elapsed().as_millis() as f32 );
     start = Instant::now();
-    let mut compiler = Compiler::new("warper.txt".to_string(), file_content, "native_functions_list.txt");
+    let mut compiler = Compiler::new("warper.txt".to_string(), file_content, "native_functions_list.txt", compiler::DebugFlag::None.value());
     compiler.visit_compilationUnit(tree.as_ref().unwrap());
     println!("Compilation took {}ms", start.elapsed().as_millis() as f32 );
     // Then

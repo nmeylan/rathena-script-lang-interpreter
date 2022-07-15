@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -19,7 +20,7 @@ fn simple_for_loop() {
 		.@j -= 1;
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -41,7 +42,7 @@ fn simple_while_loop() {
         .@j -= 1;
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -66,7 +67,7 @@ fn simple_while_loop_in_a_function() {
     }
     .@j = iterate(100);
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -88,7 +89,7 @@ fn simple_for_loop_with_already_init() {
 		.@j -= 1;
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -112,7 +113,7 @@ fn simple_for_loop_with_increment_in_the_for_loop() {
 		.@j -= 1;
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -136,7 +137,7 @@ fn nested_simple_for_loop() {
         }
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -168,7 +169,7 @@ fn break_should_stop_for_loop() {
         .@j -= 1;
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -199,7 +200,7 @@ fn break_should_stop_for_loop2() {
 
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -233,7 +234,7 @@ fn break_should_stop_nested_for_loop2() {
 
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -256,7 +257,7 @@ fn simple_do_while_loop() {
 		.@j -= 1;
     } while(.@j > 0);
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -280,7 +281,7 @@ fn simple_do_while_loop_2() {
 		.@j -= 1;
     } while(.@j > 0);
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

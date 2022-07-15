@@ -8,7 +8,7 @@ use antlr_rust::input_stream::ByteStream;
 use antlr_rust::InputStream;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor};
 use crate::lang::chunk::ClassFile;
-use crate::lang::compiler::{Compiler, parse_number};
+use crate::lang::compiler::{Compiler, DebugFlag, parse_number};
 use std::default::Default;
 use antlr_rust::parser_rule_context::ParserRuleContext;
 use crate::lang::error::CompilationError;
@@ -33,8 +33,8 @@ pub struct ScriptVisitor {
     pub file_content: Vec<String>,
 }
 
-pub fn compile(paths: Vec<String>, native_function_list_file_path: &str) -> Result<(Vec<Script>, Vec<ClassFile>), Vec<CompilationError>> {
-    let mut compiler = Compiler::new(Default::default(), Default::default(), native_function_list_file_path);
+pub fn compile(paths: Vec<String>, native_function_list_file_path: &str, debug_flag: u64) -> Result<(Vec<Script>, Vec<ClassFile>), Vec<CompilationError>> {
+    let mut compiler = Compiler::new(Default::default(), Default::default(), native_function_list_file_path, debug_flag);
     let mut scripts = Vec::<Script>::new();
     for path in paths.iter() {
         let path = Path::new(path);

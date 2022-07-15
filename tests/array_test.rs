@@ -2,6 +2,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::compiler;
+use rathena_script_lang_interpreter::lang::compiler::Compiler;
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 
@@ -29,7 +31,7 @@ fn simple_array_assignment() {
     vm_dump_var("a1", .@a$[1]);
     vm_dump_var("b", .@b$);
     vm_dump_var("c", .@c$);
-    "#).unwrap();
+    "#, compiler::DebugFlag::TypeChecker.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -55,7 +57,7 @@ fn getarraysize_should_array_size() {
     .@b_len = getarraysize(.@b$);
     vm_dump_var("a_len", .@a_len);
     vm_dump_var("b_len", .@b_len);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -84,7 +86,7 @@ fn cleararray() {
     vm_dump_var("b1", .@b[1]);
     vm_dump_var("a9", .@a$[9]);
     vm_dump_var("b10", .@b[10]);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -117,7 +119,7 @@ fn setarray() {
     vm_dump_var("b2", .@b[2]);
     .@two = 2;
     vm_dump_var("b3", .@b[.@two + 1]);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
@@ -147,7 +149,7 @@ fn getelementofarray() {
     .@d = getelementofarray(.@b, 2);
     vm_dump_var("two", .@c);
     vm_dump_var("three", .@d);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -174,7 +176,7 @@ fn deletearray() {
     vm_dump_var("b_0_after_second_delete", .@b[0]);
     vm_dump_var("b_2_after_second_delete", .@b[2]);
     vm_dump_var("b_len_after_second_delete", getarraysize(.@b));
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -204,7 +206,7 @@ fn inarray() {
     vm_dump_var("toto_index", .@toto_index);
     vm_dump_var("four_index", .@four_index);
     vm_dump_var("not_found_index", .@not_found_index);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -234,7 +236,7 @@ fn copyarray() {
     vm_dump_var("b0", .@b$[0]);
     vm_dump_var("c1", .@c$[1]);
     vm_dump_var("c2", .@c$[2]);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -258,7 +260,7 @@ fn setarray_wrong_type_error() {
     .@toto = 1;
     setarray .@a$[0], "hello", "world", .@toto;
     setarray .@a$[0], "hello", "world", "2";
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -282,7 +284,7 @@ fn cleararray_wrong_type_error() {
     let script = compile_script(r#"
     .@a$[0] = "hello";
     cleararray(.@a$[0], 0, 10);
-"#).unwrap();
+"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -308,7 +310,7 @@ fn copyarray_wrong_type_error() {
     .@toto$ = "toto";
     setarray .@a$[0], "hello", "world", .@toto$;
     copyarray .@b[0], .@a[0], 1;
-"#).unwrap();
+"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -333,7 +335,7 @@ fn copyarray_outofbounds_error() {
     .@toto$ = "toto";
     setarray .@a$[0], "hello", "world", .@toto$;
     copyarray .@b$[0], .@a$[18], 1;
-"#).unwrap();
+"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

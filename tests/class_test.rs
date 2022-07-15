@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -26,7 +27,7 @@ fn simple_class_test() {
     function global_func_hello {
         return "hello";
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -55,7 +56,7 @@ fn instance_variable_test() {
         inc2();
         vm_dump_var("counter", 'counter);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(Mutex::new(0));
     let vm_hook = VmHook { hook: Box::new(move |e| {
@@ -92,7 +93,7 @@ fn static_variable_test() {
         inc2();
         vm_dump_var("counter", .counter);
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let i = Arc::new(Mutex::new(0));
     let vm_hook = VmHook { hook: Box::new(move |e| {
@@ -136,7 +137,7 @@ fn on_init_hook_test() {
             .hello$ = .@hello$;
             end;
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
     let vm_hook = VmHook { hook: Box::new(move |e| {
@@ -185,7 +186,7 @@ fn on_instance_init_hook_test() {
             'hello$ = .@hello$;
             end;
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
     let vm_hook = VmHook { hook: Box::new(move |e| {
@@ -230,7 +231,7 @@ fn setd_instance_variable() {
             setd("'my_array[" + 1 + "]$", "hello_world array");
             end;
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
     let vm_hook = VmHook { hook: Box::new(move |e| {
@@ -272,7 +273,7 @@ fn setd_static_variable() {
             setd(".my_array[" + 1 + "]$", "hello_world array");
             end;
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let i: Arc<Mutex<HashMap<String, usize>>> = Arc::new(Mutex::new(HashMap::new()));
     let vm_hook = VmHook { hook: Box::new(move |e| {
@@ -314,7 +315,7 @@ fn getvariableofnpc_when_npc_exist() {
         vm_dump_var("array1", getvariableofnpc(.array$[0], "MyNPC1");
         vm_dump_var("array2", getvariableofnpc(.array$[1], "MyNPC1");
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

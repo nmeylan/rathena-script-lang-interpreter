@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use rathena_script_lang_interpreter::lang::call_frame::CallFrame;
 use rathena_script_lang_interpreter::lang::chunk::ClassFile;
-use rathena_script_lang_interpreter::lang::compiler::{Compiler};
+use rathena_script_lang_interpreter::lang::compiler::{Compiler, DebugFlag};
 use rathena_script_lang_interpreter::lang::error::CompilationError;
 use rathena_script_lang_interpreter::lang::thread::Thread;
 use rathena_script_lang_interpreter::lang::value::{Value};
@@ -65,16 +65,16 @@ pub fn setup_vm(debug_flag: u16) -> Arc<Vm> {
     Arc::new(vm)
 }
 
-pub fn compile_script(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-    Compiler::compile_script("test_script".to_string(), script, "native_functions_list.txt").map_err(|e| {
+pub fn compile_script(script: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+    Compiler::compile_script("test_script".to_string(), script, "native_functions_list.txt", debug_flag).map_err(|e| {
         e.iter().for_each(|e| println!("\n{}", e));
         e
     })
 }
 
 
-pub fn compile(script: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-    Compiler::compile("test_script".to_string(), script, "native_functions_list.txt").map_err(|e| {
+pub fn compile(script: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+    Compiler::compile("test_script".to_string(), script, "native_functions_list.txt", debug_flag).map_err(|e| {
         e.iter().for_each(|e| println!("\n{}", e));
         e
     })

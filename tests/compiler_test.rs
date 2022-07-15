@@ -1,5 +1,4 @@
-
-
+use rathena_script_lang_interpreter::lang::compiler;
 use crate::common::{compile, compile_script};
 
 mod common;
@@ -13,7 +12,7 @@ print(.@b$);
 .@b$ = "hello world";
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!("Variable \".@a$\" is undefined.\ntest_script 3:6.\nl3\tprint(.@a$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
@@ -28,7 +27,7 @@ fn type_checking_string_valid() {
 .@c$ = "toto" + 1;
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_ok());
 }
@@ -45,7 +44,7 @@ fn type_checking_string_invalid() {
 .@a$ = "1" / 2;
 "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(7, result.as_ref().err().unwrap().len());
@@ -66,7 +65,7 @@ fn type_checking_number_valid() {
     .@a = 1 + 3;
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_ok());
 }
@@ -78,7 +77,7 @@ fn type_checking_number_invalid() {
 .@b = 1 + "2";
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!("Variable \".@a\" is declared as a Number but is assigned with a String.\ntest_script 2:0.\nl2\t.@a = \"1\";\n\t^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
@@ -102,7 +101,7 @@ fn type_checking_function_call() {
     .@d$ = num();
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     let errors = result.err().unwrap();
@@ -124,7 +123,7 @@ fn undefined_function() {
     // Given
     let script = r#"undefined();"#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
 }
@@ -134,7 +133,7 @@ fn function_definition() {
     // Given
     let script = r#"function my_func {}"#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_ok());
 }
@@ -154,7 +153,7 @@ fn function_redefinition_should_be_an_error() {
     }
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(2, result.as_ref().err().unwrap().len());
@@ -184,7 +183,7 @@ fn class_redefinition_should_be_an_error() {
     }
     "#;
     // When
-    let result = compile(script);
+    let result = compile(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Class Myclass is already defined in file "test_script" at line "l2"
@@ -205,7 +204,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_n
     }
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Variable ".@a" is declared as a Number but is assigned with a String.
@@ -219,36 +218,55 @@ l5	        .@a = getarg(1, "3") + 4;
 fn type_checking_conditional_statement() {
     // Given
     let script = r#"
-    .@a = 1 == 1;
-    .@a = 1 == "1";
-    .@a = "1" == "1";
-    .@a = "1" == "1" && 1 == "1";
-    .@a = "1" > 2;
-    .@a = "1" >= 2;
-    .@a = 1 > 2;
-    .@a = "1" < 2;
-    .@a = "1" <= 2;
-    .@a = 1 < 2;
+    .@a = 1 == 1;                               // correct
+    .@a = 1 == "1";                             // incorrect
+    .@a = "1" == "1";                           // correct
+    .@a = "1" == "1" && 1 == "1";               // incorrect (right part of &&)
+    .@a = "1" == "1" && "1" == "1";             // correct
+    .@a = "1" == "1" || "1" == "1";             // correct
+    .@a = "1" > 2;                              // incorrect
+    .@a = "1" >= 2;                             // incorrect
+    .@a = 1 > 2;                                // incorrect
+    .@a = "1" < 2;                              // incorrect
+    .@a = "1" <= 2;                             // incorrect
+    .@a = 1 < 2;                                // incorrect
+    .@a = (getarg(0) == "RE" && !RENEWAL) || (getarg(0) == "Pre-RE" && RENEWAL);    // correct
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
+    assert_eq!(6, result.as_ref().err().unwrap().len());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
 test_script 4:10.
-l4	    .@a = 1 == "1";
+l4	    .@a = 1 == "1";                             // incorrect
 	          ^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
 test_script 6:24.
-l6	    .@a = "1" == "1" && 1 == "1";
+l6	    .@a = "1" == "1" && 1 == "1";               // incorrect (right part of &&)
 	                        ^^^^^^
 "#, result.as_ref().err().unwrap()[1].message());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
-test_script 7:10.
-l7	    .@a = "1" > 2;
+test_script 9:10.
+l9	    .@a = "1" > 2;                              // incorrect
 	          ^^^^^^^
-"#, result.as_ref().err().unwrap()[3].message()); //TODO fix this, at index 2 there is an error which should not be there
+"#, result.as_ref().err().unwrap()[2].message());
+    assert_eq!(r#"Can't perform comparison when left and right are not same types
+test_script 10:10.
+l10	    .@a = "1" >= 2;                             // incorrect
+	          ^^^^^^^^
+"#, result.as_ref().err().unwrap()[3].message());
+    assert_eq!(r#"Can't perform comparison when left and right are not same types
+test_script 12:10.
+l12	    .@a = "1" < 2;                              // incorrect
+	          ^^^^^^^
+"#, result.as_ref().err().unwrap()[4].message());
+    assert_eq!(r#"Can't perform comparison when left and right are not same types
+test_script 13:10.
+l13	    .@a = "1" <= 2;                             // incorrect
+	          ^^^^^^^^
+"#, result.as_ref().err().unwrap()[5].message());
 }
 
 #[test]
@@ -261,7 +279,7 @@ fn type_checking_logical_and_or() {
     .@a = 1 && "0";
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Can't perform logical and (&&) when left and right are not same types
@@ -283,7 +301,7 @@ fn undefined_label() {
 
     "#;
     // When
-    let _result = compile_script(script);
+    let _result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
 }
 
@@ -298,7 +316,7 @@ fn label_defined_in_a_function_is_not_valid() {
         }
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Label "Assign" is declared in "my_func" function scope but label should be declared in script scope only.
@@ -321,7 +339,7 @@ fn array_type_checking() {
     .@a$ = "hello"; // variable .@a$ become a string
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(3, result.as_ref().err().unwrap().len());
@@ -351,7 +369,7 @@ fn array_type_checking_copy_array() {
     copyarray .@b[0], .@a$[0], 1;
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(1, result.as_ref().err().unwrap().len());
@@ -372,7 +390,7 @@ fn native_wrong_argument_count() {
     getarraysize(.@b[0], .@a$[0]);
     "#;
     // When
-    let result = compile_script(script);
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(1, result.as_ref().err().unwrap().len());

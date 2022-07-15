@@ -6,6 +6,7 @@ compilationUnit
 
 primaryExpression
     : variable
+    | char_variable_get
     | Identifier
     |   Number
     |   String
@@ -21,8 +22,8 @@ functionCallExpression
 
 postfixExpression
     : primaryExpression
-    | variable ('++' | '--')
-    | ('++' | '--') variable
+    | (variable | char_variable_set) ('++' | '--')
+    | ('++' | '--') (variable | char_variable_set)
     | '(' conditionalExpression ')'
     | functionCallExpression
     ;
@@ -100,6 +101,7 @@ conditionalExpression
 
 assignmentExpression
     :   assignmentLeftExpression assignmentOperator conditionalExpression
+    |   char_variable_set assignmentOperator conditionalExpression
     |   'set' '('? functionCallExpression ',' conditionalExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
     |   'set' '('? assignmentLeftExpression ',' conditionalExpression ')'?
     |   'setarray' '('? assignmentLeftExpression ',' conditionalExpression (',' argumentExpressionList)? ')'?
@@ -244,10 +246,15 @@ scope_specifier
   :  '@' | '$' | '$@' | '.' | '.@' | '\'' | '#' | '##';
 variable
   : scope_specifier  variable_name '$'? ('[' conditionalExpression ']')?
-  | scope_specifier? variable_name '$' ('[' conditionalExpression ']')?
   ;
 variable_name
   : (Identifier | Menu);
+
+char_variable_get
+    : variable_name '$'? ('[' conditionalExpression ']')? ;
+
+char_variable_set
+    : variable_name '$'? ('[' conditionalExpression ']')? ;
 
 // Tokens
 LeftParen : '(';

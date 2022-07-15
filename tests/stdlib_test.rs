@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -16,7 +17,7 @@ fn pow() {
     let classes = compile_script(r#"
     .@two = 2;
     vm_dump_var("nine", pow(3, .@two));
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
@@ -33,7 +34,7 @@ fn pow_with_wrong_type() {
     let classes = compile_script(r#"
     .@two = 2;
     vm_dump_var("nine", pow("3", .@two));
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When

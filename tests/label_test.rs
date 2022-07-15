@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -20,7 +21,7 @@ fn simple_label() {
     ItDoesNothing1:
         .@c$ = "variable in label 2";
         vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -49,7 +50,7 @@ fn simple_label_with_goto() {
         .@d$ = "variable in label 3";
     vm_dump_locals();
 
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -80,7 +81,7 @@ fn label_with_goto_inside() {
         .@d$ = "variable in label 3";
     End:
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -116,7 +117,7 @@ fn label_with_goto_in_a_function() {
     function goto_end {
         goto End;
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -155,7 +156,7 @@ fn label_with_goto_in_a_nested_function() {
     function my_func {
         goto_end();
     }
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

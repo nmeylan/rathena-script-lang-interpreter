@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -13,6 +14,7 @@ use std::rc::Rc;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
 use antlr_rust::parser_rule_context::ParserRuleContext;
+use antlr_rust::rule_context::CustomRuleContext;
 use antlr_rust::token::Token;
 use antlr_rust::tree::{NodeText, ParseTree, ParseTreeVisitor, Tree};
 
@@ -36,6 +38,28 @@ const HOOK_LABEL: &[&str] = &[
     "OnInstanceDestroy",
 ];
 
+pub enum DebugFlag {
+    None,
+    All,
+    TypeChecker,
+}
+
+impl DebugFlag {
+    pub fn value(&self) -> u64 {
+        match self {
+            DebugFlag::None => 0,
+            DebugFlag::All => 0xFFFF,
+            DebugFlag::TypeChecker => 2,
+        }
+    }
+}
+
+impl Default for DebugFlag {
+    fn default() -> Self {
+        DebugFlag::None
+    }
+}
+
 #[allow(dead_code)]
 #[derive(Default)]
 pub struct Compiler {
@@ -46,11 +70,12 @@ pub struct Compiler {
     errors: RefCell<Vec<CompilationError>>,
     state: State,
     script_lines: Vec<String>,
+    debug_flag: u64,
 }
 
 #[derive(Default)]
 pub struct State {
-    current_assignment_types: Vec<ValueType>,
+    current_assignment_types: Vec<(ValueType, Option<String>)>,
     current_declared_class: usize,
 }
 
@@ -101,7 +126,7 @@ impl Display for CompilationDetail {
 }
 
 impl Compiler {
-    pub fn new(file_name: String, script: String, native_function_list_file_path: &str) -> Self {
+    pub fn new(file_name: String, script: String, native_function_list_file_path: &str, debug_flag: u64) -> Self {
         let mut native_functions: Vec<NativeFunction> = NATIVE_FUNCTIONS.to_vec().iter()
             .map(|native_function| NativeFunction::from_vm_native(&native_function))
             .collect();
@@ -114,11 +139,12 @@ impl Compiler {
             errors: RefCell::new(vec![]),
             state: Default::default(),
             script_lines: script.split('\n').map(|l| l.to_string()).collect::<Vec<String>>(),
+            debug_flag,
         }
     }
 
-    pub fn compile_script(name: String, script: &str, native_function_list_file_path: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path)
+    pub fn compile_script(name: String, script: &str, native_function_list_file_path: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path, debug_flag)
     }
 
     pub fn compile_file_and_keep_state(&mut self, script_path: &Path) {
@@ -152,8 +178,8 @@ impl Compiler {
         }
     }
 
-    pub fn compile(name: String, script: &str, native_function_list_file_path: &str) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-        let mut compiler = Compiler::new(name, script.to_string(), native_function_list_file_path);
+    pub fn compile(name: String, script: &str, native_function_list_file_path: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
+        let mut compiler = Compiler::new(name, script.to_string(), native_function_list_file_path, debug_flag);
         let lexer = RathenaScriptLangLexer::new(InputStream::new(script));
         let token_stream = CommonTokenStream::new(lexer);
         let mut parser = RathenaScriptLangParser::new(token_stream);
@@ -327,22 +353,27 @@ impl Compiler {
         scope
     }
 
-    fn add_current_assignment_type_from_variable(&mut self, var: &Variable) {
+    fn add_current_assignment_type_from_variable<'input>(&mut self, var: &Variable, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
         match var.value_ref.borrow().deref().value_type {
-            ValueType::String => self.add_current_assigment_type(ValueType::String),
-            ValueType::Number => self.add_current_assigment_type(ValueType::Number),
+            ValueType::String => self.add_current_assigment_type(ValueType::String, node),
+            ValueType::Number => self.add_current_assigment_type(ValueType::Number, node),
             ValueType::Array(_) => {
                 if var.value_ref.borrow().is_string_array() {
-                    self.add_current_assigment_type(ValueType::String)
+                    self.add_current_assigment_type(ValueType::String, node)
                 } else {
-                    self.add_current_assigment_type(ValueType::Number)
+                    self.add_current_assigment_type(ValueType::Number, node)
                 }
             }
         }
     }
 
-    fn add_current_assigment_type(&mut self, value_type: ValueType) {
-        self.state.current_assignment_types.push(value_type)
+    fn add_current_assigment_type<'input>(&mut self, value_type: ValueType, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
+        let debug_context = if self.debug_flag & DebugFlag::TypeChecker.value() == DebugFlag::TypeChecker.value() {
+            Some(node.get_text())
+        } else {
+            None
+        };
+        self.state.current_assignment_types.push((value_type, debug_context))
     }
 
     fn remove_current_assigment_type(&mut self, count: usize) {
@@ -356,30 +387,37 @@ impl Compiler {
         if assignment_types.is_empty() {
             return None;
         }
-        if assignment_types.iter().all(|v| v.is_number()) {
+        if assignment_types.iter().all(|(v, _)| v.is_number()) {
             Some(ValueType::Number)
         } else {
             Some(ValueType::String)
         }
     }
 
-    fn current_assignment_type(&mut self) -> ValueType {
-        if self.state.current_assignment_types.iter().all(|v| v.is_number()) {
-            ValueType::Number
+    fn current_assignment_type(&mut self) -> Option<ValueType> {
+        if self.state.current_assignment_types.is_empty() {
+            return None;
+        }
+        if self.state.current_assignment_types.iter().all(|(v, _)| v.is_number()) {
+            Some(ValueType::Number)
         } else {
-            ValueType::String
+            Some(ValueType::String)
         }
     }
 
     fn current_assignment_types_are_same_type(&self) -> bool {
-        self.state.current_assignment_types.iter().all(|v| v.is_number())
-            || self.state.current_assignment_types.iter().all(|v| v.is_string())
+        Self::types_are_same_type(&self.state.current_assignment_types.iter().map(|(v, _)| Some(v.clone())).collect::<Vec<Option<ValueType>>>())
+    }
+
+    pub fn types_are_same_type(types: &Vec<Option<ValueType>>) -> bool {
+        types.iter().all(|v| v.is_none() || v.as_ref().unwrap().is_number())
+            || types.iter().all(|v| v.is_none() || v.as_ref().unwrap().is_string())
     }
 
     fn build_variable(ctx: &VariableContext) -> Variable {
         let scope = Self::get_variable_scope(ctx);
         let variable_name = ctx.variable_name().unwrap();
-        let name = variable_name.Identifier().unwrap().symbol.text.deref().to_string();
+        let name = variable_name.get_child(0).as_ref().unwrap().get_text();
         Variable {
             value_ref: Variable::variable_value(ctx.Dollar().is_some(), ctx.LeftBracket().is_some()),
             name,
@@ -433,6 +471,20 @@ impl Compiler {
             self.current_chunk().emit_op_code(ArrayLoad, self.compilation_details_from_context(node));
         }
     }
+
+    fn debug_type_checking<'input>(&mut self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
+        if self.debug_flag & DebugFlag::TypeChecker.value() == DebugFlag::TypeChecker.value() {
+            println!("L{}. {} -> ", node.start().line, self.script_lines[node.start().get_line() as usize - 1]);
+            self.state.current_assignment_types.iter().for_each(|(t, context)| {
+                if context.is_some() {
+                    print!("\t[({}) -> {:?}],", context.as_ref().unwrap(), t)
+                } else {
+                    print!("\t{:?},", t)
+                }
+            });
+            println!();
+        }
+    }
 }
 
 impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
@@ -448,13 +500,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 Constant::String(
                     remove_quote_from_string(ctx.String().as_ref().unwrap().symbol.text.as_ref()) // TODO check if it can be done by antlr skip instead.
                 ));
-            self.add_current_assigment_type(ValueType::String);
+            self.add_current_assigment_type(ValueType::String, ctx);
             self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
         }
         if ctx.Number().is_some() {
             let number_value = &ctx.Number().unwrap().symbol.text;
             let reference = self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
-            self.add_current_assigment_type(ValueType::Number);
+            self.add_current_assigment_type(ValueType::Number, ctx);
             self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
         }
         if ctx.Identifier().is_some() {
@@ -519,7 +571,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
             if let Some(returned_type) = native.return_type.as_ref() {
-                self.add_current_assigment_type(returned_type.clone());
+                self.add_current_assigment_type(returned_type.clone(), ctx);
             }
             if native.name == "close" {
                 self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
@@ -528,7 +580,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.remove_current_assigment_type(argument_count);
             self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_details_from_context(ctx)));
             if let Some(returned_type) = self.function_returned_type(&function_or_native_name) {
-                self.add_current_assigment_type(returned_type);
+                self.add_current_assigment_type(returned_type, ctx);
             }
             self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
         }
@@ -564,17 +616,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let operator = ctx.multiplicativeOperator(i).unwrap();
 
             if operator.Star().is_some() {
-                if self.current_assignment_type().is_string() {
+                if self.current_assignment_type().is_some() && self.current_assignment_type().unwrap().is_string() {
+                    self.debug_type_checking(ctx);
                     self.register_error(Type, ctx, "Multiply operator \"*\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Multiply), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Slash().is_some() {
-                if self.current_assignment_type().is_string() {
+                self.debug_type_checking(ctx);
+                if self.current_assignment_type().is_some() && self.current_assignment_type().unwrap().is_string() {
                     self.register_error(Type, ctx, "Divide operator \"/\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Divide), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Percent().is_some() {
-                if self.current_assignment_type().is_string() {
+                self.debug_type_checking(ctx);
+                if self.current_assignment_type().is_some() && self.current_assignment_type().unwrap().is_string() {
                     self.register_error(Type, ctx, "Modulo operator \"%\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Modulo), self.compilation_details_from_context(operator.as_ref()));
@@ -594,7 +649,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if operator.Plus().is_some() {
                 self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Minus().is_some() {
-                if self.current_assignment_type().is_string() {
+                if self.current_assignment_type().is_some() && self.current_assignment_type().unwrap().is_string() {
+                    self.debug_type_checking(ctx);
                     self.register_error(Type, ctx, "Subtraction operator \"-\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(operator.as_ref()));
@@ -610,6 +666,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             self.visit_shiftExpression(&ctx.shiftExpression(i).unwrap());
             if !self.current_assignment_types_are_same_type() {
+                self.debug_type_checking(ctx);
                 self.register_error(Type, ctx, "Can't perform comparison when left and right are not same types".to_string());
             }
             let operator = ctx.relationalOperator(i).unwrap();
@@ -623,7 +680,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.current_chunk().emit_op_code(OpCode::Relational(Relational::LTE), self.compilation_details_from_context(operator.as_ref()));
             }
             self.current_assignment_type_drop();
-            self.add_current_assigment_type(ValueType::Number);
+            self.add_current_assigment_type(ValueType::Number, ctx);
         }
     }
 
@@ -635,6 +692,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             self.visit_relationalExpression(&ctx.relationalExpression(i).unwrap());
             if !self.current_assignment_types_are_same_type() {
+                self.debug_type_checking(ctx);
                 self.register_error(Type, ctx, "Can't perform comparison when left and right are not same types".to_string());
             }
             let operator = ctx.equalityOperator(i).unwrap();
@@ -644,39 +702,43 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.current_chunk().emit_op_code(OpCode::NotEqual, self.compilation_details_from_context(operator.as_ref()));
             }
             self.current_assignment_type_drop();
-            self.add_current_assigment_type(ValueType::Number);
+            self.add_current_assigment_type(ValueType::Number, ctx);
         }
     }
 
     fn visit_logicalAndExpression(&mut self, ctx: &LogicalAndExpressionContext<'input>) {
         self.visit_inclusiveOrExpression(&ctx.inclusiveOrExpression(ctx.inclusiveOrExpression_all().len() - 1).unwrap());
+        let mut types = vec![];
         for (i, _) in ctx.inclusiveOrExpression_all().iter().enumerate().rev() {
             if i == ctx.inclusiveOrExpression_all().len() - 1 {
                 continue;
             }
+            types.push(self.current_assignment_type_drop());
             self.visit_inclusiveOrExpression(&ctx.inclusiveOrExpression(i).unwrap());
-            if !self.current_assignment_types_are_same_type() {
+            types.push(self.current_assignment_type_drop());
+            if !Compiler::types_are_same_type(&types) {
+                self.debug_type_checking(ctx);
                 self.register_error(Type, ctx, "Can't perform logical and (&&) when left and right are not same types".to_string());
             }
             self.current_chunk().emit_op_code(OpCode::LogicalAnd, self.compilation_details_from_context(ctx));
-            self.current_assignment_type_drop();
-            self.add_current_assigment_type(ValueType::Number);
         }
     }
 
     fn visit_logicalOrExpression(&mut self, ctx: &LogicalOrExpressionContext<'input>) {
         self.visit_logicalAndExpression(&ctx.logicalAndExpression(ctx.logicalAndExpression_all().len() - 1).unwrap());
+        let mut types = vec![];
         for (i, _) in ctx.logicalAndExpression_all().iter().enumerate().rev() {
             if i == ctx.logicalAndExpression_all().len() - 1 {
                 continue;
             }
+            types.push(self.current_assignment_type_drop());
             self.visit_logicalAndExpression(&ctx.logicalAndExpression(i).unwrap());
-            if !self.current_assignment_types_are_same_type() {
+            types.push(self.current_assignment_type_drop());
+            if !Compiler::types_are_same_type(&types) {
+                self.debug_type_checking(ctx);
                 self.register_error(Type, ctx, "Can't perform logical or (||) when left and right are not same types".to_string());
             }
             self.current_chunk().emit_op_code(OpCode::LogicalOr, self.compilation_details_from_context(ctx));
-            self.current_assignment_type_drop();
-            self.add_current_assigment_type(ValueType::Number);
         }
     }
 
@@ -757,25 +819,30 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             // TODO
         } else if ctx.variable().is_some() {
             let variable = Self::build_variable(&ctx.variable().unwrap());
-            if let Some(current_value_type) = self.current_assignment_type_drop() {
+            if let Some(current_value_type) = self.current_assignment_type() {
                 if variable.value_ref.borrow().is_string() && current_value_type.is_number() {
+                    self.debug_type_checking(ctx);
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
                 }
                 if variable.value_ref.borrow().is_string_array() && current_value_type.is_number() {
+                    self.debug_type_checking(ctx);
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as an Array of string but an index is assigned with a Number.", variable.to_script_identifier()));
                 }
                 if variable.value_ref.borrow().is_number() && current_value_type.is_string() {
+                    self.debug_type_checking(ctx);
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
                 }
 
                 if variable.value_ref.borrow().is_number_array() && current_value_type.is_string() {
+                    self.debug_type_checking(ctx);
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as an Array of number but an index is assigned with a String.", variable.to_script_identifier()));
                 }
             }
+            self.current_assignment_type_drop();
             let is_array = variable.value_ref.borrow().is_array();
             match variable.scope {
                 Scope::Server | Scope::Account | Scope::Character => {
@@ -848,6 +915,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else {
             self.visit_children(ctx);
         }
+    }
+
+    fn visit_statement(&mut self, ctx: &StatementContext<'input>) {
+        self.current_assignment_type_drop();
+        self.visit_children(ctx);
     }
 
     fn visit_switchStatement(&mut self, ctx: &SwitchStatementContext<'input>) {
@@ -1000,6 +1072,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>) {
+        if ctx.SemiColon().is_some() {
+            // We don't care of function declared like this: function fn_name;
+            return;
+        }
         let function_name = &ctx.Identifier().unwrap().symbol.text;
         let function_name = function_name.clone().to_string();
         if self.visible_functions().contains(&function_name) {
@@ -1035,7 +1111,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_variable(&mut self, ctx: &VariableContext<'input>) {
         let variable = Self::build_variable(ctx);
-        self.add_current_assignment_type_from_variable(&variable);
+        self.add_current_assignment_type_from_variable(&variable, ctx);
         self.load_variable(&variable, ctx, ctx);
     }
 

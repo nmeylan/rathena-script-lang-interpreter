@@ -369,6 +369,18 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	 */
 	fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) { self.visit_children(ctx) }
 
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_get}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_char_variable_get(&mut self, ctx: &Char_variable_getContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_set}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_char_variable_set(&mut self, ctx: &Char_variable_setContext<'input>) { self.visit_children(ctx) }
+
 }
 
 pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, Node= RathenaScriptLangParserContextType>{
@@ -852,6 +864,22 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 			self.visit_children(ctx)
 		}
 
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_get}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_char_variable_get(&mut self, ctx: &Char_variable_getContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#char_variable_set}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_char_variable_set(&mut self, ctx: &Char_variable_setContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
 }
 
 impl<'input,T> RathenaScriptLangVisitor<'input> for T
@@ -1155,6 +1183,16 @@ where
 
 	fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_variable_name(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_char_variable_get(&mut self, ctx: &Char_variable_getContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_char_variable_get(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_char_variable_set(&mut self, ctx: &Char_variable_setContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_char_variable_set(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

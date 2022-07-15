@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -46,7 +47,7 @@ fn simple_condition() {
         .@m$ = "i am false";
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -81,7 +82,7 @@ fn condition_with_expressions() {
         .@b$ = "i am false";
     }
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -115,7 +116,7 @@ fn conditional_statements() {
     .@l = .@h > 999 && .@h <= 1000;
     .@m = .@h > 999 && .@h < 1000;
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -166,7 +167,7 @@ fn switch_statement() {
     .@d$ = num_to_str(4);
     .@e$ = num_to_str(5);
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
@@ -224,7 +225,7 @@ fn nested_switch_statement() {
     .@d$ = num_to_str(4);
     .@e$ = num_to_str(5);
     vm_dump_locals();
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

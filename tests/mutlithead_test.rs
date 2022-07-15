@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use rathena_script_lang_interpreter::lang::compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -17,7 +18,7 @@ fn multithread_support_test() {
     let classes = compile_script(r#"
     .@a$ = "hello world";
     vm_dump_var("a", .@a$);
-    "#).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
