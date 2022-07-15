@@ -1,7 +1,7 @@
 use std::borrow::Borrow;
-use std::env::var;
+
 use std::mem;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc};
 use crate::lang::call_frame::CallFrame;
 use crate::lang::class::{Class, Instance};
 use crate::lang::error::RuntimeError;
@@ -68,7 +68,7 @@ fn getvariableofnpc(thread: &Thread, instance: &Option<Arc<Instance>>, call_fram
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
     let class_name = arguments[1].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "getvariableofnpc second argument should be NPC name"))?;
-    let class = thread.vm.get_class(&class_name).clone();
+    let class = thread.vm.get_class(class_name);
     let variable = class.get_variable(variable_reference)
         .ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
                                          format!("Variable {} is not declared in NPC {}", variable_identifier, class_name).as_str()))?;
@@ -124,7 +124,7 @@ fn load_array_index_value(thread: &Thread, class: &Class, instance: &Option<Arc<
 
 fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "setd first argument should be an expression producing a variable name"))?;
-    let variable_value = arguments_ref[1].clone();
+    let variable_value = arguments_ref[1];
     let variable = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable);
     let owner_reference = if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Instance) {
@@ -149,8 +149,8 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, ca
 fn array_index_from_string(variable_identifier: &String) -> usize {
     let opening_bracket_index = variable_identifier.chars().position(|c| c == '[').unwrap();
     let closing_bracket_index = variable_identifier.chars().position(|c| c == ']').unwrap();
-    let array_index = variable_identifier[opening_bracket_index + 1..closing_bracket_index].parse::<usize>().unwrap();
-    array_index
+    
+    variable_identifier[opening_bracket_index + 1..closing_bracket_index].parse::<usize>().unwrap()
 }
 
 fn copyarray(thread: &Thread, arguments: Vec<Value>) -> Result<(), RuntimeError> {

@@ -5,11 +5,11 @@ use std::time::Instant;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
 use rathena_script_lang_interpreter::lang::compiler;
-use rathena_script_lang_interpreter::lang::compiler::{Compiler, DebugFlag};
+use rathena_script_lang_interpreter::lang::compiler::{Compiler};
 use rathena_script_lang_interpreter::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
 use rathena_script_lang_interpreter::parser::rathenascriptlangparser::RathenaScriptLangParser;
 use rathena_script_lang_interpreter::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
-use crate::common::{compile, compile_script};
+
 
 mod common;
 #[test]
@@ -20,7 +20,7 @@ fn parser_compiler_performance() {
     let mut file_content = String::new();
     reader.read_to_string(&mut file_content).unwrap();
     // When
-    let mut start_process = Instant::now();
+    let start_process = Instant::now();
     let mut start = Instant::now();
     let file_content_clone = file_content.clone();
     let lexer = RathenaScriptLangLexer::new(InputStream::new(file_content_clone.as_str()));

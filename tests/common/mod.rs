@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use rathena_script_lang_interpreter::lang::call_frame::CallFrame;
 use rathena_script_lang_interpreter::lang::chunk::ClassFile;
-use rathena_script_lang_interpreter::lang::compiler::{Compiler, DebugFlag};
+use rathena_script_lang_interpreter::lang::compiler::{Compiler};
 use rathena_script_lang_interpreter::lang::error::CompilationError;
 use rathena_script_lang_interpreter::lang::thread::Thread;
 use rathena_script_lang_interpreter::lang::value::{Value};

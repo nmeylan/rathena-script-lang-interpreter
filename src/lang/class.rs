@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
-use std::rc::Rc;
+
 use std::sync::{Arc, RwLock};
 use std::time::SystemTime;
 use crate::lang::chunk::{Chunk, OpCode};
@@ -26,7 +26,8 @@ pub struct Class {
 impl Class {
     pub fn new(name: String, reference: u64, functions_pool: HashMap<u64, Function, NoopHasher>, sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher>, static_variables: HashMap<u64, Variable, NoopHasher>,
                instance_variables: HashMap<u64, Variable, NoopHasher>) -> Self {
-        let mut class = Self {
+        
+        Self {
             reference,
             name,
             functions_pool,
@@ -34,8 +35,7 @@ impl Class {
             instances_references: RwLock::new(0),
             static_variables: RwLock::new(static_variables),
             instance_variables
-        };
-        class
+        }
     }
 
     pub fn new_instance(&self) -> Instance {
@@ -135,7 +135,7 @@ pub struct Array {
 impl Clone for Array {
     fn clone(&self) -> Self {
         Self {
-            reference: self.reference.clone(),
+            reference: self.reference,
             values: RwLock::new(self.values.read().unwrap().clone()),
             value_type: self.value_type.clone()
         }

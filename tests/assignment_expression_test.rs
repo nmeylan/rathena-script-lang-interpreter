@@ -1,14 +1,14 @@
 mod common;
 
-use std::cell::RefCell;
+
 use std::collections::HashMap;
-use std::rc::Rc;
+
 use std::sync::{Arc, Mutex};
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 use common::Event;
 use rathena_script_lang_interpreter::lang::compiler;
-use rathena_script_lang_interpreter::lang::vm::DebugFlag::{Execution, OpCode, Stack};
+
 
 use crate::common::{compile_script, VmHook};
 
@@ -245,7 +245,7 @@ fn setd_function_error_wrong_type() {
     .@var_name$ = "var";
     setd ".@my_" + .@var_name$, "hello_world";
     "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
@@ -270,7 +270,7 @@ fn setd_function_error_undefined_variable() {
     setd ".@my_" + .@var_name$, 1;
     print(.@a);
     "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };

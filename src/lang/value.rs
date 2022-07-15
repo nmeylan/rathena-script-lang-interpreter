@@ -1,12 +1,12 @@
-use std::cell::RefCell;
-use std::env::var;
+
+
 
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
-use std::ops::Deref;
+
 use std::sync::RwLock;
-use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
+use crate::lang::error::{TemporaryRuntimeError};
 
 
 pub type AccountId = String;
@@ -24,7 +24,7 @@ pub struct Variable {
 }
 
 // Variables scope
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Scope {
     Server,
     Account,
@@ -50,7 +50,7 @@ pub enum ValueType {
 }
 
 // Actual values are contains in this enum
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Constant {
     String(String),
     Number(i32),
@@ -58,7 +58,7 @@ pub enum Constant {
 
 // Value wrap actual values stored in constant pool.
 // Values can be also value behind references.
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Value {
     String(Option<String>),
     Number(Option<i32>),
@@ -193,7 +193,7 @@ impl Value {
     pub fn display_value(&self) -> String {
         match self {
             Value::String(v) => format!("\"{}\"", if let Some(v) = v { v.to_string() } else { "<unitialized>".to_string() }),
-            Value::Number(v) => format!("{}", if let Some(v) = v { format!("{}", v) } else { "<unitialized>".to_string() }),
+            Value::Number(v) => (if let Some(v) = v { format!("{}", v) } else { "<unitialized>".to_string() }),
             Value::Reference(v) => format!("#{}", if let Some((owner_ref, reference)) = v { format!("{},{}", owner_ref, reference) } else { "<unitialized>".to_string() }),
             Value::ArrayEntry(entry) => match entry.as_ref().unwrap().2.as_ref().unwrap() {
                 Constant::String(constant) => format!("\"{}\"", constant),
@@ -233,7 +233,7 @@ impl ValueType {
 impl ValueRef {
     pub fn reference(&self) -> Option<u64> {
         let value_ref_reference_guard = self.reference.read().unwrap();
-        value_ref_reference_guard.clone()
+        *value_ref_reference_guard
     }
     pub fn new_empty_string() -> Self {
         Self {
@@ -317,7 +317,7 @@ impl ValueRef {
 impl Clone for ValueRef {
     fn clone(&self) -> Self {
         Self {
-            reference: RwLock::new(self.reference.read().unwrap().clone()),
+            reference: RwLock::new(*self.reference.read().unwrap()),
             value_type: self.value_type.clone()
         }
     }
@@ -332,7 +332,7 @@ impl Hash for ValueRef {
 
 impl PartialEq for ValueRef {
     fn eq(&self, other: &Self) -> bool {
-        self.reference.read().unwrap().clone() == other.reference.read().unwrap().clone()
+        *self.reference.read().unwrap() == *other.reference.read().unwrap()
         && self.value_type == other.value_type
     }
 }
@@ -383,11 +383,11 @@ impl Variable {
             panic!("Can't find variable scope from string {}", string)
         };
         let mut variable_name = string[scope_len..string.len()].to_string();
-        let has_bracket = variable_name.ends_with("]") || variable_name.ends_with("]$");
+        let has_bracket = variable_name.ends_with(']') || variable_name.ends_with("]$");
         if has_bracket {
             variable_name = variable_name[0..variable_name.chars().position(|c| c == '[').unwrap()].to_string();
         }
-        let has_dollar = variable_name.ends_with("$");
+        let has_dollar = variable_name.ends_with('$');
         if has_dollar {
             variable_name = variable_name[0..variable_name.len() - 1].to_string();
         }
@@ -437,7 +437,7 @@ impl PartialEq<Self> for Variable {
 impl Eq for Variable {}
 
 
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Native {
     pub name: String,
 }

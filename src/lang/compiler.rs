@@ -1,4 +1,4 @@
-use std::any::Any;
+
 use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -12,24 +12,24 @@ use std::path::Path;
 use std::rc::Rc;
 
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream, RwLock};
+use antlr_rust::{InputStream};
 use antlr_rust::parser_rule_context::ParserRuleContext;
-use antlr_rust::rule_context::CustomRuleContext;
+
 use antlr_rust::token::Token;
-use antlr_rust::tree::{NodeText, ParseTree, ParseTreeVisitor, Tree};
+use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 
 use crate::lang::chunk::{Chunk, ClassFile, FunctionDefinition, Label, NumericOperation, OpCode, Relational};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreInstance, StoreLocal};
 use crate::lang::error::{CompilationError, CompilationErrorType};
-use crate::lang::error::CompilationErrorType::{FunctionAlreadyDefined, Generic, LabelNotInMain, NativeAlreadyDefined, NativeArgumentCount, Type, UndefinedFunction, UndefinedLabel};
+use crate::lang::error::CompilationErrorType::{FunctionAlreadyDefined, LabelNotInMain, NativeAlreadyDefined, NativeArgumentCount, Type, UndefinedFunction, UndefinedLabel};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{*};
 use crate::lang::vm::{NATIVE_FUNCTIONS, NativeFunction, Vm};
 use crate::parser::rathenascriptlanglexer::{*};
 use crate::parser::rathenascriptlangparser::{*};
 use crate::parser::rathenascriptlangvisitor::{*};
-use crate::util::file::read_lines;
+
 
 // Labels below will be turned into functions
 const HOOK_LABEL: &[&str] = &[
@@ -128,7 +128,7 @@ impl Display for CompilationDetail {
 impl Compiler {
     pub fn new(file_name: String, script: String, native_function_list_file_path: &str, debug_flag: u64) -> Self {
         let mut native_functions: Vec<NativeFunction> = NATIVE_FUNCTIONS.to_vec().iter()
-            .map(|native_function| NativeFunction::from_vm_native(&native_function))
+            .map(NativeFunction::from_vm_native)
             .collect();
         native_functions.extend(Vm::collect_native_functions(native_function_list_file_path));
         Self {
@@ -167,10 +167,10 @@ impl Compiler {
 
     pub fn end_compilation(&mut self) -> (Vec<ClassFile>, HashMap<String, Vec<CompilationError>>) {
         for class in self.classes.iter() {
-            Self::check_called_function_are_defined(&self, class);
+            Self::check_called_function_are_defined(self, class);
             Self::add_hook_functions(class);
             for function in class.functions().iter() {
-                Self::update_goto_jump_index(&self, class, function.as_ref());
+                Self::update_goto_jump_index(self, class, function.as_ref());
             }
         }
 
@@ -1141,5 +1141,5 @@ pub fn parse_number(num: Cow<str>) -> i32 {
 }
 
 fn remove_quote_from_string(string: &str) -> String {
-    (&string[1..string.len() - 1]).to_string()
+    string[1..string.len() - 1].to_string()
 }

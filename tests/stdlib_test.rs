@@ -1,6 +1,6 @@
-use std::cell::RefCell;
+
 use std::collections::HashMap;
-use std::rc::Rc;
+
 use std::sync::{Arc, Mutex};
 use rathena_script_lang_interpreter::lang::compiler;
 
@@ -35,7 +35,7 @@ fn pow_with_wrong_type() {
     .@two = 2;
     vm_dump_var("nine", pow("3", .@two));
     "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };

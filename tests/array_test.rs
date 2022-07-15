@@ -1,9 +1,9 @@
-use std::cell::RefCell;
+
 use std::collections::HashMap;
-use std::rc::Rc;
+
 use std::sync::{Arc, Mutex};
 use rathena_script_lang_interpreter::lang::compiler;
-use rathena_script_lang_interpreter::lang::compiler::Compiler;
+
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
 
@@ -261,7 +261,7 @@ fn setarray_wrong_type_error() {
     setarray .@a$[0], "hello", "world", .@toto;
     setarray .@a$[0], "hello", "world", "2";
     "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
@@ -285,7 +285,7 @@ fn cleararray_wrong_type_error() {
     .@a$[0] = "hello";
     cleararray(.@a$[0], 0, 10);
 "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
@@ -311,7 +311,7 @@ fn copyarray_wrong_type_error() {
     setarray .@a$[0], "hello", "world", .@toto$;
     copyarray .@b[0], .@a[0], 1;
 "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
@@ -336,7 +336,7 @@ fn copyarray_outofbounds_error() {
     setarray .@a$[0], "hello", "world", .@toto$;
     copyarray .@b$[0], .@a$[18], 1;
 "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };

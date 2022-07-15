@@ -1,14 +1,14 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::mem;
 use std::path::Path;
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::input_stream::ByteStream;
+
 use antlr_rust::InputStream;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 use crate::lang::chunk::ClassFile;
-use crate::lang::compiler::{Compiler, DebugFlag, parse_number};
+use crate::lang::compiler::{Compiler, parse_number};
 use std::default::Default;
 use antlr_rust::parser_rule_context::ParserRuleContext;
 use crate::lang::error::CompilationError;
@@ -83,7 +83,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
     fn visit_scriptInitialization(&mut self, ctx: &ScriptInitializationContext<'input>) {
         if ctx.scriptLocation().is_some() {
             let script_declaration = self.file_content[ctx.start().line as usize - 1].clone();
-            let script_name = script_declaration.split("\t").collect::<Vec<&str>>()[2].to_string();
+            let script_name = script_declaration.split('\t').collect::<Vec<&str>>()[2].to_string();
             let sprite = ctx.scriptSprite_all().get(0).unwrap().Number().unwrap().symbol.text.to_string();
             self.scripts.push(Script {
                 name: script_name,
@@ -102,7 +102,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
     fn visit_npcInitialization(&mut self, ctx: &NpcInitializationContext<'input>) {
         if ctx.scriptLocation().is_some() {
             let script_declaration = self.file_content[ctx.start().line as usize - 1].clone();
-            let script_name = script_declaration.split("\t").collect::<Vec<&str>>()[2].to_string();
+            let script_name = script_declaration.split('\t').collect::<Vec<&str>>()[2].to_string();
             let sprite = ctx.scriptSprite_all().get(0).unwrap().get_child(0).as_ref().unwrap().get_text();
             self.scripts.push(Script {
                 name: script_name,

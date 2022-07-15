@@ -3,10 +3,10 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::io::{Stdout, Write};
-use std::rc::Rc;
+
 use std::default::Default;
-use std::fmt::format;
-use std::os::linux::raw::stat;
+
+
 
 use std::sync::{Arc, RwLock};
 use crate::lang::call_frame::CallFrame;
@@ -209,7 +209,7 @@ impl Vm {
     }
 
     pub fn create_instance(vm: Arc<Vm>, class_name: String, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(u64, u64), RuntimeError> {
-        let mut instance = Arc::new(vm.classes_pool.read().unwrap().get(&class_name).as_ref().unwrap().new_instance());
+        let instance = Arc::new(vm.classes_pool.read().unwrap().get(&class_name).as_ref().unwrap().new_instance());
         let class = vm.get_class(&instance.class_name);
         vm.store_instance_on_heap(class.hash_code(), instance.hash_code(), instance.clone());
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
@@ -300,11 +300,11 @@ impl Vm {
             self.heap.write().unwrap().insert(owner_reference, Default::default());
         }
         let heap_ref = self.heap.read().unwrap();
-        let mut owner_entries = heap_ref.get(&owner_reference).unwrap().read().unwrap();
+        let owner_entries = heap_ref.get(&owner_reference).unwrap().read().unwrap();
         let entry = owner_entries.get(&reference).ok_or(RuntimeError::new_internal(format!("Heap entry is not an instance for owner reference {} and reference {}", owner_reference, reference)))?;
         match entry {
             HeapEntry::Instance(entry) => Ok(entry.clone()),
-            x => Err(RuntimeError::new_internal(format!("Heap entry does not contain an instance for owner reference {} and reference {}", owner_reference, reference))),
+            _x => Err(RuntimeError::new_internal(format!("Heap entry does not contain an instance for owner reference {} and reference {}", owner_reference, reference))),
         }
     }
 
