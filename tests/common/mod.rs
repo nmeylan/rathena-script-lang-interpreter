@@ -68,7 +68,6 @@ impl NativeMethodHandler for VmHook {
                 }
             });
         } else if native.name.eq("setgamevariable") {
-            params.iter().for_each(|p| println!("{}", p));
             let variable_name = params[2].string_value().unwrap();
             let variable_type = params[1].string_value().unwrap();
             if variable_type == "account" {

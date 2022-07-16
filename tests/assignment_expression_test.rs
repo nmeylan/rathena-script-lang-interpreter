@@ -23,7 +23,7 @@ fn simple_assigment() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -43,7 +43,7 @@ fn assigment_to_local_variable() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -61,7 +61,7 @@ fn assignment_with_string_concat() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -95,7 +95,7 @@ fn assignment_with_number_operation() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -131,7 +131,7 @@ fn simple_re_assigment() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -148,7 +148,7 @@ fn plus_equal_string_concat() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -165,7 +165,7 @@ fn plus_equal_num_addition() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -197,7 +197,7 @@ fn setd_function() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -228,7 +228,7 @@ fn set_with_getd_function() {
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -248,7 +248,7 @@ fn setd_function_error_wrong_type() {
     let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
@@ -268,17 +268,17 @@ fn setd_function_error_undefined_variable() {
     let script = compile_script(r#"
     .@var_name$ = "var";
     setd ".@my_" + .@var_name$, 1;
-    print(.@a);
+    println(.@a);
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
     assert_eq!(r#"Variable is not declared in local scope
-test_script 5:10.
-l5	    print(.@a);
-	          ^^^"#, runtime_error.to_string().trim());
+test_script 5:12.
+l5	    println(.@a);
+	            ^^^"#, runtime_error.to_string().trim());
 }

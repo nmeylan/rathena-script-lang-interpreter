@@ -17,6 +17,7 @@ use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 
 use crate::lang::chunk::{Chunk, ClassFile, FunctionDefinition, Label, NumericOperation, OpCode, Relational};
+use crate::lang::chunk::NumericOperation::{Divide, Multiply, Subtract};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreInstance, StoreLocal};
 use crate::lang::error::{CompilationError, CompilationErrorType};
@@ -491,6 +492,13 @@ impl Compiler {
             println!();
         }
     }
+
+    fn getgamevariable<'input>(&mut self, ctx: &(dyn RathenaScriptLangParserContext<'input> + 'input), variable_type_reference: u64, variable_name_reference: u64) {
+        let native_name = String::from("getgamevariable");
+        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
+        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_name_reference), self.compilation_details_from_context(ctx));
+        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
+    }
 }
 
 impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
@@ -817,11 +825,25 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let native_name = "setd";
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
         } else if ctx.accountVariableSet().is_some() {
+            let operator = ctx.assignmentOperator().unwrap();
             let accountVariableSet = ctx.accountVariableSet().unwrap();
-            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
             let variable_type_reference = self.current_chunk().add_constant(Constant::String("account".to_string()));
-            self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
             let variable_name_reference = self.current_chunk().add_constant(Constant::String(accountVariableSet.variable_name().as_ref().unwrap().get_text()));
+            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
+            if operator.PlusEqual().is_some() {
+                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
+                self.current_chunk().emit_op_code(OpCode::Add, self.compilation_details_from_context(ctx));
+            } else if operator.MinusEqual().is_some() {
+                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
+                self.current_chunk().emit_op_code(OpCode::NumericOperation(Subtract), self.compilation_details_from_context(ctx));
+            } else if operator.DivideEqual().is_some() {
+                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
+                self.current_chunk().emit_op_code(OpCode::NumericOperation(Divide), self.compilation_details_from_context(ctx));
+            } else if operator.MultiplyEqual().is_some() {
+                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
+                self.current_chunk().emit_op_code(OpCode::NumericOperation(Multiply), self.compilation_details_from_context(ctx));
+            }
+            self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
             self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_name_reference), self.compilation_details_from_context(ctx));
             let native_name = String::from("setgamevariable");
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 3 }, self.compilation_details_from_context(ctx));
@@ -889,11 +911,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>) {
         let variable_type_reference = self.current_chunk().add_constant(Constant::String("account".to_string()));
-        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
         let variable_name_reference = self.current_chunk().add_constant(Constant::String(ctx.variable_name().as_ref().unwrap().get_text()));
-        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_name_reference), self.compilation_details_from_context(ctx));
-        let native_name = String::from("getgamevariable");
-        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
+        self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
 
     }
 

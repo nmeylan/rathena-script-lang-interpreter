@@ -148,7 +148,7 @@ fn function_redefinition_should_be_an_error() {
     function my_func {
         .@a = 2;
     }
-    function print { // this is a native function, it is forbidden to declare a func with the same name as native function.
+    function println { // this is a native function, it is forbidden to declare a func with the same name as native function.
         .@a = 2;
     }
     "#;
@@ -163,9 +163,9 @@ test_script 6:4.
 l6	    function my_func {
 	    ^
 "#, result.as_ref().err().unwrap().get(0).unwrap().message());
-    assert_eq!(r#"A native function with name "print" already exists.
+    assert_eq!(r#"A native function with name "println" already exists.
 test_script 9:4.
-l9	    function print { // this is a native function, it is forbidden to declare a func with the same name as native function.
+l9	    function println { // this is a native function, it is forbidden to declare a func with the same name as native function.
 	    ^
 "#, result.as_ref().err().unwrap().get(1).unwrap().message());
 }

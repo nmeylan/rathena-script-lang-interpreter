@@ -24,7 +24,7 @@ fn simple_function_call() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -45,7 +45,7 @@ fn function_call_with_arguments() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -67,7 +67,7 @@ fn function_call_with_variable_arguments() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -88,7 +88,7 @@ fn function_call_with_two_arguments() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -109,7 +109,7 @@ fn function_call_with_arguments_out_of_bounds() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
     // Then
@@ -137,7 +137,7 @@ fn function_call_with_arguments_with_default() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -157,7 +157,7 @@ fn function_call_with_number_arguments() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -177,7 +177,7 @@ fn function_call_with_number_arguments_with_default() {
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -197,7 +197,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_s
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -226,7 +226,7 @@ fn function_with_return_type() {
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -251,14 +251,14 @@ fn function_with_return_type_multicall() {
         return getarg(0) - 1;
     }
     function print_arg {
-        print(getarg(0));
+        println(getarg(0));
     }
     .@a = minus_one(plus_four(2));
     print_arg(.@a);
     vm_dump_var("a", .@a);
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
@@ -283,7 +283,7 @@ fn recursive_function_call_with_return() {
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
-    let vm_hook = VmHook { hook: Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }) };
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
