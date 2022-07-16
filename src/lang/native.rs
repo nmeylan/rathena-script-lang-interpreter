@@ -41,7 +41,7 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             setd(thread, class, instance, call_frame, &arguments, arguments_ref, native_method_handler)?
         }
         "getd" => {
-            getd(thread, class, instance, call_frame, arguments)?
+            getd(thread, class, instance, call_frame, arguments, native_method_handler)?
         }
         "getvariableofnpc" => {
             getvariableofnpc(thread, instance, call_frame, arguments)?
@@ -82,7 +82,7 @@ fn getvariableofnpc(thread: &Thread, instance: &Option<Arc<Instance>>, call_fram
     Ok(())
 }
 
-fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, native_method_handler: &Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "getd first argument should be an expression producing a variable name"))?;
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
@@ -94,7 +94,7 @@ fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_f
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local){
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), call_frame.hash_code(), variable_reference)));
     } else {
-        panic!("getd - Not supported yet, only static, instance and local variable scope are supported");
+        thread.load_global(call_frame, native_method_handler, &variable_from_string, variable_reference);
     };
     if variable_from_string.value_ref.borrow().is_array() {
         // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.

@@ -16,9 +16,16 @@ fn char_variable_set_get() {
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let classes = compile_script(r#"
     a$ = "hello world";
+    set c, 2;
+    setd "char_variable" + "$", "using setd";
+    set getd("char_variable_set_getd" + "$"), "using set + getd";
     b = 1;
     vm_dump_var("a", a$);
     vm_dump_var("b", b);
+    vm_dump_var("c", c);
+    vm_dump_var("d", char_variable$);
+    vm_dump_var("e", char_variable_set_getd);
+    vm_dump_var("f", getd("char_variable" + "$"));
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::All.value());
@@ -29,6 +36,10 @@ fn char_variable_set_get() {
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("using setd"), events.lock().unwrap().get("d").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("using set + getd"), events.lock().unwrap().get("e").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("using setd"), events.lock().unwrap().get("f").unwrap().value.string_value().unwrap().clone());
 }
 #[test]
 fn char_variable_plus_equal() {

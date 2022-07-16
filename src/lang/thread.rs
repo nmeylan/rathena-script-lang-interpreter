@@ -85,12 +85,9 @@ impl Thread {
                     let variable_name_stack_entry = self.stack.pop()?;
                     let value_from_stack = self.value_from_stack_entry(&variable_name_stack_entry, &call_frame, class, instance)?;
                     let variable_name = value_from_stack.string_value().unwrap();
-                    let _ = Vm::calculate_hash(&variable_name);
+                    let owner_reference = Vm::calculate_hash(&variable_name);
                     let variable = Variable::from_string(variable_name);
-                    let mut arguments: Vec<Value> = vec![];
-                    arguments.push(Value::String(Some(variable.name.clone())));
-                    arguments.push(Value::String(Some(variable.scope.to_string().clone())));
-                    native_method_handler.handle(&Native {name: "getglobalvariable".to_string()}, arguments, self, &call_frame);
+                    self.load_global(&call_frame, &native_method_handler, &variable, owner_reference);
                 }
                 OpCode::StoreReference => {
                     // TODO no longer used: check to keep
@@ -398,6 +395,13 @@ impl Thread {
         }
         self.print_after_current_run(call_frame, class, &mut stdout);
         Ok(CallFrameBreak::Return(false))
+    }
+
+    pub(crate) fn load_global(&self, call_frame: &CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, variable: &Variable, _owner_reference: u64) {
+        let mut arguments: Vec<Value> = vec![];
+        arguments.push(Value::String(Some(variable.name.clone())));
+        arguments.push(Value::String(Some(variable.scope.to_string().clone())));
+        native_method_handler.handle(&Native { name: "getglobalvariable".to_string() }, arguments, self, &call_frame);
     }
 
     pub fn push_constant_on_stack(&self, value: Value) {
