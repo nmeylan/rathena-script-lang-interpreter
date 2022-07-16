@@ -369,18 +369,6 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	 */
 	fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>) { self.visit_children(ctx) }
 
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableGet}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>) { self.visit_children(ctx) }
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableSet}.
-	 * @param ctx the parse tree
-	 */
-	fn visit_accountVariableSet(&mut self, ctx: &AccountVariableSetContext<'input>) { self.visit_children(ctx) }
-
 }
 
 pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, Node= RathenaScriptLangParserContextType>{
@@ -864,22 +852,6 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 			self.visit_children(ctx)
 		}
 
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableGet}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
-	/**
-	 * Visit a parse tree produced by {@link RathenaScriptLangParser#accountVariableSet}.
-	 * @param ctx the parse tree
-	 */
-		fn visit_accountVariableSet(&mut self, ctx: &AccountVariableSetContext<'input>) -> Self::Return {
-			self.visit_children(ctx)
-		}
-
 }
 
 impl<'input,T> RathenaScriptLangVisitor<'input> for T
@@ -1183,16 +1155,6 @@ where
 
 	fn visit_variable_name(&mut self, ctx: &Variable_nameContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_variable_name(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_accountVariableGet(self, ctx);
-        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
-	}
-
-	fn visit_accountVariableSet(&mut self, ctx: &AccountVariableSetContext<'input>){
-		let result = <Self as RathenaScriptLangVisitorCompat>::visit_accountVariableSet(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

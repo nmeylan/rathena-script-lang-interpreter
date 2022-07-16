@@ -368,8 +368,8 @@ impl Chunk {
 #[derive(Debug, Clone, Hash)]
 pub enum OpCode {
     LoadConstant(u64),
-    StoreGlobal(u64),
-    LoadGlobal(u64),
+    StoreGlobal,
+    LoadGlobal,
     StoreReference,
     LoadReference,
     StoreLocal(u64),

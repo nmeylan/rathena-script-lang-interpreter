@@ -40,8 +40,8 @@ pub struct NativeFunction {
 }
 
 pub const NATIVE_FUNCTIONS: &[StaticNativeFunction] = &[
-    StaticNativeFunction { name: "getarraysize", return_type: Some(ValueType::Number), min_arguments: 1, max_arguments: 1 },
     StaticNativeFunction { name: "getarg", return_type: None, min_arguments: 1, max_arguments: 2 },
+    StaticNativeFunction { name: "getarraysize", return_type: Some(ValueType::Number), min_arguments: 1, max_arguments: 1 },
     StaticNativeFunction { name: "cleararray", return_type: None, min_arguments: 3, max_arguments: 3 },
     StaticNativeFunction { name: "setarray", return_type: None, min_arguments: 2, max_arguments: 255 },
     StaticNativeFunction { name: "getelementofarray", return_type: None, min_arguments: 2, max_arguments: 2 },

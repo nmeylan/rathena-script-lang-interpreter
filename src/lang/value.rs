@@ -1,13 +1,9 @@
-
-
-
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
-
 use std::sync::RwLock;
-use crate::lang::error::{TemporaryRuntimeError};
 
+use crate::lang::error::TemporaryRuntimeError;
 
 pub type AccountId = String;
 pub type CharId = String;
@@ -27,7 +23,9 @@ pub struct Variable {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Scope {
     Server,
+    ServerTemporary,
     Account,
+    CharacterTemporary,
     Character,
     Npc,
     Instance,
@@ -70,11 +68,26 @@ impl Scope {
     pub fn prefix(&self) -> String {
         match self {
             Scope::Server => String::from("$"),
-            Scope::Account => String::from(""),
-            Scope::Character => String::from("@"),
+            Scope::Account => String::from("#"),
+            Scope::Character => String::from(""),
             Scope::Npc => String::from("."),
             Scope::Instance => String::from("'"),
             Scope::Local => String::from(".@"),
+            Scope::ServerTemporary => String::from("$@"),
+            Scope::CharacterTemporary => String::from("@")
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Scope::Server => String::from("server_permanent"),
+            Scope::Account => String::from("account_permanent"),
+            Scope::Character => String::from("char_permanent"),
+            Scope::Npc => String::from("static"),
+            Scope::Instance => String::from("instance"),
+            Scope::Local => String::from("local"),
+            Scope::ServerTemporary => String::from("server_temporary"),
+            Scope::CharacterTemporary => String::from("char_temporary")
         }
     }
 }
@@ -318,7 +331,7 @@ impl Clone for ValueRef {
     fn clone(&self) -> Self {
         Self {
             reference: RwLock::new(*self.reference.read().unwrap()),
-            value_type: self.value_type.clone()
+            value_type: self.value_type.clone(),
         }
     }
 }
@@ -333,7 +346,7 @@ impl Hash for ValueRef {
 impl PartialEq for ValueRef {
     fn eq(&self, other: &Self) -> bool {
         *self.reference.read().unwrap() == *other.reference.read().unwrap()
-        && self.value_type == other.value_type
+            && self.value_type == other.value_type
     }
 }
 
@@ -367,20 +380,22 @@ impl Variable {
     }
 
     pub fn from_string(string: &String) -> Self {
-        let (scope, scope_len) =  if string.starts_with(&Scope::Local.prefix()){
+        let (scope, scope_len) = if string.starts_with(&Scope::Local.prefix()) {
             (Scope::Local, Scope::Local.prefix().len())
-        } else if string.starts_with(&Scope::Character.prefix()) {
-            (Scope::Character, Scope::Character.prefix().len())
-        } else if string.starts_with(&Scope::Server.prefix()){
+        } else if string.starts_with(&Scope::Server.prefix()) {
             (Scope::Server, Scope::Server.prefix().len())
+        } else if string.starts_with(&Scope::ServerTemporary.prefix()) {
+            (Scope::ServerTemporary, Scope::ServerTemporary.prefix().len())
         } else if string.starts_with(&Scope::Npc.prefix()) {
             (Scope::Npc, Scope::Npc.prefix().len())
         } else if string.starts_with(&Scope::Instance.prefix()) {
             (Scope::Instance, Scope::Instance.prefix().len())
         } else if string.starts_with(&Scope::Account.prefix()) {
             (Scope::Account, Scope::Account.prefix().len())
+        } else if string.starts_with(&Scope::CharacterTemporary.prefix()) {
+            (Scope::CharacterTemporary, Scope::CharacterTemporary.prefix().len())
         } else {
-            panic!("Can't find variable scope from string {}", string)
+            (Scope::Character, 0)
         };
         let mut variable_name = string[scope_len..string.len()].to_string();
         let has_bracket = variable_name.ends_with(']') || variable_name.ends_with("]$");

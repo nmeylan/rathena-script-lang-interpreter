@@ -21,7 +21,7 @@ fn char_variable_set_get() {
     vm_dump_var("b", b);
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
     let vm_hook = VmHook::new(Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));

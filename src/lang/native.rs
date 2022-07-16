@@ -9,9 +9,9 @@ use crate::lang::stack::StackEntry;
 use crate::lang::stack::StackEntry::ConstantPoolReference;
 use crate::lang::thread::Thread;
 use crate::lang::value::{Native, Scope, Value, Variable};
-use crate::lang::vm::{Hashcode, Vm};
+use crate::lang::vm::{Hashcode, NativeMethodHandler, Vm};
 
-pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
+pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>, native_method_handler: &Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
     match native.name.as_str() {
         "getarg" => {
             getarg(thread, call_frame, &arguments)?
@@ -38,7 +38,7 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             copyarray(thread, arguments)?
         }
         "setd" => {
-            setd(thread, class, instance, call_frame, &arguments, arguments_ref)?
+            setd(thread, class, instance, call_frame, &arguments, arguments_ref, native_method_handler)?
         }
         "getd" => {
             getd(thread, class, instance, call_frame, arguments)?
@@ -122,7 +122,7 @@ fn load_array_index_value(thread: &Thread, class: &Class, instance: &Option<Arc<
     Ok(())
 }
 
-fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
+fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>, native_method_handler: &Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "setd first argument should be an expression producing a variable name"))?;
     let variable_value = arguments_ref[1];
     let variable = Variable::from_string(variable_identifier);
@@ -136,7 +136,7 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, ca
     };
     // to simulate the behavior when we assign via "set" and "=", where right expression of assigment is a constant reference, just before assigning the variable.
     thread.stack.push(ConstantPoolReference(variable_value.unwrap()));
-    thread.variable_assign_reference(class, instance, call_frame, variable.clone(), owner_reference)?;
+    thread.variable_assign_reference(class, instance, call_frame, &native_method_handler, variable.clone(), owner_reference)?;
     // When it is an array, we simulate ArrayStore OpCode. ArrayStore OpCode contains index for assignment, here we need to retrieve from first argument of "setd"
     if variable.value_ref.borrow().is_array() {
         let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference);

@@ -73,14 +73,31 @@ impl Thread {
                 OpCode::LoadConstant(reference) => {
                     self.stack.push(StackEntry::ConstantPoolReference(*reference));
                 }
-                OpCode::StoreGlobal(_) => {}
-                OpCode::LoadGlobal(_) => {}
+                OpCode::StoreGlobal => {
+                    let variable_name_stack_entry = self.stack.pop()?;
+                    let value_from_stack = self.value_from_stack_entry(&variable_name_stack_entry, &call_frame, class, instance)?;
+                    let variable_name = value_from_stack.string_value().unwrap();
+                    let owner_reference = Vm::calculate_hash(&variable_name);
+                    let variable = Variable::from_string(variable_name);
+                    self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable, owner_reference)?;
+                }
+                OpCode::LoadGlobal => {
+                    let variable_name_stack_entry = self.stack.pop()?;
+                    let value_from_stack = self.value_from_stack_entry(&variable_name_stack_entry, &call_frame, class, instance)?;
+                    let variable_name = value_from_stack.string_value().unwrap();
+                    let _ = Vm::calculate_hash(&variable_name);
+                    let variable = Variable::from_string(variable_name);
+                    let mut arguments: Vec<Value> = vec![];
+                    arguments.push(Value::String(Some(variable.name.clone())));
+                    arguments.push(Value::String(Some(variable.scope.to_string().clone())));
+                    native_method_handler.handle(&Native {name: "getglobalvariable".to_string()}, arguments, self, &call_frame);
+                }
                 OpCode::StoreReference => {
                     // TODO no longer used: check to keep
                     let stack_entry = self.stack.pop()?;
                     if let StackEntry::VariableReference((scope, owner_reference, reference)) = stack_entry {
                         let variable = self.get_variable_from_scope_and_reference(&call_frame, class, instance, &scope, reference)?;
-                        self.variable_assign_reference(class, instance, &mut call_frame, variable, owner_reference)?
+                        self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable, owner_reference)?
                     } else {
                         return Err(RuntimeError::new_with_type(self.current_source_line.clone(), self.stack_traces.clone(),
                                                      Internal, format!("Expected stack to contain variable reference but got {:?}", stack_entry).as_str()))
@@ -119,7 +136,7 @@ impl Thread {
                     let variable = call_frame.get_local(*reference).ok_or_else(|| self.new_runtime_error("Variable is not declared in local scope".to_string()))?;
                     let owner_reference = call_frame.hash_code();
                     let variable_cloned = variable.clone();
-                    self.variable_assign_reference(class, instance, &mut call_frame, variable_cloned, owner_reference)?;
+                    self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable_cloned, owner_reference)?;
                 }
                 OpCode::LoadLocal(reference) => {
                     self.load_local_variable(&call_frame, reference)?;
@@ -133,7 +150,7 @@ impl Thread {
                         .ok_or_else(|| self.new_runtime_error("Variable is not declared in instance scope".to_string()))?.clone();
                     let owner_reference = instance.as_ref().unwrap().hash_code();
                     drop(instance_variables_guard);
-                    self.variable_assign_reference(class, instance, &mut call_frame, variable, owner_reference)?;
+                    self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable, owner_reference)?;
                 }
                 OpCode::LoadInstance(reference) => {
                     if instance.is_none() {
@@ -144,7 +161,7 @@ impl Thread {
                 OpCode::StoreStatic(reference) => {
                     let variable = class.get_variable(*reference).ok_or_else(|| self.new_runtime_error("Variable is not declared in class scope".to_string()))?;
                     let owner_reference = class.hash_code();
-                    self.variable_assign_reference(class, instance, &mut call_frame, variable.clone(), owner_reference)?;
+                    self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable.clone(), owner_reference)?;
                 }
                 OpCode::LoadStatic(reference) => {
                     self.load_static_variable(class, reference)?;
@@ -287,7 +304,7 @@ impl Thread {
                     arguments_ref.reverse();
                     let native_method = self.native_from_stack_entry(StackEntry::NativeReference(*reference))?;
                     if NATIVE_FUNCTIONS.iter().any(|native| native.name == native_method.name.as_str()) {
-                        handle_native_method(self, native_method, class, instance, &mut call_frame, arguments, arguments_ref)?;
+                        handle_native_method(self, native_method, class, instance, &mut call_frame, arguments, arguments_ref, &native_method_handler)?;
                     } else {
                         native_method_handler.handle(native_method, arguments, self, &call_frame);
                     }
@@ -445,7 +462,7 @@ impl Thread {
         }
     }
 
-    pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+    pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
         let variable_ref = Vm::calculate_hash(&variable);
         let reference = if variable.value_ref.is_array() {
             self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone());
@@ -470,8 +487,14 @@ impl Thread {
             instance.insert_variable(variable_ref, variable);
         } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Npc) {
             class.insert_variable(variable_ref, variable);
-        } else {
+        } else if mem::discriminant(&variable.scope) == mem::discriminant(&Scope::Local) {
             call_frame.locals.insert(variable_ref, variable);
+        } else {
+            let mut arguments: Vec<Value> = vec![];
+            arguments.push(Value::String(Some(variable.name.clone())));
+            arguments.push(Value::String(Some(variable.scope.to_string().clone())));
+            arguments.push(self.vm.get_from_constant_pool(reference).unwrap().value().clone());
+            native_method_handler.handle(&Native {name: "setglobalvariable".to_string()}, arguments, self, &call_frame);
         };
         Ok(())
     }

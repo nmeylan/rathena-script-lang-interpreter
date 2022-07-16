@@ -6,7 +6,6 @@ compilationUnit
 
 primaryExpression
     : variable
-    | accountVariableGet
     | Identifier
     |   Number
     |   String
@@ -22,8 +21,8 @@ functionCallExpression
 
 postfixExpression
     : primaryExpression
-    | (variable | accountVariableSet) ('++' | '--')
-    | ('++' | '--') (variable | accountVariableSet)
+    | variable ('++' | '--')
+    | ('++' | '--') variable
     | '(' conditionalExpression ')'
     | functionCallExpression
     ;
@@ -100,15 +99,15 @@ conditionalExpression
     ;
 
 assignmentExpression
-    : accountVariableSet assignmentOperator conditionalExpression
-    | assignmentLeftExpression assignmentOperator conditionalExpression
+    : assignmentLeftExpression assignmentOperator conditionalExpression
     |   'set' '('? functionCallExpression ',' conditionalExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
     |   'set' '('? assignmentLeftExpression ',' conditionalExpression ')'?
     |   'setarray' '('? assignmentLeftExpression ',' conditionalExpression (',' argumentExpressionList)? ')'?
     |   'copyarray' '('? assignmentLeftExpression ',' conditionalExpression ',' argumentExpressionList ')'?
     ;
+
 assignmentLeftExpression
-    : Identifier | variable;
+    : variable;
 
 assignmentOperator
     :   '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='
@@ -245,16 +244,10 @@ scriptName
 scope_specifier
   :  '@' | '$' | '$@' | '.' | '.@' | '\'' | '#' | '##';
 variable
-  : scope_specifier variable_name '$'? ('[' conditionalExpression ']')?
+  : scope_specifier? variable_name '$'? ('[' conditionalExpression ']')?
   ;
 variable_name
   : (Identifier | Menu);
-
-accountVariableGet
-    : variable_name '$'? ('[' conditionalExpression ']')? ;
-
-accountVariableSet
-    : variable_name '$'? ('[' conditionalExpression ']')? ;
 
 // Tokens
 LeftParen : '(';

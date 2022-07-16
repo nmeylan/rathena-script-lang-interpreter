@@ -18,14 +18,14 @@ pub struct Event {
 
 pub struct VmHook {
     pub hook: Box<dyn Fn(Event) + Send + Sync>,
-    pub account_variable_store: Mutex<HashMap<String, Value>>,
+    pub char_permanent_variable_store: Mutex<HashMap<String, Value>>,
 }
 
 impl VmHook {
     pub fn new(hook: Box<dyn Fn(Event) + Send + Sync>) -> Self {
         Self {
             hook,
-            account_variable_store: Default::default(),
+            char_permanent_variable_store: Default::default(),
         }
     }
 }
@@ -67,22 +67,22 @@ impl NativeMethodHandler for VmHook {
                     });
                 }
             });
-        } else if native.name.eq("setgamevariable") {
-            let variable_name = params[2].string_value().unwrap();
+        } else if native.name.eq("setglobalvariable") {
+            let variable_name = params[0].string_value().unwrap();
             let variable_type = params[1].string_value().unwrap();
-            if variable_type == "account" {
-                self.account_variable_store.lock().unwrap().insert(variable_name.clone(), params[0].clone());
+            if variable_type == "char_permanent" {
+                self.char_permanent_variable_store.lock().unwrap().insert(variable_name.clone(), params[2].clone());
             } else {
-                panic!("setgamevariable: {} type is not handled", variable_type);
+                panic!("setglobalvariable: {} type is not handled", variable_type);
             }
-        } else if native.name.eq("getgamevariable") {
-            let variable_name = params[1].string_value().unwrap();
-            let variable_type = params[0].string_value().unwrap();
-            if variable_type == "account" {
-                let value = self.account_variable_store.lock().unwrap().get(&variable_name.clone()).cloned().unwrap();
+        } else if native.name.eq("getglobalvariable") {
+            let variable_name = params[0].string_value().unwrap();
+            let variable_type = params[1].string_value().unwrap();
+            if variable_type == "char_permanent" {
+                let value = self.char_permanent_variable_store.lock().unwrap().get(&variable_name.clone()).cloned().unwrap();
                 thread.push_constant_on_stack(value);
             } else {
-                panic!("getgamevariable: {} type is not handled", variable_type);
+                panic!("getglobalvariable: {} type is not handled", variable_type);
             }
         } else {
             panic!("native not handled {}", native.name);

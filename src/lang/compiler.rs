@@ -338,11 +338,11 @@ impl Compiler {
         let scope = if ctx.scope_specifier().is_some() {
             let scope_specifier = ctx.scope_specifier().unwrap();
             if scope_specifier.At().is_some() {
-                Scope::Character // TODO: Temporary
-            } else if scope_specifier.Dollar().is_some() || scope_specifier.DollarAt().is_some() {
+                Scope::CharacterTemporary
+            } else if scope_specifier.Dollar().is_some() {
                 Scope::Server
-                // } else if scope_specifier.DollarAt().is_some() {
-                //     Scope::Server // TODO: Temporary
+            } else if scope_specifier.DollarAt().is_some() {
+                Scope::ServerTemporary
             } else if scope_specifier.Dot().is_some() {
                 Scope::Npc
             } else if scope_specifier.DotAt().is_some() {
@@ -355,7 +355,7 @@ impl Compiler {
                 Scope::Local
             }
         } else {
-            Scope::Local
+            Scope::Character
         };
         scope
     }
@@ -434,9 +434,6 @@ impl Compiler {
 
     fn load_variable<'input>(&mut self, variable: &Variable, variable_ctx: &VariableContext, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
         match variable.scope {
-            Scope::Server => {}
-            Scope::Account => {}
-            Scope::Character => {}
             Scope::Npc => {
                 if let Ok(reference) = self.current_class().load_variable(variable, Scope::Npc) {
                     self.current_chunk().emit_op_code(LoadStatic(reference), self.compilation_details_from_context(node));
@@ -469,6 +466,12 @@ impl Compiler {
                         self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
                     }
                 }
+            }
+            Scope::Server | Scope::ServerTemporary | Scope::Account | Scope::CharacterTemporary |Scope::Character => {
+                let variable_name = variable_ctx.variable_name().as_ref().unwrap().get_text();
+                let reference = self.current_chunk().add_constant(Constant::String(variable_name));
+                self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(node));
+                self.current_chunk().emit_op_code(LoadGlobal, self.compilation_details_from_context(node));
             }
         }
 
@@ -531,9 +534,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
-        }
-        if ctx.accountVariableGet().is_some() {
-            self.visit_accountVariableGet(ctx.accountVariableGet().as_ref().unwrap());
         }
         // self.visit_children(ctx)
     }
@@ -824,40 +824,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             let native_name = "setd";
             self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
-        } else if ctx.accountVariableSet().is_some() {
-            let operator = ctx.assignmentOperator().unwrap();
-            let accountVariableSet = ctx.accountVariableSet().unwrap();
-            let variable_type_reference = self.current_chunk().add_constant(Constant::String("account".to_string()));
-            let variable_name_reference = self.current_chunk().add_constant(Constant::String(accountVariableSet.variable_name().as_ref().unwrap().get_text()));
-            self.visit_conditionalExpression(ctx.conditionalExpression().as_ref().unwrap());
-            if operator.PlusEqual().is_some() {
-                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
-                self.current_chunk().emit_op_code(OpCode::Add, self.compilation_details_from_context(ctx));
-            } else if operator.MinusEqual().is_some() {
-                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
-                self.current_chunk().emit_op_code(OpCode::NumericOperation(Subtract), self.compilation_details_from_context(ctx));
-            } else if operator.DivideEqual().is_some() {
-                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
-                self.current_chunk().emit_op_code(OpCode::NumericOperation(Divide), self.compilation_details_from_context(ctx));
-            } else if operator.MultiplyEqual().is_some() {
-                self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
-                self.current_chunk().emit_op_code(OpCode::NumericOperation(Multiply), self.compilation_details_from_context(ctx));
-            }
-            self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
-            self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_name_reference), self.compilation_details_from_context(ctx));
-            let native_name = String::from("setgamevariable");
-            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 3 }, self.compilation_details_from_context(ctx));
         } else {
             self.visit_children(ctx);
         }
     }
 
     fn visit_assignmentLeftExpression(&mut self, ctx: &AssignmentLeftExpressionContext<'input>) {
-        if ctx.Identifier().is_some() {
-            // Number + char permanent variable (ie: not ending with '$', nor having any scope) match Identifier instead of variable.
-            let _name = ctx.Identifier().unwrap().symbol.text.deref().to_string();
-            // TODO
-        } else if ctx.variable().is_some() {
+        if ctx.variable().is_some() {
             let variable = Self::build_variable(&ctx.variable().unwrap());
             if let Some(current_value_type) = self.current_assignment_type() {
                 if variable.value_ref.borrow().is_string() && current_value_type.is_number() {
@@ -885,8 +858,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_assignment_type_drop();
             let is_array = variable.value_ref.borrow().is_array();
             match variable.scope {
-                Scope::Server | Scope::Account | Scope::Character => {
-                    // TODO
+                Scope::Server | Scope::Account | Scope::Character | Scope::ServerTemporary | Scope::CharacterTemporary=> {
+                    let variable_name = ctx.variable().as_ref().unwrap().get_text();
+                    let reference = self.current_chunk().add_constant(Constant::String(variable_name));
+                    self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
+                    self.current_chunk().emit_op_code(StoreGlobal, self.compilation_details_from_context(ctx));
                 }
                 Scope::Local => {
                     let reference = self.current_chunk().add_local(variable);
@@ -907,13 +883,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.current_chunk().emit_op_code(ArrayStore, self.compilation_details_from_context(ctx));
             }
         }
-    }
-
-    fn visit_accountVariableGet(&mut self, ctx: &AccountVariableGetContext<'input>) {
-        let variable_type_reference = self.current_chunk().add_constant(Constant::String("account".to_string()));
-        let variable_name_reference = self.current_chunk().add_constant(Constant::String(ctx.variable_name().as_ref().unwrap().get_text()));
-        self.getgamevariable(ctx, variable_type_reference, variable_name_reference);
-
     }
 
     fn visit_labeledStatement(&mut self, ctx: &LabeledStatementContext<'input>) {
