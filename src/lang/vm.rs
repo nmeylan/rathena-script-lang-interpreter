@@ -18,7 +18,7 @@ use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::thread::Thread;
 
-use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable};
+use crate::lang::value::{Constant, Native, Scope, Value, ValueRef, ValueType, Variable};
 use crate::util::file::read_lines;
 
 pub const MAIN_FUNCTION: &str = "_main";
@@ -275,14 +275,14 @@ impl Vm {
         }
     }
 
-    pub fn allocate_array_if_needed(&self, owner_reference: u64, reference: u64, value_type: ValueType) {
+    pub fn allocate_array_if_needed(&self, owner_reference: u64, reference: u64, value_type: ValueType, scope: Scope) {
         if self.heap.read().unwrap().get(&owner_reference).is_none() {
             self.heap.write().unwrap().insert(owner_reference, Default::default());
         }
         let heap_ref = self.heap.read().unwrap();
         let mut owner_entries = heap_ref.get(&owner_reference).unwrap().write().unwrap();
         if owner_entries.get(&reference).is_none() {
-            owner_entries.insert(reference, HeapEntry::Array(Arc::new(Array::new(reference, value_type))));
+            owner_entries.insert(reference, HeapEntry::Array(Arc::new(Array::new(reference, value_type, scope))));
         }
     }
 

@@ -9,7 +9,7 @@ use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::compiler::CompilationDetail;
 use crate::lang::error::TemporaryRuntimeError;
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{ValueType, Variable};
+use crate::lang::value::{Scope, ValueType, Variable};
 use crate::lang::vm::{Hashcode, Vm};
 
 #[derive(Debug)]
@@ -130,6 +130,7 @@ pub struct Array {
     pub(crate) reference: u64,
     pub(crate) values: RwLock<Vec<Option<u64>>>,
     pub(crate) value_type: ValueType,
+    pub(crate) scope: Scope,
 }
 
 impl Clone for Array {
@@ -137,18 +138,24 @@ impl Clone for Array {
         Self {
             reference: self.reference,
             values: RwLock::new(self.values.read().unwrap().clone()),
-            value_type: self.value_type.clone()
+            value_type: self.value_type.clone(),
+            scope: self.scope.clone()
         }
     }
 }
 
 impl Array {
-    pub fn new(reference: u64, value_type: ValueType) -> Self {
+    pub fn new(reference: u64, value_type: ValueType, scope: Scope) -> Self {
         Self {
             reference,
             values: RwLock::new(vec![]),
-            value_type
+            value_type,
+            scope
         }
+    }
+
+    pub fn is_scope_global(&self) -> bool {
+        self.scope.is_global()
     }
 
     pub fn assign(&self, index: usize, constant_pool_reference: u64) {

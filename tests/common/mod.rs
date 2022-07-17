@@ -23,9 +23,11 @@ pub struct VmHook {
 
 impl VmHook {
     pub fn new(hook: Box<dyn Fn(Event) + Send + Sync>) -> Self {
+        let mut char_permanent_variable_store: Mutex<HashMap<String, Value>> = Default::default();
+        char_permanent_variable_store.lock().unwrap().insert("existing_variable".to_string(), Value::Number(Some(11)));
         Self {
             hook,
-            char_permanent_variable_store: Default::default(),
+            char_permanent_variable_store,
         }
     }
 }

@@ -10,8 +10,8 @@ use std::ops::Deref;
 use std::path::Path;
 use std::rc::Rc;
 
-use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
+use antlr_rust::InputStream;
 use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
@@ -467,8 +467,8 @@ impl Compiler {
                     }
                 }
             }
-            Scope::Server | Scope::ServerTemporary | Scope::Account | Scope::CharacterTemporary |Scope::Character => {
-                let variable_name = variable_ctx.variable_name().as_ref().unwrap().get_text();
+            Scope::Server | Scope::ServerTemporary | Scope::Account | Scope::CharacterTemporary | Scope::Character => {
+                let variable_name = variable_ctx.get_text();
                 let reference = self.current_chunk().add_constant(Constant::String(variable_name));
                 self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(node));
                 self.current_chunk().emit_op_code(LoadGlobal, self.compilation_details_from_context(node));
@@ -562,13 +562,24 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                                     ));
                 return;
             }
-            if native.name == "getarg" && argument_count > 1 {
-                // do not remove default value type, so we can check at compile time that default type match variable type
-                self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
-            } else if native.name == "setd" {
+             if native.name == "setd" {
                 let setd_variable_expression = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
                 if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                     self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
+                }
+            } else if native.name == "getarraysize" {
+                // getarraysize accept the array name without index.
+                // In case of loadglobal we use the variable string then build a variable from it. But if it does not contains bracket
+                // we can't determine it is an array.
+                // Code below transform array$ into array$[0] for load global.
+                let last_code_op = self.current_chunk().last_op_code_index();
+                if mem::discriminant(&self.current_chunk().get_op_code_at(last_code_op)) == mem::discriminant(&LoadGlobal) {
+                    let mut array_name = ctx.argumentExpressionList().as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
+                    if !array_name.contains("[") {
+                        array_name = format!("{}[0]", array_name);
+                    }
+                    let reference = self.current_chunk().add_constant(Constant::String(array_name));
+                    self.current_chunk().set_op_code_at(last_code_op - 1, LoadConstant(reference))
                 }
             } else if native.name == "getvariableofnpc" {
                 // Replacing first argument LoadStatic with a LoadConstant instead.
@@ -583,6 +594,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                         self.current_chunk().set_op_code_at(i, OpCode::Noop);
                     }
                 }
+            }
+            if native.name == "getarg" && argument_count > 1 {
+                // do not remove default value type, so we can check at compile time that default type match variable type
+                self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
             } else {
                 self.remove_current_assigment_type(argument_count);
             }
@@ -858,7 +873,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_assignment_type_drop();
             let is_array = variable.value_ref.borrow().is_array();
             match variable.scope {
-                Scope::Server | Scope::Account | Scope::Character | Scope::ServerTemporary | Scope::CharacterTemporary=> {
+                Scope::Server | Scope::Account | Scope::Character | Scope::ServerTemporary | Scope::CharacterTemporary => {
                     let variable_name = ctx.variable().as_ref().unwrap().get_text();
                     let reference = self.current_chunk().add_constant(Constant::String(variable_name));
                     self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));

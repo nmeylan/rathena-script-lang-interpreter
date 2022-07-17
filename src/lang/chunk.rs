@@ -287,6 +287,10 @@ impl Chunk {
     pub fn set_op_code_at(&self, index: usize, op_code: OpCode) {
         self.op_codes.borrow_mut()[index] = op_code;
     }
+
+    pub fn get_op_code_at(&self, index: usize) -> OpCode {
+        self.op_codes.borrow()[index].clone()
+    }
     pub fn clone_op_code_at(&self, index: usize) -> (OpCode, CompilationDetail) {
         (self.op_codes.borrow()[index].clone(), self.compilation_details.borrow()[index].clone())
     }
@@ -381,6 +385,8 @@ pub enum OpCode {
     DefineFunction(u64),
     ArrayStore,
     ArrayLoad,
+    GlobalArrayStore,
+    GlobalArrayLoad,
     CallNative { reference: u64, argument_count: usize },
     CallFunction { reference: u64, argument_count: usize },
     Equal,

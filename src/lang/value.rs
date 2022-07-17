@@ -90,6 +90,12 @@ impl Scope {
             Scope::CharacterTemporary => String::from("char_temporary")
         }
     }
+    pub fn is_global(&self) -> bool {
+        match self {
+            Scope::Server | Scope::ServerTemporary | Scope::Account | Scope::CharacterTemporary | Scope::Character => true,
+            Scope::Npc | Scope::Instance | Scope::Local => false
+        }
+    }
 }
 
 impl Constant {
