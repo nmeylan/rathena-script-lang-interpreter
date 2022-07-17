@@ -11,7 +11,8 @@ use std::default::Default;
 use std::sync::{Arc, RwLock};
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{Chunk, ClassFile};
-use crate::lang::class::{Array, Class, Function, Instance};
+use crate::lang::class::{Class, Function, Instance};
+use crate::lang::array::{Array};
 use crate::lang::compiler::CompilationDetail;
 use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
 

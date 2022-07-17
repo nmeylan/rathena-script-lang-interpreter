@@ -11,3 +11,4 @@ pub mod stack_trace;
 pub mod error;
 mod native;
 pub mod scripts_compiler;
+pub mod array;
