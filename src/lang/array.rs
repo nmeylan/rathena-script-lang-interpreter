@@ -8,6 +8,7 @@ pub struct Array {
     pub(crate) reference: u64,
     pub(crate) values: RwLock<Vec<Option<u64>>>,
     pub(crate) value_type: ValueType,
+    pub(crate) name: String,
     pub(crate) scope: Scope,
 }
 
@@ -17,17 +18,19 @@ impl Clone for Array {
             reference: self.reference,
             values: RwLock::new(self.values.read().unwrap().clone()),
             value_type: self.value_type.clone(),
+            name: self.name.clone(),
             scope: self.scope.clone()
         }
     }
 }
 
 impl Array {
-    pub fn new(reference: u64, value_type: ValueType, scope: Scope) -> Self {
+    pub fn new(reference: u64, value_type: ValueType, scope: Scope, name: String) -> Self {
         Self {
             reference,
             values: RwLock::new(vec![]),
             value_type,
+            name,
             scope
         }
     }
@@ -36,7 +39,9 @@ impl Array {
         self.scope.is_global()
     }
 
-    pub fn assign(&self, index: usize, constant_pool_reference: u64) {
+    pub fn assign<F>(&self, index: usize, constant_pool_reference: u64, callback: Option<F>)
+    where F: Fn(Self) -> ()
+    {
         let len = self.values.read().unwrap().len();
         if index >= len {
             for _ in len..index + 1 {
@@ -44,6 +49,9 @@ impl Array {
             }
         }
         self.values.write().unwrap()[index] = Some(constant_pool_reference);
+        if callback.is_some() {
+            callback.unwrap()(self.clone());
+        }
     }
 
     pub fn get(&self, index: usize) -> Result<Option<u64>, TemporaryRuntimeError> {
@@ -54,9 +62,14 @@ impl Array {
         Ok(*self.values.read().unwrap().get(index).unwrap())
     }
 
-    pub fn remove(&self, index: usize, count: usize) {
+    pub fn remove<F>(&self, index: usize, count: usize, callback: Option<F>)
+        where F: Fn(Self) -> ()
+    {
         let len = self.len();
         self.values.write().unwrap().drain(index..count.min(len));
+        if callback.is_some() {
+            callback.unwrap()(self.clone());
+        }
     }
 
     pub fn index_of(&self, reference: u64) -> isize {
@@ -64,16 +77,21 @@ impl Array {
             .map_or(-1, |index| index as isize)
     }
 
-    pub fn copyarray(&self, source_array: Arc<Array>, destination_array_start_index: usize, source_array_index: usize, count: usize) -> Result<(), TemporaryRuntimeError> {
+    pub fn copyarray<F>(&self, source_array: Arc<Array>, destination_array_start_index: usize, source_array_index: usize, count: usize, callback: Option<F>) -> Result<(), TemporaryRuntimeError>
+        where F: Fn(Self) -> ()
+    {
         let mut destination_array_index = destination_array_start_index;
         for index in source_array_index..(source_array_index + count) {
             let value = source_array.get(index)?;
             if let Some(value) = value {
-                self.assign(destination_array_index, value);
+                self.assign::<F>(destination_array_index, value, None);
                 destination_array_index += 1;
             } else {
                 break;
             }
+        }
+        if callback.is_some() {
+            callback.unwrap()(self.clone());
         }
         Ok(())
     }
@@ -86,9 +104,14 @@ impl Array {
         self.values.read().unwrap().is_empty()
     }
 
-    pub fn assign_multiple(&self, start_index: usize, size: usize, value_reference: u64) {
+    pub fn assign_multiple<F>(&self, start_index: usize, size: usize, value_reference: u64, callback: Option<F>)
+        where F: Fn(Self) -> ()
+    {
         for i in start_index..(start_index + size) {
-            self.assign(i, value_reference);
+            self.assign::<F>(i, value_reference, None);
+        }
+        if callback.is_some() {
+            callback.unwrap()(self.clone());
         }
     }
 }

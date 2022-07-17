@@ -3,7 +3,7 @@ use std::{io, mem};
 
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
-
+use crate::lang::array::Array;
 
 
 use crate::lang::stack::{Stack, StackEntry};
@@ -113,7 +113,7 @@ impl Thread {
                             .map_err(|err| self.new_runtime_from_temporary(err, "VM: ArrayStore expected to retrieve array from heap reference"))?;
                         let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
                         if let Ok(constant_ref) = value_constant_ref {
-                            array.assign(arr_index as usize, constant_ref);
+                            array.assign(arr_index as usize, constant_ref, self.array_update_callback(&call_frame, &native_method_handler, array.clone()));
                         }
                     } else {
                         return Err(self.new_runtime_error("OpCode::ArrayStore - Expected stack entry to be a heap reference.".to_string()));
@@ -402,13 +402,24 @@ impl Thread {
     pub(crate) fn load_global(&self, call_frame: &CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, variable: &Variable, owner_reference: u64) {
         let variable_ref = Vm::calculate_hash(&variable);
         if variable.value_ref.is_array() {
-            self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone(), variable.scope.clone());
+            self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone(), variable);
             self.stack.push(StackEntry::HeapReference((owner_reference, variable_ref)));
         } else {
             let mut arguments: Vec<Value> = vec![];
             arguments.push(Value::String(Some(variable.name.clone())));
             arguments.push(Value::String(Some(variable.scope.to_string().clone())));
             native_method_handler.handle(&Native { name: "getglobalvariable".to_string() }, arguments, self, &call_frame);
+        }
+    }
+
+    pub(crate) fn array_update_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread Box<&'program dyn NativeMethodHandler>, array: Arc<Array>) -> Option<Box<dyn Fn(Array) -> () + 'thread>> {
+        if array.scope.is_global() {
+            let closure = move |updated_array| {
+                native_method_handler.handle(&Native {name: "setglobalarray".to_string()}, vec![], self, &call_frame);
+            };
+            Some(Box::new(closure))
+        } else {
+            None
         }
     }
 
@@ -477,7 +488,7 @@ impl Thread {
     pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
         let variable_ref = Vm::calculate_hash(&variable);
         let reference = if variable.value_ref.is_array() {
-            self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone(), variable.scope.clone());
+            self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone(), &variable);
             self.stack.push(StackEntry::HeapReference((owner_reference, variable_ref)));
             variable_ref
         } else {
