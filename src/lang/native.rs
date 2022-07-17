@@ -95,7 +95,7 @@ fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_f
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local){
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), call_frame.hash_code(), variable_reference)));
     } else {
-        thread.load_global(call_frame, native_method_handler, &variable_from_string, variable_reference);
+        thread.load_global(class, &mut None, call_frame, native_method_handler, &variable_from_string, variable_reference);
     };
     if variable_from_string.value_ref.borrow().is_array() {
         // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.
