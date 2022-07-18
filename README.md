@@ -47,14 +47,14 @@ l5	        .@a$ = getarg(1) + " world";
 1: my_func
 	at /home/ragnarok/dev/npc/warps.txt(Warper:5)
 ```
-- Compilation for faster server startup
-- Compilation type checking for variable assignment
-- Compilation argument count checking for native functions
+- AOT Compilation for faster server startup
+- AOT Compilation type checking for variable assignment
+- AOT Compilation argument count checking for native functions
 
 # Server implementation notes
 Server should implement natives functions (commands starting after [point 2](https://github.com/rathena/rathena/blob/master/doc/script_commands.txt#L2344)) in order to make scripts working.
 
-In addition of native functions listed in link above, server should implement some extra native functions, for example to support char,account and server variable scopes.
+In addition of native functions listed in link above, server should implement some extra native functions, for example to support **char**, **account** and **server** variable scopes.
 
 [more details here]()
 
