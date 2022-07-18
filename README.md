@@ -51,6 +51,13 @@ l5	        .@a$ = getarg(1) + " world";
 - Compilation type checking for variable assignment
 - Compilation argument count checking for native functions
 
+# Server implementation notes
+Server should implement natives functions (commands starting after [point 2](https://github.com/rathena/rathena/blob/master/doc/script_commands.txt#L2344)) in order to make scripts working.
+
+In addition of native functions listed in link above, server should implement some extra native functions, for example to support char,account and server variable scopes.
+
+[more details here]()
+
 # Architecture
 ## Language specificity
 Althought Rathena script lang is not an oriented object programming language, it has notion of:
