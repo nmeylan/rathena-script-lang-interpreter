@@ -15,7 +15,7 @@ This crate offers a compiler and VM to be embedded in game server.
 `java -jar bin/antlr4.9.4-rust.jar RathenaScriptLang.g4 -Dlanguage=Rust -visitor -o src/parser`
 
 # Grammar
-Grammar is defined in `RathenaScriptLang.g4` file. Parser is generated using `antlr`.
+Grammar is defined in [RathenaScriptLang.g4](https://github.com/nmeylan/rathena-script-lang-interpreter/blob/master/RathenaScriptLang.g4) file. Parser is generated using `antlr`.
 
 # Integration with a server
 Currently only integretation for a rust server implementation is targeted. A C/C++ API can be provided to integrate it in [herculesWS](https://github.com/HerculesWS/Hercules) and [rathena](https://github.com/rathena/rathena)
