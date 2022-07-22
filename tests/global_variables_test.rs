@@ -25,7 +25,7 @@ fn char_variable_set_get() {
     vm_dump_var("b", b);
     vm_dump_var("c", c);
     vm_dump_var("d", char_variable$);
-    vm_dump_var("e", char_variable_set_getd);
+    vm_dump_var("e", char_variable_set_getd$);
     vm_dump_var("f", getd("char_variable" + "$"));
     vm_dump_var("g", existing_variable); // Variable already exist in DB
     "#, compiler::DebugFlag::None.value()).unwrap();
@@ -43,7 +43,7 @@ fn char_variable_set_get() {
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(String::from("hello world"), vm_hook.find_global_by_name_and_scope(&String::from("a"), &String::from("char_permanent")).unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello world"), vm_hook.find_global_by_name_and_scope(&String::from("a$"), &String::from("char_permanent")).unwrap().value.string_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap().clone());
     assert_eq!(String::from("using setd"), events.lock().unwrap().get("d").unwrap().value.string_value().unwrap().clone());

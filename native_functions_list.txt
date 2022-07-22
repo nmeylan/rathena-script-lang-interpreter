@@ -4,4 +4,4 @@ println, 1, 1
 vm_dump_var, 2, 2
 vm_dump_locals, 0, 0
 setglobalvariable,3,3
-getglobalvariable,3,3
+getglobalvariable,2,2

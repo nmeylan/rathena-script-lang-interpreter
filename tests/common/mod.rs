@@ -98,6 +98,7 @@ impl NativeMethodHandler for VmHook {
         } else if native.name.eq("setglobalvariable") {
             let variable_name = params[0].string_value().unwrap();
             let variable_scope = params[1].string_value().unwrap();
+            println!("{}", variable_name);
             self.remove_global_by_name_and_scope(variable_name, variable_scope);
             self.global_variable_store.lock().unwrap().push(
                 GlobalVariableEntry {
@@ -110,6 +111,7 @@ impl NativeMethodHandler for VmHook {
         } else if native.name.eq("getglobalvariable") {
             let variable_name = params[0].string_value().unwrap();
             let variable_scope = params[1].string_value().unwrap();
+            println!("{}", variable_name);
             let entry = self.find_global_by_name_and_scope(variable_name, variable_scope);
             if let Some(entry) = entry {
                 thread.push_constant_on_stack(entry.value.clone());

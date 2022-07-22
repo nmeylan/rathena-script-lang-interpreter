@@ -429,7 +429,7 @@ impl Thread {
             self.stack.push(StackEntry::HeapReference((owner_reference, variable_ref)));
         } else {
             let mut arguments: Vec<Value> = vec![];
-            arguments.push(Value::String(Some(variable.name.clone())));
+            arguments.push(Value::String(Some(variable.to_script_identifier())));
             arguments.push(Value::String(Some(variable.scope.to_string().clone())));
             // TODO: doc
             native_method_handler.handle(&Native { name: "getglobalvariable".to_string() }, arguments, self, &call_frame);
@@ -551,7 +551,7 @@ impl Thread {
         } else {
             let mut arguments: Vec<Value> = vec![];
             // call setglobalvariable(variable_name, scope, <expression result to assign to variable>)
-            arguments.push(Value::String(Some(variable.name.clone())));
+            arguments.push(Value::String(Some(variable.to_script_identifier().clone())));
             arguments.push(Value::String(Some(variable.scope.to_string().clone())));
             if !variable.value_ref.is_array() { // In case of array, reference is the reference of the array, not of the expression result constant. it will come in ArrayStore instruction
                 arguments.push(self.vm.get_from_constant_pool(reference).unwrap().value().clone());
