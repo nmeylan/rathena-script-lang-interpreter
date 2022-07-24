@@ -1,7 +1,7 @@
 use std::borrow::Borrow;
-
 use std::mem;
-use std::sync::{Arc};
+use std::sync::Arc;
+
 use crate::lang::array::Array;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::class::{Class, Instance};
@@ -12,7 +12,7 @@ use crate::lang::thread::Thread;
 use crate::lang::value::{Native, Scope, Value, Variable};
 use crate::lang::vm::{Hashcode, NativeMethodHandler, Vm};
 
-pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>, native_method_handler: &Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
+pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>, native_method_handler: &&dyn NativeMethodHandler) -> Result<(), RuntimeError> {
     match native.name.as_str() {
         "getarg" => {
             getarg(thread, call_frame, &arguments)?
@@ -48,7 +48,7 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             getvariableofnpc(thread, instance, call_frame, arguments)?
         }
         // stdlib
-        "pow" =>  {
+        "pow" => {
             let value = arguments[0].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "Pow first argument should be a number"))?;
             let exponent = arguments[1].number_value().map_err(|err|
@@ -77,13 +77,13 @@ fn getvariableofnpc(thread: &Thread, instance: &Option<Arc<Instance>>, call_fram
         load_array_index_value(thread, class.as_ref(), instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
     } else {
         let reference = variable.value_ref.borrow().reference().ok_or_else(|| RuntimeError::new(thread.current_source_line.clone(), thread.stack_traces.clone(),
-                                                                                              format!("Variable {} in NPC {} is not initialized", variable_identifier, class_name).as_str()))?;
+                                                                                                format!("Variable {} in NPC {} is not initialized", variable_identifier, class_name).as_str()))?;
         thread.stack.push(ConstantPoolReference(reference));
     }
     Ok(())
 }
 
-fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, native_method_handler: &Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
+fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, native_method_handler: &&dyn NativeMethodHandler) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "getd first argument should be an expression producing a variable name"))?;
     let variable_from_string = Variable::from_string(variable_identifier);
     let variable_reference = Vm::calculate_hash(&variable_from_string);
@@ -92,10 +92,10 @@ fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_f
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), instance.hash_code(), variable_reference)));
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), class.hash_code(), variable_reference)));
-    } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local){
+    } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Local) {
         thread.stack.push(StackEntry::VariableReference((variable_from_string.scope.clone(), call_frame.hash_code(), variable_reference)));
     } else {
-        thread.load_global(class, &mut None, call_frame, native_method_handler, &variable_from_string, variable_reference);
+        thread.load_global(class, &mut None, call_frame, native_method_handler, &variable_from_string, variable_reference)?
     };
     if variable_from_string.value_ref.borrow().is_array() {
         // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.
@@ -106,7 +106,7 @@ fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_f
     Ok(())
 }
 
-fn load_array_index_value(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, variable_identifier: &String, variable_from_string: &Variable, variable_reference: u64) -> Result<(), RuntimeError> {
+fn load_array_index_value(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_frame: &mut CallFrame, variable_identifier: &str, variable_from_string: &Variable, variable_reference: u64) -> Result<(), RuntimeError> {
     let owner_reference = if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Instance) {
         instance.as_ref().unwrap().hash_code()
     } else if mem::discriminant(&variable_from_string.scope) == mem::discriminant(&Scope::Npc) {
@@ -123,7 +123,7 @@ fn load_array_index_value(thread: &Thread, class: &Class, instance: &Option<Arc<
     Ok(())
 }
 
-fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>, native_method_handler: &Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
+fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: &[Value], arguments_ref: Vec<Option<u64>>, native_method_handler: &&dyn NativeMethodHandler) -> Result<(), RuntimeError> {
     let variable_identifier = arguments[0].string_value().map_err(|err| thread.new_runtime_from_temporary(err, "setd first argument should be an expression producing a variable name"))?;
     let variable_value = arguments_ref[1];
     let variable = Variable::from_string(variable_identifier);
@@ -137,25 +137,25 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, ca
     };
     // to simulate the behavior when we assign via "set" and "=", where right expression of assigment is a constant reference, just before assigning the variable.
     thread.stack.push(ConstantPoolReference(variable_value.unwrap()));
-    thread.variable_assign_reference(class, instance, call_frame, &native_method_handler, variable.clone(), owner_reference)?;
+    thread.variable_assign_reference(class, instance, call_frame, native_method_handler, variable.clone(), owner_reference)?;
     // When it is an array, we simulate ArrayStore OpCode. ArrayStore OpCode contains index for assignment, here we need to retrieve from first argument of "setd"
     if variable.value_ref.borrow().is_array() {
         let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference);
         let array_index = array_index_from_string(variable_identifier);
         let array = array.unwrap();
-        array.assign(array_index, variable_value.unwrap(), thread.array_update_callback(&call_frame, &native_method_handler, array.clone()));
+        array.assign(array_index, variable_value.unwrap(), thread.array_update_callback(call_frame, native_method_handler, array.clone()));
     }
     Ok(())
 }
 
-fn array_index_from_string(variable_identifier: &String) -> usize {
+fn array_index_from_string(variable_identifier: &str) -> usize {
     let opening_bracket_index = variable_identifier.chars().position(|c| c == '[').unwrap();
     let closing_bracket_index = variable_identifier.chars().position(|c| c == ']').unwrap();
-    
+
     variable_identifier[opening_bracket_index + 1..closing_bracket_index].parse::<usize>().unwrap()
 }
 
-fn copyarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+fn copyarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: Vec<Value>) -> Result<(), RuntimeError> {
     let (destination_owner_reference, destination_reference, _, destination_index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "copyarray first argument should be an array element"))?;
     let (source_array_owner_reference, source_array_reference, _, source_array_index) = arguments[1].array_entry_value().map_err(|err|
@@ -173,7 +173,7 @@ fn copyarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler:
         .map_err(|err| RuntimeError::from_temporary(thread.current_source_line.clone(), thread.stack_traces.clone(), err))
 }
 
-fn inarray(thread: &Thread, arguments: &Vec<Value>, arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
+fn inarray(thread: &Thread, arguments: &[Value], arguments_ref: Vec<Option<u64>>) -> Result<(), RuntimeError> {
     let (owner_reference, reference) = if arguments[0].is_reference() {
         arguments[0].reference_value().map_err(|err|
             thread.new_runtime_from_temporary(err, "inarray first argument should be array name"))?
@@ -190,7 +190,7 @@ fn inarray(thread: &Thread, arguments: &Vec<Value>, arguments_ref: Vec<Option<u6
     Ok(())
 }
 
-fn deletearray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
+fn deletearray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value]) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "deletearray first argument should be array name"))?;
     let size = arguments[1].number_value().map_err(|err| thread.new_runtime_from_temporary(err, "deletearray second argument should be number of element to delete"))? as usize;
@@ -199,7 +199,7 @@ fn deletearray(thread: &Thread, call_frame: &mut CallFrame, native_method_handle
     Ok(())
 }
 
-fn getelementofarray(thread: &Thread, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
+fn getelementofarray(thread: &Thread, arguments: &[Value]) -> Result<(), RuntimeError> {
     let (owner_reference, reference) = arguments[0].reference_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "getelementofarray first argument should be array name"))?;
     let index = arguments[1].number_value().map_err(|err| thread.new_runtime_from_temporary(err, "getelementofarray second argument should be array index"))? as usize;
@@ -209,7 +209,7 @@ fn getelementofarray(thread: &Thread, arguments: &Vec<Value>) -> Result<(), Runt
     Ok(())
 }
 
-fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, arguments: &Vec<Value>, arguments_ref: &Vec<Option<u64>>) -> Result<(), RuntimeError> {
+fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value], arguments_ref: &[Option<u64>]) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "setarray first argument should be array name"))?;
     let array = thread.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
@@ -223,18 +223,18 @@ fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: 
                                                     format!("setarray - tried to assign {} ({}th arguments) to an array of {}",
                                                             arguments[i].display_type(), i + 2, array.value_type.display_type())));
             }
-            array.assign::<Box<dyn Fn(Array) -> ()>>(index, array_reference.unwrap(), None);
+            array.assign::<Box<dyn Fn(Array)>>(index, array_reference.unwrap(), None);
             index += 1;
         }
     }
     let maybe_callback = thread.array_update_callback(call_frame, native_method_handler, array.clone());
     if let Some(callback) = maybe_callback {
-        callback(array.clone().as_ref().clone());
+        callback(array.as_ref().clone());
     }
     Ok(())
 }
 
-fn cleararray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
+fn cleararray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value]) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "cleararray first argument should be array name"))?;
     let value = arguments[1].clone();
@@ -251,7 +251,7 @@ fn cleararray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler
     Ok(())
 }
 
-fn getarraysize(thread: &Thread, arguments: &Vec<Value>) -> Result<(), RuntimeError> {
+fn getarraysize(thread: &Thread, arguments: &[Value]) -> Result<(), RuntimeError> {
     let (owner_reference, reference) = arguments[0].reference_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "getarraysize first argument should be array name"))?;
     let array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();

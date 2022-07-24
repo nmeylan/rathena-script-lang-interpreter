@@ -19,7 +19,7 @@ use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::thread::Thread;
 
-use crate::lang::value::{Constant, Native, Scope, Value, ValueRef, ValueType, Variable};
+use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable};
 use crate::util::file::read_lines;
 
 pub const MAIN_FUNCTION: &str = "_main";

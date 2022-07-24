@@ -84,7 +84,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
         if ctx.scriptLocation().is_some() {
             let script_declaration = self.file_content[ctx.start().line as usize - 1].clone();
             let script_name = script_declaration.split('\t').collect::<Vec<&str>>()[2].to_string();
-            let sprite = ctx.scriptSprite_all().get(0).unwrap().Number().unwrap().symbol.text.to_string();
+            let sprite = if ctx.scriptSprite_all().get(0).unwrap().Number().is_some() {
+                ctx.scriptSprite_all().get(0).unwrap().Number().unwrap().symbol.text.to_string()
+            } else {
+                ctx.scriptSprite_all().get(0).unwrap().Identifier().unwrap().symbol.text.to_string()
+            };
             self.scripts.push(Script {
                 name: script_name,
                 x_pos: parse_number(ctx.scriptXPos().unwrap().Number().unwrap().symbol.text.clone()) as usize,

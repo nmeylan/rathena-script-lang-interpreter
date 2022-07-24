@@ -40,7 +40,7 @@ impl Array {
     }
 
     pub fn assign<F>(&self, index: usize, constant_pool_reference: u64, callback: Option<F>)
-    where F: Fn(Self) -> ()
+    where F: Fn(Self)
     {
         let len = self.values.read().unwrap().len();
         if index >= len {
@@ -49,8 +49,8 @@ impl Array {
             }
         }
         self.values.write().unwrap()[index] = Some(constant_pool_reference);
-        if callback.is_some() {
-            callback.unwrap()(self.clone());
+        if let Some(callback) = callback {
+            callback(self.clone());
         }
     }
 
@@ -63,12 +63,12 @@ impl Array {
     }
 
     pub fn remove<F>(&self, index: usize, count: usize, callback: Option<F>)
-        where F: Fn(Self) -> ()
+        where F: Fn(Self)
     {
         let len = self.len();
         self.values.write().unwrap().drain(index..count.min(len));
-        if callback.is_some() {
-            callback.unwrap()(self.clone());
+        if let Some(callback) = callback {
+            callback(self.clone());
         }
     }
 
@@ -78,7 +78,7 @@ impl Array {
     }
 
     pub fn copyarray<F>(&self, source_array: Arc<Array>, destination_array_start_index: usize, source_array_index: usize, count: usize, callback: Option<F>) -> Result<(), TemporaryRuntimeError>
-        where F: Fn(Self) -> ()
+        where F: Fn(Self)
     {
         let mut destination_array_index = destination_array_start_index;
         for index in source_array_index..(source_array_index + count) {
@@ -90,8 +90,8 @@ impl Array {
                 break;
             }
         }
-        if callback.is_some() {
-            callback.unwrap()(self.clone());
+        if let Some(callback) = callback {
+            callback(self.clone());
         }
         Ok(())
     }
@@ -105,13 +105,13 @@ impl Array {
     }
 
     pub fn assign_multiple<F>(&self, start_index: usize, size: usize, value_reference: u64, callback: Option<F>)
-        where F: Fn(Self) -> ()
+        where F: Fn(Self)
     {
         for i in start_index..(start_index + size) {
             self.assign::<F>(i, value_reference, None);
         }
-        if callback.is_some() {
-            callback.unwrap()(self.clone());
+        if let Some(callback) = callback {
+            callback(self.clone());
         }
     }
 }

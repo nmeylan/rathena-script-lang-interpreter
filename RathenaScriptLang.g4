@@ -247,7 +247,7 @@ variable
   : scope_specifier? variable_name '$'? ('[' conditionalExpression ']')?
   ;
 variable_name
-  : (Identifier | Menu);
+  : (Identifier | Menu | Next);
 
 // Tokens
 LeftParen : '(';

@@ -78,7 +78,7 @@ impl Scope {
         }
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn as_string(&self) -> String {
         match self {
             Scope::Server => String::from("server_permanent"),
             Scope::Account => String::from("account_permanent"),

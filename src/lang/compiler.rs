@@ -12,12 +12,10 @@ use std::rc::Rc;
 
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
-use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 
 use crate::lang::chunk::{Chunk, ClassFile, FunctionDefinition, Label, NumericOperation, OpCode, Relational};
-use crate::lang::chunk::NumericOperation::{Divide, Multiply, Subtract};
 use crate::lang::chunk::OpCode::{*};
 use crate::lang::chunk::OpCode::{Add, CallFunction, CallNative, LoadConstant, LoadLocal, StoreInstance, StoreLocal};
 use crate::lang::error::{CompilationError, CompilationErrorType};
@@ -416,7 +414,7 @@ impl Compiler {
         Self::types_are_same_type(&self.state.current_assignment_types.iter().map(|(v, _)| Some(v.clone())).collect::<Vec<Option<ValueType>>>())
     }
 
-    pub fn types_are_same_type(types: &Vec<Option<ValueType>>) -> bool {
+    pub fn types_are_same_type(types: &[Option<ValueType>]) -> bool {
         types.iter().all(|v| v.is_none() || v.as_ref().unwrap().is_number())
             || types.iter().all(|v| v.is_none() || v.as_ref().unwrap().is_string())
     }
@@ -495,13 +493,6 @@ impl Compiler {
             println!();
         }
     }
-
-    fn getgamevariable<'input>(&mut self, ctx: &(dyn RathenaScriptLangParserContext<'input> + 'input), variable_type_reference: u64, variable_name_reference: u64) {
-        let native_name = String::from("getgamevariable");
-        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_type_reference), self.compilation_details_from_context(ctx));
-        self.current_chunk().emit_op_code(OpCode::LoadConstant(variable_name_reference), self.compilation_details_from_context(ctx));
-        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 2 }, self.compilation_details_from_context(ctx));
-    }
 }
 
 impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
@@ -575,7 +566,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 let last_code_op = self.current_chunk().last_op_code_index();
                 if mem::discriminant(&self.current_chunk().get_op_code_at(last_code_op)) == mem::discriminant(&LoadGlobal) {
                     let mut array_name = ctx.argumentExpressionList().as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
-                    if !array_name.contains("[") {
+                    if !array_name.contains('[') {
                         array_name = format!("{}[0]", array_name);
                     }
                     let reference = self.current_chunk().add_constant(Constant::String(array_name));

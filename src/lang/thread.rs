@@ -3,6 +3,8 @@ use std::{io, mem};
 
 use std::sync::{Arc};
 use std::io::{Stdout, Write};
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering::{Relaxed, SeqCst};
 use crate::lang::array::Array;
 
 
@@ -32,6 +34,7 @@ pub struct Thread {
     pub(crate) stack: Stack,
     pub(crate) current_source_line: CompilationDetail,
     pub(crate) stack_traces: Vec<StackTrace>,
+    pub aborted: AtomicBool,
 }
 
 impl Thread {
@@ -43,6 +46,7 @@ impl Thread {
             stack,
             current_source_line: CompilationDetail::new_empty(),
             stack_traces: vec![],
+            aborted: Default::default()
         }
     }
 
@@ -63,6 +67,9 @@ impl Thread {
         self.print_before_current_run(&call_frame, class, &mut stdout);
         let mut op_index = 0;
         loop {
+            if self.aborted.load(Relaxed) {
+                return Ok(CallFrameBreak::End);
+            }
             if op_index >= call_frame.op_codes.len() {
                 break;
             }
@@ -399,18 +406,16 @@ impl Thread {
         Ok(CallFrameBreak::Return(false))
     }
 
-    pub(crate) fn load_global(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, variable: &Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+    pub(crate) fn load_global(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &CallFrame, native_method_handler: &&dyn NativeMethodHandler, variable: &Variable, owner_reference: u64) -> Result<(), RuntimeError> {
         let variable_ref = Vm::calculate_hash(&variable);
         if variable.value_ref.is_array() {
             // When we load a global array we allocated it on the heap
             self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone(), variable);
             let array = self.vm.array_from_heap_reference(owner_reference, variable_ref).unwrap();
-            let mut arguments = vec![];
-            arguments.push(Value::String(Some(array.name.clone())));
-            arguments.push(Value::String(Some(array.scope.to_string().clone())));
+            let arguments = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string()))];
             // Calling native getglobalarray which put on stack array: number of stack entreies + (index/value reference)*
             // TODO: doc
-            native_method_handler.handle(&Native {name: "getglobalarray".to_string()}, arguments, self, &call_frame);
+            native_method_handler.handle(&Native {name: "getglobalarray".to_string()}, arguments, self, call_frame);
             let number_of_stack_entries = self.stack.pop()?;
             let number_of_stack_entries = self.value_from_stack_entry(&number_of_stack_entries, call_frame, class, instance)?.number_value().unwrap() as usize;
             let mut i = 0;
@@ -422,28 +427,24 @@ impl Thread {
                 let array_index = self.value_from_stack_entry(&array_index, call_frame, class, instance)?.number_value().unwrap() as usize;
                 let array_value = self.stack.pop()?;
                 let array_value = self.constant_ref_from_stack_entry(&array_value, call_frame, class, instance)?;
-                array.assign::<Box<dyn Fn(Array) -> ()>>(array_index, array_value, None);
+                array.assign::<Box<dyn Fn(Array)>>(array_index, array_value, None);
                 i += 2;
             }
             //
             self.stack.push(StackEntry::HeapReference((owner_reference, variable_ref)));
         } else {
-            let mut arguments: Vec<Value> = vec![];
-            arguments.push(Value::String(Some(variable.to_script_identifier())));
-            arguments.push(Value::String(Some(variable.scope.to_string().clone())));
+            let arguments: Vec<Value> = vec![Value::String(Some(variable.to_script_identifier())), Value::String(Some(variable.scope.as_string()))];
             // TODO: doc
-            native_method_handler.handle(&Native { name: "getglobalvariable".to_string() }, arguments, self, &call_frame);
+            native_method_handler.handle(&Native { name: "getglobalvariable".to_string() }, arguments, self, call_frame);
         }
         Ok(())
     }
 
-    pub(crate) fn array_update_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread Box<&'program dyn NativeMethodHandler>, array: Arc<Array>) -> Option<Box<dyn Fn(Array) -> () + 'thread>> {
+    pub(crate) fn array_update_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread &'program dyn NativeMethodHandler, array: Arc<Array>) -> Option<Box<dyn Fn(Array) + 'thread>> {
         if array.scope.is_global() {
-            let closure = move |updated_array: Array| {
-                let mut arguments: Vec<Value> = vec![];
+            let closure = move |_updated_array: Array| {
+                let mut arguments: Vec<Value> = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string()))];
                 // call setglobalarray(array_name, scope, values...)
-                arguments.push(Value::String(Some(array.name.clone())));
-                arguments.push(Value::String(Some(array.scope.to_string().clone())));
                 for (index, value_reference) in array.values.read().unwrap().iter().enumerate() {
                     if let Some(reference) = value_reference {
                         arguments.push(Value::Number(Some(index as i32)));
@@ -451,7 +452,7 @@ impl Thread {
                     }
                 }
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "setglobalarray".to_string()}, arguments, self, &call_frame);
+                native_method_handler.handle(&Native {name: "setglobalarray".to_string()}, arguments, self, call_frame);
             };
             Some(Box::new(closure))
         } else {
@@ -521,7 +522,7 @@ impl Thread {
         }
     }
 
-    pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, native_method_handler: &Box<&dyn NativeMethodHandler>, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
+    pub(crate) fn variable_assign_reference(&self, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, variable: Variable, owner_reference: u64) -> Result<(), RuntimeError> {
         let variable_ref = Vm::calculate_hash(&variable);
         let reference = if variable.value_ref.is_array() {
             self.vm.allocate_array_if_needed(owner_reference, variable_ref, variable.value_ref.value_type.clone(), &variable);
@@ -551,12 +552,12 @@ impl Thread {
         } else {
             let mut arguments: Vec<Value> = vec![];
             // call setglobalvariable(variable_name, scope, <expression result to assign to variable>)
-            arguments.push(Value::String(Some(variable.to_script_identifier().clone())));
-            arguments.push(Value::String(Some(variable.scope.to_string().clone())));
+            arguments.push(Value::String(Some(variable.to_script_identifier())));
+            arguments.push(Value::String(Some(variable.scope.as_string())));
             if !variable.value_ref.is_array() { // In case of array, reference is the reference of the array, not of the expression result constant. it will come in ArrayStore instruction
-                arguments.push(self.vm.get_from_constant_pool(reference).unwrap().value().clone());
+                arguments.push(self.vm.get_from_constant_pool(reference).unwrap().value());
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "setglobalvariable".to_string()}, arguments, self, &call_frame);
+                native_method_handler.handle(&Native {name: "setglobalvariable".to_string()}, arguments, self, call_frame);
             }
         };
         Ok(())
@@ -705,6 +706,10 @@ impl Thread {
             self.stack_traces.remove(0);
         }
         self.stack_traces.push(stack_trace);
+    }
+
+    pub fn abort(&self) {
+        self.aborted.store(true, SeqCst);
     }
 
 

@@ -33,12 +33,12 @@ fn simple_condition() {
     } else {
         .@h$ = "i am true";
     }
-    if(1) {
+    if(1)
         .@i$ = "i am true";
-    }
-    if(0) {
+
+    if(0)
         .@j$ = "i am false";
-    }
+
     if(0) {
         .@k$ = "i am false";
     } else if (1) {

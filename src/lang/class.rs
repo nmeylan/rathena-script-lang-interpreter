@@ -3,13 +3,12 @@ use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 
-use std::sync::{Arc, RwLock};
+use std::sync::{RwLock};
 use std::time::SystemTime;
 use crate::lang::chunk::{Chunk, OpCode};
 use crate::lang::compiler::CompilationDetail;
-use crate::lang::error::TemporaryRuntimeError;
 use crate::lang::noop_hasher::NoopHasher;
-use crate::lang::value::{Scope, ValueType, Variable};
+use crate::lang::value::{Variable};
 use crate::lang::vm::{Hashcode, Vm};
 
 #[derive(Debug)]

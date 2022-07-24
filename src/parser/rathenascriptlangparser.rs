@@ -783,7 +783,7 @@ where
 					recog.base.set_state(133);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
-					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Menu - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
+					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Menu - 73)) | (1usize << (Next - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 						{
 						/*InvokeRule argumentExpressionList*/
 						recog.base.set_state(132);
@@ -6243,7 +6243,7 @@ where
 			recog.base.set_state(470);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Setarray - 73)) | (1usize << (Copyarray - 73)) | (1usize << (Menu - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Setarray - 73)) | (1usize << (Copyarray - 73)) | (1usize << (Menu - 73)) | (1usize << (Next - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 				{
 				/*InvokeRule forStopExpression*/
 				recog.base.set_state(469);
@@ -6258,7 +6258,7 @@ where
 			recog.base.set_state(474);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Setarray - 73)) | (1usize << (Copyarray - 73)) | (1usize << (Menu - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Setarray - 73)) | (1usize << (Copyarray - 73)) | (1usize << (Menu - 73)) | (1usize << (Next - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 				{
 				/*InvokeRule forExpression*/
 				recog.base.set_state(473);
@@ -6362,7 +6362,7 @@ where
 			recog.base.set_state(477);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << At) | (1usize << Quote) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Set))) != 0) || ((((_la - 75)) & !0x3f) == 0 && ((1usize << (_la - 75)) & ((1usize << (Setarray - 75)) | (1usize << (Copyarray - 75)) | (1usize << (Menu - 75)) | (1usize << (Identifier - 75)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << At) | (1usize << Quote) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Set))) != 0) || ((((_la - 75)) & !0x3f) == 0 && ((1usize << (_la - 75)) & ((1usize << (Setarray - 75)) | (1usize << (Copyarray - 75)) | (1usize << (Menu - 75)) | (1usize << (Next - 75)) | (1usize << (Identifier - 75)))) != 0) {
 				{
 				/*InvokeRule assignmentExpression*/
 				recog.base.set_state(476);
@@ -6768,7 +6768,7 @@ where
 					recog.base.set_state(492);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
-					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Menu - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
+					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 73)) & !0x3f) == 0 && ((1usize << (_la - 73)) & ((1usize << (Callfunc - 73)) | (1usize << (Menu - 73)) | (1usize << (Next - 73)) | (1usize << (Identifier - 73)) | (1usize << (String - 73)) | (1usize << (Number - 73)))) != 0) {
 						{
 						/*InvokeRule conditionalExpression*/
 						recog.base.set_state(491);
@@ -8805,6 +8805,11 @@ fn Identifier(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserCon
 fn Menu(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
 	self.get_token(Menu, 0)
 }
+/// Retrieves first TerminalNode corresponding to token Next
+/// Returns `None` if there is no child corresponding to token Next
+fn Next(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(Next, 0)
+}
 
 }
 
@@ -8830,7 +8835,7 @@ where
 			{
 			recog.base.set_state(630);
 			_la = recog.base.input.la(1);
-			if { !(_la==Menu || _la==Identifier) } {
+			if { !(((((_la - 77)) & !0x3f) == 0 && ((1usize << (_la - 77)) & ((1usize << (Menu - 77)) | (1usize << (Next - 77)) | (1usize << (Identifier - 77)))) != 0)) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
 
 			}
@@ -8964,7 +8969,7 @@ const _serializedATN:&'static str =
 	\x32\x34\x35\x37\x37\x04\x02\x2f\x2f\x31\x31\x05\x02\x04\x08\x30\x30\x38\
 	\x3c\x04\x02\x26\x26\x53\x53\x05\x02\x09\x09\x3f\x3f\x4a\x4a\x04\x02\x53\
 	\x53\x56\x56\x06\x02\x14\x14\x24\x24\x53\x54\x56\x56\x06\x02\x13\x13\x1a\
-	\x1a\x24\x25\x2a\x2d\x04\x02\x4f\x4f\x53\x53\x02\u{297}\x02\x7a\x03\x02\
+	\x1a\x24\x25\x2a\x2d\x04\x02\x4f\x4f\x52\x53\x02\u{297}\x02\x7a\x03\x02\
 	\x02\x02\x04\u{82}\x03\x02\x02\x02\x06\u{9c}\x03\x02\x02\x02\x08\u{a9}\x03\
 	\x02\x02\x02\x0a\u{ab}\x03\x02\x02\x02\x0c\u{b7}\x03\x02\x02\x02\x0e\u{b9}\
 	\x03\x02\x02\x02\x10\u{bb}\x03\x02\x02\x02\x12\u{c4}\x03\x02\x02\x02\x14\
