@@ -115,11 +115,17 @@ impl Constant {
 }
 
 impl Value {
-    pub fn new_string() -> Value {
+    pub fn new_empty_string() -> Value {
         Value::String(None)
     }
-    pub fn new_number() -> Value {
+    pub fn new_string(value: String) -> Value {
+        Value::String(Some(value))
+    }
+    pub fn new_empty_number() -> Value {
         Value::Number(None)
+    }
+    pub fn new_number(value: i32) -> Value {
+        Value::Number(Some(value))
     }
     pub fn new_reference() -> Value {
         Value::Reference(None)

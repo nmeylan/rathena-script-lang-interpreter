@@ -518,10 +518,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
         }
         if ctx.Identifier().is_some() {
-            // TODO ensure it is a native, otherwise is is a function
-            // let reference = self.current_chunk().add_native(Native{name: ctx.Identifier().unwrap().symbol.text.deref().to_string()});
-            // self.current_chunk().emit_op_code(OpCode::LoadConstant(reference));
-            // self.current_chunk().emit_reference(reference);
+            let reference = self.current_chunk().add_constant(
+                Constant::String(
+                    ctx.Identifier().unwrap().symbol.text.deref().to_string()
+                ));
+            self.current_chunk().emit_op_code(OpCode::LoadConstant(reference), self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"loadconstant"), argument_count: 1 }, self.compilation_details_from_context(ctx));
         }
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
