@@ -50,3 +50,20 @@ l4	    vm_dump_var("nine", pow("3", .@two));
 0: _main
 	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
 }
+
+#[test]
+fn rand() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    vm_dump_var("randomv", rand(1, 9));
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(true, events.lock().unwrap().get("randomv").unwrap().value.number_value().is_ok());
+}

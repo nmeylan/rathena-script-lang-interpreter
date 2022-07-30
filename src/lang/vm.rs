@@ -54,6 +54,7 @@ pub const NATIVE_FUNCTIONS: &[StaticNativeFunction] = &[
     StaticNativeFunction { name: "getvariableofnpc", return_type: None, min_arguments: 2, max_arguments: 2 },
     // stdlib
     StaticNativeFunction { name: "pow", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "rand", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
 ];
 
 impl NativeFunction {

@@ -1,4 +1,6 @@
 use std::borrow::Borrow;
+use std::collections::hash_map::RandomState;
+use std::hash::{BuildHasher, Hasher};
 use std::mem;
 use std::sync::Arc;
 
@@ -54,7 +56,16 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             let exponent = arguments[1].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "Pow second argument should be a number"))?;
             let res = value.pow(exponent as u32);
-            let constant_ref = thread.vm.add_in_constant_pool(Value::Number(Some(res)));
+            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number(res));
+            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+        }
+        "rand" => {
+            let min = arguments[0].number_value().map_err(|err|
+                thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
+            let max = arguments[0].number_value().map_err(|err|
+                thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
+            let res = (RandomState::new().build_hasher().finish() % max as u64) + min as u64; // this random function is crap
+            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number(res as i32));
             thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
         }
         _ => {
