@@ -1,16 +1,17 @@
-use std::collections::{HashMap};
+use std::collections::HashMap;
+use std::default::Default;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::mem;
 use std::path::Path;
-use antlr_rust::common_token_stream::CommonTokenStream;
 
+use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
+use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
+
 use crate::lang::chunk::ClassFile;
 use crate::lang::compiler::{Compiler, parse_number};
-use std::default::Default;
-use antlr_rust::parser_rule_context::ParserRuleContext;
 use crate::lang::error::CompilationError;
 use crate::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
 use crate::parser::rathenascriptlangparser::{NpcInitializationContext, NpcInitializationContextAttrs, RathenaScriptLangParser, RathenaScriptLangParserContextType, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptSpriteContextAttrs, ScriptXPosContextAttrs, ScriptYPosContextAttrs};
@@ -28,6 +29,7 @@ pub struct Script {
     pub class_name: String,
     pub class_reference: u64,
 }
+
 pub struct ScriptVisitor {
     scripts: Vec<Script>,
     pub file_content: Vec<String>,
@@ -51,7 +53,7 @@ pub fn compile(paths: Vec<String>, native_function_list_file_path: &str, debug_f
     class_files.iter().for_each(|k| println!("class file after filter -> {}", k.name));
     class_files.iter_mut().for_each(|class_file| class_file.set_reference());
     let mut class_references = HashMap::<String, u64>::new();
-    class_files.iter().for_each(|class| {class_references.insert(class.name.clone(), class.reference);} );
+    class_files.iter().for_each(|class| { class_references.insert(class.name.clone(), class.reference); });
     scripts.iter_mut().for_each(|script| {
         if class_references.get(&script.class_name).is_some() {
             script.class_reference = *class_references.get(&script.class_name).unwrap();
@@ -72,7 +74,7 @@ pub fn visit(path: &Path) -> Vec<Script> {
     let token_stream = CommonTokenStream::new(lexer);
     let mut parser = RathenaScriptLangParser::new(token_stream);
     let tree = parser.compilationUnit();
-    let mut script_visitor = ScriptVisitor{ scripts: vec![], file_content: file_content.split('\n').map(|l| l.to_string()).collect::<Vec<String>>() };
+    let mut script_visitor = ScriptVisitor { scripts: vec![], file_content: file_content.split('\n').map(|l| l.to_string()).collect::<Vec<String>>() };
     script_visitor.visit_compilationUnit(tree.as_ref().unwrap());
     mem::take(&mut script_visitor.scripts)
 }
@@ -99,7 +101,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                 x_size: 0,
                 y_size: 0,
                 class_name: ctx.scriptName().unwrap().get_text(),
-                class_reference: 0
+                class_reference: 0,
             });
         }
     }
@@ -118,7 +120,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                 x_size: 0,
                 y_size: 0,
                 class_name: ctx.scriptName_all().get(0).unwrap().get_text(),
-                class_reference: 0
+                class_reference: 0,
             });
         }
     }

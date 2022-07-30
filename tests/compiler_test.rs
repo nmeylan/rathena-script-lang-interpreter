@@ -294,10 +294,26 @@ l6	    .@a = 1 && "0";
 "#, result.as_ref().err().unwrap()[1].message());
 }
 
+// #[test]
+fn type_checking_ternary() {
+    // Given
+    let script = r#"
+    setarray .@Styles[1], 1;
+    set .@Revert, 1;
+    set .@Style, 1;
+    set .@s,1;
+    set .@menu$, ((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000)";
+    "#;
+    // When
+    let result = compile_script(script, compiler::DebugFlag::TypeChecker.value());
+    // Then
+    assert_eq!(false, result.is_err());
+}
+
 #[test]
 fn undefined_label() {
     // Given
-    let script = r#"
+    let script = r#"#
 
     "#;
     // When
