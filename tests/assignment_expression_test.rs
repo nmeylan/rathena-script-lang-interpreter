@@ -282,3 +282,21 @@ test_script 5:12.
 l5	    println(.@a);
 	            ^^^"#, runtime_error.to_string().trim());
 }
+
+#[test]
+fn input_assign_variable() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    input .@a$;
+    vm_dump_var("a", .@a$);
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from("Hello world from input"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+}

@@ -265,6 +265,7 @@ pub struct BlockState {
 #[derive(Clone, Debug, Default)]
 pub struct ChunkState {
     pub local_setd: HashSet<u64>,
+    pub dynamically_defined_variable: HashSet<u64>,
     pub undefined_variables: HashSet<u64>,
 }
 
@@ -359,6 +360,12 @@ impl Chunk {
     pub fn add_local_setd(&self, reference: u64) {
         self.chunk_state.borrow_mut().local_setd.insert(reference);
     }
+    pub fn add_dynamically_defined_variable(&self, reference: u64) {
+        self.chunk_state.borrow_mut().dynamically_defined_variable.insert(reference);
+    }
+    pub fn dynamically_defined_variable_contains(&self, reference: u64) -> bool {
+        self.chunk_state.borrow().dynamically_defined_variable.contains(&reference)
+    }
 
     pub fn add_undefined_variable(&self, reference: u64) {
         self.chunk_state.borrow_mut().undefined_variables.insert(reference);
@@ -374,8 +381,8 @@ pub enum OpCode {
     LoadConstant(u64),
     StoreGlobal,
     LoadGlobal,
-    StoreReference,
-    LoadReference,
+    // To handle edge case for function using variable reference. Some function takes variable (not variable name) which should be evaluated as variable ref
+    AssignVariable(u64),
     StoreLocal(u64),
     LoadLocal(u64),
     StoreInstance(u64),

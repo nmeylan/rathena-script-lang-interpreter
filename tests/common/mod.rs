@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::default::Default;
+use std::env::var;
 use std::mem;
 
 use rathena_script_lang_interpreter::lang::call_frame::CallFrame;
@@ -137,6 +138,13 @@ impl NativeMethodHandler for VmHook {
                     }
                 );
                 index += 2;
+            }
+        } else if native.name.eq("input") {
+            let variable_name = params[0].string_value().unwrap();
+            if variable_name.ends_with('$') {
+                thread.push_constant_on_stack(Value::new_string("Hello world from input".to_string()));
+            } else{
+                thread.push_constant_on_stack(Value::new_number(10));
             }
         } else if native.name.eq("getglobalarray") {
             let variable_name = params[0].string_value().unwrap();

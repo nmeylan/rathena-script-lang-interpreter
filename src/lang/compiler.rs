@@ -2,6 +2,7 @@ use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::default::Default;
+use std::env::var;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -460,7 +461,9 @@ impl Compiler {
                     // So we disable variable existence check in this case
                     if self.current_chunk().local_setd_len() > 0 {
                         self.current_chunk().emit_op_code(LoadLocal(variable_ref), self.compilation_details_from_context(node));
-                    } else {
+                    } else if self.current_chunk().dynamically_defined_variable_contains(variable_ref) {
+                        self.current_chunk().emit_op_code(LoadLocal(variable_ref), self.compilation_details_from_context(node));
+                    } else  {
                         self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
                     }
                 }
@@ -491,6 +494,82 @@ impl Compiler {
                 }
             });
             println!();
+        }
+    }
+
+    // Unfortunately some native function support un-standard behavior:
+    // 1. some(input, getarraysize, getvariableofnpc) accept variable reference
+    // 2. some(setvariableofnpc, setd, etc..) set value to variable reference
+    // 3. some terminate execution (close)
+    // We need function below to handle these edge cases.
+    fn visit_native_function(&mut self, ctx: &FunctionCallExpressionContext, function_or_native_name: &String, first_argument_op_code_index: usize, argument_count: usize, native: NativeFunction) {
+        if argument_count < native.min_arguments || argument_count > native.max_arguments {
+            self.register_error(NativeArgumentCount, ctx,
+                                format!("Wrong arguments: {} accept at least {} argument(s) and at most {} argument(s) but received {} argument(s)",
+                                        native.name, native.min_arguments, native.max_arguments, argument_count
+                                ));
+            return;
+        }
+
+        if native.name == "input" {
+            let variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+            let constant_reference = self.current_chunk().add_constant(Constant::String(variable_identifier));
+            self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_reference), self.compilation_details_from_context(ctx));
+        } else if ctx.argumentExpressionList().is_some() {
+            self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
+        }
+
+        if native.name == "setd" {
+            let setd_variable_expression = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+            if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
+                self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
+            }
+        } else if native.name == "getarraysize" {
+            // getarraysize accept the array name without index.
+            // In case of loadglobal we use the variable string then build a variable from it. But if it does not contains bracket
+            // we can't determine it is an array.
+            // Code below transform array$ into array$[0] for load global.
+            let last_code_op = self.current_chunk().last_op_code_index();
+            if mem::discriminant(&self.current_chunk().get_op_code_at(last_code_op)) == mem::discriminant(&LoadGlobal) {
+                let mut array_name = ctx.argumentExpressionList().as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
+                if !array_name.contains('[') {
+                    array_name = format!("{}[0]", array_name);
+                }
+                let reference = self.current_chunk().add_constant(Constant::String(array_name));
+                self.current_chunk().set_op_code_at(last_code_op - 1, LoadConstant(reference))
+            }
+        } else if native.name == "getvariableofnpc" {
+            // Replacing first argument LoadStatic with a LoadConstant instead.
+            // Syntax want first argument to be the variable, instead of a string with the variable name.
+            // In this implementation variable will be interpreted and its value will be pushed in the stack instead of its name..
+            let static_variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+            if !static_variable_identifier.starts_with("getd(") { // we can use getd to use reference of another variable containing the variable identifier
+                let constant_reference = self.current_chunk().add_constant(Constant::String(static_variable_identifier));
+                let npc_name_load_constant_op_code_index = self.current_chunk().last_op_code_index();
+                self.current_chunk().set_op_code_at(first_argument_op_code_index, OpCode::LoadConstant(constant_reference));
+                for i in (first_argument_op_code_index + 1)..npc_name_load_constant_op_code_index {
+                    self.current_chunk().set_op_code_at(i, OpCode::Noop);
+                }
+            }
+        }
+        if native.name == "getarg" && argument_count > 1 {
+            // do not remove default value type, so we can check at compile time that default type match variable type
+            self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
+        } else {
+            self.remove_current_assigment_type(argument_count);
+        }
+        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
+        if let Some(returned_type) = native.return_type.as_ref() {
+            self.add_current_assigment_type(returned_type.clone(), ctx);
+        }
+        if native.name == "close" {
+            self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
+        } else if native.name == "input" {
+            let variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+            let constant_reference = self.current_chunk().add_constant(Constant::String(variable_identifier.clone()));
+            let variable = Variable::from_string(&variable_identifier);
+            self.current_chunk().add_dynamically_defined_variable(Vm::calculate_hash(&variable));
+            self.current_chunk().emit_op_code(OpCode::AssignVariable(constant_reference), self.compilation_details_from_context(ctx));
         }
     }
 }
@@ -532,13 +611,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) {
-        let first_argument_op_code_index = self.current_chunk().last_op_code_index() + 1;
-        let argument_count = if ctx.argumentExpressionList().is_some() {
-            self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
-            ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize
-        } else {
-            0
-        };
         let function_or_native_name = if ctx.Identifier().is_some() {
             ctx.Identifier().unwrap().symbol.text.to_string()
         } else if ctx.String().is_some() {
@@ -547,61 +619,19 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             return;
         };
 
-        if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
-            if argument_count < native.min_arguments || argument_count > native.max_arguments {
-                self.register_error(NativeArgumentCount, ctx,
-                                    format!("Wrong arguments: {} accept at least {} argument(s) and at most {} argument(s) but received {} argument(s)",
-                                            native.name, native.min_arguments, native.max_arguments, argument_count
-                                    ));
-                return;
-            }
-             if native.name == "setd" {
-                let setd_variable_expression = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
-                if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
-                    self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
-                }
-            } else if native.name == "getarraysize" {
-                // getarraysize accept the array name without index.
-                // In case of loadglobal we use the variable string then build a variable from it. But if it does not contains bracket
-                // we can't determine it is an array.
-                // Code below transform array$ into array$[0] for load global.
-                let last_code_op = self.current_chunk().last_op_code_index();
-                if mem::discriminant(&self.current_chunk().get_op_code_at(last_code_op)) == mem::discriminant(&LoadGlobal) {
-                    let mut array_name = ctx.argumentExpressionList().as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
-                    if !array_name.contains('[') {
-                        array_name = format!("{}[0]", array_name);
-                    }
-                    let reference = self.current_chunk().add_constant(Constant::String(array_name));
-                    self.current_chunk().set_op_code_at(last_code_op - 1, LoadConstant(reference))
-                }
-            } else if native.name == "getvariableofnpc" {
-                // Replacing first argument LoadStatic with a LoadConstant instead.
-                // Syntax want first argument to be the variable, instead of a string with the variable name.
-                // In this implementation variable will be interpreted and its value will be pushed in the stack instead of its name..
-                let static_variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
-                if !static_variable_identifier.starts_with("getd(") { // we can use getd to use reference of another variable containing the variable identifier
-                    let constant_reference = self.current_chunk().add_constant(Constant::String(static_variable_identifier));
-                    let npc_name_load_constant_op_code_index = self.current_chunk().last_op_code_index();
-                    self.current_chunk().set_op_code_at(first_argument_op_code_index, OpCode::LoadConstant(constant_reference));
-                    for i in (first_argument_op_code_index + 1)..npc_name_load_constant_op_code_index {
-                        self.current_chunk().set_op_code_at(i, OpCode::Noop);
-                    }
-                }
-            }
-            if native.name == "getarg" && argument_count > 1 {
-                // do not remove default value type, so we can check at compile time that default type match variable type
-                self.state.current_assignment_types.remove(self.state.current_assignment_types.len() - 2);
-            } else {
-                self.remove_current_assigment_type(argument_count);
-            }
-            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
-            if let Some(returned_type) = native.return_type.as_ref() {
-                self.add_current_assigment_type(returned_type.clone(), ctx);
-            }
-            if native.name == "close" {
-                self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
-            }
+        let first_argument_op_code_index = self.current_chunk().last_op_code_index() + 1;
+        let argument_count = if ctx.argumentExpressionList().is_some() {
+            ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize
         } else {
+            0
+        };
+
+        if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
+            self.visit_native_function(ctx, &function_or_native_name, first_argument_op_code_index, argument_count, native)
+        } else {
+            if ctx.argumentExpressionList().is_some() {
+                self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
+            }
             self.remove_current_assigment_type(argument_count);
             self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_details_from_context(ctx)));
             if let Some(returned_type) = self.function_returned_type(&function_or_native_name) {

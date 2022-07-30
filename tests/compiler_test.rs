@@ -400,3 +400,16 @@ l5	    getarraysize(.@b[0], .@a$[0]);
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
 }
+
+#[test]
+fn native_input_declare_variable() {
+    // Given
+    let script = r#"
+    input(.@choice);
+    vm_dump_var("a", .@choice);
+    "#;
+    // When
+    let result = compile_script(script, compiler::DebugFlag::None.value());
+    // Then
+    assert_eq!(false, result.is_err());
+}

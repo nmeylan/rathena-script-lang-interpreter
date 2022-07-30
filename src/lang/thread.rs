@@ -80,6 +80,13 @@ impl Thread {
                 OpCode::LoadConstant(reference) => {
                     self.stack.push(StackEntry::ConstantPoolReference(*reference));
                 }
+                OpCode::AssignVariable(reference) => {
+                    let value_from_stack = self.value_from_stack_entry(&StackEntry::ConstantPoolReference(*reference), &call_frame, class, instance)?;
+                    let variable_name = value_from_stack.string_value().unwrap();
+                    let variable = Variable::from_string(variable_name);
+                    let owner_reference = Vm::calculate_hash(&variable);
+                    self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable, owner_reference)?;
+                }
                 OpCode::StoreGlobal => {
                     let variable_name_stack_entry = self.stack.pop()?;
                     let value_from_stack = self.value_from_stack_entry(&variable_name_stack_entry, &call_frame, class, instance)?;
@@ -95,20 +102,6 @@ impl Thread {
                     let variable = Variable::from_string(variable_name);
                     let owner_reference = Vm::calculate_hash(&variable);
                     self.load_global(class, instance, &call_frame, &native_method_handler, &variable, owner_reference)?;
-                }
-                OpCode::StoreReference => {
-                    // TODO no longer used: check to keep
-                    let stack_entry = self.stack.pop()?;
-                    if let StackEntry::VariableReference((scope, owner_reference, reference)) = stack_entry {
-                        let variable = self.get_variable_from_scope_and_reference(&call_frame, class, instance, &scope, reference)?;
-                        self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable, owner_reference)?
-                    } else {
-                        return Err(RuntimeError::new_with_type(self.current_source_line.clone(), self.stack_traces.clone(),
-                                                     Internal, format!("Expected stack to contain variable reference but got {:?}", stack_entry).as_str()))
-                    };
-                }
-                OpCode::LoadReference => {
-
                 }
                 OpCode::ArrayStore => {
                     let arr_index = self.stack.pop()?;
