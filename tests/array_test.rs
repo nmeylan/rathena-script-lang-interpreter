@@ -111,6 +111,7 @@ fn setarray() {
     .@c$ = "toto";
     setarray .@a$[0], "hello", "world", .@c$;
     setarray(.@b[1], 1, 2, 3);
+    setarray .@x[1], 1;
     vm_dump_var("a_len", getarraysize(.@a$));
     vm_dump_var("b_len", getarraysize(.@b));
     vm_dump_var("a0", .@a$[0]);

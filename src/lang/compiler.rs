@@ -463,7 +463,7 @@ impl Compiler {
                         self.current_chunk().emit_op_code(LoadLocal(variable_ref), self.compilation_details_from_context(node));
                     } else if self.current_chunk().dynamically_defined_variable_contains(variable_ref) {
                         self.current_chunk().emit_op_code(LoadLocal(variable_ref), self.compilation_details_from_context(node));
-                    } else  {
+                    } else {
                         self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
                     }
                 }
@@ -805,7 +805,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 // *setarray <array name>[<first value>],<value>{,<value>...<value>};
                 self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <value>. In this language declaration require a value to assign
                 self.visit_assignmentLeftExpression(&left); // <array name>[<first value>]. Declare array variable.
-                let argument_count = ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize; // {,<value>...<value>}
+                let argument_count = if ctx.argumentExpressionList().is_none() {
+                    0
+                } else { // {,<value>...<value>}
+                    ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize
+                };
                 if argument_count > 0 {
                     self.visit_variable(left.variable().as_ref().unwrap());
                     self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
