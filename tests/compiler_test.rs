@@ -502,3 +502,25 @@ fn native_input_declare_variable() {
     // Then
     assert_eq!(false, result.is_err());
 }
+
+
+fn debug_opcodes() {
+    // Given
+    let script = r#"#
+    setarray .@Styles[1], 1;
+    set .@Revert, 1;
+    set .@Style, 1;
+    set .@s,1;
+set .@menu$, " ~ Next (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Previous (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Jump to...: ~ Revert to original (^0055FF"+.@Revert+"^000000)";
+
+    "#;
+    // When
+    let result = compile_script(script, compiler::DebugFlag::None.value()).unwrap();
+    // Then
+    let class_file = &result[1];
+    let functions = class_file.functions.borrow();
+    let main_function = functions[0].as_ref();
+    for (index, op_code) in main_function.chunk.op_codes.borrow().iter().enumerate() {
+        println!("[{}] {:?}", index, op_code);
+    }
+}

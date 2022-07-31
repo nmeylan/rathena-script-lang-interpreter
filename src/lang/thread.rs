@@ -715,16 +715,16 @@ impl Thread {
         }
     }
 
-    fn dump_stack(&self, out: &mut Stdout, _call_frame: &CallFrame, _class: &Class, _instance: &mut Option<Arc<Instance>>) {
+    fn dump_stack(&self, out: &mut Stdout, call_frame: &CallFrame, class: &Class, instance: &mut Option<Arc<Instance>>) {
         if self.stack.contents().is_empty() {
             writeln!(out, "         <empty stack>").unwrap();
         } else {
             for (i, val) in self.stack.contents().iter().enumerate() {
                 write!(out, "    [{}]  {:?}", i, val).unwrap();
-                // let maybe_value = self.value_from_stack_entry(val, call_frame, class, instance);
-                // if maybe_value.is_ok() {
-                //     write!(out, " - {}", maybe_value.unwrap()).unwrap();
-                // }
+                let maybe_value = self.value_from_stack_entry(val, call_frame, class, instance);
+                if maybe_value.is_ok() {
+                    write!(out, " - {}", maybe_value.unwrap()).unwrap();
+                }
                 writeln!(out).unwrap();
             }
         }

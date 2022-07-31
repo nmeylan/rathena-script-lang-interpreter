@@ -67,6 +67,27 @@ fn assignment_with_string_concat() {
     // Then
     assert_eq!(String::from("hello world 1"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
+#[test]
+fn assignment_with_complex_string_concat() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#" setarray .@Styles[1], 1;
+    set .@Revert, 1;
+    set .@Style, 1;
+    setarray .@Styles[1], 10,20,30,4,5;
+    set .@s,1;
+    set .@menu$, " ~ Next (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): Jump to...: ~ Revert to original (^0055FF"+.@Revert+"^000000)";
+
+    vm_dump_var("menu", .@menu$);"#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::Execution.value() | DebugFlag::Stack.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from(" ~ Next (^0055FF2^000000): Jump to...: ~ Revert to original (^0055FF1^000000)"), events.lock().unwrap().get("menu").unwrap().value.string_value().unwrap().clone());
+}
 
 #[test]
 fn assignment_with_number_operation() {

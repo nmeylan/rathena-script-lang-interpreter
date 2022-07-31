@@ -156,7 +156,7 @@ impl ClassFileState {
 #[derive(Debug)]
 pub struct FunctionDefinition {
     pub name: String,
-    pub(crate) chunk: Rc<Chunk>,
+    pub chunk: Rc<Chunk>,
     pub(crate) state: Option<FunctionDefinitionState>,
     pub(crate) returned_type: RefCell<Option<ValueType>>,
 }

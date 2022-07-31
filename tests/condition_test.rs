@@ -95,7 +95,25 @@ fn condition_with_expressions() {
     assert_eq!(String::from("i am not part of condition"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
-
+#[test]
+fn ternary_condition() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    .@a$ = 1 == 2 ? "hello" : "world";
+    .@b$ = 1 == 1 ? "hello" : "world";
+    vm_dump_locals();
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::OpCode.value() |DebugFlag::Stack.value() | DebugFlag::Execution.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from("world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+}
 
 #[test]
 fn conditional_statements() {

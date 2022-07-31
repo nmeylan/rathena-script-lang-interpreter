@@ -806,7 +806,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_conditionalExpression(&mut self, ctx: &ConditionalExpressionContext<'input>) {
         self.type_checker.inc_current_expression_index(ctx, "visit_conditionalExpression");
-        self.visit_children(ctx);
+        if ctx.QuestionMark().is_some() {
+            self.visit_logicalOrExpression(ctx.logicalOrExpression().as_ref().unwrap());
+            let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(ctx));
+            self.visit_conditionalExpression(ctx.conditionalExpression(0).as_ref().unwrap());
+            let jump_to_index = self.current_chunk().last_op_code_index() + 2;
+            self.current_chunk().set_op_code_at(if_index, OpCode::If(jump_to_index));
+            let then_jump_index = self.current_chunk().emit_op_code(OpCode::Jump(jump_to_index - 1), self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(OpCode::Else, self.compilation_details_from_context(ctx));
+            self.visit_conditionalExpression(ctx.conditionalExpression(1).as_ref().unwrap());
+            let jump_to_index = self.current_chunk().last_op_code_index() + 1;
+            self.current_chunk().set_op_code_at(then_jump_index, OpCode::Jump(jump_to_index));
+        } else{
+            self.visit_children(ctx);
+        }
         self.type_checker.dec_current_expression_index(true, ctx, "visit_conditionalExpression");
     }
 
