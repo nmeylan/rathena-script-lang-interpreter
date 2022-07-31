@@ -19,7 +19,7 @@ fn simple_assigment() {
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let script = compile_script(r#"
     .@a$ = "hello world";
-    vm_dump_var("a", .@a$);"#, compiler::DebugFlag::TypeChecker.value()).unwrap();
+    vm_dump_var("a", .@a$);"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

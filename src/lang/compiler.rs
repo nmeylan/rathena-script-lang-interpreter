@@ -419,7 +419,7 @@ impl Compiler {
 
         if variable.value_ref.borrow().is_array() {
             self.visit_conditionalExpression(variable_ctx.conditionalExpression().as_ref().unwrap());
-            self.type_checker.pop_current_expression_types();
+            self.type_checker.pop_expression_type();
             self.current_chunk().emit_op_code(ArrayLoad, self.compilation_details_from_context(node));
         }
     }
@@ -481,7 +481,7 @@ impl Compiler {
         }
         if native.name == "getarg" && argument_count > 1 {
             // do not remove default value type, so we can check at compile time that default type match variable type
-            let index = self.type_checker.current_type_len() - 2;
+            let index = self.type_checker.type_len() - 2;
             self.type_checker.remove_type_at(index);
         } else {
             self.type_checker.remove_type(argument_count);
@@ -599,20 +599,20 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let operator = ctx.multiplicativeOperator(i).unwrap();
 
             if operator.Star().is_some() {
-                if self.type_checker.current_type().is_some() && self.type_checker.current_type().unwrap().is_string() {
-                    self.type_checker.debug_type_checking(ctx);
+                if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
+                    self.type_checker.debug_type_checking(ctx, "visit_multiplicativeExpression");
                     self.register_error(Type, ctx, "Multiply operator \"*\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Multiply), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Slash().is_some() {
-                self.type_checker.debug_type_checking(ctx);
-                if self.type_checker.current_type().is_some() && self.type_checker.current_type().unwrap().is_string() {
+                self.type_checker.debug_type_checking(ctx, "visit_multiplicativeExpression");
+                if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
                     self.register_error(Type, ctx, "Divide operator \"/\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Divide), self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Percent().is_some() {
-                self.type_checker.debug_type_checking(ctx);
-                if self.type_checker.current_type().is_some() && self.type_checker.current_type().unwrap().is_string() {
+                self.type_checker.debug_type_checking(ctx, "visit_multiplicativeExpression");
+                if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
                     self.register_error(Type, ctx, "Modulo operator \"%\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Modulo), self.compilation_details_from_context(operator.as_ref()));
@@ -632,8 +632,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if operator.Plus().is_some() {
                 self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(operator.as_ref()));
             } else if operator.Minus().is_some() {
-                if self.type_checker.current_type().is_some() && self.type_checker.current_type().unwrap().is_string() {
-                    self.type_checker.debug_type_checking(ctx);
+                if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
+                    self.type_checker.debug_type_checking(ctx, "visit_additiveExpression");
                     self.register_error(Type, ctx, "Subtraction operator \"-\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(operator.as_ref()));
@@ -649,7 +649,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             }
             self.visit_shiftExpression(&ctx.shiftExpression(i).unwrap());
             if !self.type_checker.current_types_are_same_type() {
-                self.type_checker.debug_type_checking(ctx);
+                self.type_checker.debug_type_checking(ctx, "visit_relationalExpression");
                 self.register_error(Type, ctx, "Can't perform comparison when left and right are not same types".to_string());
             }
             let operator = ctx.relationalOperator(i).unwrap();
@@ -662,7 +662,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             } else if operator.LeftCaretEqual().is_some() {
                 self.current_chunk().emit_op_code(OpCode::Relational(Relational::LTE), self.compilation_details_from_context(operator.as_ref()));
             }
-            self.type_checker.drop_current_type();
+            self.type_checker.clear_current_expression_types();
             self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
         }
     }
@@ -673,54 +673,59 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             if i == ctx.relationalExpression_all().len() - 1 {
                 continue;
             }
+            self.type_checker.inc_current_expression_index(ctx, "visit_equalityExpression");
             self.visit_relationalExpression(&ctx.relationalExpression(i).unwrap());
+            self.type_checker.dec_current_expression_index(false, ctx, "visit_equalityExpression");
             if !self.type_checker.current_types_are_same_type() {
-                self.type_checker.debug_type_checking(ctx);
+                self.type_checker.debug_type_checking(ctx, "visit_equalityExpression");
                 self.register_error(Type, ctx, "Can't perform comparison when left and right are not same types".to_string());
             }
+            self.type_checker.clear_current_expression_types();
+            self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
             let operator = ctx.equalityOperator(i).unwrap();
             if operator.DoubleEqual().is_some() {
                 self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(operator.as_ref()));
             } else if operator.BangEqual().is_some() {
                 self.current_chunk().emit_op_code(OpCode::NotEqual, self.compilation_details_from_context(operator.as_ref()));
             }
-            self.type_checker.drop_current_type();
-            self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
         }
     }
 
+
     fn visit_logicalAndExpression(&mut self, ctx: &LogicalAndExpressionContext<'input>) {
         self.visit_inclusiveOrExpression(&ctx.inclusiveOrExpression(ctx.inclusiveOrExpression_all().len() - 1).unwrap());
-        let mut types = vec![];
         for (i, _) in ctx.inclusiveOrExpression_all().iter().enumerate().rev() {
             if i == ctx.inclusiveOrExpression_all().len() - 1 {
                 continue;
             }
-            types.push(self.type_checker.drop_current_type());
+            self.type_checker.inc_current_expression_index(ctx, "visit_logicalAndExpression");
             self.visit_inclusiveOrExpression(&ctx.inclusiveOrExpression(i).unwrap());
-            types.push(self.type_checker.drop_current_type());
-            if !TypeChecker::types_are_same_type(&types) {
-                self.type_checker.debug_type_checking(ctx);
+            self.type_checker.dec_current_expression_index(false, ctx, "visit_logicalAndExpression");
+            if !self.type_checker.current_types_are_same_type() {
+                self.type_checker.debug_type_checking(ctx, "visit_logicalAndExpression");
                 self.register_error(Type, ctx, "Can't perform logical and (&&) when left and right are not same types".to_string());
             }
+            self.type_checker.clear_current_expression_types();
+            self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
             self.current_chunk().emit_op_code(OpCode::LogicalAnd, self.compilation_details_from_context(ctx));
         }
     }
 
     fn visit_logicalOrExpression(&mut self, ctx: &LogicalOrExpressionContext<'input>) {
         self.visit_logicalAndExpression(&ctx.logicalAndExpression(ctx.logicalAndExpression_all().len() - 1).unwrap());
-        let mut types = vec![];
         for (i, _) in ctx.logicalAndExpression_all().iter().enumerate().rev() {
             if i == ctx.logicalAndExpression_all().len() - 1 {
                 continue;
             }
-            types.push(self.type_checker.drop_current_type());
+            self.type_checker.inc_current_expression_index(ctx, "visit_logicalOrExpression");
             self.visit_logicalAndExpression(&ctx.logicalAndExpression(i).unwrap());
-            types.push(self.type_checker.drop_current_type());
-            if !TypeChecker::types_are_same_type(&types) {
-                self.type_checker.debug_type_checking(ctx);
+            self.type_checker.dec_current_expression_index(false, ctx, "visit_logicalOrExpression");
+            if !self.type_checker.current_types_are_same_type() {
+                self.type_checker.debug_type_checking(ctx, "visit_logicalOrExpression");
                 self.register_error(Type, ctx, "Can't perform logical or (||) when left and right are not same types".to_string());
             }
+            self.type_checker.clear_current_expression_types();
+            self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
             self.current_chunk().emit_op_code(OpCode::LogicalOr, self.compilation_details_from_context(ctx));
         }
     }
@@ -750,7 +755,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.visit_assignmentLeftExpression(&left); // <destination array>[<first value>]. Declare array variable.
                 self.visit_variable(left.variable().as_ref().unwrap()); // Retrieve declared destination array
                 self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // Retrieve source array
-                self.type_checker.drop_current_type();
+                self.type_checker.drop_current_type(ctx);
                 // TODO ensure that argument list contains only 1 element.
                 self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap()); // <amount of data to copy>
                 self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"copyarray"), argument_count: 3 }, self.compilation_details_from_context(ctx));
@@ -800,36 +805,38 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_conditionalExpression(&mut self, ctx: &ConditionalExpressionContext<'input>) {
+        self.type_checker.inc_current_expression_index(ctx, "visit_conditionalExpression");
         self.visit_children(ctx);
+        self.type_checker.dec_current_expression_index(true, ctx, "visit_conditionalExpression");
     }
 
     fn visit_assignmentLeftExpression(&mut self, ctx: &AssignmentLeftExpressionContext<'input>) {
         if ctx.variable().is_some() {
             let variable = Self::build_variable(&ctx.variable().unwrap());
-            if let Some(current_value_type) = self.type_checker.current_type() {
+            if let Some(current_value_type) = self.type_checker.current_type(ctx) {
                 if variable.value_ref.borrow().is_string() && current_value_type.is_number() {
-                    self.type_checker.debug_type_checking(ctx);
+                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
                 }
                 if variable.value_ref.borrow().is_string_array() && current_value_type.is_number() {
-                    self.type_checker.debug_type_checking(ctx);
+                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as an Array of string but an index is assigned with a Number.", variable.to_script_identifier()));
                 }
                 if variable.value_ref.borrow().is_number() && current_value_type.is_string() {
-                    self.type_checker.debug_type_checking(ctx);
+                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
                 }
 
                 if variable.value_ref.borrow().is_number_array() && current_value_type.is_string() {
-                    self.type_checker.debug_type_checking(ctx);
+                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
                     self.register_error(CompilationErrorType::Type, ctx,
                                         format!("Variable \"{}\" is declared as an Array of number but an index is assigned with a String.", variable.to_script_identifier()));
                 }
             }
-            self.type_checker.drop_current_type();
+            self.type_checker.drop_current_type(ctx);
             let is_array = variable.value_ref.borrow().is_array();
             match variable.scope {
                 Scope::Server | Scope::Account | Scope::Character | Scope::ServerTemporary | Scope::CharacterTemporary => {
@@ -908,7 +915,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_statement(&mut self, ctx: &StatementContext<'input>) {
-        self.type_checker.drop_current_type();
+        self.type_checker.reset_state();
         self.visit_children(ctx);
     }
 
@@ -933,7 +940,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     if label.Case().is_some() {
                         self.current_chunk().emit_op_code(switch_expression_op_code, self.compilation_details_from_context(ctx));
                         self.visit_constantExpression(label.constantExpression().as_ref().unwrap());
-                        self.type_checker.drop_current_type();
+                        self.type_checker.drop_current_type(ctx);
                         self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(label.as_ref()));
                         let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(label.as_ref()));
                         let goto_case_statement_index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(label.as_ref()));
@@ -953,7 +960,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
          * 2. we iterate over all case statement block, collect their first code op index
          */
         for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
-            self.type_checker.drop_current_type();
+            self.type_checker.drop_current_type(ctx);
             for goto_index in goto_op_code_indices_to_update.get(&i).unwrap().iter() {
                 self.current_chunk().set_op_code_at(*goto_index, OpCode::Jump(self.current_chunk().last_op_code_index() + 1));
             }
@@ -1058,7 +1065,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_externalDeclaration(&mut self, ctx: &ExternalDeclarationContext<'input>) {
         self.visit_children(ctx);
-        self.type_checker.drop_current_type();
+        self.type_checker.reset_state();
     }
 
     fn visit_functionDefinition(&mut self, ctx: &FunctionDefinitionContext<'input>) {
@@ -1080,7 +1087,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         self.add_function_to_current_class(function);
         self.visit_children(ctx);
         // TODO: it won't work for all cases, to refactor
-        self.current_declared_function().set_returned_type(self.type_checker.drop_current_type());
+        self.current_declared_function().set_returned_type(self.type_checker.drop_current_type(ctx));
         self.current_class().set_current_declared_function_index(0);
     }
 

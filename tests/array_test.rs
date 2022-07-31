@@ -31,7 +31,7 @@ fn simple_array_assignment() {
     vm_dump_var("a1", .@a$[1]);
     vm_dump_var("b", .@b$);
     vm_dump_var("c", .@c$);
-    "#, compiler::DebugFlag::TypeChecker.value()).unwrap();
+    "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When

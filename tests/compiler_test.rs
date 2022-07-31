@@ -270,6 +270,78 @@ l13	    .@a = "1" <= 2;                             // incorrect
 }
 
 #[test]
+fn type_checking_with_operator() {
+    // Given
+    let script = r#"
+    .@a = 1 + "1";
+    .@a$ = 1 + "1";
+    .@a$ = "1" + 0;
+    .@a = "1" + 0;
+    .@a$ = 1 - "0";
+    .@a$ = 1 * "0";
+    .@a$ = 1 / "0";
+    .@a$ = 1 % "0";
+    .@a = 1 - "0";
+    .@a = 1 * "0";
+    .@a = 1 / "0";
+    .@a = 1 % "0";
+    "#;
+    // When
+    let result = compile_script(script, compiler::DebugFlag::None.value());
+    // Then
+    assert_eq!(true, result.is_err());
+    assert_eq!(r#"Variable ".@a" is declared as a Number but is assigned with a String.
+test_script 3:4.
+l3	    .@a = 1 + "1";
+	    ^^^
+"#, result.as_ref().err().unwrap()[0].message());
+    assert_eq!(r#"Variable ".@a" is declared as a Number but is assigned with a String.
+test_script 6:4.
+l6	    .@a = "1" + 0;
+	    ^^^
+"#, result.as_ref().err().unwrap()[1].message());
+    assert_eq!(r#"Subtraction operator "-" is not allowed for String
+test_script 7:11.
+l7	    .@a$ = 1 - "0";
+	           ^^^^^
+"#, result.as_ref().err().unwrap()[2].message());
+    assert_eq!(r#"Multiply operator "*" is not allowed for String
+test_script 8:11.
+l8	    .@a$ = 1 * "0";
+	           ^^^^^
+"#, result.as_ref().err().unwrap()[3].message());
+    assert_eq!(r#"Divide operator "/" is not allowed for String
+test_script 9:11.
+l9	    .@a$ = 1 / "0";
+	           ^^^^^
+"#, result.as_ref().err().unwrap()[4].message());
+    assert_eq!(r#"Modulo operator "%" is not allowed for String
+test_script 10:11.
+l10	    .@a$ = 1 % "0";
+	           ^^^^^
+"#, result.as_ref().err().unwrap()[5].message());
+    assert_eq!(r#"Subtraction operator "-" is not allowed for String
+test_script 11:10.
+l11	    .@a = 1 - "0";
+	          ^^^^^
+"#, result.as_ref().err().unwrap()[6].message());
+    assert_eq!(r#"Multiply operator "*" is not allowed for String
+test_script 12:10.
+l12	    .@a = 1 * "0";
+	          ^^^^^
+"#, result.as_ref().err().unwrap()[8].message());
+    assert_eq!(r#"Divide operator "/" is not allowed for String
+test_script 13:10.
+l13	    .@a = 1 / "0";
+	          ^^^^^
+"#, result.as_ref().err().unwrap()[10].message());
+    assert_eq!(r#"Modulo operator "%" is not allowed for String
+test_script 14:10.
+l14	    .@a = 1 % "0";
+	          ^^^^^
+"#, result.as_ref().err().unwrap()[12].message());
+}
+#[test]
 fn type_checking_logical_and_or() {
     // Given
     let script = r#"
@@ -294,7 +366,7 @@ l6	    .@a = 1 && "0";
 "#, result.as_ref().err().unwrap()[1].message());
 }
 
-// #[test]
+#[test]
 fn type_checking_ternary() {
     // Given
     let script = r#"
@@ -303,9 +375,10 @@ fn type_checking_ternary() {
     set .@Style, 1;
     set .@s,1;
     set .@menu$, ((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000)";
+    set .@menu$, " ~ Next (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Previous (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Jump to...: ~ Revert to original (^0055FF"+.@Revert+"^000000)";
     "#;
     // When
-    let result = compile_script(script, compiler::DebugFlag::TypeChecker.value());
+    let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(false, result.is_err());
 }
