@@ -62,10 +62,26 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
         "rand" => {
             let min = arguments[0].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
-            let max = arguments[0].number_value().map_err(|err|
+            let max = arguments[1].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
             let res = (RandomState::new().build_hasher().finish() % max as u64) + min as u64; // this random function is crap
             let constant_ref = thread.vm.add_in_constant_pool(Value::new_number(res as i32));
+            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+        }
+        "min" => {
+            let arg1 = arguments[0].number_value().map_err(|err|
+                thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
+            let arg2 = arguments[1].number_value().map_err(|err|
+                thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
+            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number( arg1.min(arg2)));
+            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+        }
+        "max" => {
+            let arg1 = arguments[0].number_value().map_err(|err|
+                thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
+            let arg2 = arguments[1].number_value().map_err(|err|
+                thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
+            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number( arg1.max(arg2)));
             thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
         }
         _ => {
