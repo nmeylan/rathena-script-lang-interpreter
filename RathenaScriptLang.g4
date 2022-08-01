@@ -99,7 +99,7 @@ conditionalExpression
     ;
 
 assignmentExpression
-    : assignmentLeftExpression assignmentOperator conditionalExpression
+    : (assignmentLeftExpression assignmentOperator)+ conditionalExpression
     |   'set' '('? functionCallExpression ',' conditionalExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
     |   'set' '('? assignmentLeftExpression ',' conditionalExpression ')'?
     |   'setarray' '('? assignmentLeftExpression ',' conditionalExpression (',' argumentExpressionList)? ')'?

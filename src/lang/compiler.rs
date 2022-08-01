@@ -737,9 +737,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
-        let maybe_left = ctx.assignmentLeftExpression();
-        if let Some(left) = maybe_left {
+        if ctx.assignmentLeftExpression_all().len() > 0 {
             if ctx.Setarray().is_some() {
+                let left = ctx.assignmentLeftExpression(0).unwrap();
                 // Array can be assigned using setarray too
                 // *setarray <array name>[<first value>],<value>{,<value>...<value>};
                 self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <value>. In this language declaration require a value to assign
@@ -755,6 +755,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 }, self.compilation_details_from_context(ctx));
                 }
             } else if ctx.Copyarray().is_some() {
+                let left = ctx.assignmentLeftExpression(0).unwrap();
                 // Array can be assigned using copyarray too
                 // *copyarray <destination array>[<first value>],<source array>[<first value>],<amount of data to copy>
                 self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <source array>[<first value>]. Declare array variable.
@@ -766,25 +767,27 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap()); // <amount of data to copy>
                 self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"copyarray"), argument_count: 3 }, self.compilation_details_from_context(ctx));
             } else {
-                self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap());
-                if ctx.assignmentOperator().is_some() {
-                    let assignment_operator = &ctx.assignmentOperator().unwrap();
-                    // Convert a += 1; into a = a + 1;
-                    if assignment_operator.PlusEqual().is_some() {
-                        if left.variable().is_some() {
-                            let variable = Self::build_variable(&left.variable().unwrap());
-                            self.load_variable(&variable, &left.variable().unwrap(), ctx);
+                for (i, left) in ctx.assignmentLeftExpression_all().iter().enumerate() {
+                    self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap());
+                    if ctx.assignmentOperator(i).is_some() {
+                        let assignment_operator = &ctx.assignmentOperator(i).unwrap();
+                        // Convert a += 1; into a = a + 1;
+                        if assignment_operator.PlusEqual().is_some() {
+                            if left.variable().is_some() {
+                                let variable = Self::build_variable(&left.variable().unwrap());
+                                self.load_variable(&variable, &left.variable().unwrap(), ctx);
+                            }
+                            self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(ctx));
+                        } else if assignment_operator.MinusEqual().is_some() {
+                            if left.variable().is_some() {
+                                let variable = Self::build_variable(&left.variable().unwrap());
+                                self.load_variable(&variable, &left.variable().unwrap(), ctx);
+                            }
+                            self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(ctx));
                         }
-                        self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(ctx));
-                    } else if assignment_operator.MinusEqual().is_some() {
-                        if left.variable().is_some() {
-                            let variable = Self::build_variable(&left.variable().unwrap());
-                            self.load_variable(&variable, &left.variable().unwrap(), ctx);
-                        }
-                        self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(ctx));
                     }
+                    self.visit_assignmentLeftExpression(&left);
                 }
-                self.visit_assignmentLeftExpression(&left);
             }
         } else if ctx.Set().is_some() && ctx.functionCallExpression().is_some() { // edge case handling
             // handle set(getd(expr), assignement_expr); -> transform into setd(expr, assigment_expr);
