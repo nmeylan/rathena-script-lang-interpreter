@@ -1142,9 +1142,13 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 }
 
 pub fn parse_number(num: Cow<str>) -> i32 {
-    let maybe_i32 = num.parse::<i32>();
+    let maybe_i32 = if num.starts_with("0x") || num.starts_with("0X"){
+        i32::from_str_radix(&num.as_ref()[2..], 16)
+    } else {
+        num.parse::<i32>()
+    };
     if maybe_i32.is_err() {
-        panic!("Expected number to be u32, but was {}", num);
+        panic!("Expected number to be i32, but was {} due to {}", num, maybe_i32.err().unwrap());
     }
     maybe_i32.unwrap()
 }

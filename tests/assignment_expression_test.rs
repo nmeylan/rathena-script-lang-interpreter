@@ -50,6 +50,26 @@ fn double_assigment() {
 }
 
 #[test]
+fn hex_number() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@a = 0xE;
+    vm_dump_var("a", .@a);
+    vm_dump_var("b", .@a + 1);
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(14, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(15, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
+}
+
+#[test]
 fn assigment_to_local_variable() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));

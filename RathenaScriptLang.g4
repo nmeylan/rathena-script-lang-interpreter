@@ -220,7 +220,8 @@ externalDeclaration
     ;
 
 functionDefinition
-    :  Function Identifier compoundStatement
+    :  Function 'script' Identifier compoundStatement
+    |  Function Identifier compoundStatement
     |  Function Identifier ';'
     ;
 scriptInitialization
@@ -336,7 +337,7 @@ fragment Escape : '\\' ( '\'' | '\\' );
 fragment Digit : [0-9];
 fragment Letter : [A-Za-z_];
 
-Number : Digit+;
+Number : Digit+ | '0'[xX][a-fA-F]+;
 
 Whitespace
     :   [ \t]+
