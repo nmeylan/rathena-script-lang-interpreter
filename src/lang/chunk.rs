@@ -397,6 +397,7 @@ pub enum OpCode {
     CallNative { reference: u64, argument_count: usize },
     CallFunction { reference: u64, argument_count: usize },
     Equal,
+    SwitchCompare,
     NotEqual,
     LogicalAnd,
     LogicalOr,

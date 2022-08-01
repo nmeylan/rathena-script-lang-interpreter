@@ -178,6 +178,20 @@ impl Thread {
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
+                OpCode::SwitchCompare => {
+                    let stack_entry1 = self.stack.pop()?;
+                    let stack_entry2 = self.stack.peek(self.stack.len() - 1)?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
+                    let comparison_result = if v1.is_string() && v2.is_string() {
+                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                    } else if v2.is_number() && v2.is_number() {
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                    } else { false };
+                    let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
+                    let reference = self.vm.add_in_constant_pool(result_as_number);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                }
                 OpCode::NotEqual => {
                     // TODO refactor, same op code can be used with a variant
                     let stack_entry1 = self.stack.pop()?;

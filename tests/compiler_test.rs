@@ -504,15 +504,18 @@ fn native_input_declare_variable() {
 }
 
 
+#[test]
 fn debug_opcodes() {
     // Given
     let script = r#"#
-    setarray .@Styles[1], 1;
-    set .@Revert, 1;
-    set .@Style, 1;
-    set .@s,1;
-set .@menu$, " ~ Next (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Previous (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Jump to...: ~ Revert to original (^0055FF"+.@Revert+"^000000)";
-
+    switch(select("a:b:c")) {
+		case 1:
+		1 + 1;
+		break;
+		case 2:
+		input .@Style,0,29;
+		break;
+    }
     "#;
     // When
     let result = compile_script(script, compiler::DebugFlag::None.value()).unwrap();

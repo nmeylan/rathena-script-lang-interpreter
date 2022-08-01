@@ -439,9 +439,15 @@ impl Compiler {
         }
 
         if native.name == "input" {
-            let variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
-            let constant_reference = self.current_chunk().add_constant(Constant::String(variable_identifier));
-            self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_reference), self.compilation_details_from_context(ctx));
+            for (i, expr) in ctx.argumentExpressionList().unwrap().conditionalExpression_all().iter().enumerate() {
+                if i == 0 {
+                    let variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+                    let constant_reference = self.current_chunk().add_constant(Constant::String(variable_identifier));
+                    self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_reference), self.compilation_details_from_context(ctx));
+                } else {
+                    self.visit_conditionalExpression(expr);
+                }
+            }
         } else if ctx.argumentExpressionList().is_some() {
             self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
         }
@@ -817,7 +823,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.visit_conditionalExpression(ctx.conditionalExpression(1).as_ref().unwrap());
             let jump_to_index = self.current_chunk().last_op_code_index() + 1;
             self.current_chunk().set_op_code_at(then_jump_index, OpCode::Jump(jump_to_index));
-        } else{
+        } else {
             self.visit_children(ctx);
         }
         self.type_checker.dec_current_expression_index(true, ctx, "visit_conditionalExpression");
@@ -948,13 +954,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
             goto_op_code_indices_to_update.insert(i, vec![]);
             for switch_labels in switch_block_group.switchLabels().iter() {
-                for label in switch_labels.switchLabel_all().iter() {
+                for (j, label) in switch_labels.switchLabel_all().iter().enumerate() {
                     let (switch_expression_op_code, _) = self.current_chunk().clone_op_code_at(switch_expression_index);
                     if label.Case().is_some() {
-                        self.current_chunk().emit_op_code(switch_expression_op_code, self.compilation_details_from_context(ctx));
                         self.visit_constantExpression(label.constantExpression().as_ref().unwrap());
                         self.type_checker.drop_current_type(ctx);
-                        self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(label.as_ref()));
+                        self.current_chunk().emit_op_code(OpCode::SwitchCompare, self.compilation_details_from_context(label.as_ref()));
                         let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(label.as_ref()));
                         let goto_case_statement_index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(label.as_ref()));
                         if_op_code_indices_to_update.push(if_index);
@@ -984,7 +989,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         /*
          * 3.Update all case "if" op_code to jump after to next case when not match
         */
-        let end_of_switch_op_code = self.current_chunk().last_op_code_index() + 1;
+        let end_of_switch_op_code = self.current_chunk().last_op_code_index();
         let mut i = 0;
         loop {
             if i >= if_op_code_indices_to_update.len() - 1 {
@@ -998,7 +1003,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 break;
             }
             // If is updated to jump to next if, when not match
-            self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(if_op_code_indices_to_update[i + 1] - 3));
+            self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(if_op_code_indices_to_update[i + 1] - 2));
             i += 1;
         }
         let block_state = self.current_chunk().drop_block_state();

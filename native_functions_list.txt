@@ -6,4 +6,5 @@ vm_dump_locals, 0, 0
 setglobalvariable,3,3
 getglobalvariable,2,2
 loadconstant,1,1
-input,1,1
+input,1,3
+select,1,255
