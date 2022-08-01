@@ -208,8 +208,10 @@ impl Compiler {
             let rc = rc.clone();
             let (function_name, compilation_error_details) = rc.borrow();
             if !class.functions().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
-                compiler.register_error_with_details_class(class, UndefinedFunction, compilation_error_details.clone(),
-                                                           format!("Function \"{}\" is not defined", function_name))
+                if !compiler.classes[0].functions.borrow().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
+                    compiler.register_error_with_details_class(class, UndefinedFunction, compilation_error_details.clone(),
+                                                               format!("Function \"{}\" is not defined", function_name))
+                }
             }
         }
     }
@@ -1105,7 +1107,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             return;
         }
         let function = FunctionDefinition::new(function_name);
-        self.add_function_to_current_class(function);
+        if ctx.Script().is_some() {
+            self.classes[0].add_function(function); // Add global function
+        } else {
+            self.add_function_to_current_class(function);
+        }
         self.visit_children(ctx);
         // TODO: it won't work for all cases, to refactor
         self.current_declared_function().set_returned_type(self.type_checker.drop_current_type(ctx));

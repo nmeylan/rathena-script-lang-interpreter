@@ -326,6 +326,7 @@ Menu: 'menu';
 Close: 'close';
 Close2: 'close2';
 Next: 'next';
+Script: 'script';
 
 // Literal
 Identifier : Letter (Letter | Digit)*;
