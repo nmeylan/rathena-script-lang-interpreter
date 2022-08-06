@@ -507,7 +507,7 @@ fn native_input_declare_variable() {
 #[test]
 fn debug_opcodes() {
     // Given
-    let script = r#"#
+    let script = r#"
     switch(select("a:b:c")) {
 		case 1:
 		1 + 1;

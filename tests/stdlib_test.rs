@@ -19,7 +19,7 @@ fn pow() {
     vm_dump_var("nine", pow(3, .@two));
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -36,7 +36,7 @@ fn pow_with_wrong_type() {
     vm_dump_var("nine", pow("3", .@two));
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events;
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
@@ -59,7 +59,7 @@ fn rand() {
     vm_dump_var("randomv", rand(1, 9));
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));

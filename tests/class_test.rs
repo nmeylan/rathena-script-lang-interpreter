@@ -126,7 +126,8 @@ fn on_init_hook_test() {
             .hello$ = .hello$ + .hello$;
             vm_dump_var("counter", .counter);
             vm_dump_var("hello_str", .hello$);
-            vm_dump_var("array_index0_", .array[0]);
+            .@a = .array[0];
+            vm_dump_var("array_index0_", .@a);
         }
         end;
         OnInit:

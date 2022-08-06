@@ -33,7 +33,7 @@ fn simple_condition() {
     } else {
         .@h$ = "i am true";
     }
-    if(1)
+    if(true)
         .@i$ = "i am true";
 
     if(0)
@@ -105,7 +105,7 @@ fn ternary_condition() {
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::OpCode.value() |DebugFlag::Stack.value() | DebugFlag::Execution.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));

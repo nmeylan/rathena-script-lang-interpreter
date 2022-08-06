@@ -48,7 +48,7 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
         }
         "getvariableofnpc" => {
             getvariableofnpc(thread, instance, call_frame, arguments)?
-        }
+        },
         // stdlib
         "pow" => {
             let value = arguments[0].number_value().map_err(|err|
@@ -244,6 +244,9 @@ fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: 
     // so we assign arguments starting at index + 1;
     let mut index = index + 1; // setarray .@a[0], assignment, arguments.
     for (i, array_reference) in arguments_ref.iter().enumerate() { // arguments are in reverse order
+        if i == 0 {
+            continue;
+        }
         if array_reference.is_some() {
             if !array.value_type.match_value(&arguments[i]) {
                 return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(),

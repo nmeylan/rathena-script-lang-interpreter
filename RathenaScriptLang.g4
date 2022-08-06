@@ -7,16 +7,21 @@ compilationUnit
 primaryExpression
     : variable
     | Identifier
-    |   Number
-    |   String
-    |   '-' // it is a special arguments for command, lets see if it can cause weird parse issue
+    | True
+    | False
+    | Number
+    | String
+    | '-' // it is a special arguments for command, lets see if it can cause weird parse issue
     ;
 
 functionCallExpression
     : Identifier '(' argumentExpressionList? ')'
+    | Underscore '(' argumentExpressionList? ')'
     | Identifier argumentExpressionList
     | Callfunc '('? String ( ',' argumentExpressionList)? ')'
     | Callfunc String ( ',' argumentExpressionList)?
+    | Callsub '('? Identifier ( ',' argumentExpressionList)? ')'
+    | Callsub Identifier ( ',' argumentExpressionList)?
     ;
 
 postfixExpression
@@ -267,6 +272,7 @@ Tilde : '~';
 QuestionMark : '?';
 Quote : '\'';
 DoubleQuote : '"';
+Underscore: '_';
 // one or two char token
 LogicalOr : '|';
 OrOp : '||';
@@ -318,9 +324,12 @@ Default : 'default:';
 Function : 'function';
 Break : 'break';
 Callfunc: 'callfunc';
+Callsub: 'callsub';
 Eof : 'eof';
 Setarray: 'setarray';
 Copyarray: 'copyarray';
+True: 'true';
+False: 'false';
 // Functions without args
 Menu: 'menu';
 Close: 'close';

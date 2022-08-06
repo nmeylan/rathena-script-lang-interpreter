@@ -54,7 +54,7 @@ pub struct RuntimeError {
     pub stack_traces: Vec<StackTrace>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TemporaryRuntimeError {
     pub message: String,
 }

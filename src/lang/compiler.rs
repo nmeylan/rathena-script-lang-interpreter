@@ -166,8 +166,8 @@ impl Compiler {
 
     pub fn end_compilation(&mut self) -> (Vec<ClassFile>, HashMap<String, Vec<CompilationError>>) {
         for class in self.classes.iter() {
-            Self::check_called_function_are_defined(self, class);
             Self::add_hook_functions(class);
+            Self::check_called_function_are_defined(self, class);
             for function in class.functions().iter() {
                 Self::update_goto_jump_index(self, class, function.as_ref());
             }
@@ -186,8 +186,8 @@ impl Compiler {
         compiler.visit_compilationUnit(tree.as_ref().unwrap());
 
         for class in compiler.classes.iter() {
-            Self::check_called_function_are_defined(&compiler, class);
             Self::add_hook_functions(class);
+            Self::check_called_function_are_defined(&compiler, class);
             for function in class.functions().iter() {
                 Self::update_goto_jump_index(&compiler, class, function.as_ref());
             }
@@ -222,11 +222,15 @@ impl Compiler {
         }
         let functions = class.functions();
         let main_function: &FunctionDefinition = functions.get(0).unwrap().borrow();
-        for hook_label in main_function.declared_labels().iter().filter(|label| HOOK_LABEL.contains(&label.name.as_str())) {
+        for hook_label in main_function.declared_labels().iter().filter(|label| HOOK_LABEL.contains(&label.name.as_str())
+            || main_function.callsub_contains(&label.name)) {
             let mut function_definition = FunctionDefinition::new(format!("_{}", hook_label.name.clone()));
             let mut chunk = Chunk::default();
             let mut declared_local_variable_references: HashMap<u64, Variable, NoopHasher> = Default::default();
+            let start_index = hook_label.first_op_code_index;
             let mut index = hook_label.first_op_code_index;
+            let mut condition_depth = 0;
+            let mut end_if_indexes: Vec<usize> = vec![];
             loop {
                 if index >= main_function.chunk.op_codes.borrow().len() { break; }
                 let op_code = main_function.chunk.op_codes.borrow()[index].clone();
@@ -236,9 +240,33 @@ impl Compiler {
                         declared_local_variable_references.insert(reference, variable.clone());
                     }
                 }
-                chunk.emit_op_code(op_code.clone(), compilation_details);
-                if mem::discriminant(&op_code) == mem::discriminant(&OpCode::End)
-                    || mem::discriminant(&op_code) == mem::discriminant(&OpCode::Return(false)) {
+                // Update OpCode jump index
+                match op_code {
+                    Jump(i) => chunk.emit_op_code(OpCode::Jump(i - start_index), compilation_details),
+                    OpCode::If(i) =>  chunk.emit_op_code(OpCode::If(i - start_index), compilation_details),
+                    _ => chunk.emit_op_code(op_code.clone(), compilation_details),
+                };
+                // To know if we are inside a if or not
+                match op_code {
+                    OpCode::If(i) => {
+                        if mem::discriminant(&main_function.chunk.op_codes.borrow()[i]) == mem::discriminant(&OpCode::Else) {
+                            if let OpCode::Jump(j) = main_function.chunk.op_codes.borrow()[i - 1].clone() {
+                                end_if_indexes.push(j);
+                            }
+                        } else {
+                            end_if_indexes.push(i);
+                        }
+                        condition_depth += 1;
+                    } ,
+                    _ => {},
+                };
+                if let Some(if_index) = end_if_indexes.last() {
+                    if *if_index <= index {
+                        condition_depth -= 1;
+                        end_if_indexes.pop();
+                    }
+                }
+                if condition_depth == 0 && mem::discriminant(&op_code) == mem::discriminant(&OpCode::End) {
                     break;
                 }
                 index += 1;
@@ -532,6 +560,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
             self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
         }
+        if ctx.True().is_some() {
+            let reference = self.current_chunk().add_constant(Constant::Number(1));
+            self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
+        }
+        if ctx.False().is_some() {
+            let reference = self.current_chunk().add_constant(Constant::Number(0));
+            self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
+        }
         if ctx.Identifier().is_some() {
             let reference = self.current_chunk().add_constant(
                 Constant::String(
@@ -547,10 +583,12 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
     fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) {
-        let function_or_native_name = if ctx.Identifier().is_some() {
+        let mut function_or_native_name = if ctx.Identifier().is_some() {
             ctx.Identifier().unwrap().symbol.text.to_string()
         } else if ctx.String().is_some() {
             remove_quote_from_string(ctx.String().as_ref().unwrap().symbol.text.as_ref())
+        } else if ctx.Underscore().is_some() {
+            String::from("_")
         } else {
             return;
         };
@@ -561,12 +599,18 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else {
             0
         };
-
         if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
             self.visit_native_function(ctx, &function_or_native_name, first_argument_op_code_index, argument_count, native)
         } else {
             if ctx.argumentExpressionList().is_some() {
                 self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
+            }
+            if ctx.Underscore().is_some() {
+                return;
+            }
+            if ctx.Callsub().is_some() {
+                self.current_class().insert_callsub(function_or_native_name.clone());
+                function_or_native_name = format!("_{}", function_or_native_name);
             }
             self.type_checker.remove_type(argument_count);
             self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_details_from_context(ctx)));

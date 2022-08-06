@@ -23,16 +23,6 @@ pub struct CallFrame {
     current_op_code: usize,
 }
 
-impl Display for CallFrame {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.op_codes.len() <= self.current_op_code {
-            return f.write_str("<end>\n");
-        }
-        write!(f, "   OpCode [{}] {:?}", self.current_op_code, self.op_codes[self.current_op_code]).unwrap();
-        f.write_str("\n")
-    }
-}
-
 impl CallFrame {
     pub fn new(function: &Function, stack_pointer: usize, arguments_count: usize, debug_flag: u16) -> Self {
         let mut call_frame = Self {

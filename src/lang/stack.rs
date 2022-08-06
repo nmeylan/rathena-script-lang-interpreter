@@ -53,7 +53,7 @@ impl Stack {
     }
 
     pub fn truncate(&self, index: usize) {
-        self.values.borrow_mut().truncate(index + 1);
+        self.values.borrow_mut().truncate(index);
     }
 
     pub fn len(&self) -> usize {

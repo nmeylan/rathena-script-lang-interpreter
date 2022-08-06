@@ -335,6 +335,10 @@ impl Vm {
         self.native_pool.get(&reference)
     }
 
+    pub fn get_global_class(&self, reference: &u64) -> Arc<Class> {
+        self.get_class(&String::from("_Global"))
+    }
+
     pub fn get_class(&self, name: &String) -> Arc<Class> {
         self.classes_pool.read().unwrap().get(name).unwrap().clone()
     }

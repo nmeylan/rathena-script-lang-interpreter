@@ -169,3 +169,39 @@ fn label_with_goto_in_a_nested_function() {
     assert_eq!(true, events.lock().unwrap().get("d").is_none());
     assert_eq!(String::from("the end"), events.lock().unwrap().get("endd").unwrap().value.string_value().unwrap().clone());
 }
+
+#[test]
+fn callsub_with_return() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    callsub L_Style, 1, 2;
+    vm_dump_var("a", 0);
+    callsub L_Style, 2, 2;
+    vm_dump_var("b", 0);
+
+    L_Style:
+        .@a = getarg(0);
+        .@b = getarg(1);
+         .@c = 1;
+        for (.@i = 0; .@i < 2; .@i +=1) {
+            .@c += .@i;
+        }
+        vm_dump_var("c", .@c);
+        if (.@a < .@b) {
+            return;
+        } else
+            end;
+        end;
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(0, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(true, events.lock().unwrap().get("b").is_none());
+    assert_eq!(2, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap().clone());
+}

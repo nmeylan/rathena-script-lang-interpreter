@@ -32,6 +32,27 @@ fn simple_function_call() {
 }
 
 #[test]
+fn underscore_function_call() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::OpCode.value());
+    let classes = compile_script(r#"
+    my_func();
+    function my_func {
+        .@a$ = "hello world";
+        vm_dump_var("a", _(.@a$));
+    }
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+}
+
+#[test]
 fn function_call_with_arguments() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));

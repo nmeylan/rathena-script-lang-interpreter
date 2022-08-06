@@ -323,7 +323,17 @@ impl Thread {
                 }
                 OpCode::CallFunction { argument_count, reference } => {
                     self.add_stack_trace(StackTrace::from_compilation_detail(&self.current_source_line, call_frame.name.clone(), class.name.clone()));
-                    let function = class.functions_pool.get(reference).unwrap();
+                    let global_class = self.vm.get_global_class(reference);
+                    let mut is_global_function = false;
+                    let mut function = class.functions_pool.get(reference);
+                    if function.is_none() {
+                        function = global_class.functions_pool.get(reference);
+                        is_global_function = function.is_some();
+                    }
+                    if function.is_none() {
+                        return Err(self.new_runtime_error("Function is not defined in current script nor in global functions list".to_string()));
+                    }
+                    let function = function.unwrap();
                     let stack_pointer = self.stack.len() - argument_count;
                     // Convert function argument to constant ref. If we pass current frame's variable in function argument, we need to retrieve value in sub callframe.
                     // We can do that by putting retrieved constant reference and put them in the stack.
@@ -356,6 +366,11 @@ impl Thread {
                         }
                     }
                     let new_function_call_frame = CallFrame::new(function, stack_pointer, *argument_count, self.debug_flag);
+                    let class = if is_global_function {
+                        global_class.as_ref()
+                    } else {
+                        class
+                    };
                     let break_type = self.run(new_function_call_frame, depth + 1, class, instance, native_method_handler.clone())?;
                     self.stack_traces.pop();
                     match break_type {
@@ -376,8 +391,8 @@ impl Thread {
                     }
                 }
                 OpCode::Call => {}
-                OpCode::Return(not_empty_return) => {
-                    return if *not_empty_return {
+                OpCode::Return(has_returned) => {
+                    return if *has_returned {
                         let returned_stack_entry = self.stack.pop()?;
                         self.stack.truncate(call_frame.stack_pointer);
                         let returned_value = self.value_from_stack_entry(&returned_stack_entry, &call_frame, class, instance)?;
@@ -703,7 +718,20 @@ impl Thread {
                 let constant_ref = variable.value_ref.get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
                 Ok(constant_ref)
-            }
+            },
+            StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
+                if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
+                    let array_value_ref = array.get(*index);
+                    let value = array_value_ref.map_err(|e| self.new_runtime_from_temporary(e.clone(), e.message.as_str()))?;
+                    if let Some(value) = value {
+                        Ok(value)
+                    } else {
+                        Err(self.new_runtime_error(format!("Value at index {} is not initialized", index)))
+                    }
+                } else {
+                    Err(self.new_runtime_error("value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array".to_string()))
+                }
+            },
             x => Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
     }

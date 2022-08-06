@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::cell::{RefCell};
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
@@ -116,6 +117,12 @@ impl ClassFile {
         }
     }
 
+    pub fn insert_callsub(&self, label: String) {
+        let functions = self.functions.borrow();
+        let main_function = functions.get(0).unwrap();
+        main_function.insert_callsub(label);
+    }
+
     pub fn load_variable(&self, variable: &Variable, scope: Scope) -> Result<u64, String> {
         let cell = RefCell::new(Default::default());
         let variables = match scope {
@@ -186,6 +193,14 @@ impl FunctionDefinition {
         self.state.as_ref().unwrap().declared_labels.borrow_mut().insert(label.name.clone(), Rc::new(label));
     }
 
+    pub fn insert_callsub(&self, label: String) {
+        self.state.as_ref().unwrap().callsub.borrow_mut().insert(label);
+    }
+
+    pub fn callsub_contains(&self, label: &String) -> bool {
+        self.state.as_ref().unwrap().callsub.borrow().contains(label)
+    }
+
     pub fn get_label(&self, label_name: &String) -> Option<Rc<Label>> {
         let declared_labels = self.state.as_ref().unwrap().declared_labels.borrow();
         declared_labels.get(label_name).cloned()
@@ -199,6 +214,7 @@ impl FunctionDefinition {
 #[derive(Debug, Default)]
 pub struct FunctionDefinitionState {
     declared_labels: RefCell<HashMap<String, Rc<Label>>>,
+    callsub: RefCell<HashSet<String>>
 }
 
 #[derive(Debug)]
