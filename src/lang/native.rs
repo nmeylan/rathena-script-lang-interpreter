@@ -16,6 +16,9 @@ use crate::lang::vm::{Hashcode, NativeMethodHandler, Vm};
 
 pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Class, instance: &mut Option<Arc<Instance>>, call_frame: &mut CallFrame, arguments: Vec<Value>, arguments_ref: Vec<Option<u64>>, native_method_handler: &&dyn NativeMethodHandler) -> Result<(), RuntimeError> {
     match native.name.as_str() {
+        "getargcount" => {
+            thread.push_constant_on_stack(Value::new_number(call_frame.arguments_count as i32))
+        }
         "getarg" => {
             getarg(thread, call_frame, &arguments)?
         }
@@ -56,33 +59,29 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             let exponent = arguments[1].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "Pow second argument should be a number"))?;
             let res = value.pow(exponent as u32);
-            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number(res));
-            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+            thread.push_constant_on_stack(Value::new_number(res));
         }
         "rand" => {
             let min = arguments[0].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
             let max = arguments[1].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
-            let res = (RandomState::new().build_hasher().finish() % max as u64) + min as u64; // this random function is crap
-            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number(res as i32));
-            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+            let res = (RandomState::new().build_hasher().finish() % max as u64) + min as u64; // this random function is crap, should do the job for random in npc
+            thread.push_constant_on_stack(Value::new_number(res as i32));
         }
         "min" => {
             let arg1 = arguments[0].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
             let arg2 = arguments[1].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
-            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number( arg1.min(arg2)));
-            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+            thread.push_constant_on_stack(Value::new_number(arg1.min(arg2)));
         }
         "max" => {
             let arg1 = arguments[0].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
             let arg2 = arguments[1].number_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "rand first argument should be a number"))?;
-            let constant_ref = thread.vm.add_in_constant_pool(Value::new_number( arg1.max(arg2)));
-            thread.stack.push(StackEntry::ConstantPoolReference(constant_ref));
+            thread.push_constant_on_stack(Value::new_number(arg1.max(arg2)));
         }
         _ => {
             return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), format!("Native function {} is not handled yet!", native.name)));

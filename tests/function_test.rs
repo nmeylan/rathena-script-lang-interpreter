@@ -106,6 +106,7 @@ fn function_call_with_two_arguments() {
     function my_func {
         .@a$ = getarg(0) + " " + getarg(1);
         vm_dump_var("a", .@a$);
+        vm_dump_var("b", getargcount());
     }
     "#, compiler::DebugFlag::None.value()).unwrap();
     // When
@@ -114,6 +115,7 @@ fn function_call_with_two_arguments() {
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
 }
 
 #[test]
