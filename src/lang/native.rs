@@ -126,7 +126,7 @@ fn getd(thread: &Thread, class: &Class, instance: &Option<Arc<Instance>>, call_f
     if variable_from_string.value_ref.borrow().is_array() {
         // pop HeapReference, we don't need it on stack as we already have all reference to be able to load array.
         // When variable is an array, stack has been pushed with a HeapReference when calling load_xxxxx_variable functions
-        thread.stack.pop()?;
+        thread.stack.pop().map_err(|err| thread.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
         load_array_index_value(thread, class, instance, call_frame, variable_identifier, &variable_from_string, variable_reference)?;
     }
     Ok(())
@@ -301,7 +301,7 @@ fn getarg(thread: &Thread, call_frame: &CallFrame, arguments: &Vec<Value>) -> Re
     } else if arguments.len() > 2 {
         return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), String::from("Can't call getarg with more than 2 arguments")));
     } else {
-        let stack_entry = thread.stack.peek(call_frame.stack_pointer + index)?;
+        let stack_entry = thread.stack.peek(call_frame.stack_pointer + index).map_err(|err| thread.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;;
         thread.stack.push(stack_entry);
     }
     Ok(())

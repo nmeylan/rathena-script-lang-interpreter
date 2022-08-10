@@ -97,14 +97,6 @@ impl RuntimeError {
             error_type: RuntimeErrorType::Execution,
         }
     }
-    pub fn new_internal(message: String) -> Self {
-        Self {
-            message,
-            source: CompilationDetail::new_empty(),
-            error_type: RuntimeErrorType::Internal,
-            stack_traces: vec![],
-        }
-    }
     pub fn from_temporary(source: CompilationDetail, stack_traces: Vec<StackTrace>, temporary: TemporaryRuntimeError) -> Self {
         Self {
             message: temporary.message,

@@ -88,7 +88,7 @@ impl Thread {
                     self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable, owner_reference)?;
                 }
                 OpCode::StoreGlobal => {
-                    let variable_name_stack_entry = self.stack.pop()?;
+                    let variable_name_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let value_from_stack = self.value_from_stack_entry(&variable_name_stack_entry, &call_frame, class, instance)?;
                     let variable_name = value_from_stack.string_value().unwrap();
                     let variable = Variable::from_string(variable_name);
@@ -96,7 +96,7 @@ impl Thread {
                     self.variable_assign_reference(class, instance, &mut call_frame, &native_method_handler, variable, owner_reference)?;
                 }
                 OpCode::LoadGlobal => {
-                    let variable_name_stack_entry = self.stack.pop()?;
+                    let variable_name_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let value_from_stack = self.value_from_stack_entry(&variable_name_stack_entry, &call_frame, class, instance)?;
                     let variable_name = value_from_stack.string_value().unwrap();
                     let variable = Variable::from_string(variable_name);
@@ -104,13 +104,13 @@ impl Thread {
                     self.load_global(class, instance, &call_frame, &native_method_handler, &variable, owner_reference)?;
                 }
                 OpCode::ArrayStore => {
-                    let arr_index = self.stack.pop()?;
+                    let arr_index = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let arr_index = self.value_from_stack_entry(&arr_index, &call_frame, class, instance)?.number_value().map_err(|e| self.new_runtime_from_temporary(e, "Expected array index to be a number"))?;
-                    let array_ref_stack_entry = self.stack.pop()?;
-                    let value_ref_stack_entry = self.stack.pop()?;
+                    let array_ref_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let value_ref_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         let array = self.vm.array_from_heap_reference(owner_reference, reference)
-                            .map_err(|err| self.new_runtime_from_temporary(err, "VM: ArrayStore expected to retrieve array from heap reference"))?;
+                            .map_err(|err| self.new_runtime_from_temporary(err.clone(), "VM: ArrayStore expected to retrieve array from heap reference"))?;
                         let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
                         if let Ok(constant_ref) = value_constant_ref {
                             array.assign(arr_index as usize, constant_ref, self.array_update_callback(&call_frame, &native_method_handler, array.clone()));
@@ -120,9 +120,9 @@ impl Thread {
                     }
                 }
                 OpCode::ArrayLoad => {
-                    let arr_index = self.stack.pop()?;
+                    let arr_index = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let arr_index = self.value_from_stack_entry(&arr_index, &call_frame, class, instance)?.number_value().map_err(|e| self.new_runtime_from_temporary(e, "Expected array index to be a number"))?;
-                    let array_ref_stack_entry = self.stack.pop()?;
+                    let array_ref_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         self.stack.push(StackEntry::ArrayHeapReference((owner_reference, reference, arr_index as usize)));
                     } else {
@@ -165,28 +165,28 @@ impl Thread {
                 }
                 OpCode::DefineFunction(_) => {}
                 OpCode::Equal => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_string() && v2.is_string() {
-                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
                     } else if v2.is_number() && v2.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
                 OpCode::SwitchCompare => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.peek(self.stack.len() - 1)?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.peek(self.stack.len() - 1).map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_string() && v2.is_string() {
-                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
                     } else if v2.is_number() && v2.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
@@ -194,54 +194,54 @@ impl Thread {
                 }
                 OpCode::NotEqual => {
                     // TODO refactor, same op code can be used with a variant
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_string() && v2.is_string() {
-                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? != v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? != v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
                     } else if v2.is_number() && v1.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? != v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? != v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
                 OpCode::LogicalAnd => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v2.is_number() && v1.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1 && v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1 && v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
                 OpCode::LogicalOr => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v2.is_number() && v1.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1 || v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1 || v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
                 OpCode::Relational(relational) => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_number() && v2.is_number() {
                         match relational {
-                            Relational::GT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? > v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
-                            Relational::GTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? >= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
-                            Relational::LT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? < v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
-                            Relational::LTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? <= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            Relational::GT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? > v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            Relational::GTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? >= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            Relational::LT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? < v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            Relational::LTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? <= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                         }
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
@@ -249,23 +249,23 @@ impl Thread {
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
                 OpCode::Add => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         Value::String(Some(format!("{}{}",
-                                                   if v1.is_string() { v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.clone() } else { v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.to_string() },
-                                                   if v2.is_string() { v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.clone() } else { v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.to_string() })))
+                                                   if v1.is_string() { v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.clone() } else { v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.to_string() },
+                                                   if v2.is_string() { v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.clone() } else { v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.to_string() })))
                     } else {
-                        Value::Number(Some(v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?))
+                        Value::Number(Some(v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?))
                     };
                     let reference = self.vm.add_in_constant_pool(new_value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
                 OpCode::NumericOperation(operation) => {
-                    let stack_entry1 = self.stack.pop()?;
-                    let stack_entry2 = self.stack.pop()?;
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let new_value = if v1.is_string() || v2.is_string() {
@@ -278,10 +278,10 @@ impl Thread {
                         return Err(self.new_runtime_error(format!("Attempt to {} strings: {} - {}", operation_name, v1, v2)));
                     } else {
                         let res = match operation {
-                            NumericOperation::Subtract => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? - v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
-                            NumericOperation::Multiply => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? * v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
-                            NumericOperation::Divide => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? / v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
-                            NumericOperation::Modulo => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? % v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            NumericOperation::Subtract => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? - v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            NumericOperation::Multiply => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? * v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            NumericOperation::Divide => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? / v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            NumericOperation::Modulo => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? % v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                         };
                         Value::Number(Some(res))
                     };
@@ -307,7 +307,7 @@ impl Thread {
                     let mut arguments: Vec<Value> = vec![];
                     let mut arguments_ref: Vec<Option<u64>> = vec![];
                     for _ in 0..*argument_count {
-                        let stack_entry = self.stack.pop()?;
+                        let stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                         arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?);
                         arguments_ref.push(self.constant_ref_from_stack_entry(&stack_entry, &call_frame, class, instance).ok());
                     }
@@ -339,7 +339,7 @@ impl Thread {
                     // We can do that by putting retrieved constant reference and put them in the stack.
                     let mut arguments: Vec<Value> = vec![];
                     for _ in 0..*argument_count {
-                        let stack_entry = self.stack.pop()?;
+                        let stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                         arguments.push(self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?);
                     }
                     arguments.reverse();
@@ -393,7 +393,7 @@ impl Thread {
                 OpCode::Call => {}
                 OpCode::Return(has_returned) => {
                     return if *has_returned {
-                        let returned_stack_entry = self.stack.pop()?;
+                        let returned_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                         self.stack.truncate(call_frame.stack_pointer);
                         let returned_value = self.value_from_stack_entry(&returned_stack_entry, &call_frame, class, instance)?;
                         let reference = self.vm.add_in_constant_pool(returned_value);
@@ -405,9 +405,9 @@ impl Thread {
                 }
                 OpCode::Command => {}
                 OpCode::If(jump_to_index) => {
-                    let stack_entry = self.stack.pop()?;
+                    let stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let value = self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?;
-                    if value.number_value().map_err(|err| self.new_runtime_from_temporary(err, "VM: If expected expression result to be a number"))? != 1 {
+                    if value.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), "VM: If expected expression result to be a number"))? != 1 {
                         op_index = *jump_to_index - 1;
                     }
                 }
@@ -438,16 +438,16 @@ impl Thread {
             // Calling native getglobalarray which put on stack array: number of stack entreies + (index/value reference)*
             // TODO: doc
             native_method_handler.handle(&Native {name: "getglobalarray".to_string()}, arguments, self, call_frame);
-            let number_of_stack_entries = self.stack.pop()?;
+            let number_of_stack_entries = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
             let number_of_stack_entries = self.value_from_stack_entry(&number_of_stack_entries, call_frame, class, instance)?.number_value().unwrap() as usize;
             let mut i = 0;
             loop {
                 if i >= number_of_stack_entries {
                     break;
                 }
-                let array_index = self.stack.pop()?;
+                let array_index = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                 let array_index = self.value_from_stack_entry(&array_index, call_frame, class, instance)?.number_value().unwrap() as usize;
-                let array_value = self.stack.pop()?;
+                let array_value = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                 let array_value = self.constant_ref_from_stack_entry(&array_value, call_frame, class, instance)?;
                 array.assign::<Box<dyn Fn(Array)>>(array_index, array_value, None);
                 i += 2;
@@ -551,7 +551,7 @@ impl Thread {
             self.stack.push(StackEntry::HeapReference((owner_reference, variable_ref)));
             variable_ref
         } else {
-            let stack_entry = self.stack.pop()?;
+            let stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
             let value = self.value_from_stack_entry(&stack_entry, call_frame, class, instance)?;
             if !variable.value_ref.value_type.match_value(&value) {
                 return Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(),

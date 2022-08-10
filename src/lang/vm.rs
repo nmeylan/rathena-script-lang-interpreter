@@ -204,7 +204,7 @@ impl Vm {
     }
 
     pub fn run_main_function(vm: Arc<Vm>, class_reference: u64, instance_reference: u64, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
-        let instance = vm.get_instance_from_heap(class_reference, instance_reference)?;
+        let instance = vm.get_instance_from_heap(class_reference, instance_reference).map_err(|e| RuntimeError::from_temporary(CompilationDetail::new_empty(), vec![], e))?;
         let debug_flag = vm.debug_flag;
         let mut thread = Thread::new(vm, debug_flag);
         thread.run_main(instance, native_method_handler).map_err(|e| {
@@ -300,16 +300,16 @@ impl Vm {
         owner_entries.insert(reference, HeapEntry::Instance(instance));
     }
 
-    pub fn get_instance_from_heap(&self, owner_reference: u64, reference: u64) -> Result<Arc<Instance>, RuntimeError> {
+    pub fn get_instance_from_heap(&self, owner_reference: u64, reference: u64) -> Result<Arc<Instance>, TemporaryRuntimeError> {
         if self.heap.read().unwrap().get(&owner_reference).is_none() {
             self.heap.write().unwrap().insert(owner_reference, Default::default());
         }
         let heap_ref = self.heap.read().unwrap();
         let owner_entries = heap_ref.get(&owner_reference).unwrap().read().unwrap();
-        let entry = owner_entries.get(&reference).ok_or(RuntimeError::new_internal(format!("Heap entry is not an instance for owner reference {} and reference {}", owner_reference, reference)))?;
+        let entry = owner_entries.get(&reference).ok_or(TemporaryRuntimeError::new_string(format!("Heap entry is not an instance for owner reference {} and reference {}", owner_reference, reference)))?;
         match entry {
             HeapEntry::Instance(entry) => Ok(entry.clone()),
-            _x => Err(RuntimeError::new_internal(format!("Heap entry does not contain an instance for owner reference {} and reference {}", owner_reference, reference))),
+            _x => Err(TemporaryRuntimeError::new_string(format!("Heap entry does not contain an instance for owner reference {} and reference {}", owner_reference, reference))),
         }
     }
 
