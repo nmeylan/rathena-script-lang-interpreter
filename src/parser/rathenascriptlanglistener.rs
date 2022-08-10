@@ -295,6 +295,26 @@ fn enter_commandStatement(&mut self, _ctx: &CommandStatementContext<'input>) { }
  */
 fn exit_commandStatement(&mut self, _ctx: &CommandStatementContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#menuOptionText}.
+ * @param ctx the parse tree
+ */
+fn enter_menuOptionText(&mut self, _ctx: &MenuOptionTextContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#menuOptionText}.
+ * @param ctx the parse tree
+ */
+fn exit_menuOptionText(&mut self, _ctx: &MenuOptionTextContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#menuLabel}.
+ * @param ctx the parse tree
+ */
+fn enter_menuLabel(&mut self, _ctx: &MenuLabelContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#menuLabel}.
+ * @param ctx the parse tree
+ */
+fn exit_menuLabel(&mut self, _ctx: &MenuLabelContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#labeledStatement}.
  * @param ctx the parse tree
  */

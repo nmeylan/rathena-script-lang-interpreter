@@ -536,6 +536,12 @@ impl Compiler {
             self.current_chunk().emit_op_code(OpCode::AssignVariable(constant_reference), self.compilation_details_from_context(ctx));
         }
     }
+
+    fn goto<'input>(&mut self, label: String, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) {
+        let index = self.current_chunk().emit_op_code(OpCode::Goto(0), self.compilation_details_from_context(node));
+        let detail = self.compilation_details_from_context(node);
+        self.current_chunk().push_goto_index(label, index, detail);
+    }
 }
 
 impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
@@ -623,6 +629,55 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) {
         let native_name = ctx.get_child(0).as_ref().unwrap().get_text();
+
+        // example: menu "String", Label, "A:B", Label,...;
+        // we will transform this command above into:
+        // 1. call to native "menu" function to wait player answer
+        // 2. generate if(option_number) + goto Label
+        if native_name == "menu" {
+            let argument_count = ctx.menuOptionText_all().len() as usize;
+            ctx.menuOptionText_all().iter().for_each(|option_text_node| {
+                if option_text_node.String().is_some() {
+                    let constant_ref = self.current_chunk().add_constant(Constant::String(remove_quote_from_string(&option_text_node.String().as_ref().unwrap().symbol.text)));
+                    self.current_chunk().emit_op_code(LoadConstant(constant_ref), self.compilation_details_from_context(ctx));
+                } else {
+                    self.visit_children(option_text_node.as_ref());
+                }
+            });
+            // 1. Call native menu function
+            self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count }, self.compilation_details_from_context(ctx));
+
+            // 2. iterate over all String, to generate if + goto. A string can contain multiple options
+            let mut option_number = 0;
+            // When label is "-" we want to jump right after the menu
+            let mut goto_op_code_indicies_to_update: Vec<usize> = vec![];
+            for (i, options) in ctx.menuOptionText_all().iter().enumerate() {
+                let iter_count = if options.String().is_some() {
+                    options.String().as_ref().unwrap().symbol.text.split(":").count()
+                } else {
+                    1 // In case option text is an expression, we consider that returned String does not contains ":"
+                };
+                for option in 0..iter_count {
+                    option_number += 1;
+                    let constant_ref = self.current_chunk().add_constant(Constant::Number(option_number));
+                    self.current_chunk().emit_op_code(LoadConstant(constant_ref), self.compilation_details_from_context(ctx));
+                    let current_op_code_index = self.current_chunk().emit_op_code(OpCode::SwitchCompare, self.compilation_details_from_context(ctx));
+                    let next_if_index = current_op_code_index + 3; // jump to next "if", when "if" is false. + 3, because current op code is "SwitchCompare" next op code is "if" then "goto".
+                    self.current_chunk().emit_op_code(OpCode::If(next_if_index), self.compilation_details_from_context(ctx));
+                    let menu_label = ctx.menuLabel(i).unwrap();
+                    if menu_label.Identifier().is_some() {
+                        self.goto( menu_label.Identifier().as_ref().unwrap().symbol.text.to_string(), ctx);
+                    } else {
+                        // meaning that Label is "-"
+                        goto_op_code_indicies_to_update.push(self.current_chunk().emit_op_code(OpCode::Goto(0), self.compilation_details_from_context(ctx)));
+                    }
+                }
+            }
+            for i in goto_op_code_indicies_to_update.iter() {
+                self.current_chunk().set_op_code_at(*i, OpCode::Goto(self.current_chunk().last_op_code_index() + 1));
+            }
+            return;
+        }
         self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&native_name), argument_count: 0 }, self.compilation_details_from_context(ctx));
         if native_name == "close" {
             self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
@@ -1051,7 +1106,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 }
                 break;
             }
-            // If is updated to jump to next if, when not match
+            // "If" is updated to jump to next if, when not match
             self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(if_op_code_indices_to_update[i + 1] - 2));
             i += 1;
         }
@@ -1121,10 +1176,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let index = self.current_chunk().emit_op_code(OpCode::Jump(0), self.compilation_details_from_context(ctx));
             self.current_chunk().push_block_break_index(index);
         } else if ctx.Goto().is_some() {
-            let index = self.current_chunk().emit_op_code(OpCode::Goto(0), self.compilation_details_from_context(ctx));
             let label = ctx.Identifier().unwrap().symbol.text.clone();
-            let detail = self.compilation_details_from_context(ctx);
-            self.current_chunk().push_goto_index(label.to_string(), index, detail);
+            self.goto(label.to_string(), ctx);
         } else if ctx.End().is_some() {
             self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
         }

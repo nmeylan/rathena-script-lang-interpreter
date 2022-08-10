@@ -21,6 +21,7 @@ pub struct Event {
 
 pub struct VmHook {
     pub hook: Box<dyn Fn(Event) + Send + Sync>,
+    pub hook_handle_native: Option<Box<dyn Fn(String, &Thread) -> bool + Send + Sync>>,
     pub global_variable_store: Mutex<Vec<GlobalVariableEntry>>,
 }
 
@@ -29,13 +30,21 @@ pub struct GlobalVariableEntry {
     pub name: String,
     pub value: Value,
     pub scope: String,
-    pub index: Option<usize>
+    pub index: Option<usize>,
 }
 
 impl VmHook {
     pub fn new(hook: Box<dyn Fn(Event) + Send + Sync>) -> Self {
         Self {
             hook,
+            hook_handle_native: None,
+            global_variable_store: Default::default(),
+        }
+    }
+    pub fn new_with_custom_handler(hook: Box<dyn Fn(Event) + Send + Sync>, hook_handle_native: Box<dyn Fn(String, &Thread) -> bool + Send + Sync>) -> Self {
+        Self {
+            hook,
+            hook_handle_native: Some(hook_handle_native),
             global_variable_store: Default::default(),
         }
     }
@@ -61,6 +70,12 @@ impl VmHook {
 
 impl NativeMethodHandler for VmHook {
     fn handle(&self, native: &rathena_script_lang_interpreter::lang::value::Native, params: Vec<Value>, thread: &Thread, call_frame: &CallFrame) {
+        if self.hook_handle_native.is_some() {
+            let should_continue = self.hook_handle_native.as_ref().unwrap()(native.name.clone(), thread);
+            if !should_continue {
+                return;
+            }
+        }
         if native.name.eq("println") {
             println!("{}", params.iter().map(|p| {
                 match p {
@@ -106,7 +121,7 @@ impl NativeMethodHandler for VmHook {
                     name: variable_name.clone(),
                     value: params[2].clone(),
                     scope: variable_scope.clone(),
-                    index: None
+                    index: None,
                 }
             );
         } else if native.name.eq("getglobalvariable") {
@@ -124,7 +139,7 @@ impl NativeMethodHandler for VmHook {
             let variable_scope = params[1].string_value().unwrap();
             let mut index = 2;
             loop {
-                if index >= params.len(){
+                if index >= params.len() {
                     break;
                 }
                 let array_index = params[index].number_value().unwrap();
@@ -134,7 +149,7 @@ impl NativeMethodHandler for VmHook {
                         name: variable_name.clone(),
                         value,
                         scope: variable_scope.clone(),
-                        index: Some(array_index as usize)
+                        index: Some(array_index as usize),
                     }
                 );
                 index += 2;
@@ -143,7 +158,7 @@ impl NativeMethodHandler for VmHook {
             let variable_name = params[0].string_value().unwrap();
             if variable_name.ends_with('$') {
                 thread.push_constant_on_stack(Value::new_string("Hello world from input".to_string()));
-            } else{
+            } else {
                 thread.push_constant_on_stack(Value::new_number(10));
             }
         } else if native.name.eq("getglobalarray") {

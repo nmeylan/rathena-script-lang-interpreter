@@ -134,9 +134,12 @@ statement
     |   labeledStatement
     ;
 commandStatement
-    : Menu conditionalExpression ',' (Identifier | '-') (',' conditionalExpression ',' (Identifier | '-'))*
+    : Menu menuOptionText ',' menuLabel  (',' menuOptionText ',' menuLabel)*
     | Close | Close2 | Next;
-
+menuOptionText
+    :  (String | conditionalExpression);
+menuLabel
+    :  (Identifier | '-');
 labeledStatement
     : Label;
 
