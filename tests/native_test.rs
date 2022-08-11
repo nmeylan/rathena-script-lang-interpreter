@@ -66,3 +66,22 @@ fn menu_test() {
     Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
     assert_eq!(String::from("E"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
 }
+
+
+#[test]
+fn implode_test() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    setarray .@a$[1], "Hello", "World", "this", "is implode function";
+    vm_dump_var("a", implode(.@a$, " "));
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from("Hello World this is implode function"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+}

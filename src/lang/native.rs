@@ -25,6 +25,9 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
         "getarraysize" => {
             getarraysize(thread, &arguments)?
         }
+        "implode" => {
+            implode(thread, &arguments)?
+        }
         "cleararray" => {
             cleararray(thread, call_frame, native_method_handler, &arguments)?
         }
@@ -286,6 +289,21 @@ fn getarraysize(thread: &Thread, arguments: &[Value]) -> Result<(), RuntimeError
     let array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();
     let len = array.len();
     let reference = thread.vm.add_in_constant_pool(Value::Number(Some(len as i32)));
+    thread.stack.push(StackEntry::ConstantPoolReference(reference));
+    Ok(())
+}
+
+fn implode(thread: &Thread, arguments: &[Value]) -> Result<(), RuntimeError> {
+    let (owner_reference, reference) = arguments[0].reference_value().map_err(|err|
+        thread.new_runtime_from_temporary(err, "implode first argument should be array name"))?;
+    let array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();
+    let array_values_guard = array.values.read().unwrap();
+    let joined_values = array_values_guard.iter().enumerate()
+        .map(|(index, _)| array_values_guard.get(index).unwrap()).filter(|v| v.is_some())
+        .map(|constant_ref| thread.vm.get_from_constant_pool(constant_ref.unwrap()).unwrap().value().string_value().unwrap().clone())
+        .collect::<Vec<String>>()
+        .join(arguments[1].string_value().map_err(|_| thread.new_runtime_error(String::from("implode second argument should be a string")))?);
+    let reference = thread.vm.add_in_constant_pool(Value::new_string(joined_values));
     thread.stack.push(StackEntry::ConstantPoolReference(reference));
     Ok(())
 }

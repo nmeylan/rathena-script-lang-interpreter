@@ -487,7 +487,7 @@ impl Compiler {
             if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                 self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
             }
-        } else if native.name == "getarraysize" {
+        } else if native.name == "getarraysize" || native.name == "implode" {
             // getarraysize accept the array name without index.
             // In case of loadglobal we use the variable string then build a variable from it. But if it does not contains bracket
             // we can't determine it is an array.

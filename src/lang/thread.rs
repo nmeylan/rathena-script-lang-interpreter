@@ -498,7 +498,7 @@ impl Thread {
         self.stack.push(StackEntry::ConstantPoolReference(reference));
     }
 
-    fn new_runtime_error(&self, message: String) -> RuntimeError {
+    pub fn new_runtime_error(&self, message: String) -> RuntimeError {
         RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), message)
     }
 

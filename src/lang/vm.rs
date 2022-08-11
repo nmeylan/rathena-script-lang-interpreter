@@ -58,6 +58,7 @@ pub const NATIVE_FUNCTIONS: &[StaticNativeFunction] = &[
     StaticNativeFunction { name: "rand", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
     StaticNativeFunction { name: "min", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
     StaticNativeFunction { name: "max", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "implode", return_type: Some(ValueType::String), min_arguments: 2, max_arguments: 2 },
 ];
 
 impl NativeFunction {
