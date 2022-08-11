@@ -348,7 +348,7 @@ Next: 'next';
 Script: 'script';
 
 // Literal
-Identifier : Letter (Letter | Digit)*;
+Identifier : (Letter | Digit '_' Letter) (Letter | Digit)*;
 
 Label : Identifier ':';
 
