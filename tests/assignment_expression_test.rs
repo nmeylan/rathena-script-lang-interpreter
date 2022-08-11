@@ -142,6 +142,8 @@ fn assignment_with_number_operation() {
     .@f = 2 + 3 * 2;
     .@g = 1 + (2 + 3) * (2 + (10 / 2 + 7) * 2 + (2 + 2 * 3));
     .@h = 2 - 3 + 2 - 1 + (2 - 3 - 1 + 1);
+    .@j = 1 << 4;
+    .@k = 32 >> 1;
     set .@a1, 1 + 1;
     set .@b1, 4 - 1;
     set .@c1, 4 * 2;
@@ -169,6 +171,8 @@ fn assignment_with_number_operation() {
     assert_eq!(8, events.lock().unwrap().get("f").unwrap().value.number_value().unwrap().clone());
     assert_eq!(171, events.lock().unwrap().get("g").unwrap().value.number_value().unwrap().clone());
     assert_eq!(-1, events.lock().unwrap().get("h").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(16, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(16, events.lock().unwrap().get("k").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("a1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("b1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(8, events.lock().unwrap().get("c1").unwrap().value.number_value().unwrap().clone());

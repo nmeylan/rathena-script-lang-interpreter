@@ -279,7 +279,9 @@ impl Thread {
                             NumericOperation::Multiply => "multiply",
                             NumericOperation::Divide => "divide",
                             NumericOperation::Modulo => "modulo",
-                            NumericOperation::Add => "add"
+                            NumericOperation::Add => "add",
+                            NumericOperation::RightShift => "right shift",
+                            NumericOperation::LeftShift => "left shift",
                         };
                         return Err(self.new_runtime_error(format!("Attempt to {} strings: {} - {}", operation_name, v1, v2)));
                     } else {
@@ -289,6 +291,8 @@ impl Thread {
                             NumericOperation::Divide => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? / v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                             NumericOperation::Modulo => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? % v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                             NumericOperation::Add => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            NumericOperation::RightShift => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? >> v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            NumericOperation::LeftShift => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? << v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                         };
                         Value::Number(Some(res))
                     };

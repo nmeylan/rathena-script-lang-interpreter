@@ -451,4 +451,6 @@ pub enum NumericOperation {
     Multiply,
     Divide,
     Modulo,
+    RightShift,
+    LeftShift,
 }

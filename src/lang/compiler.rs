@@ -781,12 +781,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
 
     fn visit_argumentExpressionList(&mut self, ctx: &ArgumentExpressionListContext<'input>) {
-        // for expression in ctx.conditionalExpression_all().iter() {
-        //     if expression.Number().is_some() {
-        //         let number_value = &expression.Number().unwrap().symbol.text;
-        //         self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
-        //     }
-        // }
         self.visit_children(ctx);
     }
 
@@ -818,6 +812,32 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                     self.register_error(Type, ctx, "Modulo operator \"%\" is not allowed for String".to_string());
                 }
                 self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Modulo), self.compilation_details_from_context(operator.as_ref()));
+            }
+        }
+    }
+
+    fn visit_shiftExpression(&mut self, ctx: &ShiftExpressionContext<'input>) {
+        self.visit_additiveExpression(&ctx.additiveExpression(ctx.additiveExpression_all().len() - 1).unwrap());
+
+        for (i, _) in ctx.additiveExpression_all().iter().enumerate().rev() {
+            if i == ctx.additiveExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_additiveExpression(&ctx.additiveExpression(i).unwrap());
+            let operator = ctx.shiftOperator(i).unwrap();
+
+            if operator.DoubleLeftCaret().is_some() {
+                if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
+                    self.type_checker.debug_type_checking(ctx, "visit_shiftExpression");
+                    self.register_error(Type, ctx, "Shift operator \"<<\" is not allowed for String".to_string());
+                }
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::LeftShift), self.compilation_details_from_context(operator.as_ref()));
+            } else if operator.DoubleRightCaret().is_some() {
+                if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
+                    self.type_checker.debug_type_checking(ctx, "visit_shiftExpression");
+                    self.register_error(Type, ctx, "Shift operator \">>\" is not allowed for String".to_string());
+                }
+                self.current_chunk().emit_op_code(NumericOperation(NumericOperation::RightShift), self.compilation_details_from_context(operator.as_ref()));
             }
         }
     }
@@ -931,6 +951,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             self.current_chunk().emit_op_code(OpCode::LogicalOr, self.compilation_details_from_context(ctx));
         }
     }
+
+
 
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
         if ctx.assignmentLeftExpression_all().len() > 0 {

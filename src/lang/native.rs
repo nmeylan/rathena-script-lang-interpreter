@@ -301,7 +301,7 @@ fn getarg(thread: &Thread, call_frame: &CallFrame, arguments: &Vec<Value>) -> Re
     } else if arguments.len() > 2 {
         return Err(RuntimeError::new_string(thread.current_source_line.clone(), thread.stack_traces.clone(), String::from("Can't call getarg with more than 2 arguments")));
     } else {
-        let stack_entry = thread.stack.peek(call_frame.stack_pointer + index).map_err(|err| thread.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;;
+        let stack_entry = thread.stack.peek(call_frame.stack_pointer + index).map_err(|err| thread.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
         thread.stack.push(stack_entry);
     }
     Ok(())
