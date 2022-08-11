@@ -360,3 +360,42 @@ fn input_assign_variable() {
     // Then
     assert_eq!(String::from("Hello world from input"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
+
+#[test]
+fn inc_then_load() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@a = 0;
+    vm_dump_var("a", ++.@a);
+    vm_dump_var("b", .@a);
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(1, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
+}
+#[test]
+fn load_then_inc() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@a = 0;
+    vm_dump_var("a", .@a++);
+    vm_dump_var("b", .@a);
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::Execution.value() | DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(0, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
+}

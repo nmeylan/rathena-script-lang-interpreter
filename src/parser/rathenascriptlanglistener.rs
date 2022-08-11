@@ -45,6 +45,26 @@ fn enter_postfixExpression(&mut self, _ctx: &PostfixExpressionContext<'input>) {
  */
 fn exit_postfixExpression(&mut self, _ctx: &PostfixExpressionContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#incrementThenLoad}.
+ * @param ctx the parse tree
+ */
+fn enter_incrementThenLoad(&mut self, _ctx: &IncrementThenLoadContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#incrementThenLoad}.
+ * @param ctx the parse tree
+ */
+fn exit_incrementThenLoad(&mut self, _ctx: &IncrementThenLoadContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#loadThenIncrement}.
+ * @param ctx the parse tree
+ */
+fn enter_loadThenIncrement(&mut self, _ctx: &LoadThenIncrementContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#loadThenIncrement}.
+ * @param ctx the parse tree
+ */
+fn exit_loadThenIncrement(&mut self, _ctx: &LoadThenIncrementContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#argumentExpressionList}.
  * @param ctx the parse tree
  */

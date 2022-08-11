@@ -48,6 +48,13 @@ impl Stack {
             .get(index).cloned()
             .ok_or_else(|| TemporaryRuntimeError::new_string(format!("Tried to access index \"{}\" is out of bounds \"{}\"", index, self.len() - 1)))
     }
+
+    pub fn peek_last(&self) -> Result<StackEntry, TemporaryRuntimeError> {
+        let index = self.len() - 1;
+        self.values.borrow()
+            .get(index).cloned()
+            .ok_or_else(|| TemporaryRuntimeError::new_string(format!("Tried to access index \"{}\" is out of bounds \"{}\"", index, self.len() - 1)))
+    }
     pub fn contents(&self) -> Ref<Vec<StackEntry>> {
         self.values.borrow()
     }

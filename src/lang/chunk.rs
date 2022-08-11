@@ -214,7 +214,7 @@ impl FunctionDefinition {
 #[derive(Debug, Default)]
 pub struct FunctionDefinitionState {
     declared_labels: RefCell<HashMap<String, Rc<Label>>>,
-    callsub: RefCell<HashSet<String>>
+    callsub: RefCell<HashSet<String>>,
 }
 
 #[derive(Debug)]
@@ -267,7 +267,7 @@ impl Default for Chunk {
             label_gotos_op_code_indices: RefCell::new(Default::default()),
             current_block_state: RefCell::new(0),
             block_states: RefCell::new(vec![]),
-            chunk_state: RefCell::new(Default::default())
+            chunk_state: RefCell::new(Default::default()),
         }
     }
 }
@@ -355,7 +355,7 @@ impl Chunk {
 
     pub fn add_new_block_state(&self) -> usize {
         *self.current_block_state.borrow_mut() = self.block_states.borrow().len();
-        self.block_states.borrow_mut().push( Default::default());
+        self.block_states.borrow_mut().push(Default::default());
         *self.current_block_state.borrow()
     }
 
@@ -395,6 +395,7 @@ impl Chunk {
 #[derive(Debug, Clone, Hash)]
 pub enum OpCode {
     LoadConstant(u64),
+    LoadValue, // Read reference from stack, push its constant reference to the stack
     StoreGlobal,
     LoadGlobal,
     // To handle edge case for function using variable reference. Some function takes variable (not variable name) which should be evaluated as variable ref
@@ -445,6 +446,7 @@ pub enum Relational {
 
 #[derive(Debug, Clone, Hash)]
 pub enum NumericOperation {
+    Add,
     Subtract,
     Multiply,
     Divide,

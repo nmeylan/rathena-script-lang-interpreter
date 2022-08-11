@@ -26,10 +26,17 @@ functionCallExpression
 
 postfixExpression
     : primaryExpression
-    | variable ('++' | '--')
-    | ('++' | '--') variable
+    | incrementThenLoad
+    | loadThenIncrement
     | '(' conditionalExpression ')'
     | functionCallExpression
+    ;
+
+incrementThenLoad
+    : ('++' | '--') variable
+    ;
+loadThenIncrement
+    : variable ('++' | '--')
     ;
 
 argumentExpressionList

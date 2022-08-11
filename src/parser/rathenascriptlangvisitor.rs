@@ -34,6 +34,18 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_postfixExpression(&mut self, ctx: &PostfixExpressionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#incrementThenLoad}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_incrementThenLoad(&mut self, ctx: &IncrementThenLoadContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#loadThenIncrement}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_loadThenIncrement(&mut self, ctx: &LoadThenIncrementContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#argumentExpressionList}.
 	 * @param ctx the parse tree
 	 */
@@ -413,6 +425,22 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 	 * @param ctx the parse tree
 	 */
 		fn visit_postfixExpression(&mut self, ctx: &PostfixExpressionContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#incrementThenLoad}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_incrementThenLoad(&mut self, ctx: &IncrementThenLoadContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#loadThenIncrement}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_loadThenIncrement(&mut self, ctx: &LoadThenIncrementContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -903,6 +931,16 @@ where
 
 	fn visit_postfixExpression(&mut self, ctx: &PostfixExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_postfixExpression(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_incrementThenLoad(&mut self, ctx: &IncrementThenLoadContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_incrementThenLoad(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_loadThenIncrement(&mut self, ctx: &LoadThenIncrementContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_loadThenIncrement(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

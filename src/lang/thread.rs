@@ -138,6 +138,11 @@ impl Thread {
                 OpCode::LoadLocal(reference) => {
                     self.load_local_variable(&call_frame, reference)?;
                 }
+                OpCode::LoadValue => {
+                    let stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let constant_reference = self.constant_ref_from_stack_entry(&stack_entry, &call_frame, class, instance)?;
+                    self.stack.push(StackEntry::ConstantPoolReference(constant_reference));
+                }
                 OpCode::StoreInstance(reference) => {
                     if instance.is_none() {
                         return Err(self.new_runtime_error("Can't store instance variable in a static(non-instance) context".to_string()));
@@ -273,7 +278,8 @@ impl Thread {
                             NumericOperation::Subtract => "subtract",
                             NumericOperation::Multiply => "multiply",
                             NumericOperation::Divide => "divide",
-                            NumericOperation::Modulo => "modulo"
+                            NumericOperation::Modulo => "modulo",
+                            NumericOperation::Add => "add"
                         };
                         return Err(self.new_runtime_error(format!("Attempt to {} strings: {} - {}", operation_name, v1, v2)));
                     } else {
@@ -282,6 +288,7 @@ impl Thread {
                             NumericOperation::Multiply => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? * v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                             NumericOperation::Divide => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? / v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                             NumericOperation::Modulo => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? % v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            NumericOperation::Add => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
                         };
                         Value::Number(Some(res))
                     };

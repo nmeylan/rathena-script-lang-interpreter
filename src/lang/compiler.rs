@@ -243,7 +243,7 @@ impl Compiler {
                 // Update OpCode jump index
                 match op_code {
                     Jump(i) => chunk.emit_op_code(OpCode::Jump(i - start_index), compilation_details),
-                    OpCode::If(i) =>  chunk.emit_op_code(OpCode::If(i - start_index), compilation_details),
+                    OpCode::If(i) => chunk.emit_op_code(OpCode::If(i - start_index), compilation_details),
                     _ => chunk.emit_op_code(op_code.clone(), compilation_details),
                 };
                 // To know if we are inside a if or not
@@ -257,8 +257,8 @@ impl Compiler {
                             end_if_indexes.push(i);
                         }
                         condition_depth += 1;
-                    } ,
-                    _ => {},
+                    }
+                    _ => {}
                 };
                 if let Some(if_index) = end_if_indexes.last() {
                     if *if_index <= index {
@@ -542,6 +542,55 @@ impl Compiler {
         let detail = self.compilation_details_from_context(node);
         self.current_chunk().push_goto_index(label, index, detail);
     }
+
+    fn store_variable<'input>(&mut self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), variable: Variable, enable_type_checking: bool) {
+        if enable_type_checking {
+            if let Some(current_value_type) = self.type_checker.current_type(node) {
+                if variable.value_ref.borrow().is_string() && current_value_type.is_number() {
+                    self.type_checker.debug_type_checking(node, "store_variable");
+                    self.register_error(CompilationErrorType::Type, node,
+                                        format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
+                }
+                if variable.value_ref.borrow().is_string_array() && current_value_type.is_number() {
+                    self.type_checker.debug_type_checking(node, "store_variable");
+                    self.register_error(CompilationErrorType::Type, node,
+                                        format!("Variable \"{}\" is declared as an Array of string but an index is assigned with a Number.", variable.to_script_identifier()));
+                }
+                if variable.value_ref.borrow().is_number() && current_value_type.is_string() {
+                    self.type_checker.debug_type_checking(node, "store_variable");
+                    self.register_error(CompilationErrorType::Type, node,
+                                        format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
+                }
+
+                if variable.value_ref.borrow().is_number_array() && current_value_type.is_string() {
+                    self.type_checker.debug_type_checking(node, "store_variable");
+                    self.register_error(CompilationErrorType::Type, node,
+                                        format!("Variable \"{}\" is declared as an Array of number but an index is assigned with a String.", variable.to_script_identifier()));
+                }
+            }
+            self.type_checker.drop_current_type(node);
+        }
+        match variable.scope {
+            Scope::Server | Scope::Account | Scope::Character | Scope::ServerTemporary | Scope::CharacterTemporary => {
+                let variable_name = variable.to_script_identifier();
+                let reference = self.current_chunk().add_constant(Constant::String(variable_name));
+                self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(node));
+                self.current_chunk().emit_op_code(StoreGlobal, self.compilation_details_from_context(node));
+            }
+            Scope::Local => {
+                let reference = self.current_chunk().add_local(variable);
+                self.current_chunk().emit_op_code(StoreLocal(reference), self.compilation_details_from_context(node));
+            }
+            Scope::Instance => {
+                let reference = self.current_class().add_instance_variable(variable);
+                self.current_chunk().emit_op_code(StoreInstance(reference), self.compilation_details_from_context(node));
+            }
+            Scope::Npc => {
+                let reference = self.current_class().add_static_variable(variable);
+                self.current_chunk().emit_op_code(StoreStatic(reference), self.compilation_details_from_context(node));
+            }
+        }
+    }
 }
 
 impl<'input> ParseTreeVisitor<'input, RathenaScriptLangParserContextType> for Compiler {}
@@ -585,7 +634,53 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         if ctx.variable().is_some() {
             self.visit_variable(ctx.variable().as_ref().unwrap());
         }
-        // self.visit_children(ctx)
+    }
+
+    fn visit_incrementThenLoad(&mut self, ctx: &IncrementThenLoadContext<'input>) {
+        let variable = Self::build_variable(&ctx.variable().unwrap());
+        if !variable.value_ref.value_type.is_number() {
+            self.register_error(Type, ctx, format!("Operator \"{}\" is not allowed for String", if ctx.IncrementOp().is_some() { "++" } else { "--" }));
+            return;
+        }
+        let one = self.current_chunk().add_constant(Constant::Number(1));
+        if ctx.IncrementOp().is_some() {
+            self.load_variable(&variable, &ctx.variable().unwrap(), ctx);
+            self.current_chunk().emit_op_code(LoadConstant(one), self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(ctx));
+        } else {
+            self.load_variable(&variable, &ctx.variable().unwrap(), ctx);
+            self.current_chunk().emit_op_code(LoadConstant(one), self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(ctx));
+        }
+        self.store_variable(ctx, variable.clone(), false);
+        self.load_variable(&variable, &ctx.variable().unwrap(), ctx);
+    }
+
+    fn visit_loadThenIncrement(&mut self, ctx: &LoadThenIncrementContext<'input>) {
+        let variable = Self::build_variable(&ctx.variable().unwrap());
+        if !variable.value_ref.value_type.is_number() {
+            self.register_error(Type, ctx, format!("Operator \"{}\" is not allowed for String", if ctx.IncrementOp().is_some() { "++" } else { "--" }));
+            return;
+        }
+        self.type_checker.inc_current_expression_index(ctx, "visit_loadThenIncrement");
+        let one = self.current_chunk().add_constant(Constant::Number(1));
+        if ctx.IncrementOp().is_some() {
+            self.load_variable(&variable, &ctx.variable().unwrap(), ctx);
+            self.current_chunk().emit_op_code(LoadValue, self.compilation_details_from_context(ctx));
+            self.load_variable(&variable, &ctx.variable().unwrap(), ctx);
+            self.current_chunk().emit_op_code(LoadConstant(one), self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(Add, self.compilation_details_from_context(ctx));
+            self.store_variable(ctx, variable, false);
+        } else {
+            self.load_variable(&variable, &ctx.variable().unwrap(), ctx);
+            self.current_chunk().emit_op_code(LoadValue, self.compilation_details_from_context(ctx));
+            self.load_variable(&variable, &ctx.variable().unwrap(), ctx);
+            self.current_chunk().emit_op_code(LoadConstant(one), self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(ctx));
+            self.store_variable(ctx, variable, false);
+        }
+        self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
+        self.type_checker.dec_current_expression_index(true, ctx, "visit_loadThenIncrement");
     }
 
     fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) {
@@ -660,16 +755,16 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 for option in 0..iter_count {
                     option_number += 1;
                     let constant_ref = self.current_chunk().add_constant(Constant::Number(option_number));
-                    self.current_chunk().emit_op_code(LoadConstant(constant_ref), self.compilation_details_from_context(ctx));
-                    let current_op_code_index = self.current_chunk().emit_op_code(OpCode::SwitchCompare, self.compilation_details_from_context(ctx));
+                    self.current_chunk().emit_op_code(LoadConstant(constant_ref), self.compilation_details_from_context(options.as_ref()));
+                    let current_op_code_index = self.current_chunk().emit_op_code(OpCode::SwitchCompare, self.compilation_details_from_context(options.as_ref()));
                     let next_if_index = current_op_code_index + 3; // jump to next "if", when "if" is false. + 3, because current op code is "SwitchCompare" next op code is "if" then "goto".
-                    self.current_chunk().emit_op_code(OpCode::If(next_if_index), self.compilation_details_from_context(ctx));
+                    self.current_chunk().emit_op_code(OpCode::If(next_if_index), self.compilation_details_from_context(options.as_ref()));
                     let menu_label = ctx.menuLabel(i).unwrap();
                     if menu_label.Identifier().is_some() {
-                        self.goto( menu_label.Identifier().as_ref().unwrap().symbol.text.to_string(), ctx);
+                        self.goto(menu_label.Identifier().as_ref().unwrap().symbol.text.to_string(), menu_label.as_ref());
                     } else {
                         // meaning that Label is "-"
-                        goto_op_code_indicies_to_update.push(self.current_chunk().emit_op_code(OpCode::Goto(0), self.compilation_details_from_context(ctx)));
+                        goto_op_code_indicies_to_update.push(self.current_chunk().emit_op_code(OpCode::Goto(0), self.compilation_details_from_context(menu_label.as_ref())));
                     }
                 }
             }
@@ -935,52 +1030,10 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
     fn visit_assignmentLeftExpression(&mut self, ctx: &AssignmentLeftExpressionContext<'input>) {
         if ctx.variable().is_some() {
-            let variable = Self::build_variable(&ctx.variable().unwrap());
-            if let Some(current_value_type) = self.type_checker.current_type(ctx) {
-                if variable.value_ref.borrow().is_string() && current_value_type.is_number() {
-                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
-                    self.register_error(CompilationErrorType::Type, ctx,
-                                        format!("Variable \"{}\" is declared as a String but is assigned with a Number.", variable.to_script_identifier()));
-                }
-                if variable.value_ref.borrow().is_string_array() && current_value_type.is_number() {
-                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
-                    self.register_error(CompilationErrorType::Type, ctx,
-                                        format!("Variable \"{}\" is declared as an Array of string but an index is assigned with a Number.", variable.to_script_identifier()));
-                }
-                if variable.value_ref.borrow().is_number() && current_value_type.is_string() {
-                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
-                    self.register_error(CompilationErrorType::Type, ctx,
-                                        format!("Variable \"{}\" is declared as a Number but is assigned with a String.", variable.to_script_identifier()));
-                }
-
-                if variable.value_ref.borrow().is_number_array() && current_value_type.is_string() {
-                    self.type_checker.debug_type_checking(ctx, "visit_assignmentLeftExpression");
-                    self.register_error(CompilationErrorType::Type, ctx,
-                                        format!("Variable \"{}\" is declared as an Array of number but an index is assigned with a String.", variable.to_script_identifier()));
-                }
-            }
-            self.type_checker.drop_current_type(ctx);
+            let variable = Self::build_variable(&ctx.variable().unwrap().clone());
             let is_array = variable.value_ref.borrow().is_array();
-            match variable.scope {
-                Scope::Server | Scope::Account | Scope::Character | Scope::ServerTemporary | Scope::CharacterTemporary => {
-                    let variable_name = ctx.variable().as_ref().unwrap().get_text();
-                    let reference = self.current_chunk().add_constant(Constant::String(variable_name));
-                    self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
-                    self.current_chunk().emit_op_code(StoreGlobal, self.compilation_details_from_context(ctx));
-                }
-                Scope::Local => {
-                    let reference = self.current_chunk().add_local(variable);
-                    self.current_chunk().emit_op_code(StoreLocal(reference), self.compilation_details_from_context(ctx));
-                }
-                Scope::Instance => {
-                    let reference = self.current_class().add_instance_variable(variable);
-                    self.current_chunk().emit_op_code(StoreInstance(reference), self.compilation_details_from_context(ctx));
-                }
-                Scope::Npc => {
-                    let reference = self.current_class().add_static_variable(variable);
-                    self.current_chunk().emit_op_code(StoreStatic(reference), self.compilation_details_from_context(ctx));
-                }
-            }
+            self.store_variable(ctx, variable, true);
+
             if is_array {
                 self.visit_conditionalExpression(ctx.variable().as_ref().unwrap().conditionalExpression().as_ref().unwrap());
                 self.type_checker.pop_current_expression_types();
@@ -1245,7 +1298,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 }
 
 pub fn parse_number(num: Cow<str>) -> i32 {
-    let maybe_i32 = if num.starts_with("0x") || num.starts_with("0X"){
+    let maybe_i32 = if num.starts_with("0x") || num.starts_with("0X") {
         i32::from_str_radix(&num.as_ref()[2..], 16)
     } else {
         num.parse::<i32>()
