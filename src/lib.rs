@@ -3,4 +3,4 @@ extern crate core;
 
 pub mod lang;
 pub mod parser;
-mod util;
+pub mod util;

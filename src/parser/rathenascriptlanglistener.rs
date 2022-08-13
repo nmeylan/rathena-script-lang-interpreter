@@ -615,6 +615,36 @@ fn enter_scriptName(&mut self, _ctx: &ScriptNameContext<'input>) { }
  */
 fn exit_scriptName(&mut self, _ctx: &ScriptNameContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#npcShopDiscount}.
+ * @param ctx the parse tree
+ */
+fn enter_npcShopDiscount(&mut self, _ctx: &NpcShopDiscountContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#npcShopDiscount}.
+ * @param ctx the parse tree
+ */
+fn exit_npcShopDiscount(&mut self, _ctx: &NpcShopDiscountContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#npcShopItem}.
+ * @param ctx the parse tree
+ */
+fn enter_npcShopItem(&mut self, _ctx: &NpcShopItemContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#npcShopItem}.
+ * @param ctx the parse tree
+ */
+fn exit_npcShopItem(&mut self, _ctx: &NpcShopItemContext<'input>) { }
+/**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#npcShopPrice}.
+ * @param ctx the parse tree
+ */
+fn enter_npcShopPrice(&mut self, _ctx: &NpcShopPriceContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#npcShopPrice}.
+ * @param ctx the parse tree
+ */
+fn exit_npcShopPrice(&mut self, _ctx: &NpcShopPriceContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#scope_specifier}.
  * @param ctx the parse tree
  */

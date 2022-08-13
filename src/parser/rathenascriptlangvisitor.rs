@@ -376,6 +376,24 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_scriptName(&mut self, ctx: &ScriptNameContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcShopDiscount}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_npcShopDiscount(&mut self, ctx: &NpcShopDiscountContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcShopItem}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_npcShopItem(&mut self, ctx: &NpcShopItemContext<'input>) { self.visit_children(ctx) }
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcShopPrice}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_npcShopPrice(&mut self, ctx: &NpcShopPriceContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scope_specifier}.
 	 * @param ctx the parse tree
 	 */
@@ -885,6 +903,30 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcShopDiscount}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_npcShopDiscount(&mut self, ctx: &NpcShopDiscountContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcShopItem}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_npcShopItem(&mut self, ctx: &NpcShopItemContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#npcShopPrice}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_npcShopPrice(&mut self, ctx: &NpcShopPriceContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#scope_specifier}.
 	 * @param ctx the parse tree
 	 */
@@ -1216,6 +1258,21 @@ where
 
 	fn visit_scriptName(&mut self, ctx: &ScriptNameContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_scriptName(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_npcShopDiscount(&mut self, ctx: &NpcShopDiscountContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_npcShopDiscount(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_npcShopItem(&mut self, ctx: &NpcShopItemContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_npcShopItem(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_npcShopPrice(&mut self, ctx: &NpcShopPriceContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_npcShopPrice(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

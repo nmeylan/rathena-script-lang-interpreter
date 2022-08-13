@@ -359,7 +359,7 @@ impl Vm {
         if let Ok(lines) = result {
             for line in lines.flatten() {
                 let line = line.trim();
-                if line.starts_with('/') {
+                if line.is_empty() || line.starts_with('/') {
                     continue;
                 }
                 let split = line.split(',');

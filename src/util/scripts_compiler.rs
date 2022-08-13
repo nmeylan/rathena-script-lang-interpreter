@@ -8,6 +8,7 @@ use std::path::Path;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
 use antlr_rust::parser_rule_context::ParserRuleContext;
+use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 
 use crate::lang::value::Value;
@@ -15,7 +16,7 @@ use crate::lang::chunk::ClassFile;
 use crate::lang::compiler::{Compiler, parse_number};
 use crate::lang::error::CompilationError;
 use crate::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
-use crate::parser::rathenascriptlangparser::{NpcInitializationContext, NpcInitializationContextAttrs, RathenaScriptLangParser, RathenaScriptLangParserContextType, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptSpriteContextAttrs, ScriptXPosContextAttrs, ScriptYPosContextAttrs};
+use crate::parser::rathenascriptlangparser::{NpcInitializationContext, NpcInitializationContextAttrs, NpcShopDiscountContextAttrs, NpcShopPriceContextAttrs, RathenaScriptLangParser, RathenaScriptLangParserContextType, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptSpriteContextAttrs, ScriptXPosContextAttrs, ScriptYPosContextAttrs};
 use crate::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
 
 pub struct Script {
@@ -112,7 +113,33 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
         if ctx.scriptLocation().is_some() {
             let script_declaration = self.file_content[ctx.start().line as usize - 1].clone();
             let script_name = script_declaration.split('\t').collect::<Vec<&str>>()[2].to_string();
+            let script_type = script_declaration.split('\t').collect::<Vec<&str>>()[1].to_string();
             let sprite = ctx.scriptSprite_all().get(0).unwrap().get_child(0).as_ref().unwrap().get_text();
+            let class_name = if script_type == "shop" {
+                String::from("ShopTemplate")
+            } else {
+                ctx.scriptName_all().get(0).unwrap().get_text()
+            };
+            let constructor_args = if script_type == "shop" {
+                let mut args = vec![];
+                if let Some(discount) = ctx.npcShopDiscount() {
+                    args.push(Value::new_number(parse_number(discount.Number().unwrap().symbol.text.clone())));
+                } else {
+                    args.push(Value::new_number(-1));
+                }
+                for (i, item) in ctx.npcShopItem_all().iter().enumerate() {
+                    args.push(Value::new_string(item.get_text()));
+                    let price = ctx.npcShopPrice(i).unwrap();
+                    if price.Minus().is_some() {
+                        args.push(Value::new_number(-1 * parse_number(price.Number().unwrap().symbol.text.clone())));
+                    } else {
+                        args.push(Value::new_number(parse_number(price.Number().unwrap().symbol.text.clone())));
+                    }
+                }
+                args
+            } else {
+                vec![]
+            };
             self.scripts.push(Script {
                 name: script_name,
                 x_pos: parse_number(ctx.scriptXPos().unwrap().Number().unwrap().symbol.text.clone()) as usize,
@@ -122,8 +149,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                 sprite,
                 x_size: 0,
                 y_size: 0,
-                class_name: ctx.scriptName_all().get(0).unwrap().get_text(),
-                constructor_args: vec![],
+                class_name,
+                constructor_args,
                 class_reference: 0,
             });
         }

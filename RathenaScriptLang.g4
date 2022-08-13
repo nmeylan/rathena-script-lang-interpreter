@@ -251,10 +251,20 @@ scriptSprite : (Minus? Number | Identifier);
 
 npcInitialization
     : Identifier (',' Number?)+  Identifier  scriptName (Number | Identifier) (',' (Number | Identifier))*
-    | scriptLocation ',' scriptXPos ',' scriptYPos ',' scriptDir  'duplicate' '(' scriptName ')' scriptName (scriptSprite) (',' (scriptSprite))*
+    | scriptLocation ',' scriptXPos ',' scriptYPos ',' scriptDir 'duplicate' '(' scriptName ')' scriptName (scriptSprite) (',' (scriptSprite))*
+    | scriptLocation ',' scriptXPos ',' scriptYPos ',' scriptDir 'shop' scriptName scriptSprite ',' (npcShopDiscount ',')? (npcShopItem ':' npcShopPrice) (',' npcShopItem ':' npcShopPrice)*
     ;
 scriptName
     : (Identifier | ':' | '#' | Colon | Label | Number)*
+    ;
+npcShopDiscount
+    : Number
+    ;
+npcShopItem
+    : Number
+    ;
+npcShopPrice
+    : Minus? Number
     ;
 
 scope_specifier
