@@ -36,7 +36,7 @@ fn underscore_function_call() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::OpCode.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     let classes = compile_script(r#"
     my_func();
     function my_func {

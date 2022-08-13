@@ -59,7 +59,7 @@ fn hex_number() {
     vm_dump_var("b", .@a + 1);
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
@@ -119,7 +119,7 @@ fn assignment_with_complex_string_concat() {
 
     vm_dump_var("menu", .@menu$);"#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::Execution.value() | DebugFlag::Stack.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
@@ -394,7 +394,7 @@ fn load_then_inc() {
     vm_dump_var("b", .@a);
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::Execution.value() | DebugFlag::None.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));

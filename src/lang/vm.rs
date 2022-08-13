@@ -214,14 +214,14 @@ impl Vm {
         })
     }
 
-    pub fn create_instance(vm: Arc<Vm>, class_name: String, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(u64, u64), RuntimeError> {
+    pub fn create_instance(vm: Arc<Vm>, class_name: String, native_method_handler: Box<&dyn NativeMethodHandler>, constructor_args: Vec<Value>) -> Result<(u64, u64), RuntimeError> {
         let instance = Arc::new(vm.classes_pool.read().unwrap().get(&class_name).as_ref().unwrap().new_instance());
         let class = vm.get_class(&instance.class_name);
         vm.store_instance_on_heap(class.hash_code(), instance.hash_code(), instance.clone());
         let maybe_init_function = class.functions_pool.get(&Vm::calculate_hash(&"_OnInstanceInit".to_string()));
         if let Some(init_function) = maybe_init_function {
             let mut thread = Thread::new(vm.clone(), vm.debug_flag);
-            thread.run_function(class.clone(), &mut Some(instance.clone()), init_function, native_method_handler)?;
+            thread.run_function(class.clone(), &mut Some(instance.clone()), init_function, native_method_handler, constructor_args)?;
         }
         Ok((class.hash_code(), instance.hash_code()))
     }
@@ -231,7 +231,7 @@ impl Vm {
         if let Some(init_function) = maybe_init_function {
             let debug_flag = vm.debug_flag;
             let mut thread = Thread::new(vm, debug_flag);
-            return thread.run_function(class.clone(), &mut None, init_function, native_method_handler).map_err(|e| {
+            return thread.run_function(class.clone(), &mut None, init_function, native_method_handler, vec![]).map_err(|e| {
                 println!("{}", e);
                 e
             });

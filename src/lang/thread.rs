@@ -57,8 +57,17 @@ impl Thread {
         self.run(call_frame, 0, class.as_ref(), &mut Some(instance), native_method_handler).map(|_| ())
     }
 
-    pub fn run_function(&mut self, class: Arc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
-        let call_frame = CallFrame::new(function, 1, 0, self.debug_flag);
+    pub fn run_function(&mut self, class: Arc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function, native_method_handler: Box<&dyn NativeMethodHandler>, constructor_args: Vec<Value>) -> Result<(), RuntimeError> {
+        let call_frame = CallFrame::new(function, 0, constructor_args.len(), self.debug_flag);
+        for argument in constructor_args {
+            match argument {
+                Value::String(_) | Value::Number(_) => {
+                    let reference = self.vm.add_in_constant_pool(argument);
+                    self.stack.push(ConstantPoolReference(reference));
+                }
+               _ => panic!("Only String or Number argument are allowed in constructor arguments")
+            }
+        }
         self.run(call_frame, 0, class.as_ref(), instance, native_method_handler).map(|_| ())
     }
 

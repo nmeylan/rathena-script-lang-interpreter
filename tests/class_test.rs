@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use std::sync::{Arc, Mutex};
 use rathena_script_lang_interpreter::lang::compiler;
+use rathena_script_lang_interpreter::lang::value::Value;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -33,7 +34,7 @@ fn simple_class_test() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
@@ -67,9 +68,9 @@ fn instance_variable_test() {
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
@@ -104,9 +105,9 @@ fn static_variable_test() {
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
@@ -149,9 +150,9 @@ fn on_init_hook_test() {
     let vm = crate::common::setup_vm(DebugFlag::All.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
@@ -198,9 +199,9 @@ fn on_instance_init_hook_test() {
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
@@ -211,6 +212,29 @@ fn on_instance_init_hook_test() {
     assert_eq!(4, events.lock().unwrap().get("array_index3_2").unwrap().value.number_value().unwrap().clone());
     assert_eq!(String::from("hellohello"), events.lock().unwrap().get("hello_str1").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hellohello"), events.lock().unwrap().get("hello_str2").unwrap().value.string_value().unwrap().clone());
+}
+
+
+#[test]
+fn create_instance_with_arguments() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let classes = compile(r#"
+    - script My class -1, {
+        OnInstanceInit:
+            'hello$ = getarg(0);
+            println('hello$);
+            vm_dump_var("hello_str", 'hello$);
+            end;
+    }
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![Value::new_string("Hello".to_string())]).unwrap();
+    assert_eq!(String::from("Hello"), events.lock().unwrap().get("hello_str").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -243,9 +267,9 @@ fn setd_instance_variable() {
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
@@ -285,9 +309,9 @@ fn setd_static_variable() {
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm.clone(), class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("counter1").unwrap().value.number_value().unwrap().clone());
@@ -322,7 +346,7 @@ fn getvariableofnpc_when_npc_exist() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "MyNPC2".to_string(), Box::new(&vm_hook)).unwrap();
+    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "MyNPC2".to_string(), Box::new(&vm_hook), vec![]).unwrap();
     Vm::run_main_function(vm, class_reference, instance_reference, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("npc_1_value").unwrap().value.number_value().unwrap().clone());

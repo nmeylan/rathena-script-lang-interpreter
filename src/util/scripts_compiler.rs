@@ -10,6 +10,7 @@ use antlr_rust::InputStream;
 use antlr_rust::parser_rule_context::ParserRuleContext;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
 
+use crate::lang::value::Value;
 use crate::lang::chunk::ClassFile;
 use crate::lang::compiler::{Compiler, parse_number};
 use crate::lang::error::CompilationError;
@@ -27,6 +28,7 @@ pub struct Script {
     pub x_size: usize,
     pub y_size: usize,
     pub class_name: String,
+    pub constructor_args: Vec<Value>,
     pub class_reference: u64,
 }
 
@@ -101,6 +103,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                 x_size: 0,
                 y_size: 0,
                 class_name: ctx.scriptName().unwrap().get_text(),
+                constructor_args: vec![],
                 class_reference: 0,
             });
         }
@@ -120,6 +123,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                 x_size: 0,
                 y_size: 0,
                 class_name: ctx.scriptName_all().get(0).unwrap().get_text(),
+                constructor_args: vec![],
                 class_reference: 0,
             });
         }
