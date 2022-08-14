@@ -326,7 +326,7 @@ impl Vm {
         hash
     }
 
-    pub(crate) fn array_from_heap_reference(&self, owner_reference: u64, reference: u64) -> Result<Arc<Array>, TemporaryRuntimeError> {
+    pub fn array_from_heap_reference(&self, owner_reference: u64, reference: u64) -> Result<Arc<Array>, TemporaryRuntimeError> {
         if let Some(owner_entries) = self.heap.read().unwrap().get(&owner_reference) {
             return Ok(owner_entries.read().unwrap().get(&reference).cloned().unwrap().get_array().unwrap());
         }

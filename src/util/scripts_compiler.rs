@@ -16,7 +16,7 @@ use crate::lang::chunk::ClassFile;
 use crate::lang::compiler::{Compiler, parse_number};
 use crate::lang::error::CompilationError;
 use crate::parser::rathenascriptlanglexer::RathenaScriptLangLexer;
-use crate::parser::rathenascriptlangparser::{NpcInitializationContext, NpcInitializationContextAttrs, NpcShopDiscountContextAttrs, NpcShopPriceContextAttrs, RathenaScriptLangParser, RathenaScriptLangParserContextType, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptSpriteContextAttrs, ScriptXPosContextAttrs, ScriptYPosContextAttrs};
+use crate::parser::rathenascriptlangparser::{NpcInitializationContext, NpcInitializationContextAttrs, NpcShopDiscountContextAttrs, NpcShopItemContextAttrs, NpcShopPriceContextAttrs, RathenaScriptLangParser, RathenaScriptLangParserContextType, ScriptDirContextAttrs, ScriptInitializationContext, ScriptInitializationContextAttrs, ScriptSpriteContextAttrs, ScriptXPosContextAttrs, ScriptYPosContextAttrs};
 use crate::parser::rathenascriptlangvisitor::RathenaScriptLangVisitor;
 
 pub struct Script {
@@ -128,7 +128,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                     args.push(Value::new_number(-1));
                 }
                 for (i, item) in ctx.npcShopItem_all().iter().enumerate() {
-                    args.push(Value::new_string(item.get_text()));
+                    args.push(Value::new_number(parse_number(item.Number().unwrap().symbol.text.clone())));
                     let price = ctx.npcShopPrice(i).unwrap();
                     if price.Minus().is_some() {
                         args.push(Value::new_number(-1 * parse_number(price.Number().unwrap().symbol.text.clone())));
