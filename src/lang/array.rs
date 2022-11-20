@@ -39,6 +39,10 @@ impl Array {
         self.scope.is_global()
     }
 
+    pub fn value_type(&self) -> ValueType {
+        self.value_type.clone()
+    }
+
     pub fn assign<F>(&self, index: usize, constant_pool_reference: u64, callback: Option<F>)
     where F: Fn(Self)
     {

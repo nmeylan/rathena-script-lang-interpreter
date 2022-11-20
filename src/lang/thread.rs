@@ -9,7 +9,7 @@ use crate::lang::array::Array;
 
 
 use crate::lang::stack::{Stack, StackEntry};
-use crate::lang::value::{Native, Scope, ValueRef, ValueType, Variable};
+use crate::lang::value::{Constant, Native, Scope, ValueRef, ValueType, Variable};
 use crate::lang::vm::{DebugFlag, Hashcode, NATIVE_FUNCTIONS, NativeMethodHandler, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
@@ -754,6 +754,22 @@ impl Thread {
             },
             x => Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
+    }
+
+    pub fn array_constants(&self, array: Arc<Array>) -> Vec<Constant> {
+        let mut i = 0;
+        let mut values = vec![];
+        while i < array.len() {
+            if let Ok(maybe_reference) = array.get(i) {
+                if let Some(reference) = maybe_reference {
+                    if let Some(constant) = self.vm.get_from_constant_pool(reference) {
+                        values.push(constant)
+                    }
+                }
+            }
+            i += 1;
+        }
+        values
     }
 
     fn add_stack_trace(&mut self, stack_trace: StackTrace) {
