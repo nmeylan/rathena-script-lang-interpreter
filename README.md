@@ -58,6 +58,10 @@ In addition of native functions listed in link above, server should implement so
 
 [more details here]()
 
+# Limitation and workaround
+## Global variable array
+- `getglobalarrayref`: put reference of a global variable array on the stack
+
 # Architecture
 ## Language specificity
 Althought Rathena script lang is not an oriented object programming language, it has notion of:

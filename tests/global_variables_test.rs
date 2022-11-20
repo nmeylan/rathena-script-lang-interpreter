@@ -112,3 +112,20 @@ fn char_variable_array() {
     assert_eq!(String::from("world"), events.lock().unwrap().get("c0").unwrap().value.string_value().unwrap().clone());
     assert_eq!(11, events.lock().unwrap().get("existing_array_3").unwrap().value.number_value().unwrap().clone());
 }
+
+
+#[test]
+fn global_array_get_ref() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    setarray a$[0], "hello", "world";
+    nativeacceptingarrayref getglobalarrayref(a$);
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let vm_hook = VmHook::new(Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    // When
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+}

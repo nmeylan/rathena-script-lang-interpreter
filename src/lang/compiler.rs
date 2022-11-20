@@ -487,6 +487,19 @@ impl Compiler {
             if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                 self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
             }
+
+        } else if native.name == "getglobalarrayref" {
+            // custom "native" method which just load a global array refrence on the stack
+            let last_code_op = self.current_chunk().last_op_code_index();
+            if mem::discriminant(&self.current_chunk().get_op_code_at(last_code_op)) == mem::discriminant(&LoadGlobal) {
+                let mut array_name = ctx.argumentExpressionList().as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
+                if !array_name.contains('[') {
+                    array_name = format!("{}[0]", array_name);
+                }
+                let reference = self.current_chunk().add_constant(Constant::String(array_name));
+                self.current_chunk().set_op_code_at(last_code_op - 1, LoadConstant(reference))
+            }
+            return;
         } else if native.name == "getarraysize" || native.name == "implode" {
             // getarraysize accept the array name without index.
             // In case of loadglobal we use the variable string then build a variable from it. But if it does not contains bracket

@@ -170,6 +170,10 @@ impl NativeMethodHandler for VmHook {
                 thread.push_constant_on_stack(Value::Number(Some(entry.index.unwrap() as i32)));
             }
             thread.push_constant_on_stack(Value::Number(Some((array_entries.len() * 2) as i32)));
+        } else if native.name.eq("nativeacceptingarrayref"){
+            let (owner_reference, reference) = params[0].reference_value().map_err(|err|
+                thread.new_runtime_from_temporary(err, "nativeacceptingarrayref first argument should be array")).unwrap();
+            let array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();
         } else {
             panic!("native not handled {}", native.name);
         }

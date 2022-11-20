@@ -53,6 +53,7 @@ pub const NATIVE_FUNCTIONS: &[StaticNativeFunction] = &[
     StaticNativeFunction { name: "setd", return_type: None, min_arguments: 2, max_arguments: 2 },
     StaticNativeFunction { name: "getd", return_type: None, min_arguments: 1, max_arguments: 1 },
     StaticNativeFunction { name: "getvariableofnpc", return_type: None, min_arguments: 2, max_arguments: 2 },
+    StaticNativeFunction { name: "getglobalarrayref", return_type: None, min_arguments: 1, max_arguments: 1 },
     // stdlib
     StaticNativeFunction { name: "pow", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
     StaticNativeFunction { name: "rand", return_type: Some(ValueType::Number), min_arguments: 2, max_arguments: 2 },
