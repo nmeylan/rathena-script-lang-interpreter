@@ -49,14 +49,27 @@ impl VmHook {
         }
     }
 
+    pub fn push_global(&self, variable: GlobalVariableEntry) {
+        self.remove_global_by_name_and_scope(&variable.name, &variable.scope, &variable.index);
+        self.global_variable_store.lock().unwrap().push(variable);
+    }
+
     pub fn find_global_by_name_and_scope(&self, name: &String, scope: &String) -> Option<GlobalVariableEntry> {
-        self.global_variable_store.lock().unwrap().iter().find(|entry| &entry.name == name && &entry.scope == scope
+        self.global_variable_store.lock().unwrap().iter().find(|entry| entry.name == *name && entry.scope == *scope
             && mem::discriminant(&entry.index) == mem::discriminant(&None)).cloned()
     }
 
-    pub fn remove_global_by_name_and_scope(&self, name: &String, scope: &String) {
+    pub fn remove_global_by_name_and_scope(&self, name: &String, scope: &String, index: &Option<usize>) {
+        let position = self.global_variable_store.lock().unwrap().iter().position(|entry| entry.name == *name && entry.scope == *scope
+            && ((index.is_some() && entry.index.is_some() && index.unwrap() == entry.index.unwrap()) || index.is_none() && entry.index.is_none()));
+        if let Some(position) = position {
+            self.global_variable_store.lock().unwrap().remove(position);
+        }
+    }
+
+    pub fn remove_global_by_name_and_scope_and_index(&self, name: &String, scope: &String, index: usize) {
         let position = self.global_variable_store.lock().unwrap().iter().position(|entry| &entry.name == name && &entry.scope == scope
-            && mem::discriminant(&entry.index) == mem::discriminant(&None));
+            && entry.index.is_some() && *entry.index.as_ref().unwrap() == index);
         if let Some(position) = position {
             self.global_variable_store.lock().unwrap().remove(position);
         }
@@ -114,8 +127,7 @@ impl NativeMethodHandler for VmHook {
         } else if native.name.eq("setglobalvariable") {
             let variable_name = params[0].string_value().unwrap();
             let variable_scope = params[1].string_value().unwrap();
-            println!("{}", variable_name);
-            self.remove_global_by_name_and_scope(variable_name, variable_scope);
+            self.remove_global_by_name_and_scope(variable_name, variable_scope, &None);
             self.global_variable_store.lock().unwrap().push(
                 GlobalVariableEntry {
                     name: variable_name.clone(),
@@ -127,7 +139,6 @@ impl NativeMethodHandler for VmHook {
         } else if native.name.eq("getglobalvariable") {
             let variable_name = params[0].string_value().unwrap();
             let variable_scope = params[1].string_value().unwrap();
-            println!("{}", variable_name);
             let entry = self.find_global_by_name_and_scope(variable_name, variable_scope);
             if let Some(entry) = entry {
                 thread.push_constant_on_stack(entry.value.clone());
@@ -144,7 +155,7 @@ impl NativeMethodHandler for VmHook {
                 }
                 let array_index = params[index].number_value().unwrap();
                 let value = params[index + 1].clone();
-                self.global_variable_store.lock().unwrap().push(
+                self.push_global(
                     GlobalVariableEntry {
                         name: variable_name.clone(),
                         value,
@@ -174,6 +185,14 @@ impl NativeMethodHandler for VmHook {
             let (owner_reference, reference) = params[0].reference_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "nativeacceptingarrayref first argument should be array")).unwrap();
             let array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();
+        } else if native.name.eq("removeitemsglobalarray"){
+            let variable_name = params[0].string_value().unwrap();
+            let variable_scope = params[1].string_value().unwrap();
+            let start_index = params[2].number_value().unwrap();
+            let end_index = params[3].number_value().unwrap();
+            for i in start_index..end_index {
+                self.remove_global_by_name_and_scope_and_index(&variable_name, &variable_scope, i as usize);
+            }
         } else {
             panic!("native not handled {}", native.name);
         }

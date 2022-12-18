@@ -130,6 +130,19 @@ impl Value {
     pub fn new_reference() -> Value {
         Value::Reference(None)
     }
+    pub fn is_empty(&self) -> bool {
+        match self {
+            Value::String(option) => {option.is_none()}
+            Value::Number(option) => {option.is_none()}
+            Value::Reference(option) => {option.is_none()}
+            Value::ArrayEntry(entry) => {
+                if entry.is_none() {
+                    return true;
+                }
+                entry.as_ref().unwrap().2.is_none()
+            }
+        }
+    }
     pub fn is_string(&self) -> bool {
         match self {
             Value::String(_) => true,

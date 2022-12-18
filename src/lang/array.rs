@@ -67,12 +67,13 @@ impl Array {
     }
 
     pub fn remove<F>(&self, index: usize, count: usize, callback: Option<F>)
-        where F: Fn(Self)
+        where F: Fn(Self, usize, usize)
     {
         let len = self.len();
-        self.values.write().unwrap().drain(index..count.min(len));
+        let end = count.min(len);
+        self.values.write().unwrap().drain(index..end);
         if let Some(callback) = callback {
-            callback(self.clone());
+            callback(self.clone(), index, end);
         }
     }
 

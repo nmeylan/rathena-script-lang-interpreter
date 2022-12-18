@@ -502,6 +502,19 @@ impl Thread {
         }
     }
 
+    pub(crate) fn array_remove_items_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread &'program dyn NativeMethodHandler, array: Arc<Array>) -> Option<Box<dyn Fn(Array, usize, usize) + 'thread>> {
+        if array.scope.is_global() {
+            let closure = move |_updated_array: Array, start_index: usize, end_index: usize| {
+                let mut arguments: Vec<Value> = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string())), Value::new_number(start_index as i32), Value::new_number(end_index as i32)];
+                // TODO: doc
+                native_method_handler.handle(&Native {name: "removeitemsglobalarray".to_string()}, arguments, self, call_frame);
+            };
+            Some(Box::new(closure))
+        } else {
+            None
+        }
+    }
+
     pub fn push_constant_on_stack(&self, value: Value) {
         let reference = self.vm.add_in_constant_pool(value);
         self.stack.push(StackEntry::ConstantPoolReference(reference));

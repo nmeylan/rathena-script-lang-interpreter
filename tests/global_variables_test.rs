@@ -113,6 +113,36 @@ fn char_variable_array() {
     assert_eq!(11, events.lock().unwrap().get("existing_array_3").unwrap().value.number_value().unwrap().clone());
 }
 
+#[test]
+fn deletearray_global_char_variable_array() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    setarray a$[0], "hello", "world";
+    vm_dump_var("array_size", getarraysize(a$));
+    vm_dump_var("a0", a$[0]);
+    vm_dump_var("a1", a$[1]);
+    deletearray a$[0], getarraysize(a$);
+    vm_dump_var("array_size_after_delete", getarraysize(a$));
+    vm_dump_var("a0_after_delete", a$[0]);
+    vm_dump_var("a1_after_delete", a$[1]);
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let vm_hook = VmHook::new(Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    // When
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    vm_hook.global_variable_store.lock().unwrap().iter().for_each(|entry| println!("{:?}", entry));
+    assert_eq!(2, events.lock().unwrap().get("array_size").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(String::from("hello"), events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("world"), events.lock().unwrap().get("a1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("array_size_after_delete").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(true, events.lock().unwrap().get("a0_after_delete").unwrap().value.is_empty());
+    assert_eq!(true, events.lock().unwrap().get("a1_after_delete").unwrap().value.is_empty());
+}
+
 
 #[test]
 fn global_array_get_ref() {

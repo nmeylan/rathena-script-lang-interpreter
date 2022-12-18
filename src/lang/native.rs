@@ -224,7 +224,7 @@ fn deletearray(thread: &Thread, call_frame: &mut CallFrame, native_method_handle
         thread.new_runtime_from_temporary(err, "deletearray first argument should be array name"))?;
     let size = arguments[1].number_value().map_err(|err| thread.new_runtime_from_temporary(err, "deletearray second argument should be number of element to delete"))? as usize;
     let array = thread.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
-    array.remove(*index, size, thread.array_update_callback(call_frame, native_method_handler, array.clone()));
+    array.remove(*index, size, thread.array_remove_items_callback(call_frame, native_method_handler, array.clone()));
     Ok(())
 }
 
