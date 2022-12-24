@@ -94,6 +94,35 @@ fn condition_with_expressions() {
     assert_eq!(false, events.lock().unwrap().get("b").is_some());
     assert_eq!(String::from("i am not part of condition"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
 }
+#[test]
+fn condition_with_function() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let classes = compile_script(r#"
+    function check_false {
+        return 0;
+    }
+    function check_true {
+        return 1;
+    }
+    if(check_true()) {
+        .@a$ = "i am true";
+    }
+    if(!check_false()) {
+        .@b$ = "i am false";
+    }
+    vm_dump_locals();
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(false, events.lock().unwrap().get("b").is_some());
+}
 
 #[test]
 fn ternary_condition() {
