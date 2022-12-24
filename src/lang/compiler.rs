@@ -487,7 +487,6 @@ impl Compiler {
             if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                 self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
             }
-
         } else if native.name == "getglobalarrayref" {
             // custom "native" method which just load a global array refrence on the stack
             let last_code_op = self.current_chunk().last_op_code_index();
@@ -966,7 +965,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     }
 
 
-
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
         if ctx.assignmentLeftExpression_all().len() > 0 {
             if ctx.Setarray().is_some() {
@@ -1101,6 +1099,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_expressionStatement(&mut self, ctx: &ExpressionStatementContext<'input>) {
         self.type_checker.reset_state();
         self.visit_children(ctx);
+    }
+
+    fn visit_unaryExpression(&mut self, ctx: &UnaryExpressionContext<'input>) {
+        self.visit_children(ctx);
+        if let Some(operator) = ctx.unaryOperator() {
+            if operator.Bang().is_some() {
+                let constant_ref = self.current_chunk().add_constant(Constant::Number(1));
+                self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_ref), self.compilation_details_from_context(ctx));
+                self.current_chunk().emit_op_code(OpCode::NotEqual, self.compilation_details_from_context(ctx));
+            }
+        }
     }
 
     fn visit_selectionStatement(&mut self, ctx: &SelectionStatementContext<'input>) {

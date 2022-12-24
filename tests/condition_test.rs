@@ -46,6 +46,9 @@ fn simple_condition() {
     } else {
         .@m$ = "i am false";
     }
+    if(!0) {
+        .@o$ = "i am true";
+    }
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
@@ -67,6 +70,7 @@ fn simple_condition() {
     assert_eq!(false, events.lock().unwrap().get("k").is_some());
     assert_eq!(true, events.lock().unwrap().get("l").is_some());
     assert_eq!(false, events.lock().unwrap().get("m").is_some());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("o").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -109,7 +113,7 @@ fn condition_with_function() {
         .@a$ = "i am true";
     }
     if(!check_false()) {
-        .@b$ = "i am false";
+        .@b$ = "i am true";
     }
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
@@ -121,7 +125,7 @@ fn condition_with_function() {
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
-    assert_eq!(false, events.lock().unwrap().get("b").is_some());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
@@ -162,6 +166,7 @@ fn conditional_statements() {
     .@k = .@h >= 1000 && .@h < 10000;
     .@l = .@h > 999 && .@h <= 1000;
     .@m = .@h > 999 && .@h < 1000;
+    .@o = 1 != 2;
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
@@ -182,6 +187,7 @@ fn conditional_statements() {
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("k").unwrap().value.number_value().unwrap().clone());
     assert_eq!(0, events.lock().unwrap().get("m").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("o").unwrap().value.number_value().unwrap().clone());
 }
 
 
