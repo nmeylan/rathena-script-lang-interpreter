@@ -17,7 +17,7 @@ use crate::lang::chunk::{*};
 use crate::lang::class::{Class, Function, Instance};
 use crate::lang::compiler::CompilationDetail;
 use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
-use crate::lang::error::RuntimeErrorType::Internal;
+
 use crate::lang::native::handle_native_method;
 use crate::lang::stack::StackEntry::{ArrayHeapReference, ConstantPoolReference, HeapReference};
 use crate::lang::stack_trace::StackTrace;
@@ -119,7 +119,7 @@ impl Thread {
                     let value_ref_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         let array = self.vm.array_from_heap_reference(owner_reference, reference)
-                            .map_err(|err| self.new_runtime_from_temporary(err.clone(), "VM: ArrayStore expected to retrieve array from heap reference"))?;
+                            .map_err(|err| self.new_runtime_from_temporary(err, "VM: ArrayStore expected to retrieve array from heap reference"))?;
                         let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
                         if let Ok(constant_ref) = value_constant_ref {
                             array.assign(arr_index as usize, constant_ref, self.array_update_callback(&call_frame, &native_method_handler, array.clone()));
@@ -184,9 +184,9 @@ impl Thread {
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_string() && v2.is_string() {
-                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
+                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
                     } else if v2.is_number() && v2.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
@@ -198,9 +198,9 @@ impl Thread {
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_string() && v2.is_string() {
-                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
+                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
                     } else if v2.is_number() && v2.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
@@ -213,9 +213,9 @@ impl Thread {
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_string() && v2.is_string() {
-                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? != v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
+                        v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? != v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
                     } else if v2.is_number() && v1.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? != v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? != v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
@@ -227,7 +227,7 @@ impl Thread {
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v2.is_number() && v1.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1 && v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1 && v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
@@ -239,7 +239,7 @@ impl Thread {
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v2.is_number() && v1.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1 || v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? == 1
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1 || v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
@@ -252,10 +252,10 @@ impl Thread {
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v1.is_number() && v2.is_number() {
                         match relational {
-                            Relational::GT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? > v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            Relational::GTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? >= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            Relational::LT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? < v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            Relational::LTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? <= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            Relational::GT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? > v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            Relational::GTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? >= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            Relational::LT => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? < v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            Relational::LTE => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? <= v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
                         }
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
@@ -269,10 +269,10 @@ impl Thread {
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let new_value = if v1.is_string() || v2.is_string() {
                         Value::String(Some(format!("{}{}",
-                                                   if v1.is_string() { v1.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.clone() } else { v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.to_string() },
-                                                   if v2.is_string() { v2.string_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.clone() } else { v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?.to_string() })))
+                                                   if v1.is_string() { v1.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.clone() } else { v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.to_string() },
+                                                   if v2.is_string() { v2.string_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.clone() } else { v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?.to_string() })))
                     } else {
-                        Value::Number(Some(v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?))
+                        Value::Number(Some(v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?))
                     };
                     let reference = self.vm.add_in_constant_pool(new_value);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
@@ -295,13 +295,13 @@ impl Thread {
                         return Err(self.new_runtime_error(format!("Attempt to {} strings: {} - {}", operation_name, v1, v2)));
                     } else {
                         let res = match operation {
-                            NumericOperation::Subtract => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? - v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            NumericOperation::Multiply => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? * v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            NumericOperation::Divide => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? / v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            NumericOperation::Modulo => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? % v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            NumericOperation::Add => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            NumericOperation::RightShift => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? >> v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
-                            NumericOperation::LeftShift => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))? << v2.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), ""))?,
+                            NumericOperation::Subtract => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? - v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            NumericOperation::Multiply => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? * v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            NumericOperation::Divide => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? / v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            NumericOperation::Modulo => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? % v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            NumericOperation::Add => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? + v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            NumericOperation::RightShift => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? >> v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
+                            NumericOperation::LeftShift => v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? << v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?,
                         };
                         Value::Number(Some(res))
                     };
@@ -427,7 +427,7 @@ impl Thread {
                 OpCode::If(jump_to_index) => {
                     let stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let value = self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?;
-                    if value.number_value().map_err(|err| self.new_runtime_from_temporary(err.clone(), "VM: If expected expression result to be a number"))? != 1 {
+                    if value.number_value().map_err(|err| self.new_runtime_from_temporary(err, "VM: If expected expression result to be a number"))? != 1 {
                         op_index = *jump_to_index - 1;
                     }
                 }
@@ -505,7 +505,7 @@ impl Thread {
     pub(crate) fn array_remove_items_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread &'program dyn NativeMethodHandler, array: Arc<Array>) -> Option<Box<dyn Fn(Array, usize, usize) + 'thread>> {
         if array.scope.is_global() {
             let closure = move |_updated_array: Array, start_index: usize, end_index: usize| {
-                let mut arguments: Vec<Value> = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string())), Value::new_number(start_index as i32), Value::new_number(end_index as i32)];
+                let arguments: Vec<Value> = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string())), Value::new_number(start_index as i32), Value::new_number(end_index as i32)];
                 // TODO: doc
                 native_method_handler.handle(&Native {name: "removeitemsglobalarray".to_string()}, arguments, self, call_frame);
             };

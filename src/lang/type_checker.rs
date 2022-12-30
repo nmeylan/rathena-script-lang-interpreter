@@ -1,4 +1,4 @@
-use std::any::Any;
+
 use std::borrow::Borrow;
 use std::mem;
 use std::ops::Deref;
@@ -92,12 +92,12 @@ impl TypeChecker {
     }
 
     fn debug_context<'input>(&mut self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input)) -> Option<String> {
-        let debug_context = if self.debug_enabled {
+        
+        if self.debug_enabled {
             Some(node.get_text())
         } else {
             None
-        };
-        debug_context
+        }
     }
 
     pub fn remove_type(&mut self, count: usize) {

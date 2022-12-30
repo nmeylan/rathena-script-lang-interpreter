@@ -358,7 +358,7 @@ impl Vm {
         self.native_pool.get(&reference)
     }
 
-    pub fn get_global_class(&self, reference: &u64) -> Arc<Class> {
+    pub fn get_global_class(&self, _reference: &u64) -> Arc<Class> {
         self.get_class(&String::from("_Global"))
     }
 

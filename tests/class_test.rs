@@ -233,7 +233,7 @@ fn create_instance_with_arguments() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![Value::new_string("Hello".to_string())]).unwrap();
+    let (_class_reference, _instance_reference) = Vm::create_instance(vm, "Myclass".to_string(), Box::new(&vm_hook), vec![Value::new_string("Hello".to_string())]).unwrap();
     assert_eq!(String::from("Hello"), events.lock().unwrap().get("hello_str").unwrap().value.string_value().unwrap().clone());
 }
 

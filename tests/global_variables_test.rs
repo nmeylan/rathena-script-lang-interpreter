@@ -152,7 +152,7 @@ fn global_array_get_ref() {
     setarray a$[0], "hello", "world";
     nativeacceptingarrayref getglobalarrayref(a$);
     "#, compiler::DebugFlag::None.value()).unwrap();
-    let events_clone = events.clone();
+    let events_clone = events;
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     let vm_hook = VmHook::new(Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     // When

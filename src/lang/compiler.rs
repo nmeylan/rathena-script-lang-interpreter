@@ -2,7 +2,7 @@ use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::default::Default;
-use std::env::var;
+
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -130,7 +130,7 @@ impl Compiler {
         native_functions.extend(Vm::collect_native_functions(native_function_list_file_path));
         let script_lines = script.split('\n').map(|l| l.to_string()).collect::<Vec<String>>();
         Self {
-            file_name: file_name,
+            file_name,
             native_functions,
             hook_labels: vec![],
             classes: vec![ClassFile::new("_Global".to_string(), "_globa_class_".to_string(), 0)],
@@ -207,11 +207,9 @@ impl Compiler {
         for rc in class.called_functions().iter() {
             let rc = rc.clone();
             let (function_name, compilation_error_details) = rc.borrow();
-            if !class.functions().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
-                if !compiler.classes[0].functions.borrow().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
-                    compiler.register_error_with_details_class(class, UndefinedFunction, compilation_error_details.clone(),
-                                                               format!("Function \"{}\" is not defined", function_name))
-                }
+            if !class.functions().iter().map(|func| func.name.clone()).any(|f| &f == function_name) && !compiler.classes[0].functions.borrow().iter().map(|func| func.name.clone()).any(|f| &f == function_name) {
+                compiler.register_error_with_details_class(class, UndefinedFunction, compilation_error_details.clone(),
+                                                           format!("Function \"{}\" is not defined", function_name))
             }
         }
     }
@@ -430,9 +428,7 @@ impl Compiler {
                     self.current_chunk().add_undefined_variable(variable_ref);
                     // When using setd for local scope we have no way to know if variable is defined or not without evaluating the setd expression, which is done at runtime.
                     // So we disable variable existence check in this case
-                    if self.current_chunk().local_setd_len() > 0 {
-                        self.current_chunk().emit_op_code(LoadLocal(variable_ref), self.compilation_details_from_context(node));
-                    } else if self.current_chunk().dynamically_defined_variable_contains(variable_ref) {
+                    if self.current_chunk().local_setd_len() > 0 || self.current_chunk().dynamically_defined_variable_contains(variable_ref) {
                         self.current_chunk().emit_op_code(LoadLocal(variable_ref), self.compilation_details_from_context(node));
                     } else {
                         self.register_error(CompilationErrorType::UndefinedVariable, node, format!("Variable \"{}\" is undefined.", variable.to_script_identifier()));
@@ -760,11 +756,11 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             let mut goto_op_code_indicies_to_update: Vec<usize> = vec![];
             for (i, options) in ctx.menuOptionText_all().iter().enumerate() {
                 let iter_count = if options.String().is_some() {
-                    options.String().as_ref().unwrap().symbol.text.split(":").count()
+                    options.String().as_ref().unwrap().symbol.text.split(':').count()
                 } else {
                     1 // In case option text is an expression, we consider that returned String does not contains ":"
                 };
-                for option in 0..iter_count {
+                for _option in 0..iter_count {
                     option_number += 1;
                     let constant_ref = self.current_chunk().add_constant(Constant::Number(option_number));
                     self.current_chunk().emit_op_code(LoadConstant(constant_ref), self.compilation_details_from_context(options.as_ref()));
@@ -966,7 +962,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
 
 
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
-        if ctx.assignmentLeftExpression_all().len() > 0 {
+        if !ctx.assignmentLeftExpression_all().is_empty() {
             if ctx.Setarray().is_some() {
                 let left = ctx.assignmentLeftExpression(0).unwrap();
                 // Array can be assigned using setarray too
@@ -1015,7 +1011,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                             self.current_chunk().emit_op_code(NumericOperation(NumericOperation::Subtract), self.compilation_details_from_context(ctx));
                         }
                     }
-                    self.visit_assignmentLeftExpression(&left);
+                    self.visit_assignmentLeftExpression(left);
                 }
             }
         } else if ctx.Set().is_some() && ctx.functionCallExpression().is_some() { // edge case handling
@@ -1155,8 +1151,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
             goto_op_code_indices_to_update.insert(i, vec![]);
             for switch_labels in switch_block_group.switchLabels().iter() {
-                for (j, label) in switch_labels.switchLabel_all().iter().enumerate() {
-                    let (switch_expression_op_code, _) = self.current_chunk().clone_op_code_at(switch_expression_index);
+                for (_j, label) in switch_labels.switchLabel_all().iter().enumerate() {
+                    let (_switch_expression_op_code, _) = self.current_chunk().clone_op_code_at(switch_expression_index);
                     if label.Case().is_some() {
                         self.visit_constantExpression(label.constantExpression().as_ref().unwrap());
                         self.type_checker.drop_current_type(ctx);

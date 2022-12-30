@@ -17,7 +17,7 @@ fn simple_script() {
     let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
-    Vm::repl(vm.clone(), &classes[1], Box::new(&vm_hook)).unwrap();
+    Vm::repl(vm, &classes[1], Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(String::from("hello"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }

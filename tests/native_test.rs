@@ -2,7 +2,7 @@
 use std::collections::HashMap;
 
 use std::sync::{Arc, Mutex};
-use std::sync::atomic::{AtomicI32, AtomicUsize};
+use std::sync::atomic::{AtomicI32};
 use std::sync::atomic::Ordering::Relaxed;
 use rathena_script_lang_interpreter::lang::compiler;
 use rathena_script_lang_interpreter::lang::value::Value;
@@ -63,7 +63,7 @@ fn menu_test() {
     assert_eq!(String::from("D"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
     Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
     assert_eq!(String::from("E"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
-    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     assert_eq!(String::from("E"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
 }
 

@@ -131,7 +131,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for ScriptVisitor {
                     args.push(Value::new_number(parse_number(item.Number().unwrap().symbol.text.clone())));
                     let price = ctx.npcShopPrice(i).unwrap();
                     if price.Minus().is_some() {
-                        args.push(Value::new_number(-1 * parse_number(price.Number().unwrap().symbol.text.clone())));
+                        args.push(Value::new_number(-parse_number(price.Number().unwrap().symbol.text.clone())));
                     } else {
                         args.push(Value::new_number(parse_number(price.Number().unwrap().symbol.text.clone())));
                     }

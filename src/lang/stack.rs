@@ -1,6 +1,6 @@
 use std::cell::{Ref, RefCell};
 use std::fmt::{Display, Formatter};
-use crate::lang::error::{RuntimeError, TemporaryRuntimeError};
+use crate::lang::error::{TemporaryRuntimeError};
 use crate::lang::value::Scope;
 
 #[derive(Debug, Clone)]

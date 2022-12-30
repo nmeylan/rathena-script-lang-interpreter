@@ -1,8 +1,8 @@
-use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+
+
 use std::sync::{Arc, Mutex};
 use std::default::Default;
-use std::env::var;
+
 use std::mem;
 
 use rathena_script_lang_interpreter::lang::call_frame::CallFrame;
@@ -10,7 +10,7 @@ use rathena_script_lang_interpreter::lang::chunk::ClassFile;
 use rathena_script_lang_interpreter::lang::compiler::Compiler;
 use rathena_script_lang_interpreter::lang::error::CompilationError;
 use rathena_script_lang_interpreter::lang::thread::Thread;
-use rathena_script_lang_interpreter::lang::value::{Value, ValueType};
+use rathena_script_lang_interpreter::lang::value::{Value};
 use rathena_script_lang_interpreter::lang::vm::{NativeMethodHandler, Vm};
 
 #[derive(Debug)]
@@ -77,7 +77,7 @@ impl VmHook {
 
     pub fn find_global_array_entries(&self, name: &String, scope: &String) -> Vec<GlobalVariableEntry> {
         self.global_variable_store.lock().unwrap().iter().filter(|entry| &entry.name == name && &entry.scope == scope
-            && entry.index.is_some()).map(|e| e.clone()).collect::<Vec<GlobalVariableEntry>>()
+            && entry.index.is_some()).cloned().collect::<Vec<GlobalVariableEntry>>()
     }
 }
 
@@ -98,7 +98,7 @@ impl NativeMethodHandler for VmHook {
                     Value::ArrayEntry(_v) => { "array entry: TODO".to_string() }
                 }
             }).collect::<Vec<String>>().join(" "));
-            return;
+            
         } else if native.name.eq("vm_dump_var") {
             if params.len() != 2 {
                 println!("vm_dump_var takes exactly 2 args: first arg is the name of the variable for display purpose, second is the variable with its scope and type.");
@@ -141,7 +141,7 @@ impl NativeMethodHandler for VmHook {
             let variable_scope = params[1].string_value().unwrap();
             let entry = self.find_global_by_name_and_scope(variable_name, variable_scope);
             if let Some(entry) = entry {
-                thread.push_constant_on_stack(entry.value.clone());
+                thread.push_constant_on_stack(entry.value);
             } else {
                 panic!("getglobalvariable: can't find variable {} with scope {}", variable_name, variable_scope);
             }
@@ -184,14 +184,14 @@ impl NativeMethodHandler for VmHook {
         } else if native.name.eq("nativeacceptingarrayref"){
             let (owner_reference, reference) = params[0].reference_value().map_err(|err|
                 thread.new_runtime_from_temporary(err, "nativeacceptingarrayref first argument should be array")).unwrap();
-            let array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();
+            let _array = thread.vm.array_from_heap_reference(owner_reference, reference).unwrap();
         } else if native.name.eq("removeitemsglobalarray"){
             let variable_name = params[0].string_value().unwrap();
             let variable_scope = params[1].string_value().unwrap();
             let start_index = params[2].number_value().unwrap();
             let end_index = params[3].number_value().unwrap();
             for i in start_index..end_index {
-                self.remove_global_by_name_and_scope_and_index(&variable_name, &variable_scope, i as usize);
+                self.remove_global_by_name_and_scope_and_index(variable_name, variable_scope, i as usize);
             }
         } else {
             panic!("native not handled {}", native.name);
