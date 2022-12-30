@@ -10,7 +10,7 @@ use std::default::Default;
 
 use std::sync::{Arc, RwLock};
 use crate::lang::call_frame::CallFrame;
-use crate::lang::chunk::{Chunk, ClassFile};
+use crate::lang::chunk::{Chunk, ClassFile, FunctionDefinition};
 use crate::lang::class::{Class, Function, Instance};
 use crate::lang::array::{Array};
 use crate::lang::compiler::CompilationDetail;
@@ -205,6 +205,21 @@ impl Vm {
         })
     }
 
+    pub fn repl(vm: Arc<Vm>, class_file: &ClassFile, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
+        let mut program = Thread::new(vm.clone(), vm.debug_flag);
+        let main_function_hash = Vm::calculate_hash(&String::from("_main"));
+        let functions_def = class_file.functions.borrow();
+        let main_function_def: &FunctionDefinition = functions_def.get(0).unwrap();
+        let class_arc = vm.define_class(class_file);
+        let instance = class_arc.new_instance();
+        let function = class_arc.functions_pool.get(&main_function_hash).unwrap();
+        vm.extend_constant_pool(main_function_def.chunk.constants_storage.borrow().clone());
+        program.run_function(class_arc.clone(), &mut Some(Arc::new(instance)), function, native_method_handler, vec![]).map_err(|e| {
+            println!("{}", e);
+            e
+        })
+    }
+
     pub fn run_main_function(vm: Arc<Vm>, class_reference: u64, instance_reference: u64, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let instance = vm.get_instance_from_heap(class_reference, instance_reference).map_err(|e| RuntimeError::from_temporary(CompilationDetail::new_empty(), vec![], e))?;
         let debug_flag = vm.debug_flag;
@@ -240,10 +255,10 @@ impl Vm {
         Ok(())
     }
 
-    pub fn register_class(&self, class_file: &mut ClassFile) -> Arc<Class> {
+    fn define_class(&self, class_file: &ClassFile) -> Arc<Class> {
         let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
         let mut sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher> = Default::default();
-        for function in class_file.functions() {
+        for function in class_file.functions().iter() {
             let chunk_rc = function.chunk.clone();
             let chunk: &Chunk = chunk_rc.borrow();
             let function_reference = Vm::calculate_hash(&function.name);
@@ -251,11 +266,16 @@ impl Vm {
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
             sources.insert(function_reference, chunk.compilation_details.take());
         }
-        let class_rc = Arc::new(Class::new(class_file.name.clone(), class_file.reference, functions_pool, sources,
-                                          class_file.static_variables.borrow().clone(),
-                                          class_file.instance_variables.borrow().clone()));
-        self.classes_pool.write().unwrap().insert(class_file.name.clone(), class_rc.clone());
-        class_rc
+        Arc::new(Class::new(class_file.name.clone(), class_file.reference, functions_pool, sources,
+                                           class_file.static_variables.borrow().clone(),
+                                           class_file.instance_variables.borrow().clone()))
+    }
+
+
+    pub fn register_class(&self, class_file: &mut ClassFile) -> Arc<Class> {
+        let class_arc = self.define_class(class_file);
+        self.classes_pool.write().unwrap().insert(class_file.name.clone(), class_arc.clone());
+        class_arc
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {

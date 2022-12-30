@@ -12,4 +12,13 @@ edition = "2021"
 antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "9649564"}
 #
 #[patch."https://github.com/nmeylan/antlr4rust"]
-#antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"}
+#antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"
+
+
+[dev-dependencies]
+criterion = "0.4.0"
+
+[[bench]]
+name = "class_vs_repl"
+path = "tests/small_script_benchmark.rs"
+harness = false
