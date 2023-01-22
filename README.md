@@ -26,6 +26,8 @@ Rathena script command related to game, almost all commands listed [here](https:
 
 Compiler considers those command as "native" functions. VM require to implement a native functions handler, which has to be implemented by the server.
 
+[Example of integration](https://github.com/nmeylan/rust-ro/blob/094aa0c6641da6461ef905a17a8ca245bb0388cd/server/src/server/script/mod.rs#L178)
+
 # Features
 In addition of providing a compiler and vm to interpret rathena script lang, this implementation provides:
 - Nice compilation errors for easier code writing
