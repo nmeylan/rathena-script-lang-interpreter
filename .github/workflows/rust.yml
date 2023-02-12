@@ -15,9 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Run build script
-      run: ./.github/workflows/pipeline.sh
-      shell: bash
     - uses: actions/cache@v3
       with:
         path: |
