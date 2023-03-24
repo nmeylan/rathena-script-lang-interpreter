@@ -61,6 +61,18 @@ In addition of native functions listed in link above, server should implement so
 [more details here]()
 
 # Limitation and workaround
+
+## Lack of reference/value consistency in the language
+Some methods return reference or value dependending on the context, forcing to implement some "hack" to support all use case.
+
+Here an example with `getelementofarray` but there are plenty of example
+``` 
+.@a$[0] = "hello"; // This is a valid array of string declaration
+
+getelementofarray(.@a$, 0) + " world";      // getelementofarray() returns a value
+setarray getelementofarray(.@a$, 0), "bye"; // getelementofarray() returns a reference so we can assign "bye" to array element 0
+```
+
 ## Global variable array
 - `getglobalarrayref`: put reference of a global variable array on the stack
 
