@@ -118,6 +118,7 @@ fn setarray() {
     vm_dump_var("a1", .@a$[1]);
     vm_dump_var("b1", .@b[1]);
     vm_dump_var("b2", .@b[2]);
+    vm_dump_var("x1", .@x[1]);
     .@two = 2;
     vm_dump_var("b3", .@b[.@two + 1]);
     "#, compiler::DebugFlag::None.value()).unwrap();
@@ -135,6 +136,7 @@ fn setarray() {
     assert_eq!(1, events.lock().unwrap().get("b1").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("b2").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("b3").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(1, events.lock().unwrap().get("x1").unwrap().value.number_value().unwrap().clone());
 }
 #[test]
 fn getelementofarray() {
@@ -250,6 +252,39 @@ fn copyarray() {
     assert_eq!(String::from("hello"), events.lock().unwrap().get("b0").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("world"), events.lock().unwrap().get("c1").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("toto"), events.lock().unwrap().get("c2").unwrap().value.string_value().unwrap().clone());
+}
+
+
+#[test]
+fn setarray_with_getelementofarray() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    .@toto$ = "toto";
+    function my_fn {
+        .@arr_size = getarraysize(getarg(0));
+        println(getelementofarray(getarg(0), getarg(1)));
+        setarray getelementofarray(getarg(0), getarg(1)),getarg(2);
+    }
+    setarray .@a$[0], "hello", "world", .@toto$;
+
+    my_fn(.@a$, 1, "hello");
+    setarray getelementofarray(.@a$, 2),"titi";
+
+    vm_dump_var("a0", .@a$[0]);
+    vm_dump_var("a1", .@a$[1]);
+    vm_dump_var("a2", .@a$[2]);
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from("hello"), events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("hello"), events.lock().unwrap().get("a1").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("titi"), events.lock().unwrap().get("a2").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]

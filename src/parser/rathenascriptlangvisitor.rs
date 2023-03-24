@@ -2,7 +2,7 @@
 // Generated from RathenaScriptLang.g4 by ANTLR 4.9.3
 use antlr_rust::tree::{ParseTreeVisitor,ParseTreeVisitorCompat};
 use super::rathenascriptlangparser::*;
-
+use std::mem;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced

@@ -114,6 +114,7 @@ assignmentExpression
     : (assignmentLeftExpression assignmentOperator)+ conditionalExpression
     |   'set' '('? functionCallExpression ',' conditionalExpression ')'? // only set(getd()) will be allowed by compiler, not any function call
     |   'set' '('? assignmentLeftExpression ',' conditionalExpression ')'?
+    |   'setarray' '('? functionCallExpression ',' conditionalExpression ')'? // only set(getelementofarray()) will be allowed by compiler, not any function call
     |   'setarray' '('? assignmentLeftExpression ',' conditionalExpression (',' argumentExpressionList)? ')'?
     |   'copyarray' '('? assignmentLeftExpression ',' conditionalExpression ',' argumentExpressionList ')'?
     ;
@@ -190,7 +191,7 @@ switchLabels
 	;
 
 switchLabel
-	:	'case' constantExpression ':'
+	:	'case' (Label | constantExpression ':')
 	|	'default:'
 	;
 

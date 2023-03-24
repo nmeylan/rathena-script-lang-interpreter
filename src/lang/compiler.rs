@@ -964,21 +964,24 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
     fn visit_assignmentExpression(&mut self, ctx: &AssignmentExpressionContext<'input>) {
         if !ctx.assignmentLeftExpression_all().is_empty() {
             if ctx.Setarray().is_some() {
-                let left = ctx.assignmentLeftExpression(0).unwrap();
-                // Array can be assigned using setarray too
-                // *setarray <array name>[<first value>],<value>{,<value>...<value>};
-                self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <value>. In this language declaration require a value to assign
-                self.visit_assignmentLeftExpression(&left); // <array name>[<first value>]. Declare array variable.
-                let argument_count = if ctx.argumentExpressionList().is_none() {
-                    0
-                } else { // {,<value>...<value>}
-                    ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize
-                };
-                if argument_count > 0 {
-                    self.visit_variable(left.variable().as_ref().unwrap());
-                    self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
-                    self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 }, self.compilation_details_from_context(ctx));
+                if let Some(left) = ctx.assignmentLeftExpression(0) {
+                    // Array can be assigned using setarray too
+                    // *setarray <array name>[<first value>],<value>{,<value>...<value>};
+                    self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <value>. In this language declaration require a value to assign
+                    self.visit_assignmentLeftExpression(&left); // <array name>[<first value>]. Declare array variable.
+                    let argument_count = if ctx.argumentExpressionList().is_none() {
+                        0
+                    } else { // {,<value>...<value>}
+                        ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize
+                    };
+                    if argument_count > 0 {
+                        self.visit_variable(left.variable().as_ref().unwrap());
+                        self.visit_argumentExpressionList(&ctx.argumentExpressionList().unwrap());
+                        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&"setarray"), argument_count: argument_count + 1 }, self.compilation_details_from_context(ctx));
+                    }
+                    return;
                 }
+
             } else if ctx.Copyarray().is_some() {
                 let left = ctx.assignmentLeftExpression(0).unwrap();
                 // Array can be assigned using copyarray too
@@ -1012,6 +1015,26 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                         }
                     }
                     self.visit_assignmentLeftExpression(left);
+                }
+            }
+        } else if ctx.Setarray().is_some() && ctx.functionCallExpression().is_some() { // edge case handling
+            if let Some(function_call) = ctx.functionCallExpression() {
+                if function_call.Identifier().unwrap().get_text() == "getelementofarray" {
+                    // *setarray getelementofarray(getarg(0), index),value;
+                    // tranform getelementofarray(getarg(0), index) -> eval(<array>, <index>) = value
+
+                    if let Some(getlementofarray_arguments) = function_call.argumentExpressionList() {
+                        if getlementofarray_arguments.conditionalExpression_all().len() != 2 {
+                            self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "getelementofarray only accept 2 arguments".to_string());
+                            return;
+                        }
+                        self.visit_conditionalExpression(&ctx.conditionalExpression().unwrap()); // <value>
+                        self.visit_conditionalExpression(getlementofarray_arguments.conditionalExpression_all().get(0).as_ref().unwrap());
+                        self.visit_conditionalExpression(getlementofarray_arguments.conditionalExpression_all().get(1).as_ref().unwrap());
+
+
+                        self.current_chunk().emit_op_code(ArrayStore, self.compilation_details_from_context(ctx));
+                    }
                 }
             }
         } else if ctx.Set().is_some() && ctx.functionCallExpression().is_some() { // edge case handling
