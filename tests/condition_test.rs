@@ -236,6 +236,50 @@ fn switch_statement() {
     assert_eq!("greater than 4", events.lock().unwrap().get("e").unwrap().value.string_value().unwrap().clone());
 }
 
+#[test]
+fn switch_statement_with_expression_in_case() {
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    function num_to_str {
+        .@a = getarg(0);
+        switch (.@a) {
+            case 1:
+                return "one";
+            case 1 + 1:
+                .@res$ = "two";
+                break;
+            case (1 * 1) + 2:
+                .@res$ = "three";
+            case 4:
+                .@res$ = "four";
+                break;
+            default:
+                .@res$ = "greater than 4";
+                break;
+        }
+        return .@res$;
+    }
+    .@a$ = num_to_str(1);
+    .@b$ = num_to_str(2);
+    .@c$ = num_to_str(3);
+    .@d$ = num_to_str(4);
+    .@e$ = num_to_str(5);
+    vm_dump_locals();
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("two", events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("four", events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone()); // no break in case 3:
+    assert_eq!("four", events.lock().unwrap().get("d").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("greater than 4", events.lock().unwrap().get("e").unwrap().value.string_value().unwrap().clone());
+}
+
 
 #[test]
 fn switch_statement_with_constant() {
