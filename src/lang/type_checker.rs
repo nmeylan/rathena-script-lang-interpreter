@@ -107,6 +107,9 @@ impl TypeChecker {
     }
 
     pub fn remove_type_at(&mut self, index: usize) {
+        if index >= self.current_expression_types.len() {
+            return
+        }
         self.current_expression_types.remove(index);
     }
     pub fn current_type_len(&mut self) -> usize {

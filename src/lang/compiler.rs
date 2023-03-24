@@ -1020,9 +1020,6 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         } else if ctx.Setarray().is_some() && ctx.functionCallExpression().is_some() { // edge case handling
             if let Some(function_call) = ctx.functionCallExpression() {
                 if function_call.Identifier().unwrap().get_text() == "getelementofarray" {
-                    // *setarray getelementofarray(getarg(0), index),value;
-                    // tranform getelementofarray(getarg(0), index) -> eval(<array>, <index>) = value
-
                     if let Some(getlementofarray_arguments) = function_call.argumentExpressionList() {
                         if getlementofarray_arguments.conditionalExpression_all().len() != 2 {
                             self.register_error(CompilationErrorType::Generic, function_call.as_ref(), "getelementofarray only accept 2 arguments".to_string());
@@ -1169,6 +1166,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
          *   goto index will be case statement block.
          */
         let mut if_op_code_indices_to_update: Vec<usize> = vec![];
+        let mut case_condition_op_code_count: Vec<usize> = vec![];
         let mut default_index: Option<usize> = None;
         let mut goto_op_code_indices_to_update: HashMap<usize, Vec<usize>> = HashMap::new();
         for (i, switch_block_group) in switch_block.switchBlockStatementGroup_all().iter().enumerate() {
@@ -1176,8 +1174,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             for switch_labels in switch_block_group.switchLabels().iter() {
                 for (_j, label) in switch_labels.switchLabel_all().iter().enumerate() {
                     let (_switch_expression_op_code, _) = self.current_chunk().clone_op_code_at(switch_expression_index);
+                    let last_op_code_index_before_case = self.current_chunk().last_op_code_index();
                     if label.Case().is_some() {
-                        self.visit_constantExpression(label.constantExpression().as_ref().unwrap());
+                        if let Some(constant_expression) = label.constantExpression().as_ref() {
+                            self.visit_constantExpression(constant_expression);
+                        } else if let Some(label_expression) = label.Label() {
+                            // Load constant e.g: Job_novice
+                            let reference = self.current_chunk().add_constant(Constant::String(label_expression.get_text().replace(":", "")));
+                            self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(label.as_ref()));
+                            self.current_chunk().emit_op_code(LoadGlobal, self.compilation_details_from_context(label.as_ref()));
+                        }
+                        case_condition_op_code_count.push(self.current_chunk().last_op_code_index() - last_op_code_index_before_case);
                         self.type_checker.drop_current_type(ctx);
                         self.current_chunk().emit_op_code(OpCode::SwitchCompare, self.compilation_details_from_context(label.as_ref()));
                         let if_index = self.current_chunk().emit_op_code(OpCode::If(0), self.compilation_details_from_context(label.as_ref()));
@@ -1223,7 +1230,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 break;
             }
             // "If" is updated to jump to next if, when not match
-            self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(if_op_code_indices_to_update[i + 1] - 2));
+            self.current_chunk().set_op_code_at(if_op_code_indices_to_update[i], OpCode::If(if_op_code_indices_to_update[i + 1] - case_condition_op_code_count[i + 1] - 1));
             i += 1;
         }
         let block_state = self.current_chunk().drop_block_state();

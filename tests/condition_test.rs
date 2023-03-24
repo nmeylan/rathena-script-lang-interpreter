@@ -3,10 +3,11 @@ use std::collections::HashMap;
 
 use std::sync::{Arc, Mutex};
 use rathena_script_lang_interpreter::lang::compiler;
+use rathena_script_lang_interpreter::lang::value::Value;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
-use crate::common::{compile_script, Event, VmHook};
+use crate::common::{compile_script, Event, GlobalVariableEntry, VmHook};
 
 mod common;
 
@@ -233,6 +234,55 @@ fn switch_statement() {
     assert_eq!("four", events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone()); // no break in case 3:
     assert_eq!("four", events.lock().unwrap().get("d").unwrap().value.string_value().unwrap().clone());
     assert_eq!("greater than 4", events.lock().unwrap().get("e").unwrap().value.string_value().unwrap().clone());
+}
+
+
+#[test]
+fn switch_statement_with_constant() {
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    function class_name {
+        .@a = getarg(0);
+        switch (.@a) {
+            case Novice:
+                return "novice";
+            case Archer:
+                println(.@a);
+                .@res$ = "archer";
+                break;
+            default:
+                .@res$ = "dont know";
+                break;
+        }
+        return .@res$;
+    }
+    .@a$ = class_name(1);
+    .@b$ = class_name(2);
+    .@c$ = class_name(3);
+    vm_dump_locals();
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    vm_hook.global_variable_store.lock().unwrap().push(GlobalVariableEntry {
+        name: "Novice".to_string(),
+        value: Value::Number(Some(1)),
+        scope: "char_permanent".to_string(),
+        index: None
+    });
+    vm_hook.global_variable_store.lock().unwrap().push(GlobalVariableEntry {
+        name: "Archer".to_string(),
+        value: Value::Number(Some(2)),
+        scope: "char_permanent".to_string(),
+        index: None
+    });
+    // When
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!("novice", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("archer", events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!("dont know", events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]
