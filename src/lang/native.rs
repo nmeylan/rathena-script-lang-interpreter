@@ -29,22 +29,22 @@ pub(crate) fn handle_native_method(thread: &Thread, native: &Native, class: &Cla
             implode(thread, &arguments)?
         }
         "cleararray" => {
-            cleararray(thread, call_frame, native_method_handler, &arguments)?
+            cleararray(thread, call_frame, native_method_handler, &arguments, &class)?
         }
         "setarray" => {
-            setarray(thread, call_frame, native_method_handler, &arguments, &arguments_ref)?
+            setarray(thread, call_frame, native_method_handler, &arguments, &arguments_ref, &class)?
         }
         "getelementofarray" => {
             getelementofarray(thread, &arguments)?
         }
         "deletearray" => {
-            deletearray(thread, call_frame, native_method_handler, &arguments)?
+            deletearray(thread, call_frame, native_method_handler, &arguments, &class)?
         }
         "inarray" => {
             inarray(thread, &arguments, arguments_ref)?
         }
         "copyarray" => {
-            copyarray(thread, call_frame, native_method_handler, arguments)?
+            copyarray(thread, call_frame, native_method_handler, arguments, &class)?
         }
         "setd" => {
             setd(thread, class, instance, call_frame, &arguments, arguments_ref, native_method_handler)?
@@ -172,7 +172,7 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, ca
         let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference);
         let array_index = array_index_from_string(variable_identifier);
         let array = array.unwrap();
-        array.assign(array_index, variable_value.unwrap(), thread.array_update_callback(call_frame, native_method_handler, array.clone()));
+        array.assign(array_index, variable_value.unwrap(), thread.array_update_callback(call_frame, native_method_handler, array.clone(), &class));
     }
     Ok(())
 }
@@ -184,7 +184,7 @@ fn array_index_from_string(variable_identifier: &str) -> usize {
     variable_identifier[opening_bracket_index + 1..closing_bracket_index].parse::<usize>().unwrap()
 }
 
-fn copyarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: Vec<Value>) -> Result<(), RuntimeError> {
+fn copyarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: Vec<Value>, class: &Class) -> Result<(), RuntimeError> {
     let (destination_owner_reference, destination_reference, _, destination_index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "copyarray first argument should be an array element"))?;
     let (source_array_owner_reference, source_array_reference, _, source_array_index) = arguments[1].array_entry_value().map_err(|err|
@@ -198,7 +198,7 @@ fn copyarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler:
                                             format!("copyarray - tried to assign an array of {} (second argument) to an array of {}",
                                                     source_array.value_type.display_type(), destination_array.value_type.display_type())));
     }
-    destination_array.copyarray(source_array, *destination_index, *source_array_index, count as usize, thread.array_update_callback(call_frame, native_method_handler, destination_array.clone()))
+    destination_array.copyarray(source_array, *destination_index, *source_array_index, count as usize, thread.array_update_callback(call_frame, native_method_handler, destination_array.clone(), &class))
         .map_err(|err| RuntimeError::from_temporary(thread.current_source_line.clone(), thread.stack_traces.clone(), err))
 }
 
@@ -219,12 +219,12 @@ fn inarray(thread: &Thread, arguments: &[Value], arguments_ref: Vec<Option<u64>>
     Ok(())
 }
 
-fn deletearray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value]) -> Result<(), RuntimeError> {
+fn deletearray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value], class: &Class) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "deletearray first argument should be array name"))?;
     let size = arguments[1].number_value().map_err(|err| thread.new_runtime_from_temporary(err, "deletearray second argument should be number of element to delete"))? as usize;
     let array = thread.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
-    array.remove(*index, size, thread.array_remove_items_callback(call_frame, native_method_handler, array.clone()));
+    array.remove(*index, size, thread.array_remove_items_callback(call_frame, native_method_handler, array.clone(), &class));
     Ok(())
 }
 
@@ -238,7 +238,7 @@ fn getelementofarray(thread: &Thread, arguments: &[Value]) -> Result<(), Runtime
     Ok(())
 }
 
-fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value], arguments_ref: &[Option<u64>]) -> Result<(), RuntimeError> {
+fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value], arguments_ref: &[Option<u64>], class: &Class) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "setarray first argument should be array name"))?;
     let array = thread.vm.array_from_heap_reference(*owner_reference, *reference).unwrap();
@@ -259,14 +259,14 @@ fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: 
             index += 1;
         }
     }
-    let maybe_callback = thread.array_update_callback(call_frame, native_method_handler, array.clone());
+    let maybe_callback = thread.array_update_callback(call_frame, native_method_handler, array.clone(), &class);
     if let Some(callback) = maybe_callback {
         callback(array.as_ref().clone());
     }
     Ok(())
 }
 
-fn cleararray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value]) -> Result<(), RuntimeError> {
+fn cleararray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: &&dyn NativeMethodHandler, arguments: &[Value], class: &Class) -> Result<(), RuntimeError> {
     let (owner_reference, reference, _, index) = arguments[0].array_entry_value().map_err(|err|
         thread.new_runtime_from_temporary(err, "cleararray first argument should be array name"))?;
     let value = arguments[1].clone();
@@ -279,7 +279,7 @@ fn cleararray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler
                                                     value.display_type(), array.value_type.display_type())));
     }
     let value_reference = thread.vm.add_in_constant_pool(value);
-    array.assign_multiple(*index, size as usize, value_reference, thread.array_update_callback(call_frame, native_method_handler, array.clone()));
+    array.assign_multiple(*index, size as usize, value_reference, thread.array_update_callback(call_frame, native_method_handler, array.clone(), &class));
     Ok(())
 }
 

@@ -7,7 +7,7 @@ use std::mem;
 
 use rathena_script_lang_interpreter::lang::call_frame::CallFrame;
 use rathena_script_lang_interpreter::lang::chunk::ClassFile;
-use rathena_script_lang_interpreter::lang::compiler::Compiler;
+use rathena_script_lang_interpreter::lang::compiler::{CompilationDetail, Compiler};
 use rathena_script_lang_interpreter::lang::error::CompilationError;
 use rathena_script_lang_interpreter::lang::thread::Thread;
 use rathena_script_lang_interpreter::lang::value::{Value};
@@ -82,7 +82,7 @@ impl VmHook {
 }
 
 impl NativeMethodHandler for VmHook {
-    fn handle(&self, native: &rathena_script_lang_interpreter::lang::value::Native, params: Vec<Value>, thread: &Thread, call_frame: &CallFrame) {
+    fn handle(&self, native: &rathena_script_lang_interpreter::lang::value::Native, params: Vec<Value>, thread: &Thread, call_frame: &CallFrame, source_line: &CompilationDetail, _class_name: String) {
         if self.hook_handle_native.is_some() {
             let should_continue = self.hook_handle_native.as_ref().unwrap()(native.name.clone(), thread);
             if !should_continue {

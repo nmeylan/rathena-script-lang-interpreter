@@ -161,7 +161,7 @@ pub struct Vm {
 }
 
 pub trait NativeMethodHandler: Send + Sync {
-    fn handle(&self, native: &Native, _params: Vec<Value>, _program: &Thread, _call_frame: &CallFrame) {
+    fn handle(&self, native: &Native, _params: Vec<Value>, _program: &Thread, _call_frame: &CallFrame, source_line: &CompilationDetail, _class_name: String) {
         panic!("Native function {}", native.name);
     }
 }

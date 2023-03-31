@@ -122,7 +122,7 @@ impl Thread {
                             .map_err(|err| self.new_runtime_from_temporary(err, "VM: ArrayStore expected to retrieve array from heap reference"))?;
                         let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
                         if let Ok(constant_ref) = value_constant_ref {
-                            array.assign(arr_index as usize, constant_ref, self.array_update_callback(&call_frame, &native_method_handler, array.clone()));
+                            array.assign(arr_index as usize, constant_ref, self.array_update_callback(&call_frame, &native_method_handler, array.clone(), &class));
                         }
                     } else {
                         return Err(self.new_runtime_error("OpCode::ArrayStore - Expected stack entry to be a heap reference.".to_string()));
@@ -337,7 +337,7 @@ impl Thread {
                     if NATIVE_FUNCTIONS.iter().any(|native| native.name == native_method.name.as_str()) {
                         handle_native_method(self, native_method, class, instance, &mut call_frame, arguments, arguments_ref, &native_method_handler)?;
                     } else {
-                        native_method_handler.handle(native_method, arguments, self, &call_frame);
+                        native_method_handler.handle(native_method, arguments, self, &call_frame, &self.current_source_line, class.name.clone());
                     }
                     self.stack_traces.pop();
                 }
@@ -457,7 +457,7 @@ impl Thread {
             let arguments = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string()))];
             // Calling native getglobalarray which put on stack array: number of stack entreies + (index/value reference)*
             // TODO: doc
-            native_method_handler.handle(&Native {name: "getglobalarray".to_string()}, arguments, self, call_frame);
+            native_method_handler.handle(&Native {name: "getglobalarray".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             let number_of_stack_entries = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
             let number_of_stack_entries = self.value_from_stack_entry(&number_of_stack_entries, call_frame, class, instance)?.number_value().unwrap() as usize;
             let mut i = 0;
@@ -477,12 +477,12 @@ impl Thread {
         } else {
             let arguments: Vec<Value> = vec![Value::String(Some(variable.to_script_identifier())), Value::String(Some(variable.scope.as_string()))];
             // TODO: doc
-            native_method_handler.handle(&Native { name: "getglobalvariable".to_string() }, arguments, self, call_frame);
+            native_method_handler.handle(&Native { name: "getglobalvariable".to_string() }, arguments, self, call_frame, &self.current_source_line, class.name.clone());
         }
         Ok(())
     }
 
-    pub(crate) fn array_update_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread &'program dyn NativeMethodHandler, array: Arc<Array>) -> Option<Box<dyn Fn(Array) + 'thread>> {
+    pub(crate) fn array_update_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread &'program dyn NativeMethodHandler, array: Arc<Array>, class: &'thread Class) -> Option<Box<dyn Fn(Array) + 'thread>> {
         if array.scope.is_global() {
             let closure = move |_updated_array: Array| {
                 let mut arguments: Vec<Value> = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string()))];
@@ -494,7 +494,7 @@ impl Thread {
                     }
                 }
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "setglobalarray".to_string()}, arguments, self, call_frame);
+                native_method_handler.handle(&Native {name: "setglobalarray".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             };
             Some(Box::new(closure))
         } else {
@@ -502,12 +502,12 @@ impl Thread {
         }
     }
 
-    pub(crate) fn array_remove_items_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread &'program dyn NativeMethodHandler, array: Arc<Array>) -> Option<Box<dyn Fn(Array, usize, usize) + 'thread>> {
+    pub(crate) fn array_remove_items_callback<'thread, 'program: 'thread>(&'thread self, call_frame: &'thread CallFrame, native_method_handler: &'thread &'program dyn NativeMethodHandler, array: Arc<Array>, class: &'thread Class) -> Option<Box<dyn Fn(Array, usize, usize) + 'thread>> {
         if array.scope.is_global() {
             let closure = move |_updated_array: Array, start_index: usize, end_index: usize| {
                 let arguments: Vec<Value> = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string())), Value::new_number(start_index as i32), Value::new_number(end_index as i32)];
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "removeitemsglobalarray".to_string()}, arguments, self, call_frame);
+                native_method_handler.handle(&Native {name: "removeitemsglobalarray".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             };
             Some(Box::new(closure))
         } else {
@@ -612,7 +612,7 @@ impl Thread {
             if !variable.value_ref.is_array() { // In case of array, reference is the reference of the array, not of the expression result constant. it will come in ArrayStore instruction
                 arguments.push(self.vm.get_from_constant_pool(reference).unwrap().value());
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "setglobalvariable".to_string()}, arguments, self, call_frame);
+                native_method_handler.handle(&Native {name: "setglobalvariable".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             }
         };
         Ok(())
