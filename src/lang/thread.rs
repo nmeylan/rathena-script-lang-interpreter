@@ -221,6 +221,28 @@ impl Thread {
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
+                OpCode::BitAnd => {
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
+                    let result = v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        & v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?;
+                    let result_as_number = Value::Number(Some(result));
+                    let reference = self.vm.add_in_constant_pool(result_as_number);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                }
+                OpCode::BitOr => {
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
+                    let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
+                    let result = v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?
+                        | v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))?;
+                    let result_as_number = Value::Number(Some(result));
+                    let reference = self.vm.add_in_constant_pool(result_as_number);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                }
                 OpCode::LogicalAnd => {
                     let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let stack_entry2 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;

@@ -295,9 +295,9 @@ Quote : '\'';
 DoubleQuote : '"';
 Underscore: '_';
 // one or two char token
-LogicalOr : '|';
+BitOr : '|';
 OrOp : '||';
-LogicalAnd : '&';
+BitAnd : '&';
 AndOp : '&&';
 Slash : '/';
 SlashStar : '/*';

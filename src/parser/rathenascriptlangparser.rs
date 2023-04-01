@@ -64,9 +64,9 @@ use std::any::{Any,TypeId};
 		pub const Quote:isize=24; 
 		pub const DoubleQuote:isize=25; 
 		pub const Underscore:isize=26; 
-		pub const LogicalOr:isize=27; 
+		pub const BitOr:isize=27; 
 		pub const OrOp:isize=28; 
-		pub const LogicalAnd:isize=29; 
+		pub const BitAnd:isize=29; 
 		pub const AndOp:isize=30; 
 		pub const Slash:isize=31; 
 		pub const SlashStar:isize=32; 
@@ -244,8 +244,8 @@ use std::any::{Any,TypeId};
 		Some("RightParen"), Some("LeftBrace"), Some("RightBrace"), Some("LeftBracket"), 
 		Some("RightBracket"), Some("Comma"), Some("At"), Some("Colon"), Some("SemiColon"), 
 		Some("Percent"), Some("Star"), Some("Tilde"), Some("QuestionMark"), Some("Quote"), 
-		Some("DoubleQuote"), Some("Underscore"), Some("LogicalOr"), Some("OrOp"), 
-		Some("LogicalAnd"), Some("AndOp"), Some("Slash"), Some("SlashStar"), Some("StarSlash"), 
+		Some("DoubleQuote"), Some("Underscore"), Some("BitOr"), Some("OrOp"), 
+		Some("BitAnd"), Some("AndOp"), Some("Slash"), Some("SlashStar"), Some("StarSlash"), 
 		Some("DoubleSlash"), Some("Sharp"), Some("DoubleSharp"), Some("Minus"), 
 		Some("DecrementOp"), Some("Plus"), Some("IncrementOp"), Some("Dot"), Some("DotAt"), 
 		Some("Dollar"), Some("DollarAt"), Some("Bang"), Some("BangEqual"), Some("Equal"), 
@@ -841,7 +841,7 @@ where
 					recog.base.set_state(149);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
-					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << BitAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
 						{
 						/*InvokeRule argumentExpressionList*/
 						recog.base.set_state(148);
@@ -869,7 +869,7 @@ where
 					recog.base.set_state(155);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
-					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << BitAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
 						{
 						/*InvokeRule argumentExpressionList*/
 						recog.base.set_state(154);
@@ -1771,10 +1771,10 @@ impl<'input> UnaryOperatorContextExt<'input>{
 
 pub trait UnaryOperatorContextAttrs<'input>: RathenaScriptLangParserContext<'input> + BorrowMut<UnaryOperatorContextExt<'input>>{
 
-/// Retrieves first TerminalNode corresponding to token LogicalAnd
-/// Returns `None` if there is no child corresponding to token LogicalAnd
-fn LogicalAnd(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LogicalAnd, 0)
+/// Retrieves first TerminalNode corresponding to token BitAnd
+/// Returns `None` if there is no child corresponding to token BitAnd
+fn BitAnd(&self) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(BitAnd, 0)
 }
 /// Retrieves first TerminalNode corresponding to token Star
 /// Returns `None` if there is no child corresponding to token Star
@@ -1826,7 +1826,7 @@ where
 			{
 			recog.base.set_state(224);
 			_la = recog.base.input.la(1);
-			if { !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << Star) | (1usize << Tilde) | (1usize << LogicalAnd) | (1usize << Minus) | (1usize << Plus) | (1usize << Bang))) != 0)) } {
+			if { !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << Star) | (1usize << Tilde) | (1usize << BitAnd) | (1usize << Minus) | (1usize << Plus) | (1usize << Bang))) != 0)) } {
 				recog.err_handler.recover_inline(&mut recog.base)?;
 
 			}
@@ -3107,14 +3107,14 @@ fn equalityExpression_all(&self) ->  Vec<Rc<EqualityExpressionContextAll<'input>
 fn equalityExpression(&self, i: usize) -> Option<Rc<EqualityExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(i)
 }
-/// Retrieves all `TerminalNode`s corresponding to token LogicalAnd in current rule
-fn LogicalAnd_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(LogicalAnd)
+/// Retrieves all `TerminalNode`s corresponding to token BitAnd in current rule
+fn BitAnd_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
+	self.children_of_given_type(BitAnd)
 }
-/// Retrieves 'i's TerminalNode corresponding to token LogicalAnd, starting from 0.
-/// Returns `None` if number of children corresponding to token LogicalAnd is less or equal than `i`.
-fn LogicalAnd(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LogicalAnd, i)
+/// Retrieves 'i's TerminalNode corresponding to token BitAnd, starting from 0.
+/// Returns `None` if number of children corresponding to token BitAnd is less or equal than `i`.
+fn BitAnd(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(BitAnd, i)
 }
 
 }
@@ -3151,7 +3151,7 @@ where
 					{
 					{
 					recog.base.set_state(282);
-					recog.base.match_token(LogicalAnd,&mut recog.err_handler)?;
+					recog.base.match_token(BitAnd,&mut recog.err_handler)?;
 
 					/*InvokeRule equalityExpression*/
 					recog.base.set_state(283);
@@ -3356,14 +3356,14 @@ fn exclusiveOrExpression_all(&self) ->  Vec<Rc<ExclusiveOrExpressionContextAll<'
 fn exclusiveOrExpression(&self, i: usize) -> Option<Rc<ExclusiveOrExpressionContextAll<'input>>> where Self:Sized{
 	self.child_of_type(i)
 }
-/// Retrieves all `TerminalNode`s corresponding to token LogicalOr in current rule
-fn LogicalOr_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
-	self.children_of_given_type(LogicalOr)
+/// Retrieves all `TerminalNode`s corresponding to token BitOr in current rule
+fn BitOr_all(&self) -> Vec<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>>  where Self:Sized{
+	self.children_of_given_type(BitOr)
 }
-/// Retrieves 'i's TerminalNode corresponding to token LogicalOr, starting from 0.
-/// Returns `None` if number of children corresponding to token LogicalOr is less or equal than `i`.
-fn LogicalOr(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
-	self.get_token(LogicalOr, i)
+/// Retrieves 'i's TerminalNode corresponding to token BitOr, starting from 0.
+/// Returns `None` if number of children corresponding to token BitOr is less or equal than `i`.
+fn BitOr(&self, i: usize) -> Option<Rc<TerminalNode<'input,RathenaScriptLangParserContextType>>> where Self:Sized{
+	self.get_token(BitOr, i)
 }
 
 }
@@ -3400,7 +3400,7 @@ where
 					{
 					{
 					recog.base.set_state(298);
-					recog.base.match_token(LogicalOr,&mut recog.err_handler)?;
+					recog.base.match_token(BitOr,&mut recog.err_handler)?;
 
 					/*InvokeRule exclusiveOrExpression*/
 					recog.base.set_state(299);
@@ -5411,7 +5411,7 @@ where
 			recog.base.set_state(443);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__6) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (For - 64)) | (1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Callsub - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (True - 64)) | (1usize << (False - 64)) | (1usize << (Menu - 64)) | (1usize << (Close - 64)) | (1usize << (CloseShop - 64)) | (1usize << (Close2 - 64)) | (1usize << (Next - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__6) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << BitAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (For - 64)) | (1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Callsub - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (True - 64)) | (1usize << (False - 64)) | (1usize << (Menu - 64)) | (1usize << (Close - 64)) | (1usize << (CloseShop - 64)) | (1usize << (Close2 - 64)) | (1usize << (Next - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0) {
 				{
 				/*InvokeRule blockItemList*/
 				recog.base.set_state(442);
@@ -5533,7 +5533,7 @@ where
 				recog.base.set_state(450); 
 				recog.err_handler.sync(&mut recog.base)?;
 				_la = recog.base.input.la(1);
-				if !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__6) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (For - 64)) | (1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Callsub - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (True - 64)) | (1usize << (False - 64)) | (1usize << (Menu - 64)) | (1usize << (Close - 64)) | (1usize << (CloseShop - 64)) | (1usize << (Close2 - 64)) | (1usize << (Next - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0)) {break}
+				if !((((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << T__6) | (1usize << LeftParen) | (1usize << LeftBrace) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << BitAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << If) | (1usize << End) | (1usize << Set))) != 0) || ((((_la - 64)) & !0x3f) == 0 && ((1usize << (_la - 64)) & ((1usize << (For - 64)) | (1usize << (While - 64)) | (1usize << (Do - 64)) | (1usize << (Goto - 64)) | (1usize << (Return - 64)) | (1usize << (Switch - 64)) | (1usize << (Function - 64)) | (1usize << (Break - 64)) | (1usize << (Callfunc - 64)) | (1usize << (Callsub - 64)) | (1usize << (Setarray - 64)) | (1usize << (Copyarray - 64)) | (1usize << (True - 64)) | (1usize << (False - 64)) | (1usize << (Menu - 64)) | (1usize << (Close - 64)) | (1usize << (CloseShop - 64)) | (1usize << (Close2 - 64)) | (1usize << (Next - 64)) | (1usize << (Identifier - 64)) | (1usize << (Label - 64)) | (1usize << (String - 64)) | (1usize << (Number - 64)))) != 0)) {break}
 			}
 			}
 		};
@@ -5630,7 +5630,7 @@ where
 			recog.err_handler.sync(&mut recog.base)?;
 			match recog.base.input.la(1) {
 			 T__6 | LeftParen | LeftBrace | At | Star | Tilde | Quote | Underscore |
-			 LogicalAnd | Sharp | DoubleSharp | Minus | DecrementOp | Plus | IncrementOp |
+			 BitAnd | Sharp | DoubleSharp | Minus | DecrementOp | Plus | IncrementOp |
 			 Dot | DotAt | Dollar | DollarAt | Bang | If | End | Set | For | While |
 			 Do | Goto | Return | Switch | Break | Callfunc | Callsub | Setarray |
 			 Copyarray | True | False | Menu | Close | CloseShop | Close2 | Next |
@@ -6563,7 +6563,7 @@ where
 							}
 						}
 
-					 LeftParen | At | Star | Tilde | Quote | Underscore | LogicalAnd | Sharp |
+					 LeftParen | At | Star | Tilde | Quote | Underscore | BitAnd | Sharp |
 					 DoubleSharp | Minus | DecrementOp | Plus | IncrementOp | Dot | DotAt |
 					 Dollar | DollarAt | Bang | Callfunc | Callsub | True | False | Menu |
 					 Next | Identifier | String | Number 
@@ -6922,7 +6922,7 @@ where
 			recog.base.set_state(536);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << BitAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
 				{
 				/*InvokeRule forStopExpression*/
 				recog.base.set_state(535);
@@ -6937,7 +6937,7 @@ where
 			recog.base.set_state(540);
 			recog.err_handler.sync(&mut recog.base)?;
 			_la = recog.base.input.la(1);
-			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+			if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << BitAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang) | (1usize << Set))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (Setarray - 74)) | (1usize << (Copyarray - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
 				{
 				/*InvokeRule forExpression*/
 				recog.base.set_state(539);
@@ -7447,7 +7447,7 @@ where
 					recog.base.set_state(558);
 					recog.err_handler.sync(&mut recog.base)?;
 					_la = recog.base.input.la(1);
-					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << LogicalAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
+					if (((_la) & !0x3f) == 0 && ((1usize << _la) & ((1usize << LeftParen) | (1usize << At) | (1usize << Star) | (1usize << Tilde) | (1usize << Quote) | (1usize << Underscore) | (1usize << BitAnd) | (1usize << Sharp) | (1usize << DoubleSharp) | (1usize << Minus) | (1usize << DecrementOp) | (1usize << Plus) | (1usize << IncrementOp) | (1usize << Dot) | (1usize << DotAt) | (1usize << Dollar) | (1usize << DollarAt) | (1usize << Bang))) != 0) || ((((_la - 74)) & !0x3f) == 0 && ((1usize << (_la - 74)) & ((1usize << (Callfunc - 74)) | (1usize << (Callsub - 74)) | (1usize << (True - 74)) | (1usize << (False - 74)) | (1usize << (Menu - 74)) | (1usize << (Next - 74)) | (1usize << (Identifier - 74)) | (1usize << (String - 74)) | (1usize << (Number - 74)))) != 0) {
 						{
 						/*InvokeRule conditionalExpression*/
 						recog.base.set_state(557);

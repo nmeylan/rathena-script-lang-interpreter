@@ -418,6 +418,8 @@ pub enum OpCode {
     NotEqual,
     LogicalAnd,
     LogicalOr,
+    BitAnd,
+    BitOr,
     Relational(Relational),
     Add,
     NumericOperation(NumericOperation),

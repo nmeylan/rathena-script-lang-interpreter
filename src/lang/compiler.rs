@@ -1306,6 +1306,38 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
     }
 
+    fn visit_andExpression(&mut self, ctx: &AndExpressionContext<'input>) {
+        self.visit_equalityExpression(&ctx.equalityExpression(ctx.equalityExpression_all().len() - 1).unwrap());
+
+        for (i, _) in ctx.equalityExpression_all().iter().enumerate().rev() {
+            if i == ctx.equalityExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_equalityExpression(&ctx.equalityExpression(i).unwrap());
+            if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
+                self.type_checker.debug_type_checking(ctx, "visit_andExpression");
+                self.register_error(Type, ctx, "And operator \"&\" is not allowed for String".to_string());
+            }
+            self.current_chunk().emit_op_code(OpCode::BitAnd, self.compilation_details_from_context(ctx.equalityExpression(i).unwrap().as_ref()));
+        }
+    }
+
+    fn visit_inclusiveOrExpression(&mut self, ctx: &InclusiveOrExpressionContext<'input>) {
+        self.visit_exclusiveOrExpression(&ctx.exclusiveOrExpression(ctx.exclusiveOrExpression_all().len() - 1).unwrap());
+
+        for (i, _) in ctx.exclusiveOrExpression_all().iter().enumerate().rev() {
+            if i == ctx.exclusiveOrExpression_all().len() - 1 {
+                continue;
+            }
+            self.visit_exclusiveOrExpression(&ctx.exclusiveOrExpression(i).unwrap());
+            if self.type_checker.current_sub_expression_type().is_some() && self.type_checker.current_sub_expression_type().unwrap().is_string() {
+                self.type_checker.debug_type_checking(ctx, "visit_andExpression");
+                self.register_error(Type, ctx, "Or operator \"|\" is not allowed for String".to_string());
+            }
+            self.current_chunk().emit_op_code(OpCode::BitOr, self.compilation_details_from_context(ctx.exclusiveOrExpression(i).unwrap().as_ref()));
+        }
+    }
+
     fn visit_externalDeclaration(&mut self, ctx: &ExternalDeclarationContext<'input>) {
         self.visit_children(ctx);
         self.type_checker.reset_state();

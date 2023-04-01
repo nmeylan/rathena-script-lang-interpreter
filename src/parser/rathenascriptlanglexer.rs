@@ -55,9 +55,9 @@ use std::ops::{Deref, DerefMut};
 	pub const Quote:isize=24; 
 	pub const DoubleQuote:isize=25; 
 	pub const Underscore:isize=26; 
-	pub const LogicalOr:isize=27; 
+	pub const BitOr:isize=27; 
 	pub const OrOp:isize=28; 
-	pub const LogicalAnd:isize=29; 
+	pub const BitAnd:isize=29; 
 	pub const AndOp:isize=30; 
 	pub const Slash:isize=31; 
 	pub const SlashStar:isize=32; 
@@ -135,8 +135,8 @@ use std::ops::{Deref, DerefMut};
 		"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "T__8", 
 		"LeftParen", "RightParen", "LeftBrace", "RightBrace", "LeftBracket", "RightBracket", 
 		"Comma", "At", "Colon", "SemiColon", "Percent", "Star", "Tilde", "QuestionMark", 
-		"Quote", "DoubleQuote", "Underscore", "LogicalOr", "OrOp", "LogicalAnd", 
-		"AndOp", "Slash", "SlashStar", "StarSlash", "DoubleSlash", "Sharp", "DoubleSharp", 
+		"Quote", "DoubleQuote", "Underscore", "BitOr", "OrOp", "BitAnd", "AndOp", 
+		"Slash", "SlashStar", "StarSlash", "DoubleSlash", "Sharp", "DoubleSharp", 
 		"Minus", "DecrementOp", "Plus", "IncrementOp", "Dot", "DotAt", "Dollar", 
 		"DollarAt", "Bang", "BangEqual", "Equal", "DoubleEqual", "LeftCaret", 
 		"DoubleLeftCaret", "LeftCaretEqual", "RightCaret", "DoubleRightCaret", 
@@ -174,8 +174,8 @@ use std::ops::{Deref, DerefMut};
 		Some("RightParen"), Some("LeftBrace"), Some("RightBrace"), Some("LeftBracket"), 
 		Some("RightBracket"), Some("Comma"), Some("At"), Some("Colon"), Some("SemiColon"), 
 		Some("Percent"), Some("Star"), Some("Tilde"), Some("QuestionMark"), Some("Quote"), 
-		Some("DoubleQuote"), Some("Underscore"), Some("LogicalOr"), Some("OrOp"), 
-		Some("LogicalAnd"), Some("AndOp"), Some("Slash"), Some("SlashStar"), Some("StarSlash"), 
+		Some("DoubleQuote"), Some("Underscore"), Some("BitOr"), Some("OrOp"), 
+		Some("BitAnd"), Some("AndOp"), Some("Slash"), Some("SlashStar"), Some("StarSlash"), 
 		Some("DoubleSlash"), Some("Sharp"), Some("DoubleSharp"), Some("Minus"), 
 		Some("DecrementOp"), Some("Plus"), Some("IncrementOp"), Some("Dot"), Some("DotAt"), 
 		Some("Dollar"), Some("DollarAt"), Some("Bang"), Some("BangEqual"), Some("Equal"), 
