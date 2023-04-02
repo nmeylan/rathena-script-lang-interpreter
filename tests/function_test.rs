@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use std::sync::{Arc, Mutex};
 use rathena_script_lang_interpreter::lang::compiler;
+use rathena_script_lang_interpreter::lang::compiler::Compiler;
 
 
 use rathena_script_lang_interpreter::lang::vm::{DebugFlag, Vm};
@@ -311,4 +312,68 @@ fn recursive_function_call_with_return() {
     Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
     // Then
     assert_eq!(0, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+}
+
+
+#[test]
+fn nested_function_call_with_return() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let classes = compile_script(r#"
+    .@a = add(add(10));
+    function add {
+        return getarg(0) + 1;
+    }
+    vm_dump_locals();
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(12, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+}
+
+#[test]
+fn nested_function_call_with_expression_in_args() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let classes = compile_script(r#"
+    .@a = two_args(1, add((add(16)&255)|32));
+    function add {
+        return getarg(0) + 1;
+    }
+    function two_args {
+        return getarg(0) + getarg(1);
+    }
+    vm_dump_locals();
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(51, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+}
+#[test]
+fn nested_function_call_with_expression_in_args_2() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let classes = compile_script(r#"
+    function a{return getarg(0) + 1;}
+    .@a = a(a(a(a(a(a(a(a(a(a(a(1)))))))))));
+    vm_dump_locals();
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(12, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
 }

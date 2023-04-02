@@ -1,4 +1,5 @@
 use rathena_script_lang_interpreter::lang::compiler;
+use rathena_script_lang_interpreter::lang::compiler::Compiler;
 use crate::common::{compile, compile_script};
 
 mod common;
@@ -526,4 +527,13 @@ fn debug_opcodes() {
     for (index, op_code) in main_function.chunk.op_codes.borrow().iter().enumerate() {
         println!("[{}] {:?}", index, op_code);
     }
+}
+
+#[test]
+fn nested_function_call() {
+    // When
+    Compiler::compile("a".to_string(), "- script _MainScript -1, {\n function a{return getarg(0) + 1;}\n
+    .@a = a(a(a(a(a(a(a(a(a(a(a(1))))))))))); \n}", "native_functions_list.txt", 0);
+    // Then
+    assert!(true)
 }
