@@ -143,7 +143,7 @@ statement
     ;
 commandStatement
     : Menu menuOptionText ',' menuLabel  (',' menuOptionText ',' menuLabel)*
-    | Close | Close2 | CloseShop | Next;
+    | Close | Close2 | Next;
 menuOptionText
     :  (String | conditionalExpression);
 menuLabel
@@ -354,7 +354,6 @@ False: 'false';
 // Functions without args
 Menu: 'menu';
 Close: 'close';
-CloseShop: 'closeshop';
 Close2: 'close2';
 Next: 'next';
 Script: 'script';
