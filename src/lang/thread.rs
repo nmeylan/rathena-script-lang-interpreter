@@ -449,7 +449,7 @@ impl Thread {
                 OpCode::If(jump_to_index) => {
                     let stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let value = self.value_from_stack_entry(&stack_entry, &call_frame, class, instance)?;
-                    if value.number_value().map_err(|err| self.new_runtime_from_temporary(err, "VM: If expected expression result to be a number"))? != 1 {
+                    if value.number_value().map_err(|err| self.new_runtime_from_temporary(err, "VM: If expected expression result to be a number"))? == 0 {
                         op_index = *jump_to_index - 1;
                     }
                 }

@@ -50,6 +50,15 @@ fn simple_condition() {
     if(!0) {
         .@o$ = "i am true";
     }
+    if(9) {
+        .@p$ = "i am true";
+    }
+    if(!9) {
+        .@q$ = "i am false";
+    }
+    if(!0) {
+        .@r$ = "i am true";
+    }
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
@@ -72,6 +81,9 @@ fn simple_condition() {
     assert_eq!(true, events.lock().unwrap().get("l").is_some());
     assert_eq!(false, events.lock().unwrap().get("m").is_some());
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("o").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("p").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(false, events.lock().unwrap().get("q").is_some());
+    assert_eq!(String::from("i am true"), events.lock().unwrap().get("r").unwrap().value.string_value().unwrap().clone());
 }
 
 #[test]

@@ -1135,9 +1135,9 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         self.visit_children(ctx);
         if let Some(operator) = ctx.unaryOperator() {
             if operator.Bang().is_some() {
-                let constant_ref = self.current_chunk().add_constant(Constant::Number(1));
+                let constant_ref = self.current_chunk().add_constant(Constant::Number(0));
                 self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_ref), self.compilation_details_from_context(ctx));
-                self.current_chunk().emit_op_code(OpCode::NotEqual, self.compilation_details_from_context(ctx));
+                self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(ctx));
             }
         }
     }
