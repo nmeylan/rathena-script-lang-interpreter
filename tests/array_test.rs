@@ -203,8 +203,8 @@ fn inarray() {
     setarray .@a$[0], "hello", "world", .@c$;
     setarray .@b[1], 1, 2, 3, 4,5;
     .@toto_index = inarray(.@a$[0], "toto");
-    .@four_index = inarray .@b, 4;
-    .@not_found_index = inarray .@b, 100;
+    .@four_index = inarray(.@b, 4);
+    .@not_found_index = inarray(.@b, 100);
     vm_dump_var("toto_index", .@toto_index);
     vm_dump_var("four_index", .@four_index);
     vm_dump_var("not_found_index", .@not_found_index);

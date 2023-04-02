@@ -17,13 +17,16 @@ primaryExpression
 functionCallExpression
     : Identifier '(' argumentExpressionList? ')'
     | Underscore '(' argumentExpressionList? ')'
-    | Identifier argumentExpressionList
     | Callfunc '('? String ( ',' argumentExpressionList)? ')'
     | Callfunc String ( ',' argumentExpressionList)?
     | Callsub '('? Identifier ( ',' argumentExpressionList)? ')'
     | Callsub Identifier ( ',' argumentExpressionList)?
     ;
 
+
+functionCallExpressionWithoutParentheses
+    : Identifier argumentExpressionList?
+    ;
 postfixExpression
     : primaryExpression
     | incrementThenLoad
@@ -167,6 +170,7 @@ blockItem
 expressionStatement
     : assignmentExpression ';'
     | conditionalExpression ';'
+    | functionCallExpressionWithoutParentheses ';'
     ;
 
 selectionStatement

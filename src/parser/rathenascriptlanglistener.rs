@@ -35,6 +35,16 @@ fn enter_functionCallExpression(&mut self, _ctx: &FunctionCallExpressionContext<
  */
 fn exit_functionCallExpression(&mut self, _ctx: &FunctionCallExpressionContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#functionCallExpressionWithoutParentheses}.
+ * @param ctx the parse tree
+ */
+fn enter_functionCallExpressionWithoutParentheses(&mut self, _ctx: &FunctionCallExpressionWithoutParenthesesContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#functionCallExpressionWithoutParentheses}.
+ * @param ctx the parse tree
+ */
+fn exit_functionCallExpressionWithoutParentheses(&mut self, _ctx: &FunctionCallExpressionWithoutParenthesesContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#postfixExpression}.
  * @param ctx the parse tree
  */

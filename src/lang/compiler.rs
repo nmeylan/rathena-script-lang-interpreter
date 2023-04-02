@@ -455,9 +455,9 @@ impl Compiler {
     // 2. some(setvariableofnpc, setd, etc..) set value to variable reference
     // 3. some terminate execution (close)
     // We need function below to handle these edge cases.
-    fn visit_native_function(&mut self, ctx: &FunctionCallExpressionContext, function_or_native_name: &String, first_argument_op_code_index: usize, argument_count: usize, native: NativeFunction) {
+    fn visit_native_function<'input>(&mut self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), argumentsList: Option<Rc<ArgumentExpressionListContextAll<'input>>>, function_or_native_name: &String, first_argument_op_code_index: usize, argument_count: usize, native: NativeFunction) {
         if argument_count < native.min_arguments || argument_count > native.max_arguments {
-            self.register_error(NativeArgumentCount, ctx,
+            self.register_error(NativeArgumentCount, node,
                                 format!("Wrong arguments: {} accept at least {} argument(s) and at most {} argument(s) but received {} argument(s)",
                                         native.name, native.min_arguments, native.max_arguments, argument_count
                                 ));
@@ -465,21 +465,21 @@ impl Compiler {
         }
 
         if native.name == "input" {
-            for (i, expr) in ctx.argumentExpressionList().unwrap().conditionalExpression_all().iter().enumerate() {
+            for (i, expr) in argumentsList.as_ref().unwrap().conditionalExpression_all().iter().enumerate() {
                 if i == 0 {
-                    let variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+                    let variable_identifier = argumentsList.as_ref().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
                     let constant_reference = self.current_chunk().add_constant(Constant::String(variable_identifier));
-                    self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_reference), self.compilation_details_from_context(ctx));
+                    self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_reference), self.compilation_details_from_context(node));
                 } else {
                     self.visit_conditionalExpression(expr);
                 }
             }
-        } else if ctx.argumentExpressionList().is_some() {
-            self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
+        } else if argumentsList.is_some() {
+            self.visit_argumentExpressionList(argumentsList.as_ref().unwrap());
         }
 
         if native.name == "setd" {
-            let setd_variable_expression = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+            let setd_variable_expression = argumentsList.as_ref().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
             if setd_variable_expression.starts_with(&format!("\"{}", &Scope::Local.prefix())) {
                 self.current_chunk().add_local_setd(Vm::calculate_hash(&setd_variable_expression))
             }
@@ -487,7 +487,7 @@ impl Compiler {
             // custom "native" method which just load a global array refrence on the stack
             let last_code_op = self.current_chunk().last_op_code_index();
             if mem::discriminant(&self.current_chunk().get_op_code_at(last_code_op)) == mem::discriminant(&LoadGlobal) {
-                let mut array_name = ctx.argumentExpressionList().as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
+                let mut array_name = argumentsList.as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
                 if !array_name.contains('[') {
                     array_name = format!("{}[0]", array_name);
                 }
@@ -502,7 +502,7 @@ impl Compiler {
             // Code below transform array$ into array$[0] for load global.
             let last_code_op = self.current_chunk().last_op_code_index();
             if mem::discriminant(&self.current_chunk().get_op_code_at(last_code_op)) == mem::discriminant(&LoadGlobal) {
-                let mut array_name = ctx.argumentExpressionList().as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
+                let mut array_name = argumentsList.as_ref().unwrap().conditionalExpression(0).as_ref().unwrap().get_text();
                 if !array_name.contains('[') {
                     array_name = format!("{}[0]", array_name);
                 }
@@ -513,7 +513,7 @@ impl Compiler {
             // Replacing first argument LoadStatic with a LoadConstant instead.
             // Syntax want first argument to be the variable, instead of a string with the variable name.
             // In this implementation variable will be interpreted and its value will be pushed in the stack instead of its name..
-            let static_variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+            let static_variable_identifier = argumentsList.as_ref().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
             if !static_variable_identifier.starts_with("getd(") { // we can use getd to use reference of another variable containing the variable identifier
                 let constant_reference = self.current_chunk().add_constant(Constant::String(static_variable_identifier));
                 let npc_name_load_constant_op_code_index = self.current_chunk().last_op_code_index();
@@ -530,18 +530,18 @@ impl Compiler {
         } else {
             self.type_checker.remove_type(argument_count);
         }
-        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
+        self.current_chunk().emit_op_code(CallNative { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(node));
         if let Some(returned_type) = native.return_type.as_ref() {
-            self.type_checker.add_current_assigment_type(returned_type.clone(), ctx);
+            self.type_checker.add_current_assigment_type(returned_type.clone(), node);
         }
         if native.name == "close" {
-            self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(OpCode::End, self.compilation_details_from_context(node));
         } else if native.name == "input" {
-            let variable_identifier = ctx.argumentExpressionList().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+            let variable_identifier = argumentsList.as_ref().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
             let constant_reference = self.current_chunk().add_constant(Constant::String(variable_identifier.clone()));
             let variable = Variable::from_string(&variable_identifier);
             self.current_chunk().add_dynamically_defined_variable(Vm::calculate_hash(&variable));
-            self.current_chunk().emit_op_code(OpCode::AssignVariable(constant_reference), self.compilation_details_from_context(ctx));
+            self.current_chunk().emit_op_code(OpCode::AssignVariable(constant_reference), self.compilation_details_from_context(node));
         }
     }
 
@@ -597,6 +597,36 @@ impl Compiler {
                 let reference = self.current_class().add_static_variable(variable);
                 self.current_chunk().emit_op_code(StoreStatic(reference), self.compilation_details_from_context(node));
             }
+        }
+    }
+
+    fn visit_functionCall<'input>(&mut self, node: &(dyn RathenaScriptLangParserContext<'input> + 'input), argumentsList: Option<Rc<ArgumentExpressionListContextAll<'input>>>, function_or_native_name: &String, functionCallCtx: Option<&FunctionCallExpressionContext<'input>>) {
+        let mut function_or_native_name = function_or_native_name.clone();
+        let first_argument_op_code_index = self.current_chunk().last_op_code_index() + 1;
+        let argument_count = if argumentsList.is_some() {
+            argumentsList.as_ref().unwrap().conditionalExpression_all().len() as usize
+        } else {
+            0
+        };
+        if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
+            self.visit_native_function(node, argumentsList, &function_or_native_name, first_argument_op_code_index, argument_count, native)
+        } else {
+            if argumentsList.is_some() {
+                self.visit_argumentExpressionList(argumentsList.as_ref().unwrap());
+            }
+            if functionCallCtx.is_some() && functionCallCtx.as_ref().unwrap().Underscore().is_some() {
+                return;
+            }
+            if functionCallCtx.is_some() && functionCallCtx.as_ref().unwrap().Callsub().is_some() {
+                self.current_class().insert_callsub(function_or_native_name.clone());
+                function_or_native_name = format!("_{}", function_or_native_name);
+            }
+            self.type_checker.remove_type(argument_count);
+            self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_details_from_context(node)));
+            if let Some(returned_type) = self.function_returned_type(&function_or_native_name) {
+                self.type_checker.add_current_assigment_type(returned_type, node);
+            }
+            self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(node));
         }
     }
 }
@@ -691,6 +721,15 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         self.type_checker.dec_current_expression_index(true, ctx, "visit_loadThenIncrement");
     }
 
+    fn visit_functionCallExpressionWithoutParentheses(&mut self, ctx: &FunctionCallExpressionWithoutParenthesesContext<'input>) {
+        let mut function_or_native_name = if ctx.Identifier().is_some() {
+            ctx.Identifier().unwrap().symbol.text.to_string()
+        } else {
+            return;
+        };
+        self.visit_functionCall(ctx, ctx.argumentExpressionList(), &mut function_or_native_name, None);
+    }
+
     fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) {
         let mut function_or_native_name = if ctx.Identifier().is_some() {
             ctx.Identifier().unwrap().symbol.text.to_string()
@@ -702,32 +741,7 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
             return;
         };
 
-        let first_argument_op_code_index = self.current_chunk().last_op_code_index() + 1;
-        let argument_count = if ctx.argumentExpressionList().is_some() {
-            ctx.argumentExpressionList().unwrap().conditionalExpression_all().len() as usize
-        } else {
-            0
-        };
-        if let Some(native) = self.native_functions.iter().find(|native| native.name == function_or_native_name).cloned() {
-            self.visit_native_function(ctx, &function_or_native_name, first_argument_op_code_index, argument_count, native)
-        } else {
-            if ctx.argumentExpressionList().is_some() {
-                self.visit_argumentExpressionList(ctx.argumentExpressionList().as_ref().unwrap());
-            }
-            if ctx.Underscore().is_some() {
-                return;
-            }
-            if ctx.Callsub().is_some() {
-                self.current_class().insert_callsub(function_or_native_name.clone());
-                function_or_native_name = format!("_{}", function_or_native_name);
-            }
-            self.type_checker.remove_type(argument_count);
-            self.current_class().add_called_function((function_or_native_name.clone(), self.compilation_details_from_context(ctx)));
-            if let Some(returned_type) = self.function_returned_type(&function_or_native_name) {
-                self.type_checker.add_current_assigment_type(returned_type, ctx);
-            }
-            self.current_chunk().emit_op_code(CallFunction { reference: Vm::calculate_hash(&function_or_native_name), argument_count }, self.compilation_details_from_context(ctx));
-        }
+        self.visit_functionCall(ctx, ctx.argumentExpressionList(), &mut function_or_native_name, Some(ctx));
     }
 
     fn visit_commandStatement(&mut self, ctx: &CommandStatementContext<'input>) {

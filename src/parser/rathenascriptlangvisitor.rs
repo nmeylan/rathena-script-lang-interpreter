@@ -28,6 +28,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#functionCallExpressionWithoutParentheses}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_functionCallExpressionWithoutParentheses(&mut self, ctx: &FunctionCallExpressionWithoutParenthesesContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#postfixExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -435,6 +441,14 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 	 * @param ctx the parse tree
 	 */
 		fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#functionCallExpressionWithoutParentheses}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_functionCallExpressionWithoutParentheses(&mut self, ctx: &FunctionCallExpressionWithoutParenthesesContext<'input>) -> Self::Return {
 			self.visit_children(ctx)
 		}
 
@@ -968,6 +982,11 @@ where
 
 	fn visit_functionCallExpression(&mut self, ctx: &FunctionCallExpressionContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_functionCallExpression(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_functionCallExpressionWithoutParentheses(&mut self, ctx: &FunctionCallExpressionWithoutParenthesesContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_functionCallExpressionWithoutParentheses(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 
