@@ -249,7 +249,7 @@ impl Thread {
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let v2 = self.value_from_stack_entry(&stack_entry2, &call_frame, class, instance)?;
                     let comparison_result = if v2.is_number() && v1.is_number() {
-                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1 && v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? == 1
+                        v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? > 0 && v2.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? > 0
                     } else { false };
                     let result_as_number = Value::Number(Some(if comparison_result { 1 } else { 0 }));
                     let reference = self.vm.add_in_constant_pool(result_as_number);
