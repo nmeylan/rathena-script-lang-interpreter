@@ -420,6 +420,7 @@ pub enum OpCode {
     LogicalOr,
     BitAnd,
     BitOr,
+    BitNot,
     Relational(Relational),
     Add,
     NumericOperation(NumericOperation),

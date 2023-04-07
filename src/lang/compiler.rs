@@ -1138,6 +1138,8 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
                 let constant_ref = self.current_chunk().add_constant(Constant::Number(0));
                 self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_ref), self.compilation_details_from_context(ctx));
                 self.current_chunk().emit_op_code(OpCode::Equal, self.compilation_details_from_context(ctx));
+            } else if operator.Tilde().is_some() {
+                self.current_chunk().emit_op_code(OpCode::BitNot, self.compilation_details_from_context(ctx));
             }
         }
     }

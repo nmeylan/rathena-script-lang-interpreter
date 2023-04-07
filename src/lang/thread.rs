@@ -463,6 +463,14 @@ impl Thread {
                 }
                 OpCode::GlobalArrayStore => {}
                 OpCode::GlobalArrayLoad => {}
+                OpCode::BitNot => {
+                    let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                    let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
+                    let number = v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? as u32;
+                    let result_as_number = Value::Number(Some(((!number)  & (!(1 << 31))) as i32)); // set u32 first bit to 0 to be able to convert to i32
+                    let reference = self.vm.add_in_constant_pool(result_as_number);
+                    self.stack.push(StackEntry::ConstantPoolReference(reference));
+                }
             }
             op_index += 1;
         }
