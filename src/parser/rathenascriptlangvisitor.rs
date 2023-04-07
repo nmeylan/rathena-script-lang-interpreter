@@ -244,6 +244,12 @@ pub trait RathenaScriptLangVisitor<'input>: ParseTreeVisitor<'input,RathenaScrip
 	fn visit_expressionStatement(&mut self, ctx: &ExpressionStatementContext<'input>) { self.visit_children(ctx) }
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationStatement}.
+	 * @param ctx the parse tree
+	 */
+	fn visit_declarationStatement(&mut self, ctx: &DeclarationStatementContext<'input>) { self.visit_children(ctx) }
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#selectionStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -733,6 +739,14 @@ pub trait RathenaScriptLangVisitorCompat<'input>:ParseTreeVisitorCompat<'input, 
 		}
 
 	/**
+	 * Visit a parse tree produced by {@link RathenaScriptLangParser#declarationStatement}.
+	 * @param ctx the parse tree
+	 */
+		fn visit_declarationStatement(&mut self, ctx: &DeclarationStatementContext<'input>) -> Self::Return {
+			self.visit_children(ctx)
+		}
+
+	/**
 	 * Visit a parse tree produced by {@link RathenaScriptLangParser#selectionStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -1162,6 +1176,11 @@ where
 
 	fn visit_expressionStatement(&mut self, ctx: &ExpressionStatementContext<'input>){
 		let result = <Self as RathenaScriptLangVisitorCompat>::visit_expressionStatement(self, ctx);
+        *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
+	}
+
+	fn visit_declarationStatement(&mut self, ctx: &DeclarationStatementContext<'input>){
+		let result = <Self as RathenaScriptLangVisitorCompat>::visit_declarationStatement(self, ctx);
         *<Self as ParseTreeVisitorCompat>::temp_result(self) = result;
 	}
 

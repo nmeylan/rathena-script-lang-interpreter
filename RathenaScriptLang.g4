@@ -170,7 +170,12 @@ blockItem
 expressionStatement
     : assignmentExpression ';'
     | conditionalExpression ';'
+    | declarationStatement  ';'
     | functionCallExpressionWithoutParentheses ';'
+    ;
+
+declarationStatement
+    : 'declare' variable
     ;
 
 selectionStatement
@@ -361,6 +366,7 @@ Close: 'close';
 Close2: 'close2';
 Next: 'next';
 Script: 'script';
+Declare: 'declare';
 
 // Literal
 Identifier : (Letter | Digit '_' Letter) (Letter | Digit)*;

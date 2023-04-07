@@ -386,3 +386,31 @@ l5	    copyarray .@b$[0], .@a$[18], 1;
 0: _main
 	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
 }
+
+#[test]
+fn setarray_in_a_function() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let script = compile_script(r#"
+    declare .@job_opt[0];
+    Job_Options(.@job_opt, 1, 2);
+    function	Job_Options	{
+        .@argcount = getargcount();
+        .@arr_size = getarraysize(getarg(0));
+        for( .@i = 1; .@i < .@argcount; .@i++) {
+            setarray getelementofarray(getarg(0), .@arr_size++),getarg(.@i);
+        }
+    }
+    vm_dump_var("a0", .@job_opt[0]);
+    vm_dump_var("a1", .@job_opt[1]);
+"#, compiler::DebugFlag::None.value()).unwrap();
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(1, events.lock().unwrap().get("a0").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(2, events.lock().unwrap().get("a1").unwrap().value.number_value().unwrap().clone());
+}

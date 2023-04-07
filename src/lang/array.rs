@@ -43,7 +43,7 @@ impl Array {
         self.value_type.clone()
     }
 
-    pub fn assign<F>(&self, index: usize, constant_pool_reference: u64, callback: Option<F>)
+    pub fn assign<F>(&self, index: usize, constant_pool_reference: Option<u64>, callback: Option<F>)
     where F: Fn(Self)
     {
         let len = self.values.read().unwrap().len();
@@ -52,7 +52,7 @@ impl Array {
                 self.values.write().unwrap().push(None);
             }
         }
-        self.values.write().unwrap()[index] = Some(constant_pool_reference);
+        self.values.write().unwrap()[index] = constant_pool_reference;
         if let Some(callback) = callback {
             callback(self.clone());
         }
@@ -89,7 +89,7 @@ impl Array {
         for index in source_array_index..(source_array_index + count) {
             let value = source_array.get(index)?;
             if let Some(value) = value {
-                self.assign::<F>(destination_array_index, value, None);
+                self.assign::<F>(destination_array_index, Some(value), None);
                 destination_array_index += 1;
             } else {
                 break;
@@ -113,7 +113,7 @@ impl Array {
         where F: Fn(Self)
     {
         for i in start_index..(start_index + size) {
-            self.assign::<F>(i, value_reference, None);
+            self.assign::<F>(i, Some(value_reference), None);
         }
         if let Some(callback) = callback {
             callback(self.clone());

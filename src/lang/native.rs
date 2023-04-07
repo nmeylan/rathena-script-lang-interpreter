@@ -172,7 +172,7 @@ fn setd(thread: &Thread, class: &Class, instance: &mut Option<Arc<Instance>>, ca
         let array = thread.vm.array_from_heap_reference(owner_reference, variable_reference);
         let array_index = array_index_from_string(variable_identifier);
         let array = array.unwrap();
-        array.assign(array_index, variable_value.unwrap(), thread.array_update_callback(call_frame, native_method_handler, array.clone(), &class));
+        array.assign(array_index, Some(variable_value.unwrap()), thread.array_update_callback(call_frame, native_method_handler, array.clone(), &class));
     }
     Ok(())
 }
@@ -255,7 +255,7 @@ fn setarray(thread: &Thread, call_frame: &mut CallFrame, native_method_handler: 
                                                     format!("setarray - tried to assign {} ({}th arguments) to an array of {}",
                                                             arguments[i].display_type(), i + 2, array.value_type.display_type())));
             }
-            array.assign::<Box<dyn Fn(Array)>>(index, array_reference.unwrap(), None);
+            array.assign::<Box<dyn Fn(Array)>>(index, Some(array_reference.unwrap()), None);
             index += 1;
         }
     }

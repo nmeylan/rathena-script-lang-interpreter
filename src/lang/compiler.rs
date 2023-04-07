@@ -1131,6 +1131,17 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         self.visit_children(ctx);
     }
 
+    fn visit_declarationStatement(&mut self, ctx: &DeclarationStatementContext<'input>) {
+        let mut variable = Self::build_variable(&ctx.variable().unwrap().clone());
+        let is_array = variable.value_ref.borrow().is_array();
+        self.store_variable(ctx, variable, true);
+
+        if is_array {
+            self.visit_conditionalExpression(ctx.variable().as_ref().unwrap().conditionalExpression().as_ref().unwrap());
+            self.current_chunk().emit_op_code(ArrayStore, self.compilation_details_from_context(ctx));
+        }
+    }
+
     fn visit_unaryExpression(&mut self, ctx: &UnaryExpressionContext<'input>) {
         self.visit_children(ctx);
         if let Some(operator) = ctx.unaryOperator() {

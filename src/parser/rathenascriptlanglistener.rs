@@ -395,6 +395,16 @@ fn enter_expressionStatement(&mut self, _ctx: &ExpressionStatementContext<'input
  */
 fn exit_expressionStatement(&mut self, _ctx: &ExpressionStatementContext<'input>) { }
 /**
+ * Enter a parse tree produced by {@link RathenaScriptLangParser#declarationStatement}.
+ * @param ctx the parse tree
+ */
+fn enter_declarationStatement(&mut self, _ctx: &DeclarationStatementContext<'input>) { }
+/**
+ * Exit a parse tree produced by {@link RathenaScriptLangParser#declarationStatement}.
+ * @param ctx the parse tree
+ */
+fn exit_declarationStatement(&mut self, _ctx: &DeclarationStatementContext<'input>) { }
+/**
  * Enter a parse tree produced by {@link RathenaScriptLangParser#selectionStatement}.
  * @param ctx the parse tree
  */

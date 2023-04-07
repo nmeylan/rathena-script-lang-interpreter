@@ -537,3 +537,16 @@ fn nested_function_call() {
     // Then
     assert!(true)
 }
+
+#[test]
+fn declare_keyword() {
+    // Given
+    let script = r#"
+    declare .@choice;
+    vm_dump_var("a", .@choice);
+    "#;
+    // When
+    let result = compile_script(script, compiler::DebugFlag::None.value());
+    // Then
+    assert_eq!(false, result.is_err());
+}

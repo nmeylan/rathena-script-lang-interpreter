@@ -46,7 +46,7 @@ impl Thread {
             stack,
             current_source_line: CompilationDetail::new_empty(),
             stack_traces: vec![],
-            aborted: Default::default()
+            aborted: Default::default(),
         }
     }
 
@@ -65,7 +65,7 @@ impl Thread {
                     let reference = self.vm.add_in_constant_pool(argument);
                     self.stack.push(ConstantPoolReference(reference));
                 }
-               _ => panic!("Only String or Number argument are allowed in constructor arguments")
+                _ => panic!("Only String or Number argument are allowed in constructor arguments")
             }
         }
         self.run(call_frame, 0, class.as_ref(), instance, native_method_handler).map(|_| ())
@@ -116,14 +116,16 @@ impl Thread {
                     let arr_index = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let arr_index = self.value_from_stack_entry(&arr_index, &call_frame, class, instance)?.number_value().map_err(|e| self.new_runtime_from_temporary(e, "Expected array index to be a number"))?;
                     let array_ref_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
-                    let value_ref_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     if let StackEntry::HeapReference((owner_reference, reference)) = array_ref_stack_entry {
                         let array = self.vm.array_from_heap_reference(owner_reference, reference)
                             .map_err(|err| self.new_runtime_from_temporary(err, "VM: ArrayStore expected to retrieve array from heap reference"))?;
-                        let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
-                        if let Ok(constant_ref) = value_constant_ref {
-                            array.assign(arr_index as usize, constant_ref, self.array_update_callback(&call_frame, &native_method_handler, array.clone(), &class));
+                        if self.stack.len() > 0 {
+                            let value_ref_stack_entry = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
+                            let value_constant_ref = self.constant_ref_from_stack_entry(&value_ref_stack_entry, &call_frame, class, instance);
+                            let value = value_constant_ref.map_or_else(|err| None, |ok| Some(ok));
+                            array.assign(arr_index as usize, value, self.array_update_callback(&call_frame, &native_method_handler, array.clone(), &class));
                         }
+
                     } else {
                         return Err(self.new_runtime_error("OpCode::ArrayStore - Expected stack entry to be a heap reference.".to_string()));
                     }
@@ -467,7 +469,7 @@ impl Thread {
                     let stack_entry1 = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                     let v1 = self.value_from_stack_entry(&stack_entry1, &call_frame, class, instance)?;
                     let number = v1.number_value().map_err(|err| self.new_runtime_from_temporary(err, ""))? as u32;
-                    let result_as_number = Value::Number(Some(((!number)  & (!(1 << 31))) as i32)); // set u32 first bit to 0 to be able to convert to i32
+                    let result_as_number = Value::Number(Some(((!number) & (!(1 << 31))) as i32)); // set u32 first bit to 0 to be able to convert to i32
                     let reference = self.vm.add_in_constant_pool(result_as_number);
                     self.stack.push(StackEntry::ConstantPoolReference(reference));
                 }
@@ -487,7 +489,7 @@ impl Thread {
             let arguments = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string()))];
             // Calling native getglobalarray which put on stack array: number of stack entreies + (index/value reference)*
             // TODO: doc
-            native_method_handler.handle(&Native {name: "getglobalarray".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
+            native_method_handler.handle(&Native { name: "getglobalarray".to_string() }, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             let number_of_stack_entries = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
             let number_of_stack_entries = self.value_from_stack_entry(&number_of_stack_entries, call_frame, class, instance)?.number_value().unwrap() as usize;
             let mut i = 0;
@@ -499,7 +501,7 @@ impl Thread {
                 let array_index = self.value_from_stack_entry(&array_index, call_frame, class, instance)?.number_value().unwrap() as usize;
                 let array_value = self.stack.pop().map_err(|err| self.new_runtime_from_temporary(err.clone(), err.message.as_str()))?;
                 let array_value = self.constant_ref_from_stack_entry(&array_value, call_frame, class, instance)?;
-                array.assign::<Box<dyn Fn(Array)>>(array_index, array_value, None);
+                array.assign::<Box<dyn Fn(Array)>>(array_index, Some(array_value), None);
                 i += 2;
             }
             //
@@ -524,7 +526,7 @@ impl Thread {
                     }
                 }
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "setglobalarray".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
+                native_method_handler.handle(&Native { name: "setglobalarray".to_string() }, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             };
             Some(Box::new(closure))
         } else {
@@ -537,7 +539,7 @@ impl Thread {
             let closure = move |_updated_array: Array, start_index: usize, end_index: usize| {
                 let arguments: Vec<Value> = vec![Value::String(Some(array.name.clone())), Value::String(Some(array.scope.as_string())), Value::new_number(start_index as i32), Value::new_number(end_index as i32)];
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "removeitemsglobalarray".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
+                native_method_handler.handle(&Native { name: "removeitemsglobalarray".to_string() }, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             };
             Some(Box::new(closure))
         } else {
@@ -579,7 +581,7 @@ impl Thread {
 
     pub fn get_static_variable(&self, class: &Class, reference: &u64) -> Result<Variable, RuntimeError> {
         let variable = class.get_variable(*reference).ok_or_else(|| self.new_runtime_error("Variable is not declared in NPC scope".to_string()))?;
-       Ok(variable)
+        Ok(variable)
     }
 
     pub fn load_instance_variable(&self, instance: &mut Option<Arc<Instance>>, reference: &u64) -> Result<(), RuntimeError> {
@@ -642,7 +644,7 @@ impl Thread {
             if !variable.value_ref.is_array() { // In case of array, reference is the reference of the array, not of the expression result constant. it will come in ArrayStore instruction
                 arguments.push(self.vm.get_from_constant_pool(reference).unwrap().value());
                 // TODO: doc
-                native_method_handler.handle(&Native {name: "setglobalvariable".to_string()}, arguments, self, call_frame, &self.current_source_line, class.name.clone());
+                native_method_handler.handle(&Native { name: "setglobalvariable".to_string() }, arguments, self, call_frame, &self.current_source_line, class.name.clone());
             }
         };
         Ok(())
@@ -678,7 +680,7 @@ impl Thread {
             }
             StackEntry::StaticVariableReference(reference) => {
                 let variable = class.get_variable(*reference).ok_or_else(|| self.new_runtime_error(format!("Can't find instance variable in CLASS static variable pool for given reference ({})", reference)))?;
-                
+
                 Ok(self.value_from_value_ref(&variable.value_ref)?)
             }
             StackEntry::HeapReference((owner_reference, reference)) => {
@@ -781,7 +783,7 @@ impl Thread {
                 let constant_ref = variable.value_ref.get_ref();
                 self.vm.get_from_constant_pool(constant_ref).ok_or_else(|| self.new_runtime_error(format!("constant_ref_from_stack_entry - Can't find constant in VM constant pool for given reference ({})", reference)))?;
                 Ok(constant_ref)
-            },
+            }
             StackEntry::ArrayHeapReference((owner_reference, reference, index)) => {
                 if let Ok(array) = self.vm.array_from_heap_reference(*owner_reference, *reference) {
                     let array_value_ref = array.get(*index);
@@ -794,7 +796,7 @@ impl Thread {
                 } else {
                     Err(self.new_runtime_error("value_from_stack_entry ArrayHeapReference - Expected heap entry to contain array".to_string()))
                 }
-            },
+            }
             x => Err(RuntimeError::new_string(self.current_source_line.clone(), self.stack_traces.clone(), format!("Expected stack entry to be a reference to Constant but was {:?}", x)))
         }
     }
