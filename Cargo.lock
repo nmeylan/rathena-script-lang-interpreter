@@ -11,7 +11,7 @@ checksum = "4b46cbb362ab8752921c97e041f5e366ee6297bd428a31275b9fcf1e380f7299"
 [[package]]
 name = "antlr-rust"
 version = "0.2.2"
-source = "git+https://github.com/nmeylan/antlr4rust?rev=9649564#96495644048d4ff6d759ec85998e5356090944b2"
+source = "git+https://github.com/nmeylan/antlr4rust?rev=eb24e7b#eb24e7b023b728405deff770eaf0261fccbcb519"
 dependencies = [
  "better_any",
  "bit-set",

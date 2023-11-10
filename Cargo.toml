@@ -9,10 +9,11 @@ edition = "2021"
 
 [dependencies]
 #antlr-rust = "0.2.2"
-antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "9649564"}
+antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "eb24e7b"}
 #
 #[patch."https://github.com/nmeylan/antlr4rust"]
-#antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"
+#antlr-rust = {path = "C:\\dev\\antlr4rust"}
+#antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"}
 
 
 [dev-dependencies]
