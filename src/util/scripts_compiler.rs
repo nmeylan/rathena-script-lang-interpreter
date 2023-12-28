@@ -51,9 +51,7 @@ pub fn compile(paths: Vec<String>, native_function_list_file_path: &str, debug_f
     let (mut class_files, errors) = compiler.end_compilation();
     let classes_in_error = errors.iter().map(|(k, _)| k.clone()).collect::<Vec<String>>();
     classes_in_error.iter().for_each(|k| println!("in error -> {}", k));
-    class_files.iter().for_each(|k| println!("class file -> {}", k.name));
     class_files = class_files.drain(..).filter(|class| !classes_in_error.contains(&class.name)).collect::<Vec<ClassFile>>();
-    class_files.iter().for_each(|k| println!("class file after filter -> {}", k.name));
     class_files.iter_mut().for_each(|class_file| class_file.set_reference());
     let mut class_references = HashMap::<String, u64>::new();
     class_files.iter().for_each(|class| { class_references.insert(class.name.clone(), class.reference); });
