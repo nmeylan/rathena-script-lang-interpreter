@@ -474,6 +474,19 @@ impl Compiler {
                     self.visit_conditionalExpression(expr);
                 }
             }
+        } else if native.name == "bonus" || native.name == "bonus2" || native.name == "bonus3" || native.name == "bonus4" || native.name == "bonus5" {
+            // First argument of bonus* methods is not a string but a "constant", using same syntax as permanent character integer variable
+            // We convert the expression into a LoadConstant, basically "bonus bStr, 10;" becomes "bonus "bStr", 10;"
+            // In the native method handler we then perform string matching on the first argument to determine what to do.
+            for (i, expr) in argumentsList.as_ref().unwrap().conditionalExpression_all().iter().enumerate() {
+                if i == 0 {
+                    let variable_identifier = argumentsList.as_ref().unwrap().conditionalExpression_all().get(0).unwrap().get_text();
+                    let constant_reference = self.current_chunk().add_constant(Constant::String(variable_identifier));
+                    self.current_chunk().emit_op_code(OpCode::LoadConstant(constant_reference), self.compilation_details_from_context(node));
+                } else {
+                    self.visit_conditionalExpression(expr);
+                }
+            }
         } else if argumentsList.is_some() {
             self.visit_argumentExpressionList(argumentsList.as_ref().unwrap());
         }
