@@ -82,7 +82,7 @@ impl Thread {
             if op_index >= call_frame.op_codes.len() {
                 break;
             }
-            self.current_source_line = class.sources.get(&Vm::calculate_hash(&call_frame.name)).as_ref().unwrap().get(op_index).unwrap().clone(); // TODO remove clone here
+            class.sources.get(&Vm::calculate_hash(&call_frame.name)).as_ref().unwrap().get(op_index).map(|source| self.current_source_line = source.clone()); // TODO remove clone here
             let next_op_code = call_frame.op_codes.get(op_index).unwrap();
             self.print_dump_current_op_code(&call_frame, class, instance, &mut stdout, &mut op_index, next_op_code);
             match next_op_code {

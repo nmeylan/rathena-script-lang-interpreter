@@ -22,6 +22,7 @@ pub struct ClassFile {
     pub instance_variables: RefCell<HashMap<u64, Variable, NoopHasher>>,
     pub static_variables: RefCell<HashMap<u64, Variable, NoopHasher>>,
     // state
+    #[serde(skip)]
     pub state: Option<ClassFileState>,
 }
 
@@ -165,6 +166,7 @@ impl ClassFileState {
 pub struct FunctionDefinition {
     pub name: String,
     pub chunk: Rc<Chunk>,
+    #[serde(skip)]
     pub(crate) state: Option<FunctionDefinitionState>,
     pub(crate) returned_type: RefCell<Option<ValueType>>,
 }
@@ -247,14 +249,19 @@ impl Display for FunctionDefinition {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Chunk {
     pub op_codes: RefCell<Vec<OpCode>>,
+    #[serde(skip)]
     pub compilation_details: RefCell<Vec<CompilationDetail>>,
     pub locals: RefCell<HashMap<u64, Variable, NoopHasher>>,
     pub constants_storage: RefCell<HashMap<u64, Constant, NoopHasher>>,
     // state
+    #[serde(skip)]
     label_gotos_op_code_indices: RefCell<HashMap<String, Vec<(usize, CompilationDetail)>>>,
     // key are label name, values are goto op code that goto this label
+    #[serde(skip)]
     current_block_state: RefCell<usize>,
+    #[serde(skip)]
     block_states: RefCell<Vec<BlockState>>,
+    #[serde(skip)]
     chunk_state: RefCell<ChunkState>,
 }
 
