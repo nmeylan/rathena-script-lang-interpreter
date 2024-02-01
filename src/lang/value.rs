@@ -3,6 +3,7 @@ use std::hash::{Hash, Hasher};
 use std::mem;
 use std::sync::RwLock;
 
+use serde::{Deserialize, Serialize};
 use crate::lang::error::TemporaryRuntimeError;
 
 pub type AccountId = String;
@@ -12,7 +13,7 @@ pub type InstanceId = String;
 
 // Variables are struct stored in variable pools (locals, static, instances)
 // They don't contains the value, but just reference of these value from constant pool.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Variable {
     pub name: String,
     pub scope: Scope,
@@ -20,7 +21,7 @@ pub struct Variable {
 }
 
 // Variables scope
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Scope {
     Server,
     ServerTemporary,
@@ -33,14 +34,14 @@ pub enum Scope {
 }
 
 // A structure containing type and reference of a value
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ValueRef {
     pub reference: RwLock<Option<u64>>,
     pub value_type: ValueType,
 }
 
 // Type of a value
-#[derive(Debug, Clone, Hash, PartialEq)]
+#[derive(Debug, Clone, Hash, PartialEq, Serialize, Deserialize)]
 pub enum ValueType {
     String,
     Number,
@@ -48,7 +49,7 @@ pub enum ValueType {
 }
 
 // Actual values are contains in this enum
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Constant {
     String(String),
     Number(i32),
@@ -56,7 +57,7 @@ pub enum Constant {
 
 // Value wrap actual values stored in constant pool.
 // Values can be also value behind references.
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Value {
     String(Option<String>),
     Number(Option<i32>),

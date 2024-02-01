@@ -15,6 +15,7 @@ use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
 use antlr_rust::token::Token;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitor, Tree};
+use serde::{Deserialize, Serialize};
 
 use crate::lang::chunk::{Chunk, ClassFile, FunctionDefinition, Label, NumericOperation, OpCode, Relational};
 use crate::lang::chunk::OpCode::{*};
@@ -88,7 +89,7 @@ pub enum VariableScope {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CompilationDetail {
     pub file_name: String,
     pub start_line: usize,
@@ -144,6 +145,19 @@ impl Compiler {
 
     pub fn compile_script(name: String, script: &str, native_function_list_file_path: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
         Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path, debug_flag)
+    }
+    pub fn compile_script_into_binary(name: String, script: &str, native_function_list_file_path: &str, debug_flag: u64) -> Result<Vec<u8>, Vec<CompilationError>> {
+        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path, debug_flag)
+            .map(|result| bitcode::serialize(&result).unwrap())
+    }
+
+    pub fn from_binary(serialized_script: &Vec<u8>) -> Result<Vec<ClassFile>, String> {
+        let result = bitcode::deserialize::<Vec<ClassFile>>(serialized_script);
+        if let Ok(classes) = result {
+            Ok(classes)
+        } else {
+            Err("Failed to deserialize script".to_string())
+        }
     }
 
     pub fn compile_file_and_keep_state(&mut self, script_path: &Path) {

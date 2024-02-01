@@ -5,13 +5,14 @@ use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::rc::Rc;
+use serde::{Deserialize, Serialize};
 use crate::lang::compiler::CompilationDetail;
 
 use crate::lang::noop_hasher::NoopHasher;
 use crate::lang::value::{Constant, Scope, ValueType, Variable};
 use crate::lang::vm::{MAIN_FUNCTION, Vm};
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize,Debug)]
 pub struct ClassFile {
     pub name: String,
     pub reference: u64,
@@ -24,7 +25,7 @@ pub struct ClassFile {
     pub state: Option<ClassFileState>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ClassFileState {
     pub(crate) current_declared_function_index: RefCell<usize>,
     pub(crate) called_functions: RefCell<Vec<Rc<(String, CompilationDetail)>>>,
@@ -160,7 +161,7 @@ impl ClassFileState {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FunctionDefinition {
     pub name: String,
     pub chunk: Rc<Chunk>,
@@ -211,13 +212,13 @@ impl FunctionDefinition {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct FunctionDefinitionState {
     declared_labels: RefCell<HashMap<String, Rc<Label>>>,
     callsub: RefCell<HashSet<String>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 #[allow(dead_code)]
 pub struct Label {
     pub(crate) name: String,
@@ -243,7 +244,7 @@ impl Display for FunctionDefinition {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Chunk {
     pub op_codes: RefCell<Vec<OpCode>>,
     pub compilation_details: RefCell<Vec<CompilationDetail>>,
@@ -272,13 +273,13 @@ impl Default for Chunk {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BlockState {
     // Switch/Loop: store all "break" op_code indices, in order to update jump index to complete switch/for/while/do-while statements
     pub break_op_code_indices: RefCell<Vec<usize>>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ChunkState {
     pub local_setd: HashSet<u64>,
     pub dynamically_defined_variable: HashSet<u64>,
@@ -392,7 +393,7 @@ impl Chunk {
     }
 }
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone, Hash, Serialize, Deserialize)]
 pub enum OpCode {
     LoadConstant(u64),
     LoadValue, // Read reference from stack, push its constant reference to the stack
@@ -439,7 +440,7 @@ pub enum OpCode {
     Noop, // Use by compiler in case it need to remove already generated op code. WE can't remove them as we may break jump index, so we replace with noop
 }
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone, Hash, Serialize, Deserialize)]
 pub enum Relational {
     GT,
     GTE,
@@ -447,7 +448,7 @@ pub enum Relational {
     LTE,
 }
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone, Hash, Serialize, Deserialize)]
 pub enum NumericOperation {
     Add,
     Subtract,

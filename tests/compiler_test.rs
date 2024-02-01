@@ -1,6 +1,13 @@
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::{BufReader, Read};
+use std::path::Path;
+use std::sync::{Arc, Mutex};
+use rathena_script_lang_interpreter::lang::chunk::ClassFile;
 use rathena_script_lang_interpreter::lang::compiler;
-use rathena_script_lang_interpreter::lang::compiler::Compiler;
-use crate::common::{compile, compile_script};
+use rathena_script_lang_interpreter::lang::compiler::{Compiler, DebugFlag};
+use rathena_script_lang_interpreter::lang::vm::Vm;
+use crate::common::{compile, compile_script, Event, VmHook};
 
 mod common;
 
@@ -549,4 +556,45 @@ fn declare_keyword() {
     let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(false, result.is_err());
+}
+
+
+#[test]
+fn serialization_deserialization() {
+    // Given
+    let mut file_content = r#"
+    goto Second;
+    First:
+        .@b$ = "variable in label 1";
+        goto_end();
+    Second:
+        .@c$ = "variable in label 2";
+        goto First;
+    Third:
+        .@d$ = "variable in label 3";
+        goto First; // Hopefully this is never reach or we would have infinite loop
+    End:
+        .@endd$ = "the end";
+
+    vm_dump_locals();
+    function goto_end {
+        goto End;
+    }"#;
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let result = compile_script(file_content, DebugFlag::None.value()).unwrap();
+    // When
+    let serialization_result = bitcode::serialize(&result).unwrap();
+    let classes: Vec<ClassFile> = bitcode::deserialize(&serialization_result).unwrap();
+    // Then
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(rathena_script_lang_interpreter::lang::vm::DebugFlag::None.value());
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
+    assert_eq!(true, events.lock().unwrap().get("d").is_none());
+    assert_eq!(String::from("the end"), events.lock().unwrap().get("endd").unwrap().value.string_value().unwrap().clone());
 }
