@@ -215,7 +215,6 @@ impl Vm {
         let function = class_arc.functions_pool.get(&main_function_hash).unwrap();
         vm.extend_constant_pool(main_function_def.chunk.constants_storage.borrow().clone());
         program.run_function(class_arc.clone(), &mut Some(Arc::new(instance)), function, native_method_handler, vec![]).map_err(|e| {
-            println!("{}", e);
             e
         })
     }
