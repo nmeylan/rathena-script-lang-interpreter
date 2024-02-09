@@ -9,7 +9,7 @@ primaryExpression
     | Identifier
     | True
     | False
-    | Number
+    | Minus? Number
     | String
     | '-' // it is a special arguments for command, lets see if it can cause weird parse issue
     ;
@@ -53,7 +53,7 @@ unaryExpression
     ;
 
 unaryOperator
-    :   '&' | '*' | '+' | '-' | '~' | '!'
+    :   '&' | '*' | Plus | Minus | '~' | '!'
     ;
 
 multiplicativeExpression

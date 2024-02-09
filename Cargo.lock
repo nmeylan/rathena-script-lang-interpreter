@@ -112,8 +112,7 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 [[package]]
 name = "bitintr"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ba5a5c4df8ac8673f22698f443ef1ce3853d7f22d5a15ebf66b9a7553b173dd"
+source = "git+https://github.com/finnbear/bitintr?rev=34a5deb0042622e066a5210949a616de49dcef3b#34a5deb0042622e066a5210949a616de49dcef3b"
 
 [[package]]
 name = "bumpalo"

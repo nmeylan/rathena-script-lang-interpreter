@@ -676,9 +676,14 @@ impl<'input> RathenaScriptLangVisitor<'input> for Compiler {
         }
         if ctx.Number().is_some() {
             let number_value = &ctx.Number().unwrap().symbol.text;
-            let reference = self.current_chunk().add_constant(Constant::Number(parse_number(number_value.clone())));
+            let mut value: i32 = parse_number(number_value.clone());
+            if ctx.Minus().is_some() {
+                value *= -1;
+            }
+            let reference = self.current_chunk().add_constant(Constant::Number(value));
             self.type_checker.add_current_assigment_type(ValueType::Number, ctx);
             self.current_chunk().emit_op_code(LoadConstant(reference), self.compilation_details_from_context(ctx));
+
         }
         if ctx.True().is_some() {
             let reference = self.current_chunk().add_constant(Constant::Number(1));

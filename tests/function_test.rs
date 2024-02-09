@@ -75,6 +75,36 @@ fn function_call_with_arguments() {
 }
 
 #[test]
+fn function_call_with_negative_number_arguments() {
+    // Given
+    let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));
+    let events_clone = events.clone();
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
+    let classes = compile_script(r#"
+    my_func(-10);
+    function my_func {
+        .@a = getarg(0);
+        vm_dump_var("a", .@a);
+        .@b = -10;
+        vm_dump_var("b", .@b);
+        .@c = .@a-10;
+        vm_dump_var("c", .@c);
+        .@d = .@a - -10;
+        vm_dump_var("d", .@d);
+    }
+    "#, compiler::DebugFlag::None.value()).unwrap();
+    // When
+    let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
+    Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
+    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    // Then
+    assert_eq!(-10, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(-10, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(-20, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap().clone());
+    assert_eq!(0, events.lock().unwrap().get("d").unwrap().value.number_value().unwrap().clone());
+}
+
+#[test]
 fn function_call_with_variable_arguments() {
     // Given
     let events = Arc::new(Mutex::new(HashMap::<String, Event>::new()));

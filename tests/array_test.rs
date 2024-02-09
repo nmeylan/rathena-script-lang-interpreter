@@ -276,7 +276,7 @@ fn setarray_with_getelementofarray() {
     vm_dump_var("a2", .@a$[2]);
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
@@ -405,7 +405,7 @@ fn setarray_in_a_function() {
     vm_dump_var("a1", .@job_opt[1]);
 "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));

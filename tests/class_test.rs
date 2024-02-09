@@ -147,7 +147,7 @@ fn on_init_hook_test() {
         i.lock().unwrap().insert(e.name.clone(), i1 + 1);
         events_clone.lock().unwrap().insert(format!("{}{}", e.name, i1 + 1), e);
     }));
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     // When
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
     let (class_reference, instance_reference) = Vm::create_instance(vm.clone(), "Myclass".to_string(), Box::new(&vm_hook), vec![]).unwrap();

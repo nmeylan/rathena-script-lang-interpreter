@@ -322,7 +322,7 @@ fn switch_statement_with_constant() {
     vm_dump_locals();
     "#, compiler::DebugFlag::None.value()).unwrap();
     let events_clone = events.clone();
-    let vm = crate::common::setup_vm(DebugFlag::All.value());
+    let vm = crate::common::setup_vm(DebugFlag::None.value());
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     vm_hook.global_variable_store.lock().unwrap().push(GlobalVariableEntry {
         name: "Novice".to_string(),
