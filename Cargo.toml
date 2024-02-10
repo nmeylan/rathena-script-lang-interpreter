@@ -11,13 +11,11 @@ edition = "2021"
 #antlr-rust = "0.2.2"
 antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "eb24e7b"}
 serde = {version = "1", features = ["derive", "rc"]}
-bitcode = { version = "0.5.0", features = ["serde", "derive"] }
+bitcode = { version = "0.5.1", features = ["serde", "derive"] }
 #
 #[patch."https://github.com/nmeylan/antlr4rust"]
 #antlr-rust = {path = "C:\\dev\\antlr4rust"}
 #antlr-rust = {path = "/home/nmeylan/dev/perso/antlr4rust"}
-[patch.crates-io]
-bitintr = { git = "https://github.com/finnbear/bitintr", rev = "34a5deb0042622e066a5210949a616de49dcef3b" }
 
 
 [dev-dependencies]
