@@ -37,7 +37,7 @@ fn simple_array_assignment() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello"), events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("world"), events.lock().unwrap().get("a1").unwrap().value.string_value().unwrap().clone());
@@ -63,7 +63,7 @@ fn getarraysize_should_array_size() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(4, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -92,7 +92,7 @@ fn cleararray() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(10, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(11, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -127,7 +127,7 @@ fn setarray() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(4, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -157,7 +157,7 @@ fn getelementofarray() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("two").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("three").unwrap().value.number_value().unwrap().clone());
@@ -184,7 +184,7 @@ fn deletearray() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("b_0_after_first_delete").unwrap().value.number_value().unwrap().clone());
     assert_eq!(3, events.lock().unwrap().get("b_2_after_first_delete").unwrap().value.number_value().unwrap().clone());
@@ -214,7 +214,7 @@ fn inarray() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("toto_index").unwrap().value.number_value().unwrap().clone());
     assert_eq!(4, events.lock().unwrap().get("four_index").unwrap().value.number_value().unwrap().clone());
@@ -244,7 +244,7 @@ fn copyarray() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(3, events.lock().unwrap().get("a_len").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("b_len").unwrap().value.number_value().unwrap().clone());
@@ -280,7 +280,7 @@ fn setarray_with_getelementofarray() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello"), events.lock().unwrap().get("a0").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hello"), events.lock().unwrap().get("a1").unwrap().value.string_value().unwrap().clone());
@@ -301,7 +301,7 @@ fn setarray_wrong_type_error() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"setarray - tried to assign Number (4th arguments) to an array of String
 test_script 4:4.
@@ -325,7 +325,7 @@ fn cleararray_wrong_type_error() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"cleararray - tried to assign Number (second argument) to an array of String
 test_script 4:4.
@@ -351,7 +351,7 @@ fn copyarray_wrong_type_error() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"copyarray - tried to assign an array of String (second argument) to an array of Number
 test_script 5:4.
@@ -376,7 +376,7 @@ fn copyarray_outofbounds_error() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"Array index out of bounds: index 18, length 3
 test_script 5:4.
@@ -409,7 +409,7 @@ fn setarray_in_a_function() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("a0").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("a1").unwrap().value.number_value().unwrap().clone());

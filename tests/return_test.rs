@@ -24,7 +24,7 @@ fn return_stop_script() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(true, events.lock().unwrap().get("a").is_none());
 }

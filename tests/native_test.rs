@@ -53,17 +53,17 @@ fn menu_test() {
     );
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
     // Then
-    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook), vec![]).unwrap();
     assert_eq!(String::from("A"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
-    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook), vec![]).unwrap();
     assert_eq!(String::from("B"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
-    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook), vec![]).unwrap();
     assert_eq!(String::from("C"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
-    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook), vec![]).unwrap();
     assert_eq!(String::from("D"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
-    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm.clone(), Box::new(&vm_hook), vec![]).unwrap();
     assert_eq!(String::from("E"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     assert_eq!(String::from("E"), events.lock().unwrap().get("selected_menu").unwrap().value.string_value().unwrap().clone());
 }
 
@@ -81,7 +81,7 @@ fn implode_test() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("Hello World this is implode function"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }

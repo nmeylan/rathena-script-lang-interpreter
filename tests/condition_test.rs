@@ -69,7 +69,7 @@ fn simple_condition() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.lock().unwrap().get("b").is_some());
@@ -109,7 +109,7 @@ fn condition_with_expressions() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(false, events.lock().unwrap().get("b").is_some());
@@ -139,7 +139,7 @@ fn condition_with_function() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("i am true"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -159,7 +159,7 @@ fn ternary_condition() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hello"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -191,7 +191,7 @@ fn conditional_statements() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(0, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
@@ -243,7 +243,7 @@ fn switch_statement() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!("two", events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -287,7 +287,7 @@ fn switch_statement_with_expression_in_case() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!("two", events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -338,7 +338,7 @@ fn switch_statement_with_constant() {
     });
     // When
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!("novice", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!("archer", events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -394,7 +394,7 @@ fn nested_switch_statement() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!("one", events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!("return", events.lock().unwrap().get("b1").unwrap().value.string_value().unwrap().clone());

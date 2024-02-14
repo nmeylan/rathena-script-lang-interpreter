@@ -26,7 +26,7 @@ fn simple_for_loop() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -48,7 +48,7 @@ fn simple_while_loop() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(-1, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
 }
@@ -73,7 +73,7 @@ fn simple_while_loop_in_a_function() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(-1, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
 }
@@ -95,7 +95,7 @@ fn simple_for_loop_with_already_init() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -119,7 +119,7 @@ fn simple_for_loop_with_increment_in_the_for_loop() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -143,7 +143,7 @@ fn nested_simple_for_loop() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(10, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -175,7 +175,7 @@ fn break_should_stop_for_loop() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -206,7 +206,7 @@ fn break_should_stop_for_loop2() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(50, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(49, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -240,7 +240,7 @@ fn break_should_stop_nested_for_loop2() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(110, events.lock().unwrap().get("c").unwrap().value.number_value().unwrap());
 }
@@ -263,7 +263,7 @@ fn simple_do_while_loop() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(100, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(0, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());
@@ -287,7 +287,7 @@ fn simple_do_while_loop_2() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("i").unwrap().value.number_value().unwrap());
     assert_eq!(-1, events.lock().unwrap().get("j").unwrap().value.number_value().unwrap());

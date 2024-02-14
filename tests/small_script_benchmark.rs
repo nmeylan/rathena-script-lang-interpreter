@@ -16,13 +16,13 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         vm_dump_var("a", "hello");
         "#, compiler::DebugFlag::None.value()).unwrap();
         Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-        Vm::execute_main_script(vm.clone(), Box::new(&vm_hook)).unwrap();
+        Vm::execute_main_script(vm.clone(), Box::new(&vm_hook), vec![]).unwrap();
     }));
     c.bench_function("repl", |b| b.iter(|| {
         let classes = compile_script(r#"
         vm_dump_var("a", "hello");
         "#, compiler::DebugFlag::None.value()).unwrap();
-        Vm::repl(vm.clone(), &classes[1], Box::new(&vm_hook)).unwrap();
+        Vm::repl(vm.clone(), &classes[1], Box::new(&vm_hook), vec![]).unwrap();
     }));
 }
 

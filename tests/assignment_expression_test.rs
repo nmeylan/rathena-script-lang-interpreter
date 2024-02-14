@@ -25,7 +25,7 @@ fn simple_assigment() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -43,7 +43,7 @@ fn double_assigment() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -63,7 +63,7 @@ fn hex_number() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(14, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(15, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
@@ -84,7 +84,7 @@ fn assigment_to_local_variable() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -102,7 +102,7 @@ fn assignment_with_string_concat() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello world 1"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -123,7 +123,7 @@ fn assignment_with_complex_string_concat() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from(" ~ Next (^0055FF2^000000): Jump to...: ~ Revert to original (^0055FF1^000000)"), events.lock().unwrap().get("menu").unwrap().value.string_value().unwrap().clone());
 }
@@ -159,7 +159,7 @@ fn assignment_with_number_operation() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     events.lock().unwrap().iter().for_each(|(k, v)| println!("{} = {}", k, v.value));
     assert_eq!(2, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
@@ -197,7 +197,7 @@ fn simple_re_assigment() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello wrld"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -214,7 +214,7 @@ fn plus_equal_string_concat() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -231,7 +231,7 @@ fn plus_equal_num_addition() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(3_i32, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap());
 }
@@ -263,7 +263,7 @@ fn setd_function() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello_world"), events.lock().unwrap().get("my_var").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("hello_world"), events.lock().unwrap().get("my_var_via_getd").unwrap().value.string_value().unwrap().clone());
@@ -294,7 +294,7 @@ fn set_with_getd_function() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(2, events.lock().unwrap().get("set_with_getd").unwrap().value.number_value().unwrap().clone());
     assert_eq!(2, events.lock().unwrap().get("set_with_getd_1").unwrap().value.number_value().unwrap().clone());
@@ -314,7 +314,7 @@ fn setd_function_error_wrong_type() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"tried to assign a String to a variable declared as Number
 test_script 4:4.
@@ -339,7 +339,7 @@ fn setd_function_error_undefined_variable() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook)).err().unwrap();
+    let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"Variable is not declared in local scope
 test_script 5:12.
@@ -360,7 +360,7 @@ fn input_assign_variable() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("Hello world from input"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
 }
@@ -379,7 +379,7 @@ fn inc_then_load() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
@@ -398,7 +398,7 @@ fn load_then_inc() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(0, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(1, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());

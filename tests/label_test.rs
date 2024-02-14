@@ -27,7 +27,7 @@ fn simple_label() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
@@ -56,7 +56,7 @@ fn simple_label_with_goto() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("hello world"), events.lock().unwrap().get("a").unwrap().value.string_value().unwrap().clone());
     assert_eq!(true, events.lock().unwrap().get("b").is_none());
@@ -87,7 +87,7 @@ fn label_with_goto_inside() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
@@ -123,7 +123,7 @@ fn label_with_goto_in_a_function() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
@@ -162,7 +162,7 @@ fn label_with_goto_in_a_nested_function() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(String::from("variable in label 1"), events.lock().unwrap().get("b").unwrap().value.string_value().unwrap().clone());
     assert_eq!(String::from("variable in label 2"), events.lock().unwrap().get("c").unwrap().value.string_value().unwrap().clone());
@@ -199,7 +199,7 @@ fn callsub_with_return() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), classes, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(0, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(true, events.lock().unwrap().get("b").is_none());

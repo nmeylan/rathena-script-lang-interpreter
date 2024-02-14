@@ -26,7 +26,7 @@ fn bit_and() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(0, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
@@ -52,7 +52,7 @@ fn bit_or() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(255, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(144, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());
@@ -79,7 +79,7 @@ fn bitwise_not() {
     // When
     let vm_hook = VmHook::new( Box::new(move |e| { events_clone.lock().unwrap().insert(e.name.clone(), e); }));
     Vm::bootstrap(vm.clone(), script, Box::new(&vm_hook));
-    Vm::execute_main_script(vm, Box::new(&vm_hook)).unwrap();
+    Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).unwrap();
     // Then
     assert_eq!(1, events.lock().unwrap().get("a").unwrap().value.number_value().unwrap().clone());
     assert_eq!(0, events.lock().unwrap().get("b").unwrap().value.number_value().unwrap().clone());

@@ -196,17 +196,19 @@ impl Vm {
         }
     }
 
-    pub fn execute_main_script(vm: Arc<Vm>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
-        let mut program = Thread::new(vm.clone(), vm.debug_flag);
+    pub fn execute_main_script(vm: Arc<Vm>, native_method_handler: Box<&dyn NativeMethodHandler>, thread_constants: Vec<u32>) -> Result<(), RuntimeError> {
+        let mut thread = Thread::new(vm.clone(), vm.debug_flag);
+        Self::set_thread_constants(thread_constants, &mut thread);
         let instance = vm.classes_pool.read().unwrap().get("_MainScript").as_ref().unwrap().new_instance();
-        program.run_main(Arc::new(instance), native_method_handler).map_err(|e| {
+        thread.run_main(Arc::new(instance), native_method_handler).map_err(|e| {
             println!("{}", e);
             e
         })
     }
 
-    pub fn repl(vm: Arc<Vm>, class_file: &ClassFile, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
-        let mut program = Thread::new(vm.clone(), vm.debug_flag);
+    pub fn repl(vm: Arc<Vm>, class_file: &ClassFile, native_method_handler: Box<&dyn NativeMethodHandler>, thread_constants: Vec<u32>) -> Result<(), RuntimeError> {
+        let mut thread = Thread::new(vm.clone(), vm.debug_flag);
+        Self::set_thread_constants(thread_constants, &mut thread);
         let main_function_hash = Vm::calculate_hash(&String::from("_main"));
         let functions_def = class_file.functions.borrow();
         let main_function_def: &FunctionDefinition = functions_def.get(0).unwrap();
@@ -214,19 +216,28 @@ impl Vm {
         let instance = class_arc.new_instance();
         let function = class_arc.functions_pool.get(&main_function_hash).unwrap();
         vm.extend_constant_pool(main_function_def.chunk.constants_storage.borrow().clone());
-        program.run_function(class_arc.clone(), &mut Some(Arc::new(instance)), function, native_method_handler, vec![]).map_err(|e| {
+        thread.run_function(class_arc.clone(), &mut Some(Arc::new(instance)), function, native_method_handler, vec![]).map_err(|e| {
             e
         })
     }
 
-    pub fn run_main_function(vm: Arc<Vm>, class_reference: u64, instance_reference: u64, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
+    pub fn run_main_function(vm: Arc<Vm>, class_reference: u64, instance_reference: u64, native_method_handler: Box<&dyn NativeMethodHandler>, thread_constants: Vec<u32>) -> Result<(), RuntimeError> {
         let instance = vm.get_instance_from_heap(class_reference, instance_reference).map_err(|e| RuntimeError::from_temporary(CompilationDetail::new_empty(), vec![], e))?;
         let debug_flag = vm.debug_flag;
         let mut thread = Thread::new(vm, debug_flag);
+        Self::set_thread_constants(thread_constants, &mut thread);
         thread.run_main(instance, native_method_handler).map_err(|e| {
             println!("{}", e);
             e
         })
+    }
+
+    fn set_thread_constants(thread_constants: Vec<u32>, thread: &mut Thread) {
+        let mut i = 0;
+        for thread_constant in thread_constants {
+            thread.set_constant(i, thread_constant);
+            i += 1;
+        }
     }
 
     pub fn create_instance(vm: Arc<Vm>, class_name: String, native_method_handler: Box<&dyn NativeMethodHandler>, constructor_args: Vec<Value>) -> Result<(u64, u64), RuntimeError> {

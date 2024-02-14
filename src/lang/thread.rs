@@ -35,6 +35,7 @@ pub struct Thread {
     pub(crate) current_source_line: CompilationDetail,
     pub(crate) stack_traces: Vec<StackTrace>,
     pub aborted: AtomicBool,
+    pub constants: [u32; 16],
 }
 
 impl Thread {
@@ -47,7 +48,16 @@ impl Thread {
             current_source_line: CompilationDetail::new_empty(),
             stack_traces: vec![],
             aborted: Default::default(),
+            constants: [0; 16],
         }
+    }
+
+    pub fn set_constant(&mut self, index: usize, value: u32) {
+        self.constants[index] = value;
+    }
+
+    pub fn get_constant(&self, index: usize) -> u32 {
+        self.constants[index]
     }
 
     pub fn run_main(&mut self, instance: Arc<Instance>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
