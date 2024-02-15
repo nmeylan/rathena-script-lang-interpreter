@@ -304,12 +304,12 @@ fn setarray_wrong_type_error() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"setarray - tried to assign Number (4th arguments) to an array of String
-test_script 4:4.
+_MainScript 4:4.
 l4	    setarray .@a$[0], "hello", "world", .@toto;
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0: _main
-	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
+	at _MainScript(_MainScript:4)"#, runtime_error.to_string().trim());
 }
 
 #[test]
@@ -328,12 +328,12 @@ fn cleararray_wrong_type_error() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"cleararray - tried to assign Number (second argument) to an array of String
-test_script 4:4.
+_MainScript 4:4.
 l4	    cleararray(.@a$[0], 0, 10);
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0: _main
-	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
+	at _MainScript(_MainScript:4)"#, runtime_error.to_string().trim());
 }
 
 
@@ -354,12 +354,12 @@ fn copyarray_wrong_type_error() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"copyarray - tried to assign an array of String (second argument) to an array of Number
-test_script 5:4.
+_MainScript 5:4.
 l5	    copyarray .@b[0], .@a[0], 1;
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0: _main
-	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
+	at _MainScript(_MainScript:5)"#, runtime_error.to_string().trim());
 }
 
 #[test]
@@ -379,12 +379,12 @@ fn copyarray_outofbounds_error() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"Array index out of bounds: index 18, length 3
-test_script 5:4.
+_MainScript 5:4.
 l5	    copyarray .@b$[0], .@a$[18], 1;
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0: _main
-	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
+	at _MainScript(_MainScript:5)"#, runtime_error.to_string().trim());
 }
 
 #[test]

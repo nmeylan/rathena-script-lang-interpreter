@@ -43,12 +43,12 @@ fn pow_with_wrong_type() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"Pow first argument should be a number. Value is string not a number.
-test_script 4:24.
+_MainScript 4:24.
 l4	    vm_dump_var("nine", pow("3", .@two));
 	                        ^^^^^^^^^^^^^^^
 
 0: _main
-	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
+	at _MainScript(_MainScript:4)"#, runtime_error.to_string().trim());
 }
 
 #[test]

@@ -23,8 +23,8 @@ print(.@b$);
     let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!("Variable \".@a$\" is undefined.\ntest_script 3:6.\nl3\tprint(.@a$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
-    assert_eq!("Variable \".@b$\" is undefined.\ntest_script 4:6.\nl4\tprint(.@b$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
+    assert_eq!("Variable \".@a$\" is undefined.\n_MainScript 3:6.\nl3\tprint(.@a$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!("Variable \".@b$\" is undefined.\n_MainScript 4:6.\nl4\tprint(.@b$);\n\t      ^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
 }
 
 #[test]
@@ -56,13 +56,13 @@ fn type_checking_string_invalid() {
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(7, result.as_ref().err().unwrap().len());
-    assert_eq!("Variable \".@a$\" is declared as a String but is assigned with a Number.\ntest_script 2:0.\nl2\t.@a$ = 1;\n\t^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
-    assert_eq!("Subtraction operator \"-\" is not allowed for String\ntest_script 3:7.\nl3\t.@a$ = \"1\" - \"2\";\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
-    assert_eq!("Subtraction operator \"-\" is not allowed for String\ntest_script 4:7.\nl4\t.@a$ = 1 - \"2\";\n\t       ^^^^^\n", result.as_ref().err().unwrap().get(2).unwrap().message());
-    assert_eq!("Subtraction operator \"-\" is not allowed for String\ntest_script 5:7.\nl5\t.@a$ = \"1\" - 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(3).unwrap().message());
-    assert_eq!("Multiply operator \"*\" is not allowed for String\ntest_script 6:7.\nl6\t.@a$ = \"1\" * 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(4).unwrap().message());
-    assert_eq!("Modulo operator \"%\" is not allowed for String\ntest_script 7:7.\nl7\t.@a$ = \"1\" % 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(5).unwrap().message());
-    assert_eq!("Divide operator \"/\" is not allowed for String\ntest_script 8:7.\nl8\t.@a$ = \"1\" / 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(6).unwrap().message());
+    assert_eq!("Variable \".@a$\" is declared as a String but is assigned with a Number.\n_MainScript 2:0.\nl2\t.@a$ = 1;\n\t^^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!("Subtraction operator \"-\" is not allowed for String\n_MainScript 3:7.\nl3\t.@a$ = \"1\" - \"2\";\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
+    assert_eq!("Subtraction operator \"-\" is not allowed for String\n_MainScript 4:7.\nl4\t.@a$ = 1 - \"2\";\n\t       ^^^^^\n", result.as_ref().err().unwrap().get(2).unwrap().message());
+    assert_eq!("Subtraction operator \"-\" is not allowed for String\n_MainScript 5:7.\nl5\t.@a$ = \"1\" - 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(3).unwrap().message());
+    assert_eq!("Multiply operator \"*\" is not allowed for String\n_MainScript 6:7.\nl6\t.@a$ = \"1\" * 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(4).unwrap().message());
+    assert_eq!("Modulo operator \"%\" is not allowed for String\n_MainScript 7:7.\nl7\t.@a$ = \"1\" % 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(5).unwrap().message());
+    assert_eq!("Divide operator \"/\" is not allowed for String\n_MainScript 8:7.\nl8\t.@a$ = \"1\" / 2;\n\t       ^^^^^^^\n", result.as_ref().err().unwrap().get(6).unwrap().message());
 }
 
 #[test]
@@ -88,8 +88,8 @@ fn type_checking_number_invalid() {
     let result = compile_script(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!("Variable \".@a\" is declared as a Number but is assigned with a String.\ntest_script 2:0.\nl2\t.@a = \"1\";\n\t^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
-    assert_eq!("Variable \".@b\" is declared as a Number but is assigned with a String.\ntest_script 3:0.\nl3\t.@b = 1 + \"2\";\n\t^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
+    assert_eq!("Variable \".@a\" is declared as a Number but is assigned with a String.\n_MainScript 2:0.\nl2\t.@a = \"1\";\n\t^^^\n", result.as_ref().err().unwrap().get(0).unwrap().message());
+    assert_eq!("Variable \".@b\" is declared as a Number but is assigned with a String.\n_MainScript 3:0.\nl3\t.@b = 1 + \"2\";\n\t^^^\n", result.as_ref().err().unwrap().get(1).unwrap().message());
 }
 
 #[test]
@@ -115,12 +115,12 @@ fn type_checking_function_call() {
     let errors = result.err().unwrap();
     assert_eq!(2, errors.len());
     assert_eq!(r#"Variable ".@c" is declared as a Number but is assigned with a String.
-test_script 12:4.
+_MainScript 12:4.
 l12	    .@c = str();
 	    ^^^
 "#, errors.get(0).unwrap().message());
     assert_eq!(r#"Variable ".@d$" is declared as a String but is assigned with a Number.
-test_script 13:4.
+_MainScript 13:4.
 l13	    .@d$ = num();
 	    ^^^^
 "#, errors.get(1).unwrap().message());
@@ -167,12 +167,12 @@ fn function_redefinition_should_be_an_error() {
     assert_eq!(2, result.as_ref().err().unwrap().len());
     result.as_ref().err().unwrap().iter().for_each(|e| println!("{}", e));
     assert_eq!(r#"A function with name "my_func" already exists.
-test_script 6:4.
+_MainScript 6:4.
 l6	    function my_func {
 	    ^
 "#, result.as_ref().err().unwrap().get(0).unwrap().message());
     assert_eq!(r#"A native function with name "println" already exists.
-test_script 9:4.
+_MainScript 9:4.
 l9	    function println { // this is a native function, it is forbidden to declare a func with the same name as native function.
 	    ^
 "#, result.as_ref().err().unwrap().get(1).unwrap().message());
@@ -194,8 +194,8 @@ fn class_redefinition_should_be_an_error() {
     let result = compile(script, compiler::DebugFlag::None.value());
     // Then
     assert_eq!(true, result.is_err());
-    assert_eq!(r#"Class Myclass is already defined in file "test_script" at line "l2"
-test_script 6:4.
+    assert_eq!(r#"Class Myclass is already defined in file "_MainScript" at line "l2"
+_MainScript 6:4.
 l6	    - script My class -1, {
 	    ^
 "#, result.as_ref().err().unwrap().get(0).unwrap().message());
@@ -216,7 +216,7 @@ fn function_call_with_number_arguments_with_default_different_type_assigned_to_n
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Variable ".@a" is declared as a Number but is assigned with a String.
-test_script 5:8.
+_MainScript 5:8.
 l5	        .@a = getarg(1, "3") + 4;
 	        ^^^
 "#, result.as_ref().err().unwrap().get(0).unwrap().message());
@@ -246,32 +246,32 @@ fn type_checking_conditional_statement() {
     assert_eq!(true, result.is_err());
     assert_eq!(6, result.as_ref().err().unwrap().len());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
-test_script 4:10.
+_MainScript 4:10.
 l4	    .@a = 1 == "1";                             // incorrect
 	          ^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
-test_script 6:24.
+_MainScript 6:24.
 l6	    .@a = "1" == "1" && 1 == "1";               // incorrect (right part of &&)
 	                        ^^^^^^
 "#, result.as_ref().err().unwrap()[1].message());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
-test_script 9:10.
+_MainScript 9:10.
 l9	    .@a = "1" > 2;                              // incorrect
 	          ^^^^^^^
 "#, result.as_ref().err().unwrap()[2].message());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
-test_script 10:10.
+_MainScript 10:10.
 l10	    .@a = "1" >= 2;                             // incorrect
 	          ^^^^^^^^
 "#, result.as_ref().err().unwrap()[3].message());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
-test_script 12:10.
+_MainScript 12:10.
 l12	    .@a = "1" < 2;                              // incorrect
 	          ^^^^^^^
 "#, result.as_ref().err().unwrap()[4].message());
     assert_eq!(r#"Can't perform comparison when left and right are not same types
-test_script 13:10.
+_MainScript 13:10.
 l13	    .@a = "1" <= 2;                             // incorrect
 	          ^^^^^^^^
 "#, result.as_ref().err().unwrap()[5].message());
@@ -299,52 +299,52 @@ fn type_checking_with_operator() {
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Variable ".@a" is declared as a Number but is assigned with a String.
-test_script 3:4.
+_MainScript 3:4.
 l3	    .@a = 1 + "1";
 	    ^^^
 "#, result.as_ref().err().unwrap()[0].message());
     assert_eq!(r#"Variable ".@a" is declared as a Number but is assigned with a String.
-test_script 6:4.
+_MainScript 6:4.
 l6	    .@a = "1" + 0;
 	    ^^^
 "#, result.as_ref().err().unwrap()[1].message());
     assert_eq!(r#"Subtraction operator "-" is not allowed for String
-test_script 7:11.
+_MainScript 7:11.
 l7	    .@a$ = 1 - "0";
 	           ^^^^^
 "#, result.as_ref().err().unwrap()[2].message());
     assert_eq!(r#"Multiply operator "*" is not allowed for String
-test_script 8:11.
+_MainScript 8:11.
 l8	    .@a$ = 1 * "0";
 	           ^^^^^
 "#, result.as_ref().err().unwrap()[3].message());
     assert_eq!(r#"Divide operator "/" is not allowed for String
-test_script 9:11.
+_MainScript 9:11.
 l9	    .@a$ = 1 / "0";
 	           ^^^^^
 "#, result.as_ref().err().unwrap()[4].message());
     assert_eq!(r#"Modulo operator "%" is not allowed for String
-test_script 10:11.
+_MainScript 10:11.
 l10	    .@a$ = 1 % "0";
 	           ^^^^^
 "#, result.as_ref().err().unwrap()[5].message());
     assert_eq!(r#"Subtraction operator "-" is not allowed for String
-test_script 11:10.
+_MainScript 11:10.
 l11	    .@a = 1 - "0";
 	          ^^^^^
 "#, result.as_ref().err().unwrap()[6].message());
     assert_eq!(r#"Multiply operator "*" is not allowed for String
-test_script 12:10.
+_MainScript 12:10.
 l12	    .@a = 1 * "0";
 	          ^^^^^
 "#, result.as_ref().err().unwrap()[8].message());
     assert_eq!(r#"Divide operator "/" is not allowed for String
-test_script 13:10.
+_MainScript 13:10.
 l13	    .@a = 1 / "0";
 	          ^^^^^
 "#, result.as_ref().err().unwrap()[10].message());
     assert_eq!(r#"Modulo operator "%" is not allowed for String
-test_script 14:10.
+_MainScript 14:10.
 l14	    .@a = 1 % "0";
 	          ^^^^^
 "#, result.as_ref().err().unwrap()[12].message());
@@ -363,12 +363,12 @@ fn type_checking_logical_and_or() {
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Can't perform logical and (&&) when left and right are not same types
-test_script 4:10.
+_MainScript 4:10.
 l4	    .@a = 1 && "1";
 	          ^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
     assert_eq!(r#"Can't perform logical and (&&) when left and right are not same types
-test_script 6:10.
+_MainScript 6:10.
 l6	    .@a = 1 && "0";
 	          ^^^^^^
 "#, result.as_ref().err().unwrap()[1].message());
@@ -417,7 +417,7 @@ fn label_defined_in_a_function_is_not_valid() {
     // Then
     assert_eq!(true, result.is_err());
     assert_eq!(r#"Label "Assign" is declared in "my_func" function scope but label should be declared in script scope only.
-test_script 4:12.
+_MainScript 4:12.
 l4	            Assign:
 	            ^
 "#, result.as_ref().err().unwrap()[0].message());
@@ -441,17 +441,17 @@ fn array_type_checking() {
     assert_eq!(true, result.is_err());
     assert_eq!(3, result.as_ref().err().unwrap().len());
     assert_eq!(r#"Variable ".@a$[]" is declared as an Array of string but an index is assigned with a Number.
-test_script 4:4.
+_MainScript 4:4.
 l4	    .@a$[1] = 2;
 	    ^^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
     assert_eq!(r#"Variable ".@b[]" is declared as an Array of number but an index is assigned with a String.
-test_script 6:4.
+_MainScript 6:4.
 l6	    .@b[1] = "2";
 	    ^^^^^^
 "#, result.as_ref().err().unwrap()[1].message());
     assert_eq!(r#"Variable ".@d" is declared as a Number but is assigned with a String.
-test_script 8:4.
+_MainScript 8:4.
 l8	    .@d = .@a$[0] + .@b[0];
 	    ^^^
 "#, result.as_ref().err().unwrap()[2].message());
@@ -471,7 +471,7 @@ fn array_type_checking_copy_array() {
     assert_eq!(true, result.is_err());
     assert_eq!(1, result.as_ref().err().unwrap().len());
     assert_eq!(r#"Variable ".@b[]" is declared as an Array of number but an index is assigned with a String.
-test_script 5:14.
+_MainScript 5:14.
 l5	    copyarray .@b[0], .@a$[0], 1;
 	              ^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());
@@ -492,7 +492,7 @@ fn native_wrong_argument_count() {
     assert_eq!(true, result.is_err());
     assert_eq!(1, result.as_ref().err().unwrap().len());
     assert_eq!(r#"Wrong arguments: getarraysize accept at least 1 argument(s) and at most 1 argument(s) but received 2 argument(s)
-test_script 5:4.
+_MainScript 5:4.
 l5	    getarraysize(.@b[0], .@a$[0]);
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 "#, result.as_ref().err().unwrap()[0].message());

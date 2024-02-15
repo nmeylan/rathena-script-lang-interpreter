@@ -317,12 +317,12 @@ fn setd_function_error_wrong_type() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"tried to assign a String to a variable declared as Number
-test_script 4:4.
+_MainScript 4:4.
 l4	    setd ".@my_" + .@var_name$, "hello_world";
 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0: _main
-	at test_script(_MainScript:4)"#, runtime_error.to_string().trim());
+	at _MainScript(_MainScript:4)"#, runtime_error.to_string().trim());
 }
 
 #[test]
@@ -342,7 +342,7 @@ fn setd_function_error_undefined_variable() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"Variable is not declared in local scope
-test_script 5:12.
+_MainScript 5:12.
 l5	    println(.@a);
 	            ^^^"#, runtime_error.to_string().trim());
 }

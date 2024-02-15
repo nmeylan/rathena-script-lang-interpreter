@@ -23,6 +23,7 @@ use crate::lang::value::{Constant, Native, Value, ValueRef, ValueType, Variable}
 use crate::util::file::read_lines;
 
 pub const MAIN_FUNCTION: &str = "_main";
+pub const MAIN_FUNCTION_HASH: u64 = 3735928559; //deadbeef
 
 #[derive(Clone)]
 pub struct StaticNativeFunction<'vm> {
@@ -187,12 +188,27 @@ impl Vm {
 
     pub fn bootstrap(vm: Arc<Vm>, mut classes: Vec<ClassFile>, native_method_handler: Box<&dyn NativeMethodHandler>) {
         for class in classes.iter_mut() {
+            if vm.contains_class(class.name.as_str()) {
+                continue;
+            }
             for function in class.functions() {
                 let chunk = &mut function.chunk.clone();
                 vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage.borrow_mut()));
             }
             let class_rc = vm.register_class(class);
             Self::bootstrap_class(vm.clone(), class_rc, native_method_handler.clone()).unwrap();
+        }
+    }
+    pub fn bootstrap_without_init(vm: Arc<Vm>, mut classes: Vec<ClassFile>) {
+        for class in classes.iter_mut() {
+            if vm.contains_class(class.name.as_str()) {
+                continue;
+            }
+            for function in class.functions() {
+                let chunk = &mut function.chunk.clone();
+                vm.extend_constant_pool(std::mem::take(&mut chunk.constants_storage.borrow_mut()));
+            }
+            vm.register_class(class);
         }
     }
 
@@ -209,13 +225,27 @@ impl Vm {
     pub fn repl(vm: Arc<Vm>, class_file: &ClassFile, native_method_handler: Box<&dyn NativeMethodHandler>, thread_constants: Vec<u32>) -> Result<(), RuntimeError> {
         let mut thread = Thread::new(vm.clone(), vm.debug_flag);
         Self::set_thread_constants(thread_constants, &mut thread);
-        let main_function_hash = Vm::calculate_hash(&String::from("_main"));
+        thread.disable_stacktrace();
+        let main_function_hash = MAIN_FUNCTION_HASH;
         let functions_def = class_file.functions.borrow();
         let main_function_def: &FunctionDefinition = functions_def.get(0).unwrap();
         let class_arc = vm.define_class(class_file, false, false);
         let instance = class_arc.new_instance();
         let function = class_arc.functions_pool.get(&main_function_hash).unwrap();
         vm.extend_constant_pool(main_function_def.chunk.constants_storage.borrow().clone());
+        thread.run_function(class_arc.clone(), &mut Some(Arc::new(instance)), function, native_method_handler, vec![]).map_err(|e| {
+            e
+        })
+    }
+
+    pub fn repl_on_registered_class(vm: Arc<Vm>, classname: &str, native_method_handler: Box<&dyn NativeMethodHandler>, thread_constants: Vec<u32>) -> Result<(), RuntimeError> {
+        let mut thread = Thread::new(vm.clone(), vm.debug_flag);
+        Self::set_thread_constants(thread_constants, &mut thread);
+        thread.disable_stacktrace();
+        let guard = vm.classes_pool.read().unwrap();
+        let class_arc = guard.get(classname).unwrap();
+        let instance = class_arc.new_instance();
+        let function = class_arc.functions_pool.get(&MAIN_FUNCTION_HASH).unwrap();
         thread.run_function(class_arc.clone(), &mut Some(Arc::new(instance)), function, native_method_handler, vec![]).map_err(|e| {
             e
         })
@@ -271,7 +301,11 @@ impl Vm {
         for function in class_file.functions().iter() {
             let chunk_rc = function.chunk.clone();
             let chunk: &Chunk = chunk_rc.borrow();
-            let function_reference = Vm::calculate_hash(&function.name);
+            let function_reference = if function.name == MAIN_FUNCTION {
+                MAIN_FUNCTION_HASH
+            } else {
+                Vm::calculate_hash(&function.name)
+            };
             functions_pool.insert(function_reference,
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
             if keep_source {
@@ -292,6 +326,10 @@ impl Vm {
         let class_arc = self.define_class(class_file, true, true);
         self.classes_pool.write().unwrap().insert(class_file.name.clone(), class_arc.clone());
         class_arc
+    }
+
+    pub fn contains_class(&self, class_name: &str) -> bool {
+        self.classes_pool.read().unwrap().contains_key(class_name)
     }
 
     pub fn extend_constant_pool(&self, constant_pool: HashMap<u64, Constant, NoopHasher>) {

@@ -219,7 +219,7 @@ pub fn setup_vm(debug_flag: u16) -> Arc<Vm> {
 }
 
 pub fn compile_script(script: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-    Compiler::compile_script("test_script".to_string(), script, "native_functions_list.txt", debug_flag).map_err(|e| {
+    Compiler::compile_script("_MainScript".to_string(), script, "native_functions_list.txt", debug_flag).map_err(|e| {
         e.iter().for_each(|e| println!("\n{}", e));
         e
     })
@@ -227,7 +227,7 @@ pub fn compile_script(script: &str, debug_flag: u64) -> Result<Vec<ClassFile>, V
 
 
 pub fn compile(script: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-    Compiler::compile("test_script".to_string(), script, "native_functions_list.txt", debug_flag).map_err(|e| {
+    Compiler::compile("_MainScript".to_string(), script, "native_functions_list.txt", debug_flag).map_err(|e| {
         e.iter().for_each(|e| println!("\n{}", e));
         e
     })

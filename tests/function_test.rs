@@ -168,14 +168,14 @@ fn function_call_with_arguments_out_of_bounds() {
     let runtime_error = Vm::execute_main_script(vm, Box::new(&vm_hook), vec![]).err().unwrap();
     // Then
     assert_eq!(r#"Can't call getarg(1) which is greater than number of arguments provided: 1. Maximum allow index is 0. Consider calling getarg with a default value: getarg(1, DEFAULT_VALUE)
-test_script 5:15.
+_MainScript 5:15.
 l5	        .@a$ = getarg(1) + " world";
 	               ^^^^^^^^^
 
 0: _main
-	at test_script(_MainScript:3)
+	at _MainScript(_MainScript:3)
 1: my_func
-	at test_script(_MainScript:5)"#, runtime_error.to_string().trim());
+	at _MainScript(_MainScript:5)"#, runtime_error.to_string().trim());
 }
 #[test]
 fn function_call_with_arguments_with_default() {

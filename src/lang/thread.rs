@@ -10,7 +10,7 @@ use crate::lang::array::Array;
 
 use crate::lang::stack::{Stack, StackEntry};
 use crate::lang::value::{Constant, Native, Scope, ValueRef, ValueType, Variable};
-use crate::lang::vm::{DebugFlag, Hashcode, NATIVE_FUNCTIONS, NativeMethodHandler, Vm};
+use crate::lang::vm::{DebugFlag, Hashcode, MAIN_FUNCTION, MAIN_FUNCTION_HASH, NATIVE_FUNCTIONS, NativeMethodHandler, Vm};
 use crate::lang::value::Value;
 use crate::lang::call_frame::CallFrame;
 use crate::lang::chunk::{*};
@@ -35,6 +35,7 @@ pub struct Thread {
     pub(crate) current_source_line: CompilationDetail,
     pub(crate) stack_traces: Vec<StackTrace>,
     pub aborted: AtomicBool,
+    pub fill_stacktrace: bool,
     pub constants: [u32; 16],
 }
 
@@ -49,9 +50,13 @@ impl Thread {
             stack_traces: vec![],
             aborted: Default::default(),
             constants: [0; 16],
+            fill_stacktrace: true,
         }
     }
 
+    pub fn disable_stacktrace(&mut self) {
+        self.fill_stacktrace = false;
+    }
     pub fn set_constant(&mut self, index: usize, value: u32) {
         self.constants[index] = value;
     }
@@ -62,7 +67,7 @@ impl Thread {
 
     pub fn run_main(&mut self, instance: Arc<Instance>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let class = self.vm.get_class(&instance.class_name);
-        let function = class.functions_pool.get(&Vm::calculate_hash(&String::from("_main"))).unwrap();
+        let function = class.functions_pool.get(&MAIN_FUNCTION_HASH).unwrap();
         let call_frame = CallFrame::new(function.clone(), 1, 0, self.debug_flag);
         self.run(call_frame, 0, class.as_ref(), &mut Some(instance), native_method_handler).map(|_| ())
     }
@@ -92,8 +97,15 @@ impl Thread {
             if op_index >= call_frame.op_codes.len() {
                 break;
             }
-            if let Some(sources) = class.sources.get(&Vm::calculate_hash(&call_frame.name)).as_ref() {
-                sources.get(op_index).map(|source| self.current_source_line = source.clone()); // TODO remove clone here
+            if self.fill_stacktrace {
+                let callframe_hash = if call_frame.name == MAIN_FUNCTION {
+                    MAIN_FUNCTION_HASH
+                } else {
+                    Vm::calculate_hash(&call_frame.name)
+                };
+                if let Some(sources) = class.sources.get(&callframe_hash).as_ref() {
+                    sources.get(op_index).map(|source| self.current_source_line = source.clone()); // TODO remove clone here
+                }
             }
            let next_op_code = call_frame.op_codes.get(op_index).unwrap();
             self.print_dump_current_op_code(&call_frame, class, instance, &mut stdout, &mut op_index, next_op_code);
@@ -830,6 +842,9 @@ impl Thread {
     }
 
     fn add_stack_trace(&mut self, stack_trace: StackTrace) {
+        if !self.fill_stacktrace {
+            return;
+        }
         if self.stack_traces.len() > 10 {
             self.stack_traces.remove(0);
         }
@@ -878,18 +893,26 @@ impl Thread {
         if self.debug_flag & DebugFlag::LocalsVariable.value() == DebugFlag::LocalsVariable.value() {
             call_frame.dump_locals(stdout, self.vm.clone());
         }
-        stdout.flush().unwrap();
+        if self.debug_flag != DebugFlag::None.value() {
+            stdout.flush().unwrap();
+        }
     }
 
     fn print_before_current_run(&mut self, call_frame: &CallFrame, class: &Class, stdout: &mut Stdout) {
         self.vm.dump(stdout);
         call_frame.dump(stdout, self.vm.clone());
         self.dump(class, stdout);
-        stdout.flush().unwrap();
+
+        if self.debug_flag != DebugFlag::None.value() {
+            stdout.flush().unwrap();
+        }
     }
 
     fn print_after_current_run(&mut self, _call_frame: CallFrame, class: &Class, stdout: &mut Stdout) {
         self.dump(class, stdout);
-        stdout.flush().unwrap();
+
+        if self.debug_flag != DebugFlag::None.value() {
+            stdout.flush().unwrap();
+        }
     }
 }

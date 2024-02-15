@@ -144,10 +144,12 @@ impl Compiler {
     }
 
     pub fn compile_script(name: String, script: &str, native_function_list_file_path: &str, debug_flag: u64) -> Result<Vec<ClassFile>, Vec<CompilationError>> {
-        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path, debug_flag)
+        let script_declaration = format!("- script {} -1,{{ \n{}\n }}", name, script);
+        Self::compile(name, script_declaration.as_str(), native_function_list_file_path, debug_flag)
     }
     pub fn compile_script_into_binary(name: String, script: &str, native_function_list_file_path: &str, debug_flag: u64) -> Result<Vec<u8>, Vec<CompilationError>> {
-        Self::compile(name, format!("- script _MainScript -1,{{ \n{}\n }}", script).as_str(), native_function_list_file_path, debug_flag)
+        let script_declaration = format!("- script {} -1,{{ \n{}\n }}", name, script);
+        Self::compile(name, script_declaration.as_str(), native_function_list_file_path, debug_flag)
             .map(|result| bitcode::serialize(&result).unwrap())
     }
 
