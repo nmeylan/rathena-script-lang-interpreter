@@ -12,6 +12,7 @@ edition = "2021"
 antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "eb24e7b"}
 serde = {version = "1", features = ["derive", "rc"]}
 bitcode = { version = "0.5.1", features = ["serde", "derive"] }
+fastrand = "2.0.1"
 #
 #[patch."https://github.com/nmeylan/antlr4rust"]
 #antlr-rust = {path = "C:\\dev\\antlr4rust"}

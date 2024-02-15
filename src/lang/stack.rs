@@ -22,15 +22,11 @@ pub struct Stack {
     values: RefCell<Vec<StackEntry>>,
 }
 
-impl Default for Stack {
-    fn default() -> Self {
-        Stack { values: RefCell::new(vec![]) }
-    }
-}
-
 impl Stack {
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(capacity: usize) -> Self {
+        Self {
+            values: RefCell::new(Vec::with_capacity(capacity)),
+        }
     }
 
     pub fn push(&self, value: StackEntry) {

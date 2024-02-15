@@ -40,7 +40,7 @@ pub struct Thread {
 
 impl Thread {
     pub fn new(vm: Arc<Vm>, debug_flag: u16) -> Self {
-        let stack = Stack::new();
+        let stack = Stack::new(128);
         Self {
             debug_flag,
             vm,
@@ -63,12 +63,12 @@ impl Thread {
     pub fn run_main(&mut self, instance: Arc<Instance>, native_method_handler: Box<&dyn NativeMethodHandler>) -> Result<(), RuntimeError> {
         let class = self.vm.get_class(&instance.class_name);
         let function = class.functions_pool.get(&Vm::calculate_hash(&String::from("_main"))).unwrap();
-        let call_frame = CallFrame::new(function, 1, 0, self.debug_flag);
+        let call_frame = CallFrame::new(function.clone(), 1, 0, self.debug_flag);
         self.run(call_frame, 0, class.as_ref(), &mut Some(instance), native_method_handler).map(|_| ())
     }
 
     pub fn run_function(&mut self, class: Arc<Class>, instance: &mut Option<Arc<Instance>>, function: &Function, native_method_handler: Box<&dyn NativeMethodHandler>, constructor_args: Vec<Value>) -> Result<(), RuntimeError> {
-        let call_frame = CallFrame::new(function, 0, constructor_args.len(), self.debug_flag);
+        let call_frame = CallFrame::new(function.clone(), 0, constructor_args.len(), self.debug_flag);
         for argument in constructor_args {
             match argument {
                 Value::String(_) | Value::Number(_) => {
@@ -92,8 +92,10 @@ impl Thread {
             if op_index >= call_frame.op_codes.len() {
                 break;
             }
-            class.sources.get(&Vm::calculate_hash(&call_frame.name)).as_ref().unwrap().get(op_index).map(|source| self.current_source_line = source.clone()); // TODO remove clone here
-            let next_op_code = call_frame.op_codes.get(op_index).unwrap();
+            if let Some(sources) = class.sources.get(&Vm::calculate_hash(&call_frame.name)).as_ref() {
+                sources.get(op_index).map(|source| self.current_source_line = source.clone()); // TODO remove clone here
+            }
+           let next_op_code = call_frame.op_codes.get(op_index).unwrap();
             self.print_dump_current_op_code(&call_frame, class, instance, &mut stdout, &mut op_index, next_op_code);
             match next_op_code {
                 OpCode::LoadConstant(reference) => {
@@ -419,7 +421,7 @@ impl Thread {
                             }
                         }
                     }
-                    let new_function_call_frame = CallFrame::new(function, stack_pointer, *argument_count, self.debug_flag);
+                    let new_function_call_frame = CallFrame::new(function.clone(), stack_pointer, *argument_count, self.debug_flag);
                     let class = if is_global_function {
                         global_class.as_ref()
                     } else {

@@ -1,5 +1,3 @@
-
-
 use std::sync::{Arc, Mutex};
 use std::default::Default;
 
@@ -23,6 +21,7 @@ pub struct VmHook {
     pub hook: Box<dyn Fn(Event) + Send + Sync>,
     pub hook_handle_native: Option<Box<dyn Fn(String, &Thread) -> bool + Send + Sync>>,
     pub global_variable_store: Mutex<Vec<GlobalVariableEntry>>,
+    pub failed_on_missing_native: bool,
 }
 
 #[derive(Clone, Eq, Hash, PartialEq, Debug)]
@@ -39,6 +38,15 @@ impl VmHook {
             hook,
             hook_handle_native: None,
             global_variable_store: Default::default(),
+            failed_on_missing_native: true,
+        }
+    }
+    pub fn new_with_behavior_on_missing_native(hook: Box<dyn Fn(Event) + Send + Sync>, failed_on_missing_native: bool) -> Self {
+        Self {
+            hook,
+            hook_handle_native: None,
+            global_variable_store: Default::default(),
+            failed_on_missing_native,
         }
     }
     pub fn new_with_custom_handler(hook: Box<dyn Fn(Event) + Send + Sync>, hook_handle_native: Box<dyn Fn(String, &Thread) -> bool + Send + Sync>) -> Self {
@@ -46,6 +54,7 @@ impl VmHook {
             hook,
             hook_handle_native: Some(hook_handle_native),
             global_variable_store: Default::default(),
+            failed_on_missing_native: true,
         }
     }
 
@@ -194,7 +203,12 @@ impl NativeMethodHandler for VmHook {
                 self.remove_global_by_name_and_scope_and_index(variable_name, variable_scope, i as usize);
             }
         } else {
-            panic!("native not handled {}", native.name);
+            if self.failed_on_missing_native {
+                panic!("native not handled {}", native.name);
+            } else {
+                thread.push_constant_on_stack(Value::Number(Some(1)));
+                // println!("native not handled {}", native.name);
+            }
         }
     }
 }

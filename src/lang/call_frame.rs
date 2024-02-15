@@ -24,18 +24,18 @@ pub struct CallFrame {
 }
 
 impl CallFrame {
-    pub fn new(function: &Function, stack_pointer: usize, arguments_count: usize, debug_flag: u16) -> Self {
+    pub fn new(function: Function, stack_pointer: usize, arguments_count: usize, debug_flag: u16) -> Self {
         let mut call_frame = Self {
             debug_flag,
             reference: None,
-            op_codes: function.code.clone(),
+            op_codes: function.code,
             stack_pointer,
             current_op_code: 0,
-            name: function.name.clone(),
-            locals: function.locals.clone(),
+            name: function.name,
+            locals: function.locals,
             arguments_count,
         };
-        call_frame.reference = Some(Vm::calculate_hash(&call_frame) & SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64);
+        call_frame.reference = Some(fastrand::u64(..));
         call_frame
     }
 

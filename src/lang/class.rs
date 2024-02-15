@@ -81,7 +81,7 @@ impl Instance {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Function {
     pub name: String,
     pub code: Vec<OpCode>,

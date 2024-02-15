@@ -66,16 +66,16 @@ pub enum Value {
 }
 
 impl Scope {
-    pub fn prefix(&self) -> String {
+    pub fn prefix(&self) -> &str {
         match self {
-            Scope::Server => String::from("$"),
-            Scope::Account => String::from("#"),
-            Scope::Character => String::from(""),
-            Scope::Npc => String::from("."),
-            Scope::Instance => String::from("'"),
-            Scope::Local => String::from(".@"),
-            Scope::ServerTemporary => String::from("$@"),
-            Scope::CharacterTemporary => String::from("@")
+            Scope::Server => "$",
+            Scope::Account => "#",
+            Scope::Character => "",
+            Scope::Npc => ".",
+            Scope::Instance => "'",
+            Scope::Local => ".@",
+            Scope::ServerTemporary => "$@",
+            Scope::CharacterTemporary =>"@"
         }
     }
 
@@ -386,20 +386,20 @@ impl Variable {
         format!("{}{}{}", self.prefix(), self.name, self.suffix())
     }
 
-    pub fn prefix(&self) -> String {
+    pub fn prefix(&self) -> &str {
         self.scope.prefix()
     }
 
-    pub fn suffix(&self) -> String {
+    pub fn suffix(&self) -> &str {
         let value_ref = &self.value_ref;
         match value_ref.value_type {
-            ValueType::String => String::from("$"),
-            ValueType::Number => String::from(""),
+            ValueType::String => "$",
+            ValueType::Number => "",
             ValueType::Array(_) => {
                 if value_ref.is_string_array() {
-                    String::from("$[]")
+                    "$[]"
                 } else {
-                    String::from("[]")
+                    "[]"
                 }
             }
         }

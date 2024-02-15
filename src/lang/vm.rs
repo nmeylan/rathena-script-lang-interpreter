@@ -212,7 +212,7 @@ impl Vm {
         let main_function_hash = Vm::calculate_hash(&String::from("_main"));
         let functions_def = class_file.functions.borrow();
         let main_function_def: &FunctionDefinition = functions_def.get(0).unwrap();
-        let class_arc = vm.define_class(class_file, false);
+        let class_arc = vm.define_class(class_file, false, false);
         let instance = class_arc.new_instance();
         let function = class_arc.functions_pool.get(&main_function_hash).unwrap();
         vm.extend_constant_pool(main_function_def.chunk.constants_storage.borrow().clone());
@@ -265,7 +265,7 @@ impl Vm {
         Ok(())
     }
 
-    fn define_class(&self, class_file: &ClassFile, take_chunk: bool) -> Arc<Class> {
+    fn define_class(&self, class_file: &ClassFile, take_chunk: bool, keep_source: bool) -> Arc<Class> {
         let mut functions_pool: HashMap<u64, Function, NoopHasher> = Default::default();
         let mut sources: HashMap<u64, Vec<CompilationDetail>, NoopHasher> = Default::default();
         for function in class_file.functions().iter() {
@@ -274,10 +274,12 @@ impl Vm {
             let function_reference = Vm::calculate_hash(&function.name);
             functions_pool.insert(function_reference,
                                   Function::from_chunk(function.name.clone(), chunk.clone()));
-            if take_chunk {
-                sources.insert(function_reference, chunk.compilation_details.take());
-            } else {
-                sources.insert(function_reference, chunk.compilation_details.borrow().clone());
+            if keep_source {
+                if take_chunk {
+                    sources.insert(function_reference, chunk.compilation_details.take());
+                } else {
+                    sources.insert(function_reference, chunk.compilation_details.borrow().clone());
+                }
             }
         }
         Arc::new(Class::new(class_file.name.clone(), class_file.reference, functions_pool, sources,
@@ -287,7 +289,7 @@ impl Vm {
 
 
     pub fn register_class(&self, class_file: &mut ClassFile) -> Arc<Class> {
-        let class_arc = self.define_class(class_file, true);
+        let class_arc = self.define_class(class_file, true, true);
         self.classes_pool.write().unwrap().insert(class_file.name.clone(), class_arc.clone());
         class_arc
     }
