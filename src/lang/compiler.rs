@@ -490,7 +490,7 @@ impl Compiler {
                     self.visit_conditionalExpression(expr);
                 }
             }
-        } else if native.name == "bonus" || native.name == "bonus2" || native.name == "bonus3" || native.name == "bonus4" || native.name == "bonus5" {
+        } else if native.name == "bonus" || native.name == "bonus2" || native.name == "bonus3" || native.name == "bonus4" || native.name == "bonus5" || native.name == "readparam" {
             // First argument of bonus* methods is not a string but a "constant", using same syntax as permanent character integer variable
             // We convert the expression into a LoadConstant, basically "bonus bStr, 10;" becomes "bonus "bStr", 10;"
             // In the native method handler we then perform string matching on the first argument to determine what to do.
