@@ -9,7 +9,7 @@ edition = "2021"
 
 [dependencies]
 #antlr-rust = "0.2.2"
-antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "eb24e7b"}
+antlr-rust = { git = "https://github.com/nmeylan/antlr4rust", rev = "7d91d3e"}
 serde = {version = "1", features = ["derive", "rc"]}
 bitcode = { version = "0.5.1", features = ["serde", "derive"] }
 fastrand = "2.0.1"
